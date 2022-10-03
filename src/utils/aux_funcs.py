@@ -1,9 +1,14 @@
 # auxiliary functions module
 
+# code destined to storing auxiliary
+# functions to main module.
+
 ######################################################################
 # importing required libraries
-from sys import stdout
 from os import listdir
+from sys import stdout
+from os.path import join
+from pandas import read_csv
 from pandas import DataFrame
 
 ######################################################################
@@ -17,6 +22,11 @@ def spacer(char: str = '_',
     Given a char and a number of reps,
     prints a "spacer" string assembled
     by multiplying char by reps.
+    :param char: String. Represents a character to be used
+    as basis for spacer.
+    :param reps: Integer. Represents number of character's
+    repetitions used in spacer.
+    :return: None.
     """
     # defining spacer string
     spacer_str = char * reps
@@ -64,12 +74,15 @@ def flush_or_print(string: str,
     :return: None.
     """
     # checking whether index is last
-    if index == total:  # current element is last
+
+    # if current element is last
+    if index == total:
 
         # printing string
         print(string)
 
-    else:  # current element is not last
+    # if current element is not last
+    else:
 
         # flushing string
         flush_string(string)
@@ -79,6 +92,8 @@ def get_data_from_consolidated_df(consolidated_df_file_path: str) -> DataFrame:
     """
     Given a path to a consolidated dataframe,
     returns processed dataframe.
+    :param consolidated_df_file_path: String. Represents a path to a file.
+    :return: DataFrame. Represents data contained in input file.
     """
     # printing execution message
     f_string = f'getting data from consolidated data frame csv...'
@@ -91,55 +106,10 @@ def get_data_from_consolidated_df(consolidated_df_file_path: str) -> DataFrame:
     return consolidated_df
 
 
-def get_image_files_paths(folder_path: str) -> list:
-    """
-    Given a path to a folder containing image files,
-    returns sorted paths for image files (.tif, .jpg, .png).
-    :param folder_path: String. Represents a path to a folder.
-    :return: List. Represents detection files' paths.
-    """
-    # printing execution message
-    f_string = f'getting image paths...'
-    spacer()
-    print(f_string)
-
-    # defining placeholder values for detection files list
-    detection_files = []
-
-    # getting tif files
-    tif_files = [join(folder_path, file)    # getting file path
-                 for file                   # iterating over files
-                 in listdir(folder_path)    # in input directory
-                 if file.endswith('.tif')]  # if file matches extension ".tif"
-
-    # getting jpg files
-    jpg_files = [join(folder_path, file)    # getting file path
-                 for file                   # iterating over files
-                 in listdir(folder_path)    # in input directory
-                 if file.endswith('.jpg')]  # if file matches extension ".jpg"
-
-    # getting png files
-    png_files = [join(folder_path, file)    # getting file path
-                 for file                   # iterating over files
-                 in listdir(folder_path)    # in input directory
-                 if file.endswith('.png')]  # if file matches extension ".png"
-
-    # appending images to list
-    detection_files.extend(tif_files)
-    detection_files.extend(jpg_files)
-    detection_files.extend(png_files)
-
-    # sorting paths
-    sorted(detection_files)
-
-    # returning files paths
-    return detection_files
-
-
 def get_obbs_from_df(df: DataFrame) -> list:
     """
     Given a detections data frame, returns
-    a list of detected centroids, in following
+    a list of detected OBBs info, in following
     format:
     [(cx, cy, width, height, angle), ...]
     """
@@ -169,7 +139,6 @@ def get_obbs_from_df(df: DataFrame) -> list:
 
     # returning centroids list
     return centroids_list
-
 
 ######################################################################
 # end of current module

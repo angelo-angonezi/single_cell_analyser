@@ -9,8 +9,14 @@ print('initializing...')  # noqa
 # importing required libraries
 
 print('importing required libraries...')  # noqa
+import cv2
 from time import sleep
 from os.path import join
+from numpy import ndarray
+from pandas import DataFrame
+from argparse import ArgumentParser
+from src.utils.aux_funcs import flush_or_print
+from src.utils.aux_funcs import get_obbs_from_df
 from src.utils.aux_funcs import get_data_from_consolidated_df
 print('all required libraries successfully imported.')  # noqa
 sleep(0.8)
@@ -25,41 +31,34 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = "pytree - a simpler 'tree' command running in python\n"
+    description = "single cell cropper - tool used to segment cells based on\n"
+    description += "machine learning output data.\n"
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
 
     # adding arguments to parser
-    parser.add_argument('start_path', nargs='*',
-                        type=str,
-                        help='defines path to directory to start building the tree',
-                        default='.')
+    parser.add_argument('-i', '--images-input-folder',
+                        dest='images_input_folder',
+                        help='defines path to folder containing images',
+                        required=True)
 
-    parser.add_argument('-d', '--dirs-only',
-                        dest='dirs_only_flag',
+    parser.add_argument('-d', '--detections-dataframe',
+                        dest='detections_df_path',
+                        help='defines path to file containing detections info',
+                        required=True)
+
+    parser.add_argument('-o', '--output-folder',
+                        dest='output_folder',
+                        help='defines path to output folder which will contain crops',
+                        required=True)
+
+    parser.add_argument('-r', '--resize',
+                        dest='resize_toggle',
                         action='store_true',
-                        help='tree displays directories only, and does not show files inside folders',
-                        default=False)
-
-    parser.add_argument('-s', '--show-sizes',
-                        dest='show_sizes_flag',
-                        action='store_true',
-                        help='tree displays files and folder sizes, in mega or gigabytes',
-                        default=False)
-
-    parser.add_argument('-c', '--show-counts',
-                        dest='show_counts_flag',
-                        action='store_true',
-                        help='tree displays the number of files or folders inside each directory',
-                        default=False)
-
-    parser.add_argument('-x', '--extension',
-                        dest='specified_extension',
-                        required=False,
-                        type=str or None,
-                        help="tree will include only files that match given extension (e.g. '.txt', '.pdf')",
-                        default=None)
+                        help='resizes all crops to same dimensions',
+                        default=False,
+                        required=False)
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -70,54 +69,120 @@ def get_args_dict() -> dict:
 ######################################################################
 # defining auxiliary functions
 
+
+def crop_single_obb(image: ndarray,
+                    obb: tuple
+                    ) -> ndarray:
+    """
+    Given an array representing an image,
+    and a tuple containing obb's info,
+    returns given obb crop, rotated to
+    be aligned to x-axis.
+    :param image: Array. Represents an open image.
+    :param obb: Tuple. Represents obb's info.
+    :return: Array. Represents obb crop from image.
+    """
+    pass
+
+
+def crop_multiple_obbs(image: ndarray,
+                       obbs_list: list,
+                       output_folder: str
+                       ) -> None:
+    """
+    Given an array representing an image,
+    and a list of tuples containing obb's
+    info, crops obbs in current image,
+    saving crops to given output folder.
+    :param image: Array. Represents an open image.
+    :param obbs_list: List. Represents a list of obbs.
+    :param output_folder: String. Represents a path to a folder.
+    :return: None.
+    """
+    pass
+
+
+def get_single_image_crops(image: ndarray,
+                           image_group: DataFrame,
+                           output_folder: str
+                           ) -> None:
+    """
+    Given an array representing an image,
+    and a data frame representing current
+    image obbs detections, saves crops
+    of obbs in given output folder.
+    :param image: Array. Represents an open image.
+    :param image_group: DataFrame. Represents current image obbs.
+    :param output_folder: String. Represents a path to a folder.
+    :return: None.
+    """
+    pass
+
+
+def get_multiple_image_crops(consolidated_df: DataFrame,
+                             input_folder: str,
+                             output_folder: str
+                             ) -> None:
+    """
+    Given ML detections consolidated data frame,
+    a path to an input folder containing images,
+    saves obbs crops in output folder.
+    :param consolidated_df: DataFrame. Represents ML obbs
+    detections for images in input folder.
+    :param input_folder: String. Represents a path to a folder.
+    :param output_folder: String. Represents a path to a folder.
+    :return: None.
+    """
+    # getting data from consolidated df csv
+    print('getting data from consolidated df...')
+    main_df = get_data_from_consolidated_df(consolidated_df_file_path=con)
+    pass
+
+
+def single_cell_cropper(input_folder: str,
+                        detections_df_path: str,
+                        output_folder: str,
+                        resize_toggle: bool
+                        ) -> None:
+    """
+    Given execution parameters, runs
+    cropping function on multiple images.
+    :param input_folder: String. Represents a path to a folder.
+    :param detections_df_path: String. Represents a path to a file.
+    :param output_folder: String. Represents a path to a folder.
+    :param resize_toggle: Bool. Represents a toogle.
+    :return: None.
+    """
+    pass
+
 ######################################################################
 # defining main function
+
 
 def main():
     """
     Runs main code.
     """
-    # getting data from consolidated df csv
-    print('getting data from consolidated df...')
-    main_df = get_data_from_consolidated_df(consolidated_df_file_path=CONSOLIDATED_DATAFRAME_PATH)
+    # getting data from Argument Parser
+    args_dict = get_args_dict()
 
-    # filtering data frame by annotator comparison images
-    print('filtering df by annotator comparison...')
-    filtered_dataframe = main_df.loc[main_df['type'] == 'annotator_comparison']
+    # getting input folder
+    input_folder = args_dict['images_input_folder']
 
-    # filtering data frame by detection threshold
-    print('filtering df by detection threshold...')
-    filtered_dataframe = filtered_dataframe.loc[filtered_dataframe['detection_threshold'] >= DETECTION_THRESHOLD]
+    # getting detections df path
+    detections_df_path = args_dict['detections_df_path']
 
-    # getting errors data frame
-    print(f'getting {ERROR_TYPE} errors data frame...')
-    total_errors_df = get_multiple_images_evaluators_error_df(detections_df=filtered_dataframe,
-                                                              error_type=ERROR_TYPE)
+    # getting output folder
+    output_folder = args_dict['output_folder']
 
-    # getting evaluator pair mean
-    print(f'getting {ERROR_TYPE} evaluator errors data frame...')
-    evaluator_errors_df = get_evaluators_pairs_means(errors_df=total_errors_df,
-                                                     annotators=ANNOTATORS,
-                                                     error_type=ERROR_TYPE)
+    # getting resize toggle
+    resize_toggle = args_dict['resize_toggle']
 
-    # getting evaluator means/stds
-    evaluator_means_df = get_evaluator_means_stds(evaluator_errors_df=evaluator_errors_df,
-                                                  error_type=ERROR_TYPE)
-
-    # defining plot/statistics output name
-    stats_output_name = 'statistics.xlsx'
-
-    # defining output paths
-    stats_output_path = join(OUTPUT_FOLDER_PATH,
-                             stats_output_name)
-
-    # saving statistics
-    # TODO: add statistics calculations here
-
-    # saving errors box plots
-    print('plotting errors variability box plots...')
-    plot_box_plots(evaluator_errors_df=evaluator_errors_df,
-                   error_type=ERROR_TYPE)
+    # running single cell cropper function
+    single_cell_cropper(input_folder=input_folder,
+                        detections_df_path=detections_df_path,
+                        output_folder=output_folder,
+                        resize_toggle=resize_toggle)
 
 ######################################################################
 # running main function
