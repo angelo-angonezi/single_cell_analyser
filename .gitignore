@@ -133,3 +133,4 @@ dmypy.json
 .idea/
 
 # end of current module
+/data/

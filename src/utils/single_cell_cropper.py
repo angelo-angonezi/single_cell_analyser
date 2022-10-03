@@ -1,9 +1,9 @@
-# single cell analyser module
+# single cell cropper module
 
 print('initializing...')  # noqa
 
-# code destined to automating single cell
-# feature extraction and analyses.
+# code destined to cropping single cells
+# using ML output.
 
 ######################################################################
 # importing required libraries
@@ -14,6 +14,58 @@ from os.path import join
 from src.utils.aux_funcs import get_data_from_consolidated_df
 print('all required libraries successfully imported.')  # noqa
 sleep(0.8)
+
+#####################################################################
+# argument parsing related functions
+
+
+def get_args_dict() -> dict:
+    """
+    Parses the arguments and returns a dictionary of the arguments.
+    :return: Dictionary. Represents the parsed arguments.
+    """
+    # defining program description
+    description = "pytree - a simpler 'tree' command running in python\n"
+
+    # creating a parser instance
+    parser = ArgumentParser(description=description)
+
+    # adding arguments to parser
+    parser.add_argument('start_path', nargs='*',
+                        type=str,
+                        help='defines path to directory to start building the tree',
+                        default='.')
+
+    parser.add_argument('-d', '--dirs-only',
+                        dest='dirs_only_flag',
+                        action='store_true',
+                        help='tree displays directories only, and does not show files inside folders',
+                        default=False)
+
+    parser.add_argument('-s', '--show-sizes',
+                        dest='show_sizes_flag',
+                        action='store_true',
+                        help='tree displays files and folder sizes, in mega or gigabytes',
+                        default=False)
+
+    parser.add_argument('-c', '--show-counts',
+                        dest='show_counts_flag',
+                        action='store_true',
+                        help='tree displays the number of files or folders inside each directory',
+                        default=False)
+
+    parser.add_argument('-x', '--extension',
+                        dest='specified_extension',
+                        required=False,
+                        type=str or None,
+                        help="tree will include only files that match given extension (e.g. '.txt', '.pdf')",
+                        default=None)
+
+    # creating arguments dictionary
+    args_dict = vars(parser.parse_args())
+
+    # returning the arguments dictionary
+    return args_dict
 
 ######################################################################
 # defining auxiliary functions
