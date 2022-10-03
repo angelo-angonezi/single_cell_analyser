@@ -130,7 +130,7 @@ dmypy.json
 
 # files and folders
 .data/
+/data/
 .idea/
 
 # end of current module
-/data/
