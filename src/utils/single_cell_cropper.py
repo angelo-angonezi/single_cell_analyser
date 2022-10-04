@@ -12,17 +12,14 @@ print('initializing...')  # noqa
 # importing required libraries
 
 print('importing required libraries...')  # noqa
-import cv2
-import numpy as np
-from math import sin
-from math import cos
 from time import sleep
 from cv2 import imread
 from cv2 import imwrite
-from math import radians
 from os.path import join
 from numpy import ndarray
+from os.path import exists
 from pandas import DataFrame
+from numpy import pad as np_pad
 from argparse import ArgumentParser
 from src.utils.aux_funcs import flush_or_print
 from scipy.ndimage import rotate as scp_rotate
@@ -87,107 +84,6 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def rotate(origin, point, angle):  # copied from stackoverflow
-    """
-    Rotate a point counterclockwise by a given angle around a given origin.
-
-    The angle should be given in radians.
-    """
-    # getting origin points coordinates
-    ox, oy = origin
-
-    # getting desired points coordinates
-    px, py = point
-
-    # translating points
-    qx = ox + cos(angle) * (px - ox) - sin(angle) * (py - oy)
-    qy = oy + sin(angle) * (px - ox) + cos(angle) * (py - oy)
-
-    # converting points to integers
-    qx_int = int(qx)
-    qy_int = int(qy)
-
-    # assembling translated point tuple
-    final_tuple = (qx_int, qy_int)
-
-    # returning translated point coordinates
-    return final_tuple
-
-
-def get_crop_points(obb: tuple) -> list:
-    """
-    Given an obb, returns obb crop points:
-    (x1)
-    # TODO: finish docstring.
-    :param obb: Tuple. Represents obb's info.
-    :return: List. Represents
-    """
-    print(obb)
-    # getting current obb info
-    cx, cy, width, height, angle = obb
-
-    # converting angle to radians
-    angle_in_rads = radians(angle)
-
-    # getting origin
-    origin = (cx, cy)
-
-    # getting margins
-    top = cy - (height / 2)
-    bottom = cy + (height / 2)
-    left = cx - (width / 2)
-    right = cx + (width / 2)
-
-    # getting untranslated corners
-    untranslated_p1 = (top, left)
-    untranslated_p2 = (top, right)
-    untranslated_p3 = (bottom, right)
-    untranslated_p4 = (bottom, left)
-
-    # translating corners
-    translated_p1 = rotate(point=untranslated_p1,
-                           origin=origin,
-                           angle=angle_in_rads)
-    translated_p2 = rotate(point=untranslated_p2,
-                           origin=origin,
-                           angle=angle_in_rads)
-    translated_p3 = rotate(point=untranslated_p3,
-                           origin=origin,
-                           angle=angle_in_rads)
-    translated_p4 = rotate(point=untranslated_p4,
-                           origin=origin,
-                           angle=angle_in_rads)
-
-    # assembling corners list
-    corners_list = [[translated_p1],
-                    [translated_p2],
-                    [translated_p3],
-                    [translated_p4]]
-
-    # returning corners list
-    return corners_list
-
-
-def crop_rect(img, rect):
-    # TODO: add dosctring
-    # get the parameter of the small rectangle
-    center = rect[0]
-    size = rect[1]
-    angle = rect[2]
-    center, size = tuple(map(int, center)), tuple(map(int, size))
-
-    # get row and col num in img
-    height, width = img.shape[0], img.shape[1]
-    print("width: {}, height: {}".format(width, height))
-
-    M = cv2.getRotationMatrix2D(center, angle, 1)
-    img_rot = cv2.warpAffine(img, M, (width, height))
-
-    img_crop = cv2.getRectSubPix(img_rot, size, center)
-
-    return img_crop, img_rot
-
-
 def resize_crop(crop: ndarray,
                 resize_dimensions: tuple
                 ) -> ndarray:
@@ -199,56 +95,38 @@ def resize_crop(crop: ndarray,
     crop desired dimensions.
     :return: Array. Represents resized image crop.
     """
-    pass
+    # getting resized image
+    # TODO: finish this function altering this line.
+    resized_image = crop
+
+    # returning resized image
+    return resized_image
 
 
-def rotate_image(img, angle, pivot):
-    padX = [img.shape[1] - pivot[0], pivot[0]]
-    padY = [img.shape[0] - pivot[1], pivot[1]]
-    imgP = np.pad(img, [padY, padX, [0, 0]], 'constant')
-    imwrite('c.png', imgP)
-    imgR = scp_rotate(imgP, angle, reshape=False)
-    imgR[(int(imgR.shape[0] / 2)), (int(imgR.shape[1] / 2))] = 0
-    imwrite('d.png', imgR)
-    imgRr = imgR[padY[0]: -padY[1], padX[0]: -padX[1]]
-    imwrite('e.png', imgRr)
-    return imgR
+def rotate_image(image: ndarray,
+                 angle: float,
+                 pivot: tuple
+                 ) -> ndarray:
+    """
+    Given an image, and angle and coordinates
+    to pivot, returns rotated image.
+    :param image: Array. Represents an open image.
+    :param angle: Float. Represents rotation angle.
+    :param pivot: Float. Represents pivot coordinates (cx, cy).
+    :return: Array. Represents rotated image.
+    """
+    # defining image pads
+    pad_x = [image.shape[1] - pivot[0], pivot[0]]
+    pad_y = [image.shape[0] - pivot[1], pivot[1]]
 
+    # padding image
+    padded_image = np_pad(image, [pad_y, pad_x, [0, 0]], 'constant')
 
-def crop_image_3(img, obb):
-    # getting current obb info
-    cx, cy, width, height, angle = obb
+    # rotating image
+    rotated_image = scp_rotate(padded_image, angle, reshape=False)
 
-    # getting image rotation angle (opposite to obb)
-    rotation_angle = angle * (-1)
-
-    # rotating current image to match current obb angle
-    r_image = rotate_image(img=img,
-                           angle=angle,
-                           pivot=(cx, cy))
-
-    # getting new cx, cy values
-    r_image_shape = r_image.shape
-    cx = r_image_shape[0] / 2
-    cy = r_image_shape[1] / 2
-
-    # getting margins
-    top = cy - (height / 2)
-    bottom = cy + (height / 2)
-    left = cx - (width / 2)
-    right = cx + (width / 2)
-
-    # converting margins to integers
-    top = int(top)
-    bottom = int(bottom)
-    left = int(left)
-    right = int(right)
-
-    # cropping image
-    image_crop = r_image[left:right, top:bottom]
-
-    # returning image crop
-    return image_crop
+    # returning rotated image
+    return rotated_image
 
 
 def crop_single_obb(image: ndarray,
@@ -265,19 +143,43 @@ def crop_single_obb(image: ndarray,
     :param resize_toggle: Boolean. Represents a toggle.
     :return: Array. Represents obb crop from image.
     """
-    # cropping image using obb info
-    image_crop = crop_image_3(img=image,
-                              obb=obb)
+    # getting current obb info
+    cx, cy, width, height, angle = obb
 
-    # getting global parameters
-    global RESIZE_DIMENSIONS
+    # rotating current image to match current obb angle
+    rotated_image = rotate_image(image=image,
+                                 angle=angle,
+                                 pivot=(cx, cy))
+
+    # getting new cx, cy values
+    rotated_image_shape = rotated_image.shape
+    cx = rotated_image_shape[0] / 2
+    cy = rotated_image_shape[1] / 2
+
+    # getting margins
+    top = cy - (height / 2)
+    bottom = cy + (height / 2)
+    left = cx - (width / 2)
+    right = cx + (width / 2)
+
+    # converting margins to integers
+    top = int(top)
+    bottom = int(bottom)
+    left = int(left)
+    right = int(right)
+
+    # cropping image (using numpy slicing)
+    image_crop = rotated_image[left:right, top:bottom]
 
     # checking resize toggle
     if resize_toggle:
 
+        # getting global parameters
+        global RESIZE_DIMENSIONS
+
         # resizing image to specified dimensions
-        resize_crop(crop=image_crop,
-                    resize_dimensions=RESIZE_DIMENSIONS)
+        image_crop = resize_crop(crop=image_crop,
+                                 resize_dimensions=RESIZE_DIMENSIONS)
 
     # returning crop
     return image_crop
@@ -320,13 +222,14 @@ def crop_multiple_obbs(image: ndarray,
         # getting current percentage progress
         current_percentage_ratio = CURRENT_ITERATION / ITERATIONS_TOTAL
         current_percentage_progress = current_percentage_ratio * 100
-        current_percentage_round_progress = round(current_percentage_progress)
+        current_percentage_round_progress = round(current_percentage_progress, 2)
 
         # printing execution message
         current_progress_string = f'{progress_string} '
         current_progress_string += f'(crop: {current_crop_str} '
         current_progress_string += f'of {obbs_total}) '
         current_progress_string += f'| {current_percentage_round_progress}%'
+        current_progress_string += f' ' *5
         flush_or_print(string=current_progress_string,
                        index=CURRENT_ITERATION,
                        total=ITERATIONS_TOTAL)
@@ -381,9 +284,6 @@ def get_single_image_crops(image: ndarray,
                        resize_toggle=resize_toggle,
                        progress_string=progress_string)
 
-    # TODO: remove once tested
-    exit()
-
 
 def get_multiple_image_crops(consolidated_df: DataFrame,
                              input_folder: str,
@@ -401,9 +301,14 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
     :param resize_toggle: Boolean. Represents a toggle.
     :return: None.
     """
-    # getting number of iterations
+    # getting global parameters
     global ITERATIONS_TOTAL
-    ITERATIONS_TOTAL = len(consolidated_df)
+
+    # getting number of iterations
+    iterations_total = len(consolidated_df)
+
+    # updating global parameters
+    ITERATIONS_TOTAL = iterations_total
 
     # printing execution message
     f_string = f'a total of {ITERATIONS_TOTAL} obbs were found in ml detections file.'
@@ -412,7 +317,7 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
     # grouping detections data frame by images
     image_groups = consolidated_df.groupby('img_file_name')
 
-    # getting total of images
+    # getting total number of images
     image_total = len(image_groups)
     image_total_str = str(image_total)
     image_total_str_len = len(image_total_str)
@@ -425,6 +330,20 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
 
         # getting current image path in input folder
         current_image_path = join(input_folder, image_name_w_extension)
+
+        # checking if current image is in input folder
+        image_is_in_folder = exists(current_image_path)
+
+        # if file is not in folder
+        if not image_is_in_folder:
+
+            # printing error message
+            e_string = f'Unable to find image "{image_name_w_extension}" in given input folder.\n'
+            e_string += f'Skipping to next image.'
+            print(e_string)
+
+            # skipping to next image
+            continue
 
         # reading current image with cv2
         current_image_array = imread(current_image_path)
@@ -440,6 +359,10 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
                                output_folder=output_folder,
                                resize_toggle=resize_toggle,
                                progress_string=progress_string)
+
+    # printing execution message
+    f_string = f'all crops generated!'
+    print(f_string)
 
 
 def single_cell_cropper(input_folder: str,
@@ -465,10 +388,6 @@ def single_cell_cropper(input_folder: str,
                              input_folder=input_folder,
                              output_folder=output_folder,
                              resize_toggle=resize_toggle)
-
-    # printing execution message
-    f_string = f'all crops generated!'
-    print(f_string)
 
 ######################################################################
 # defining main function
