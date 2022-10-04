@@ -202,91 +202,16 @@ def resize_crop(crop: ndarray,
     pass
 
 
-def crop_image(image: ndarray,
-               obb: tuple
-               ) -> ndarray:
-    """
-    Given obbs' info and an image,
-    returns cropped image.
-    # TODO: finish docstring.
-    :param image: Array. Represents an open image.
-    :param obb: Tuple. Represents obb's info.
-    :return:
-    """
-    # getting current obb crop points
-    crop_points = get_crop_points(obb)
-
-    contours = np.array(crop_points)
-    # contours = np.array([
-    #     [[64, 49]],
-    #     [[122, 11]],
-    #     [[391, 326]],
-    #     [[308, 373]]
-    # ])
-    rect = cv2.minAreaRect(contours)
-
-    img_crop, img_rot = crop_rect(image, rect)
-
-    print("size of original img: {}".format(image.shape))
-    print("size of rotated img: {}".format(img_rot.shape))
-    print("size of cropped img: {}".format(img_crop.shape))
-
-    new_size = (int(img_rot.shape[1]/2), int(img_rot.shape[0]/2))
-    img_rot_resized = cv2.resize(img_rot, new_size)
-    new_size = (int(image.shape[1]/2)), int(image.shape[0]/2)
-    img_resized = cv2.resize(image, new_size)
-
-    cv2.imwrite("crop_img1.jpg", img_crop)
-    exit()
-
-
-def crop_image_2(img, obb) -> ndarray:
-    # getting current obb crop points
-    crop_points = get_crop_points(obb)
-
-    contours = np.array(crop_points)
-
-    print("shape of cnt: {}".format(contours.shape))
-    rect = cv2.minAreaRect(contours)
-    print("rect: {}".format(rect))
-
-    # the order of the box points: bottom left, top left, top right,
-    # bottom right
-    box = cv2.boxPoints(rect)
-    box = np.int0(box)
-
-    print("bounding box: {}".format(box))
-    cv2.drawContours(img, [box], 0, 255, 2)
-
-    # get width and height of the detected rectangle
-    width = int(rect[1][0])
-    height = int(rect[1][1])
-
-    src_pts = box.astype("float32")
-    # coordinate of the points in box points after the rectangle has been
-    # straightened
-    dst_pts = np.array([[0, height-1],
-                        [0, 0],
-                        [width-1, 0],
-                        [width-1, height-1]], dtype="float32")
-
-    # the perspective transformation matrix
-    M = cv2.getPerspectiveTransform(src_pts, dst_pts)
-
-    # directly warp the rotated rectangle to get the straightened rectangle
-    warped = cv2.warpPerspective(img, M, (width, height))
-
-    cv2.imwrite("crop_img.jpg",
-                warped)
-    exit()
-
-
-def rotateImage(img, angle, pivot):
+def rotate_image(img, angle, pivot):
     padX = [img.shape[1] - pivot[0], pivot[0]]
     padY = [img.shape[0] - pivot[1], pivot[1]]
     imgP = np.pad(img, [padY, padX, [0, 0]], 'constant')
+    imwrite('c.png', imgP)
     imgR = scp_rotate(imgP, angle, reshape=False)
-    imgRr = imgR[padY[0] : -padY[1], padX[0] : -padX[1]]
+    imgR[(int(imgR.shape[0] / 2)), (int(imgR.shape[1] / 2))] = 0
+    imwrite('d.png', imgR)
+    imgRr = imgR[padY[0]: -padY[1], padX[0]: -padX[1]]
+    imwrite('e.png', imgRr)
     return imgR
 
 
@@ -294,19 +219,36 @@ def crop_image_3(img, obb):
     # getting current obb info
     cx, cy, width, height, angle = obb
 
+    # getting image rotation angle (opposite to obb)
+    rotation_angle = angle * (-1)
+
     # rotating current image to match current obb angle
-    r_image = rotateImage(img=img,
-                          angle=angle,
-                          pivot=(cx, cy))
+    r_image = rotate_image(img=img,
+                           angle=angle,
+                           pivot=(cx, cy))
+
+    # getting new cx, cy values
+    r_image_shape = r_image.shape
+    cx = r_image_shape[0] / 2
+    cy = r_image_shape[1] / 2
+
+    # getting margins
+    top = cy - (height / 2)
+    bottom = cy + (height / 2)
+    left = cx - (width / 2)
+    right = cx + (width / 2)
+
+    # converting margins to integers
+    top = int(top)
+    bottom = int(bottom)
+    left = int(left)
+    right = int(right)
 
     # cropping image
-    c_image = img[int(cy):int(cy+(height/2)), int(cx):int(cx+(width/2))]
+    image_crop = r_image[left:right, top:bottom]
 
-    imwrite('orig.png', img)
-    imwrite('rot.png', r_image)
-    imwrite('crop.png', c_image)
-
-    exit()
+    # returning image crop
+    return image_crop
 
 
 def crop_single_obb(image: ndarray,
