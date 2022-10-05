@@ -58,22 +58,27 @@ def get_args_dict() -> dict:
                         help='defines path to folder containing images',
                         required=True)
 
+    parser.add_argument('-o', '--output-folder',
+                        dest='output_folder',
+                        help='defines path to output folder which will contain crops\nand crops info file',
+                        required=True)
+
     parser.add_argument('-d', '--detections-dataframe',
                         dest='detections_df_path',
                         help='defines path to file containing detections info',
                         required=True)
 
-    parser.add_argument('-o', '--output-folder',
-                        dest='output_folder',
-                        help='defines path to output folder which will contain crops\nand crops info file',
+    parser.add_argument('-t', '--detection-threshold',
+                        dest='detection_threshold',
+                        help='defines detection threshold for ml model results',
                         required=True)
 
     parser.add_argument('-r', '--resize',
                         dest='resize_toggle',
                         action='store_true',
                         help='resizes all crops to same dimensions',
-                        default=False,
-                        required=False)
+                        required=False,
+                        default=False)
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -421,6 +426,7 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
 
 def single_cell_cropper(input_folder: str,
                         detections_df_path: str,
+                        detection_threshold: float,
                         output_folder: str,
                         resize_toggle: bool
                         ) -> None:
@@ -429,6 +435,7 @@ def single_cell_cropper(input_folder: str,
     cropping function on multiple images.
     :param input_folder: String. Represents a path to a folder.
     :param detections_df_path: String. Represents a path to a file.
+    :param detection_threshold: Float. Represents threshold for ml model results.
     :param output_folder: String. Represents a path to a folder.
     :param resize_toggle: Bool. Represents a toggle.
     :return: None.
@@ -437,9 +444,13 @@ def single_cell_cropper(input_folder: str,
     print('getting data from consolidated df...')
     consolidated_df = get_data_from_consolidated_df(consolidated_df_file_path=detections_df_path)
 
+    # filtering df
+    print('filtering df by detection threshold...')
+    filtered_df = consolidated_df.loc[consolidated_df['detection_threshold'] >= detection_threshold]
+
     # sorting df
     print('sorting data frame...')
-    sorted_df = consolidated_df.sort_values('img_file_name')
+    sorted_df = filtered_df.sort_values('img_file_name')
 
     # running multiple image cropper function
     print('initializing crops generator...')
@@ -473,11 +484,15 @@ def main():
     # getting input folder
     input_folder = args_dict['images_input_folder']
 
+    # getting output folder
+    output_folder = args_dict['output_folder']
+
     # getting detections df path
     detections_df_path = args_dict['detections_df_path']
 
-    # getting output folder
-    output_folder = args_dict['output_folder']
+    # getting detection threshold
+    detection_threshold = args_dict['detection_threshold']
+    detection_threshold = float(detection_threshold)
 
     # getting resize toggle
     resize_toggle = args_dict['resize_toggle']
@@ -485,6 +500,7 @@ def main():
     # running single cell cropper function
     single_cell_cropper(input_folder=input_folder,
                         detections_df_path=detections_df_path,
+                        detection_threshold=detection_threshold,
                         output_folder=output_folder,
                         resize_toggle=resize_toggle)
 
