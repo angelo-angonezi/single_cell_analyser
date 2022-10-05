@@ -5,9 +5,8 @@
 
 ######################################################################
 # importing required libraries
-from os import listdir
+
 from sys import stdout
-from os.path import join
 from pandas import read_csv
 from pandas import DataFrame
 
@@ -95,10 +94,6 @@ def get_data_from_consolidated_df(consolidated_df_file_path: str) -> DataFrame:
     :param consolidated_df_file_path: String. Represents a path to a file.
     :return: DataFrame. Represents data contained in input file.
     """
-    # printing execution message
-    f_string = f'getting data from consolidated data frame csv...'
-    print(f_string)
-
     # reading df from file path
     consolidated_df = read_csv(consolidated_df_file_path)
 
