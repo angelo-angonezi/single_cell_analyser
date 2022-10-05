@@ -451,11 +451,12 @@ def single_cell_cropper(input_folder: str,
 
     # saving final crops df in output folder
     print('saving crops info df...')
-    df_name = 'crops_info.csv'
+    df_name = 'crops_info'
     df_name_w_extension = f'{df_name}.csv'
     df_path = join(output_folder,
                    df_name_w_extension)
-    crops_df.to_csv(df_path)
+    crops_df.to_csv(df_path,
+                    index=False)
     print(f'crops info df saved at "{df_path}".')
 
 ######################################################################
