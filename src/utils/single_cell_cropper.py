@@ -171,6 +171,8 @@ def crop_single_obb(image: ndarray,
     # cropping image (using numpy slicing)
     image_crop = rotated_image[left:right, top:bottom]
 
+    # TODO: add logic to deal with black borders
+
     # checking resize toggle
     if resize_toggle:
 
@@ -223,13 +225,13 @@ def crop_multiple_obbs(image: ndarray,
         current_percentage_ratio = CURRENT_ITERATION / ITERATIONS_TOTAL
         current_percentage_progress = current_percentage_ratio * 100
         current_percentage_round_progress = round(current_percentage_progress, 2)
+        current_percentage_round_progress_str = '{:.2f}'.format(current_percentage_round_progress)
 
         # printing execution message
         current_progress_string = f'{progress_string} '
         current_progress_string += f'(crop: {current_crop_str} '
         current_progress_string += f'of {obbs_total}) '
-        current_progress_string += f'| {current_percentage_round_progress}%'
-        current_progress_string += f' ' *5
+        current_progress_string += f'| {current_percentage_round_progress_str}%'
         flush_or_print(string=current_progress_string,
                        index=CURRENT_ITERATION,
                        total=ITERATIONS_TOTAL)
@@ -244,7 +246,7 @@ def crop_multiple_obbs(image: ndarray,
 
         # getting current crop output name/path
         current_crop_output_name = f'{image_name}_'
-        current_crop_output_name += f'crop_{current_crop_str}.png'
+        current_crop_output_name += f'crop_{current_crop_str}.tif'
         current_crop_output_path = join(output_folder,
                                         current_crop_output_name)
 
@@ -326,7 +328,7 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
     for image_index, (image_name, image_group) in enumerate(image_groups, 1):
 
         # getting current image name with extension
-        image_name_w_extension = f'{image_name}.png'
+        image_name_w_extension = f'{image_name}.tif'
 
         # getting current image path in input folder
         current_image_path = join(input_folder, image_name_w_extension)
