@@ -6,7 +6,7 @@ print('initializing...')  # noqa
 # using ML output.
 
 # debug execution
-# python -m src.utils.single_cell_cropper -i .\\data\\input_imgs\\ -d .\\data\\ml_detections\\r2cnn_detections.csv -o .\\data\\output_crops\\
+# python -m src.single_cell_cropper -i .\\data\\input_imgs\\ -d .\\data\\ml_detections\\r2cnn_detections.csv -o .\\data\\output_crops\\
 
 ######################################################################
 # importing required libraries
