@@ -6,7 +6,7 @@ print('initializing...')  # noqa
 # using ML output.
 
 # debug execution
-# python -m src.single_cell_cropper -i .\\data\\input_imgs\\ -d .\\data\\ml_detections\\r2cnn_detections.csv -o .\\data\\output_crops\\
+# python -m src.single_cell_cropper -i .\\data\\input_imgs\\samlai\\vis -d .\\data\\ml_detections\\samlai_r2cnn_detections.csv -o .\\data\\output_crops\\samlai -t 0.5
 
 ######################################################################
 # importing required libraries
@@ -22,6 +22,7 @@ from os.path import exists
 from pandas import DataFrame
 from numpy import pad as np_pad
 from argparse import ArgumentParser
+from src.utils.aux_funcs import spacer
 from src.utils.aux_funcs import flush_or_print
 from scipy.ndimage import rotate as scp_rotate
 from src.utils.aux_funcs import get_obbs_from_df
@@ -178,6 +179,9 @@ def crop_single_obb(image: ndarray,
     image_crop = rotated_image[left:right, top:bottom]
 
     # TODO: add logic to deal with black borders
+    # TODO: check why black borders are appearing.
+    #  By the logic applied in the creation of the
+    #  crops, they should not!
 
     # checking resize toggle
     if resize_toggle:
@@ -496,6 +500,22 @@ def main():
 
     # getting resize toggle
     resize_toggle = args_dict['resize_toggle']
+
+    # printing execution message
+    execution_parameters_str = '### EXECUTION PARAMETERS ###\n'
+    execution_parameters_str += f'input_folder: {input_folder}\n'
+    execution_parameters_str += f'output_folder: {output_folder}\n'
+    execution_parameters_str += f'detections_df_path: {detections_df_path}\n'
+    execution_parameters_str += f'detection_threshold: {detection_threshold}\n'
+    execution_parameters_str += f'resize_toggle: {resize_toggle}'
+    spacer()
+    print(execution_parameters_str)
+    spacer()
+
+    # waiting user input
+    i_string = f'Press "enter" to continue'
+    input(i_string)
+    spacer()
 
     # running single cell cropper function
     single_cell_cropper(input_folder=input_folder,
