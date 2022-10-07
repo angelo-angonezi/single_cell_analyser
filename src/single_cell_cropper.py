@@ -6,7 +6,7 @@ print('initializing...')  # noqa
 # using ML output.
 
 # debug execution
-# python -m src.single_cell_cropper -i .\\data\\input_imgs\\samlai\\vis -d .\\data\\ml_detections\\samlai_r2cnn_detections.csv -o .\\data\\output_crops\\samlai -t 0.5
+# python -m src.single_cell_cropper -i .\\data\\input_imgs\\samlai\\vis\\orig -d .\\data\\ml_detections\\samlai_r2cnn_detections.csv -o .\\data\\output_crops\\samlai -t 0.5
 
 ######################################################################
 # importing required libraries
@@ -153,9 +153,12 @@ def crop_single_obb(image: ndarray,
     # getting current obb info
     cx, cy, width, height, angle = obb
 
+    # defining rotation angle
+    rotation_angle = angle * (-1)
+
     # rotating current image to match current obb angle
     rotated_image = rotate_image(image=image,
-                                 angle=angle,
+                                 angle=rotation_angle,
                                  pivot=(cx, cy))
 
     # getting new cx, cy values
@@ -177,11 +180,6 @@ def crop_single_obb(image: ndarray,
 
     # cropping image (using numpy slicing)
     image_crop = rotated_image[left:right, top:bottom]
-
-    # TODO: add logic to deal with black borders
-    # TODO: check why black borders are appearing.
-    #  By the logic applied in the creation of the
-    #  crops, they should not!
 
     # checking resize toggle
     if resize_toggle:
