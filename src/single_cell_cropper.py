@@ -153,7 +153,8 @@ def crop_single_obb(image: ndarray,
     # getting current obb info
     cx, cy, width, height, angle = obb
 
-    # defining rotation angle
+    # getting rotation angle (opposite to OBB angle, since the image
+    # will be rotated to match OBB orientation)
     rotation_angle = angle * (-1)
 
     # rotating current image to match current obb angle
