@@ -22,6 +22,7 @@ from os.path import exists
 from pandas import DataFrame
 from numpy import pad as np_pad
 from argparse import ArgumentParser
+from cv2 import resize as cv_resize
 from src.utils.aux_funcs import spacer
 from src.utils.aux_funcs import flush_or_print
 from scipy.ndimage import rotate as scp_rotate
@@ -103,11 +104,27 @@ def resize_crop(crop: ndarray,
     :return: Array. Represents resized image crop.
     """
     # getting resized image
-    # TODO: finish this function altering this line.
-    resized_image = crop
+    resized_image = cv_resize(crop, resize_dimensions)
 
     # returning resized image
     return resized_image
+
+
+def black_pixels_in_crop(crop: ndarray) -> bool:
+    """
+    Given an array, returns True if array
+    contains black pixels (pixel_value=0),
+    or False otherwise.
+    :param crop: Array. Represents an image crop.
+    :return: Boolean. Represents whether a crop
+    contains black pixels (meaning it is in image
+    corners).
+    """
+    # checking if there are black pixels in array
+    black_pixels_in_array = 0 in crop
+    
+    # returning boolean
+    return black_pixels_in_array
 
 
 def rotate_image(image: ndarray,
@@ -137,8 +154,7 @@ def rotate_image(image: ndarray,
 
 
 def crop_single_obb(image: ndarray,
-                    obb: tuple,
-                    resize_toggle: bool
+                    obb: tuple
                     ) -> ndarray:
     """
     Given an array representing an image,
@@ -147,7 +163,6 @@ def crop_single_obb(image: ndarray,
     be aligned to x-axis.
     :param image: Array. Represents an open image.
     :param obb: Tuple. Represents obb's info.
-    :param resize_toggle: Boolean. Represents a toggle.
     :return: Array. Represents obb crop from image.
     """
     # getting current obb info
@@ -181,16 +196,6 @@ def crop_single_obb(image: ndarray,
 
     # cropping image (using numpy slicing)
     image_crop = rotated_image[left:right, top:bottom]
-
-    # checking resize toggle
-    if resize_toggle:
-
-        # getting global parameters
-        global RESIZE_DIMENSIONS
-
-        # resizing image to specified dimensions
-        image_crop = resize_crop(crop=image_crop,
-                                 resize_dimensions=RESIZE_DIMENSIONS)
 
     # returning crop
     return image_crop
@@ -255,8 +260,24 @@ def crop_multiple_obbs(image: ndarray,
 
         # getting current obb crop
         current_obb_crop = crop_single_obb(image=image,
-                                           obb=obb,
-                                           resize_toggle=resize_toggle)
+                                           obb=obb)
+
+        # checking if there black pixels in current crop
+        # (meaning its OBB is in image corner)
+        if black_pixels_in_crop(crop=current_obb_crop):
+
+            # skipping to next crop
+            continue
+
+        # checking resize toggle
+        if resize_toggle:
+
+            # getting global parameters
+            global RESIZE_DIMENSIONS
+
+            # resizing image to specified dimensions
+            current_obb_crop = resize_crop(crop=current_obb_crop,
+                                           resize_dimensions=RESIZE_DIMENSIONS)
 
         # getting current crop output name/path
         current_crop_output_name = f'{image_name}_'
