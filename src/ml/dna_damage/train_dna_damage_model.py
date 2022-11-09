@@ -116,6 +116,19 @@ def main():
     # getting model's batch size
     batch_size = args_dict['batch_size']
 
+    # printing execution parameters
+    p_string = f'---Execution parameters---\n'
+    p_string += f'Images input folder: {images_folder_path}\n'
+    p_string += f'Annotations file: {annotations_file_path}\n'
+    p_string += f'Output folder: {output_folder_path}\n'
+    p_string += f'Learning rate: {learning_rate}\n'
+    p_string += f'Batch size: {batch_size}\n'
+    p_string += f'{"_" * 10}'
+
+    # waiting for user input
+    i_string = 'Press "Enter" to continue'
+    input(i_string)
+
     # running train model function
     train_dna_damage_model(images_folder_path=images_folder_path,
                            annotations_file_path=annotations_file_path,
