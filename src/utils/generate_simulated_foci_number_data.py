@@ -15,14 +15,6 @@ print('all required libraries successfully imported.')  # noqa
 sleep(0.8)
 
 #####################################################################
-# defining global variables
-
-ITERATIONS_TOTAL = 0
-CURRENT_ITERATION = 1
-RESIZE_DIMENSIONS = (500, 500)
-
-
-#####################################################################
 # argument parsing related functions
 
 
@@ -32,8 +24,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = "single cell cropper - tool used to segment cells based on\n"
-    description += "machine learning output data.\n"
+    description = "generate simulated data for single-cell crops ML\n"
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
@@ -44,27 +35,20 @@ def get_args_dict() -> dict:
                         help='defines path to folder containing images',
                         required=True)
 
-    parser.add_argument('-o', '--output-folder',
-                        dest='output_folder',
-                        help='defines path to output folder which will contain crops\nand crops info file',
+    parser.add_argument('-o', '--output-path',
+                        dest='output_path',
+                        help='defines path to output csv file containing simulated data',
                         required=True)
 
-    parser.add_argument('-d', '--detections-dataframe',
-                        dest='detections_df_path',
-                        help='defines path to file containing detections info',
+    parser.add_argument('-n', '--foci-min',
+                        dest='foci_num_min',
+                        help='defines minimum number of foci in simulated data',
                         required=True)
 
-    parser.add_argument('-t', '--detection-threshold',
-                        dest='detection_threshold',
-                        help='defines detection threshold for ml model results',
+    parser.add_argument('-m', '--foci-max',
+                        dest='foci_num_max',
+                        help='defines maximum number of foci in simulated data',
                         required=True)
-
-    parser.add_argument('-r', '--resize',
-                        dest='resize_toggle',
-                        action='store_true',
-                        help='resizes all crops to same dimensions',
-                        required=False,
-                        default=False)
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -77,6 +61,24 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
+def simulate_foci_data(images_folder_path: str,
+                       output_path: str,
+                       foci_num_min: int,
+                       foci_num_max: int
+                       ) -> None:
+    """
+    Given a path to a folder containing images,
+    a path to an output file which will contain
+    simulated data (csv format), and foci minimum
+    and maximum numbers, generates simulated
+    data for ml purposes.
+    :param images_folder_path: String. Represents a path to a folder.
+    :param output_path: String. Represents a path to a file.
+    :param foci_num_min: Integer. Represents number of foci in a given image.
+    :param foci_num_max: Integer. Represents number of foci in a given image.
+    :return: None.
+    """
+    pass
 
 ######################################################################
 # defining main function
@@ -89,8 +91,23 @@ def main():
     # getting data from Argument Parser
     args_dict = get_args_dict()
 
+    # getting images input folder path
+    images_folder_path = args_dict['images_input_folder']
 
+    # getting output path
+    output_path = args_dict['output_path']
 
+    # getting foci number min
+    foci_num_min = args_dict['foci_num_min']
+
+    # getting foci number max
+    foci_num_max = args_dict['foci_num_max']
+
+    # running data simulation function
+    simulate_foci_data(images_folder_path=images_folder_path,
+                       output_path=output_path,
+                       foci_num_min=foci_num_min,
+                       foci_num_max=foci_num_max)
 
 ######################################################################
 # running main function
