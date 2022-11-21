@@ -19,6 +19,18 @@ imgs_path = join('.',
 print(imgs_path)
 image_dir = Path(imgs_path)
 
+
+def is_using_gpu() -> bool:
+    if tf.test.gpu_device_name():
+        return True
+    return False
+
+
+f_string = f'Using GPU: {is_using_gpu()}'
+print(f_string)
+f_string = f'Press "Enter" to continue'
+input(f_string)
+
 filepaths = pd.Series(list(image_dir.glob(r'**/*.jpg')), name='Filepath').astype(str)
 ages = pd.Series(filepaths.apply(lambda x: os.path.split(os.path.split(x)[0])[1]), name='Age').astype(np.int)
 
