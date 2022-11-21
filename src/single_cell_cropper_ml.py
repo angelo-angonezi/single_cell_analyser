@@ -1,4 +1,4 @@
-# single cell cropper module
+# single cell cropper (ml) module
 
 print('initializing...')  # noqa
 
@@ -6,7 +6,7 @@ print('initializing...')  # noqa
 # using ML output.
 
 # debug execution
-# python -m src.single_cell_cropper -i .\\data\\input_imgs\\samlai\\vis\\orig -d .\\data\\ml_detections\\samlai_r2cnn_detections.csv -o .\\data\\output_crops\\samlai -t 0.5
+# python -m src.single_cell_cropper_ml -i .\\data\\input_imgs\\samlai\\vis\\orig -d .\\data\\ml_detections\\samlai_r2cnn_detections.csv -o .\\data\\output_crops\\samlai -t 0.5
 
 ######################################################################
 # importing required libraries
@@ -524,8 +524,8 @@ def main():
     # printing execution message
     execution_parameters_str = '### EXECUTION PARAMETERS ###\n'
     execution_parameters_str += f'input_folder: {input_folder}\n'
-    execution_parameters_str += f'output_folder: {output_folder}\n'
     execution_parameters_str += f'detections_df_path: {detections_df_path}\n'
+    execution_parameters_str += f'output_folder: {output_folder}\n'
     execution_parameters_str += f'detection_threshold: {detection_threshold}\n'
     execution_parameters_str += f'resize_toggle: {resize_toggle}'
     spacer()

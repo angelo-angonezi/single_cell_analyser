@@ -1,12 +1,12 @@
-# single cell cropper module
+# single cell cropper (fornma) module
 
 print('initializing...')  # noqa
 
 # code destined to cropping single cells
-# using ML output.
+# using forNMA output.
 
 # debug execution
-# python -m src.single_cell_cropper -i .\\data\\input_imgs\\samlai\\vis\\orig -d .\\data\\ml_detections\\samlai_r2cnn_detections.csv -o .\\data\\output_crops\\samlai -t 0.5
+# python -m src.single_cell_cropper_fornma -i
 
 ######################################################################
 # importing required libraries
