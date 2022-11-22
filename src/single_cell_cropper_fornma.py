@@ -67,12 +67,7 @@ def get_args_dict() -> dict:
 
     parser.add_argument('-d', '--detections-dataframe',
                         dest='detections_df_path',
-                        help='defines path to file containing detections info',
-                        required=True)
-
-    parser.add_argument('-t', '--detection-threshold',
-                        dest='detection_threshold',
-                        help='defines detection threshold for ml model results',
+                        help='defines path to file containing detections info (forNMA output)',
                         required=True)
 
     parser.add_argument('-r', '--resize',
