@@ -1,9 +1,9 @@
-# generate simulated data module
+# create train/test split module
 
 print('initializing...')  # noqa
 
-# code destined to generating random
-# simulated data for ml codes testing only.
+# code destined to generating train/test
+# split, based on annotated data.
 
 ######################################################################
 # importing required libraries
@@ -27,7 +27,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'generate simulated data for single-cell crops ML'
+    description = ''
 
     # creating a parser instance
     parser = ArgumentParser(description=description)

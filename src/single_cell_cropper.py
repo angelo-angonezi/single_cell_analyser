@@ -48,8 +48,8 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = "single cell cropper - tool used to segment cells based on\n"
-    description += "machine learning output data.\n"
+    description = 'single cell cropper - tool used to segment cells based on\n'
+    description += 'machine learning output data.'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
