@@ -16,6 +16,7 @@ from os.path import join
 from random import randint
 from pandas import DataFrame
 from argparse import ArgumentParser
+from src.utils.aux_funcs import spacer
 print('all required libraries successfully imported.')  # noqa
 sleep(0.8)
 
@@ -89,7 +90,15 @@ def create_subfolders_in_folder(folder_path: str,
     :param subfolders_list: List. Represents subfolders to be created.
     :return: None.
     """
-    pass
+    # iterating over folders list
+    for subfolder in subfolders_list:
+
+        # creating current subfolder path
+        subfolder_path = join(folder_path,
+                              subfolder)
+
+        # creating current subfolder
+        mkdir(subfolder_path)
 
 
 def create_subfolders_in_output_folder(output_folder_path: str,
@@ -118,14 +127,14 @@ def create_subfolders_in_output_folder(output_folder_path: str,
 
     # creating annotations subfolders
     train_annotations_subfolder_path = join(train_subfolder_path, 'annotations')
-    test_annotations_subfolder_path = join(train_subfolder_path, 'annotations')
+    test_annotations_subfolder_path = join(test_subfolder_path, 'annotations')
     mkdir(train_annotations_subfolder_path)
     mkdir(test_annotations_subfolder_path)
 
     # creating annotations subfolders
     create_subfolders_in_folder(folder_path=train_annotations_subfolder_path,
                                 subfolders_list=annotations_subfolder_list)
-    create_subfolders_in_folder(folder_path=test_images_subfolder_path,
+    create_subfolders_in_folder(folder_path=test_annotations_subfolder_path,
                                 subfolders_list=annotations_subfolder_list)
 
 
@@ -166,12 +175,32 @@ def create_train_test_split(images_folder_path: str,
                                        annotations_subfolder_list=ANNOTATIONS_SUBFOLDERS)
 
     # getting images names (no extension) in input folder
+    print('getting images in input folder...')
     images = listdir(images_folder_path)
     images_name = [image.replace('.tif', '')
                    for image
-                   in images]
+                   in images
+                   if image.endswith('.tif')]
+    images_num = len(images_name)
 
-    #
+    # getting train/test image numbers based on split ratio
+    train_num = int(images_num * SPLIT_RATIO)
+    test_num = images_num - train_num
+
+    # printing execution message
+    f_string = f'A total of {images_num} were found in input folder.\n'
+    f_string += f'Train imgs: {train_num} ({round(SPLIT_RATIO * 100)}%)\n'
+    f_string += f'Test imgs: {test_num} ({round((1 - SPLIT_RATIO) * 100)}%)'
+    spacer()
+    print(f_string)
+    spacer()
+    exit()
+
+    # creating train/test split
+    print('creating train/test split...')
+
+
+
 
 
 
@@ -194,6 +223,20 @@ def main():
 
     # getting output folder path
     output_folder_path = args_dict['output_folder_path']
+
+    # printing execution parameters
+    execution_parameters_str = '---Execution Parameters---\n'
+    execution_parameters_str += f'images_folder_path: {images_folder_path}\n'
+    execution_parameters_str += f'annotations_folder_path: {annotations_folder_path}\n'
+    execution_parameters_str += f'output_folder_path: {output_folder_path}'
+    spacer()
+    print(execution_parameters_str)
+    spacer()
+
+    # waiting user input
+    i_string = f'Press "Enter" to continue'
+    input(i_string)
+    spacer()
 
     # running create_train_test_split function
     create_train_test_split(images_folder_path=images_folder_path,

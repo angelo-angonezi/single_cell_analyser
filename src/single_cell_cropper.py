@@ -522,7 +522,7 @@ def main():
     resize_toggle = args_dict['resize_toggle']
 
     # printing execution message
-    execution_parameters_str = '### EXECUTION PARAMETERS ###\n'
+    execution_parameters_str = '---Execution Parameters---\n'
     execution_parameters_str += f'input_folder: {input_folder}\n'
     execution_parameters_str += f'detections_df_path: {detections_df_path}\n'
     execution_parameters_str += f'output_folder: {output_folder}\n'
@@ -533,7 +533,7 @@ def main():
     spacer()
 
     # waiting user input
-    i_string = f'Press "enter" to continue'
+    i_string = f'Press "Enter" to continue'
     input(i_string)
     spacer()
 
