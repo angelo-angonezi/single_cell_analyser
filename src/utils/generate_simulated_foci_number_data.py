@@ -63,7 +63,6 @@ def get_args_dict() -> dict:
     # returning the arguments dictionary
     return args_dict
 
-
 ######################################################################
 # defining auxiliary functions
 
