@@ -9,7 +9,6 @@ print('initializing...')  # noqa
 # importing required libraries
 
 print('importing required libraries...')  # noqa
-from os import mkdir
 from time import sleep
 from os import listdir
 from os.path import join
@@ -31,7 +30,6 @@ SPLIT_RATIO = 0.7
 ANNOTATIONS_SUBFOLDERS = ['alpr_format',
                           'dota_format',
                           'lucas_xml_format',
-                          'model_output_format',
                           'rolabelimg_format',
                           'tf_records_format']
 
@@ -190,10 +188,10 @@ def copy_images_and_annotations(images_folder_path: str,
     # defining dst folder paths
     train_images_dst_folder = join(output_folder_path,
                                    'train',
-                                   'images')
+                                   'imgs')
     test_images_dst_folder = join(output_folder_path,
                                   'test',
-                                  'images')
+                                  'imgs')
     train_annotations_dst_folder = join(output_folder_path,
                                         'train',
                                         'annotations',
@@ -228,6 +226,10 @@ def copy_images_and_annotations(images_folder_path: str,
                         dst_folder_path=test_annotations_dst_folder,
                         files_list=test_list,
                         file_extension='.xml')
+
+    # printing execution message
+    p_string = 'all images/annotations files successfully copied to split folder!'
+    print(p_string)
 
 
 def create_train_test_split(images_folder_path: str,
@@ -301,7 +303,7 @@ def main():
 
     # waiting user input
     i_string = f'Press "Enter" to continue'
-    # input(i_string)
+    input(i_string)
     spacer()
 
     # running create_train_test_split function
