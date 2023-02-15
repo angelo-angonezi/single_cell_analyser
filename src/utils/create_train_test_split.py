@@ -57,7 +57,7 @@ def get_args_dict() -> dict:
     parser.add_argument('-i', '--images-folder-path',
                         dest='images_folder_path',
                         type=str,
-                        help='defines path to folder containing images (.jpg)',
+                        help='defines path to folder containing images (.tif)',
                         required=True)
 
     # annotations folder path param
@@ -209,7 +209,7 @@ def copy_images_and_annotations(images_folder_path: str,
     copy_multiple_files(src_folder_path=images_folder_path,
                         dst_folder_path=train_images_dst_folder,
                         files_list=train_list,
-                        file_extension='.jpg')
+                        file_extension='.tif')
 
     spacer()
     print('copying train annotations to train folder...')
@@ -224,7 +224,7 @@ def copy_images_and_annotations(images_folder_path: str,
     copy_multiple_files(src_folder_path=images_folder_path,
                         dst_folder_path=test_images_dst_folder,
                         files_list=test_list,
-                        file_extension='.jpg')
+                        file_extension='.tif')
 
     spacer()
     print('copying test annotations to test folder...')
@@ -261,10 +261,10 @@ def create_train_test_split(images_folder_path: str,
     # getting images names (no extension) in input folder
     print('getting images in input folder...')
     images = listdir(images_folder_path)
-    images_names_list = [image.replace('.jpg', '')
+    images_names_list = [image.replace('.tif', '')
                          for image
                          in images
-                         if image.endswith('.jpg')]
+                         if image.endswith('.tif')]
 
     # getting train/test split lists
     print('getting train/test split lists...')
