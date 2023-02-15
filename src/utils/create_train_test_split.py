@@ -30,6 +30,7 @@ SPLIT_RATIO = 0.7
 ANNOTATIONS_SUBFOLDERS = ['alpr_format',
                           'dota_format',
                           'lucas_xml_format',
+                          'model_output_format',
                           'rolabelimg_format',
                           'tf_records_format']
 
@@ -153,6 +154,7 @@ def get_train_test_split_lists(images_names_list: list,
     # getting train sample from images names list
     train_sample = sample(images_names_list,
                           train_num)
+    print('train set created!')
 
     # getting test sample from images names list
     test_sample = [image_name
@@ -160,6 +162,7 @@ def get_train_test_split_lists(images_names_list: list,
                    in images_names_list
                    if image_name
                    not in train_sample]
+    print('test set created!')
 
     # adding samples to final tuple
     final_tuple = (train_sample, test_sample)
@@ -202,12 +205,14 @@ def copy_images_and_annotations(images_folder_path: str,
                                        'rolabelimg_format')
 
     # iterating over train images
+    spacer()
     print('copying train images to train folder...')
     copy_multiple_files(src_folder_path=images_folder_path,
                         dst_folder_path=train_images_dst_folder,
                         files_list=train_list,
                         file_extension='.jpg')
 
+    spacer()
     print('copying train annotations to train folder...')
     copy_multiple_files(src_folder_path=annotations_folder_path,
                         dst_folder_path=train_annotations_dst_folder,
@@ -215,12 +220,14 @@ def copy_images_and_annotations(images_folder_path: str,
                         file_extension='.xml')
 
     # iterating over test images
+    spacer()
     print('copying test images to test folder...')
     copy_multiple_files(src_folder_path=images_folder_path,
                         dst_folder_path=test_images_dst_folder,
                         files_list=test_list,
                         file_extension='.jpg')
 
+    spacer()
     print('copying test annotations to test folder...')
     copy_multiple_files(src_folder_path=annotations_folder_path,
                         dst_folder_path=test_annotations_dst_folder,
@@ -229,6 +236,7 @@ def copy_images_and_annotations(images_folder_path: str,
 
     # printing execution message
     p_string = 'all images/annotations files successfully copied to split folder!'
+    spacer()
     print(p_string)
 
 
@@ -265,6 +273,7 @@ def create_train_test_split(images_folder_path: str,
                                                        split_ratio=SPLIT_RATIO)
 
     # moving images/annotation files
+    spacer()
     print('copying files to respective folders...')
     copy_images_and_annotations(images_folder_path=images_folder_path,
                                 annotations_folder_path=annotations_folder_path,
