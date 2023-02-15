@@ -17,9 +17,9 @@ from argparse import ArgumentParser
 #####################################################################
 # defining global parameters
 
-PATH_TO_CONVERTER_ROLABELIMG_TO_ALPR = '/home/angelo/dados/pycharm_projects/ml_cell_detection_validation/src/converters/convert_annotation_from_rolabelimg_xml_to_alpr.py'
-PATH_TO_CONVERTER_ALPR_TO_DOTA = '/home/angelo/dados/pycharm_projects/RotationDetection/dataloader/dataset/UFRGS_CELL/convert_ann2dota.py'
-PATH_TO_CONVERTER_DOTA_TO_LUCAS_XML = '/home/angelo/dados/pycharm_projects/RotationDetection/dataloader/dataset/UFRGS_CELL/txt2xml.py'
+PATH_TO_CONVERTER_ROLABELIMG_TO_ALPR = 'Z:\\pycharm_projects\\single_cell_analyser\\src\\utils\\converters\\convert_annotation_from_rolabelimg_xml_to_alpr.py'
+PATH_TO_CONVERTER_ALPR_TO_DOTA = 'Z:\\pycharm_projects\\RotationDetection\\dataloader\\dataset\\UFRGS_CELL\\convert_ann2dota.py'
+PATH_TO_CONVERTER_DOTA_TO_LUCAS_XML = 'Z:\\pycharm_projects\\RotationDetection\\dataloader\\dataset\\UFRGS_CELL\\txt2xml.py'
 
 #####################################################################
 # argument parsing related functions
