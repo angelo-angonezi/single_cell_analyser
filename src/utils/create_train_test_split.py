@@ -12,11 +12,14 @@ print('importing required libraries...')  # noqa
 from os import mkdir
 from time import sleep
 from os import listdir
-from random import seed
 from os.path import join
 from random import sample
 from argparse import ArgumentParser
+from random import seed as set_seed
 from src.utils.aux_funcs import spacer
+from src.utils.aux_funcs import create_folder
+from src.utils.aux_funcs import copy_multiple_files
+from src.utils.aux_funcs import create_subfolders_in_folder
 print('all required libraries successfully imported.')  # noqa
 sleep(0.8)
 
@@ -31,6 +34,9 @@ ANNOTATIONS_SUBFOLDERS = ['alpr_format',
                           'model_output_format',
                           'rolabelimg_format',
                           'tf_records_format']
+
+# setting seed (so that all executions result in same sample)
+set_seed(SEED)
 
 #####################################################################
 # argument parsing related functions
@@ -80,27 +86,6 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def create_subfolders_in_folder(folder_path: str,
-                                subfolders_list: list
-                                ) -> None:
-    """
-    Given a list of subfolders and a folder path,
-    creates subfolders in given folder.
-    :param folder_path: String. Represents a path to a folder.
-    :param subfolders_list: List. Represents subfolders to be created.
-    :return: None.
-    """
-    # iterating over folders list
-    for subfolder in subfolders_list:
-
-        # creating current subfolder path
-        subfolder_path = join(folder_path,
-                              subfolder)
-
-        # creating current subfolder
-        mkdir(subfolder_path)
-
-
 def create_subfolders_in_output_folder(output_folder_path: str,
                                        annotations_subfolder_list: list
                                        ) -> None:
@@ -116,20 +101,20 @@ def create_subfolders_in_output_folder(output_folder_path: str,
                                 'train')
     test_subfolder_path = join(output_folder_path,
                                'test')
-    mkdir(train_subfolder_path)
-    mkdir(test_subfolder_path)
+    create_folder(train_subfolder_path)
+    create_folder(test_subfolder_path)
 
     # creating images subfolders
     train_images_subfolder_path = join(train_subfolder_path, 'imgs')
     test_images_subfolder_path = join(test_subfolder_path, 'imgs')
-    mkdir(train_images_subfolder_path)
-    mkdir(test_images_subfolder_path)
+    create_folder(train_images_subfolder_path)
+    create_folder(test_images_subfolder_path)
 
     # creating annotations subfolders
     train_annotations_subfolder_path = join(train_subfolder_path, 'annotations')
     test_annotations_subfolder_path = join(test_subfolder_path, 'annotations')
-    mkdir(train_annotations_subfolder_path)
-    mkdir(test_annotations_subfolder_path)
+    create_folder(train_annotations_subfolder_path)
+    create_folder(test_annotations_subfolder_path)
 
     # creating annotations subfolders
     create_subfolders_in_folder(folder_path=train_annotations_subfolder_path,
@@ -139,7 +124,7 @@ def create_subfolders_in_output_folder(output_folder_path: str,
 
 
 def get_train_test_split_lists(images_names_list: list,
-                               train_images_num: int
+                               split_ratio: float = 0.7
                                ) -> tuple:
     """
     Given a list of image names (no extension),
@@ -149,21 +134,100 @@ def get_train_test_split_lists(images_names_list: list,
     structure:
     ([train_images_names], [test_images_names])
     :param images_names_list: List. Represents a list of image names.
-    :param train_images_num: Integer. Represents number of desired train
-    images in train/test dataset split.
+    :param split_ratio: Float. Represents desired proportion of train set.
     :return: Tuple. Represents train/test split.
     """
-    # defining placeholder value for train_test_split_list
-    train_test_split_list = []
+    # getting number of images found in input folder
+    images_num = len(images_names_list)
 
-    # setting seed value
-    seed(SEED)
+    # getting train/test image numbers based on split ratio
+    train_num = int(images_num * split_ratio)
+    test_num = images_num - train_num
 
-    # getting a sample from images names list
+    # printing execution message
+    f_string = f'A total of {images_num} images were found in input folder.\n'
+    f_string += f'Train imgs: {train_num} ({round(split_ratio * 100)}%)\n'
+    f_string += f'Test imgs: {test_num} ({round((1 - split_ratio) * 100)}%)'
+    spacer()
+    print(f_string)
+    spacer()
+
+    # getting train sample from images names list
     train_sample = sample(images_names_list,
-                          )
+                          train_num)
+
+    # getting test sample from images names list
+    test_sample = [image_name
+                   for image_name
+                   in images_names_list
+                   if image_name
+                   not in train_sample]
+
+    # adding samples to final tuple
+    final_tuple = (train_sample, test_sample)
+
+    # returning final tuple
+    return final_tuple
 
 
+def copy_images_and_annotations(images_folder_path: str,
+                                annotations_folder_path: str,
+                                output_folder_path: str,
+                                train_list: list,
+                                test_list: list
+                                ) -> None:
+    """
+    Given paths to annotations and images, copies
+    files into respective output folder, based on
+    given train and test lists.
+    :param images_folder_path: String. Represents a path to a folder.
+    :param annotations_folder_path: String. Represents a path to a folder.
+    :param output_folder_path: String. Represents a path to a folder.
+    :param train_list: List. Represents train set image names.
+    :param test_list: Represents test set image names.
+    :return: None.
+    """
+    # defining dst folder paths
+    train_images_dst_folder = join(output_folder_path,
+                                   'train',
+                                   'images')
+    test_images_dst_folder = join(output_folder_path,
+                                  'test',
+                                  'images')
+    train_annotations_dst_folder = join(output_folder_path,
+                                        'train',
+                                        'annotations',
+                                        'rolabelimg_format')
+    test_annotations_dst_folder = join(output_folder_path,
+                                       'test',
+                                       'annotations',
+                                       'rolabelimg_format')
+
+    # iterating over train images
+    print('copying train images to train folder...')
+    copy_multiple_files(src_folder_path=images_folder_path,
+                        dst_folder_path=train_images_dst_folder,
+                        files_list=train_list,
+                        file_extension='.jpg')
+
+    print('copying train annotations to train folder...')
+    copy_multiple_files(src_folder_path=annotations_folder_path,
+                        dst_folder_path=train_annotations_dst_folder,
+                        files_list=train_list,
+                        file_extension='.xml')
+
+    # iterating over test images
+    print('copying test images to test folder...')
+    copy_multiple_files(src_folder_path=images_folder_path,
+                        dst_folder_path=test_images_dst_folder,
+                        files_list=test_list,
+                        file_extension='.jpg')
+
+    print('copying test annotations to test folder...')
+    copy_multiple_files(src_folder_path=annotations_folder_path,
+                        dst_folder_path=test_annotations_dst_folder,
+                        files_list=test_list,
+                        file_extension='.xml')
 
 
 def create_train_test_split(images_folder_path: str,
@@ -188,30 +252,23 @@ def create_train_test_split(images_folder_path: str,
     # getting images names (no extension) in input folder
     print('getting images in input folder...')
     images = listdir(images_folder_path)
-    images_names = [image.replace('.jpg', '')
-                    for image
-                    in images
-                    if image.endswith('.jpg')]
-    images_num = len(images_names)
-
-    # getting train/test image numbers based on split ratio
-    train_num = int(images_num * SPLIT_RATIO)
-    test_num = images_num - train_num
-
-    # printing execution message
-    f_string = f'A total of {images_num} images were found in input folder.\n'
-    f_string += f'Train imgs: {train_num} ({round(SPLIT_RATIO * 100)}%)\n'
-    f_string += f'Test imgs: {test_num} ({round((1 - SPLIT_RATIO) * 100)}%)'
-    spacer()
-    print(f_string)
-    spacer()
+    images_names_list = [image.replace('.jpg', '')
+                         for image
+                         in images
+                         if image.endswith('.jpg')]
 
     # getting train/test split lists
     print('getting train/test split lists...')
-    train_list, test_list = get_train_test_split_lists(images_names_list=images_names,
-                                                       train_images_num=SPLIT_RATIO)
+    train_list, test_list = get_train_test_split_lists(images_names_list=images_names_list,
+                                                       split_ratio=SPLIT_RATIO)
 
-    exit()
+    # moving images/annotation files
+    print('copying files to respective folders...')
+    copy_images_and_annotations(images_folder_path=images_folder_path,
+                                annotations_folder_path=annotations_folder_path,
+                                output_folder_path=output_folder_path,
+                                train_list=train_list,
+                                test_list=test_list)
 
 ######################################################################
 # defining main function
@@ -244,14 +301,13 @@ def main():
 
     # waiting user input
     i_string = f'Press "Enter" to continue'
-    input(i_string)
+    # input(i_string)
     spacer()
 
     # running create_train_test_split function
     create_train_test_split(images_folder_path=images_folder_path,
                             annotations_folder_path=annotations_folder_path,
                             output_folder_path=output_folder_path)
-
 
 ######################################################################
 # running main function

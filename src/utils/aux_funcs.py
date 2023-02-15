@@ -6,9 +6,13 @@
 ######################################################################
 # importing required libraries
 
+from os import mkdir
 from sys import stdout
+from os.path import join
+from os.path import exists
 from pandas import read_csv
 from pandas import DataFrame
+from shutil import copy as sh_copy
 
 ######################################################################
 # defining auxiliary functions
@@ -134,6 +138,88 @@ def get_obbs_from_df(df: DataFrame) -> list:
 
     # returning centroids list
     return centroids_list
+
+
+def create_folder(folder_path: str) -> None:
+    """
+    Given a path to a folder, checks folder
+    existence, and creates folder should it
+    be non-existent.
+    :param folder_path: String. Represents a path to a folder.
+    :return: None.
+    """
+    # checking if folder exists
+    if exists(folder_path):
+
+        # does nothing (return None)
+        return None
+
+    # if it does not exist
+    else:
+
+        # creating folder
+        mkdir(folder_path)
+
+
+def create_subfolders_in_folder(folder_path: str,
+                                subfolders_list: list
+                                ) -> None:
+    """
+    Given a list of subfolders and a folder path,
+    creates subfolders in given folder.
+    :param folder_path: String. Represents a path to a folder.
+    :param subfolders_list: List. Represents subfolders to be created.
+    :return: None.
+    """
+    # iterating over folders list
+    for subfolder in subfolders_list:
+
+        # creating current subfolder path
+        subfolder_path = join(folder_path,
+                              subfolder)
+
+        # creating current subfolder
+        create_folder(subfolder_path)
+
+
+def copy_multiple_files(src_folder_path: str,
+                        dst_folder_path: str,
+                        files_list: list,
+                        file_extension: str
+                        ) -> None:
+    """
+    Given a path to source and destination folders,
+    and a list of files present in source folder,
+    copies files to destination folder.
+    :param src_folder_path: String. Represents a path to a folder.
+    :param dst_folder_path: String. Represents a path to a folder.
+    :param files_list: List. Represents file names.
+    :param file_extension: String. Represents file extension.
+    :return: None.
+    """
+    # getting files number
+    files_num = len(files_list)
+
+    # iterating over files
+    for file_index, file_name in enumerate(files_list, 1):
+
+        # getting file src/dst paths
+        file_path = f'{file_name}{file_extension}'
+        src_path = join(src_folder_path, file_path)
+        dst_path = join(dst_folder_path, file_path)
+
+        # printing execution message
+        progress_ratio = file_index / files_num
+        progress_percentage = progress_ratio * 100
+        progress_percentage_round = round(progress_percentage)
+        f_string = f'copying file {file_index} of {files_num} ({progress_percentage_round}%)'
+        flush_or_print(string=f_string,
+                       index=file_index,
+                       total=files_num)
+
+        # copying file from src to dst folder
+        sh_copy(src=src_path,
+                dst=dst_path)
 
 ######################################################################
 # end of current module
