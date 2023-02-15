@@ -29,7 +29,7 @@ SEED = 53
 SPLIT_RATIO = 0.7
 ANNOTATIONS_SUBFOLDERS = ['alpr_format',
                           'dota_format',
-                          'lucas_xml_format',
+                          'pascal_format',
                           'rolabelimg_format',
                           'tf_records_format']
 
