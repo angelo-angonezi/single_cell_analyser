@@ -12,9 +12,9 @@ print('importing required libraries...')  # noqa
 from os import mkdir
 from time import sleep
 from os import listdir
+from random import seed
 from os.path import join
-from random import randint
-from pandas import DataFrame
+from random import sample
 from argparse import ArgumentParser
 from src.utils.aux_funcs import spacer
 print('all required libraries successfully imported.')  # noqa
@@ -53,7 +53,7 @@ def get_args_dict() -> dict:
     parser.add_argument('-i', '--images-folder-path',
                         dest='images_folder_path',
                         type=str,
-                        help='defines path to folder containing images (.tif)',
+                        help='defines path to folder containing images (.jpg)',
                         required=True)
 
     # annotations folder path param
@@ -139,7 +139,7 @@ def create_subfolders_in_output_folder(output_folder_path: str,
 
 
 def get_train_test_split_lists(images_names_list: list,
-                               split_ratio: float = 0.7
+                               train_images_num: int
                                ) -> tuple:
     """
     Given a list of image names (no extension),
@@ -149,10 +149,21 @@ def get_train_test_split_lists(images_names_list: list,
     structure:
     ([train_images_names], [test_images_names])
     :param images_names_list: List. Represents a list of image names.
-    :param split_ratio: Float. Represents desired proportion of train set.
+    :param train_images_num: Integer. Represents number of desired train
+    images in train/test dataset split.
     :return: Tuple. Represents train/test split.
     """
-    pass
+    # defining placeholder value for train_test_split_list
+    train_test_split_list = []
+
+    # setting seed value
+    seed(SEED)
+
+    # getting a sample from images names list
+    train_sample = sample(images_names_list,
+                          )
+
+
 
 
 def create_train_test_split(images_folder_path: str,
@@ -177,32 +188,30 @@ def create_train_test_split(images_folder_path: str,
     # getting images names (no extension) in input folder
     print('getting images in input folder...')
     images = listdir(images_folder_path)
-    images_name = [image.replace('.tif', '')
-                   for image
-                   in images
-                   if image.endswith('.tif')]
-    images_num = len(images_name)
+    images_names = [image.replace('.jpg', '')
+                    for image
+                    in images
+                    if image.endswith('.jpg')]
+    images_num = len(images_names)
 
     # getting train/test image numbers based on split ratio
     train_num = int(images_num * SPLIT_RATIO)
     test_num = images_num - train_num
 
     # printing execution message
-    f_string = f'A total of {images_num} were found in input folder.\n'
+    f_string = f'A total of {images_num} images were found in input folder.\n'
     f_string += f'Train imgs: {train_num} ({round(SPLIT_RATIO * 100)}%)\n'
     f_string += f'Test imgs: {test_num} ({round((1 - SPLIT_RATIO) * 100)}%)'
     spacer()
     print(f_string)
     spacer()
+
+    # getting train/test split lists
+    print('getting train/test split lists...')
+    train_list, test_list = get_train_test_split_lists(images_names_list=images_names,
+                                                       train_images_num=SPLIT_RATIO)
+
     exit()
-
-    # creating train/test split
-    print('creating train/test split...')
-
-
-
-
-
 
 ######################################################################
 # defining main function
