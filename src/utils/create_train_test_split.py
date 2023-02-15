@@ -30,7 +30,6 @@ SPLIT_RATIO = 0.7
 ANNOTATIONS_SUBFOLDERS = ['alpr_format',
                           'dota_format',
                           'lucas_xml_format',
-                          'model_output_format',
                           'rolabelimg_format',
                           'tf_records_format']
 

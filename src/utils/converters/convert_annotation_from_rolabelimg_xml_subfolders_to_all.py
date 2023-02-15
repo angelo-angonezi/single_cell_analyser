@@ -289,7 +289,7 @@ def main():
 
     # waiting for user input
     e_string = 'Press "Enter" to continue'
-    #input(e_string)
+    input(e_string)
 
     # running multiple converter function
     convert_files_in_multiple_dirs(images_folder_path=images_folder,
