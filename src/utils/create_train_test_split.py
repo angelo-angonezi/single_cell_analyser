@@ -31,7 +31,7 @@ ANNOTATIONS_SUBFOLDERS = ['alpr_format',
                           'dota_format',
                           'pascal_format',
                           'rolabelimg_format',
-                          'tf_records_format']
+                          'tfrecords_format']
 
 # setting seed (so that all executions result in same sample)
 set_seed(SEED)
