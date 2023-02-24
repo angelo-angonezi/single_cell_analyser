@@ -1,5 +1,4 @@
 # imports
-from os import rename
 from os import listdir
 from os.path import join
 from shutil import copy as sh_copy
