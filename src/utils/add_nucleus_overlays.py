@@ -13,7 +13,9 @@ print('importing required libraries...')  # noqa
 import cv2
 import numpy as np
 from os.path import join
+from numpy import ndarray
 from pandas import concat
+from pandas import Series
 from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
@@ -25,9 +27,9 @@ print('all required libraries successfully imported.')  # noqa
 #####################################################################
 # defining global variables
 
-COLOR_DICT = {'model': (),
-              'fornma': ()}
-
+COLOR_DICT = {'model': (0, 102, 204),
+              'fornma': (0, 204, 102),
+              'DT': (255, 153, 102)}
 
 #####################################################################
 # argument parsing related functions
@@ -61,14 +63,14 @@ def get_args_dict() -> dict:
                         help=extension_help)
 
     # detection file param
-    detection_help = 'defines path to file containing model detections'
+    detection_help = 'defines path to csv file containing model detections'
     parser.add_argument('-d', '--detection_file',
                         dest='detection_file',
                         required=True,
                         help=detection_help)
 
     # gt file param
-    gt_help = 'defines path to file containing ground-truth annotations '
+    gt_help = 'defines path to csv file containing ground-truth annotations'
     gt_help += '(if none is passed, adds only model detections)'
     parser.add_argument('-g', '--ground-truth-file',
                         dest='ground_truth_file',
@@ -98,51 +100,6 @@ def get_args_dict() -> dict:
 
 ######################################################################
 # defining auxiliary functions
-
-
-def draw_rectangle(img,
-                   cx: float,
-                   cy: float,
-                   width: float,
-                   height: float,
-                   angle: float,
-                   color: tuple
-                   ) -> None:
-    """
-    Given an open image, and corners for a rectangle with color,
-    draws rectangle on base image.
-    """
-    # get the corner points
-    box = cv2.boxPoints(((cx, cy),
-                         (width, height),
-                         angle))
-
-    # converting corners format
-    box = np.int0(box)
-
-    # drawing lines
-    cv2.drawContours(img, [box], -1, color, 2)
-
-
-def draw_circle(img,
-                cx: float,
-                cy: float,
-                color: tuple
-                ) -> None:
-    """
-    Given an open image, and a set of cartesian
-    coordinates, draws circle on base image.
-    """
-    # converting centroid coords to integers
-    cx = int(cx)
-    cy = int(cy)
-
-    # defining radius and thickness
-    radius = 3
-    thickness = -1  # -1 fills circle
-
-    # drawing circle
-    cv2.circle(img, (cx, cy), radius, color, thickness)
 
 
 def get_merged_detection_annotation_df(detections_df_path: str,
@@ -189,6 +146,105 @@ def get_merged_detection_annotation_df(detections_df_path: str,
     return merged_df
 
 
+def draw_rectangle(open_img: ndarray,
+                   cx: float,
+                   cy: float,
+                   width: float,
+                   height: float,
+                   angle: float,
+                   color: tuple
+                   ) -> ndarray:
+    """
+    Given an open image, and coordinates for OBB,
+    returns image with OBB overlay.
+    """
+    # get the corner points
+    box = cv2.boxPoints(((cx, cy),
+                         (width, height),
+                         angle))
+
+    # converting corners format
+    box = np.int0(box)
+
+    # drawing lines
+    cv2.drawContours(open_img,
+                     [box],
+                     -1,
+                     color,
+                     2)
+
+    # returning modified image
+    return open_img
+
+
+def add_single_overlay(open_img: ndarray,
+                       obbs_df_row: Series,
+                       color_dict: dict
+                       ) -> None:
+    """
+    Given an open image and respective obb row
+    (extracted from merged_df), returns image
+    with given obb overlay.
+    :param open_img: ndarray. Represents an open image.
+    :param obbs_df_row: Series. Represents single obb data.
+    :param color_dict: Dictionary. Represents colors to be used in overlays.
+    :return: None.
+    """
+    # getting current row bounding box info
+    cx = float(obbs_df_row['cx'])
+    cy = float(obbs_df_row['cy'])
+    width = float(obbs_df_row['width'])
+    height = float(obbs_df_row['height'])
+    angle = float(obbs_df_row['angle'])
+    det_class = str(obbs_df_row['class'])
+    evaluator = str(obbs_df_row['evaluator'])
+
+    # defining color for overlay
+    overlay_color = color_dict[evaluator]
+
+    # adding rectangle overlay
+    draw_rectangle(open_img=open_img,
+                   cx=cx,
+                   cy=cy,
+                   width=width,
+                   height=height,
+                   angle=angle,
+                   color=overlay_color)
+
+    # adding class text
+    cv2.putText(open_img,
+                det_class,
+                (int(cx), int(cy)),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.02,
+                overlay_color,
+                2)
+
+
+def add_multiple_overlays(open_img: ndarray,
+                          current_image_df: DataFrame,
+                          color_dict: dict
+                          ) -> None:
+    """
+    Given an open image and current image data frame,
+    returns image with detection/annotation overlays.
+    :param open_img: ndarray. Represents an open image.
+    :param current_image_df: DataFrame. Represents current image detection/annotation data.
+    :param color_dict: Dictionary. Represents colors to be used in overlays.
+    :return: None.
+    """
+    # getting df rows
+    df_rows = current_image_df.iterrows()
+
+    # iterating over df_rows
+    for row_index, row_data in df_rows:
+
+        # adding current row overlay
+        add_single_overlay(open_img=open_img,
+                           obbs_df_row=row_data,
+                           color_dict=color_dict)
+
+
 def add_overlays_to_single_image(image_name: str,
                                  image_path: str,
                                  merged_df: DataFrame,
@@ -208,57 +264,58 @@ def add_overlays_to_single_image(image_name: str,
     :param color_dict: Dictionary. Represents colors to be used in overlays.
     :return: None.
     """
-    # getting image data from df
-    current_image_df = merged_df[merged_df['img_file_name'] == image_name]
-
     # opening image
     open_img = cv2.imread(image_path)
     open_img = cv2.cvtColor(open_img, cv2.COLOR_BGR2RGB)
 
-    # getting df rows
-    df_rows = current_image_df.iterrows()
+    # getting image data from df
+    current_image_df = merged_df[merged_df['img_file_name'] == image_name]
 
-    # iterating over df_rows
-    for row in df_rows:
+    # filtering current image data based on detection threshold
+    current_image_df = current_image_df[current_image_df['detection_threshold'] >= detection_threshold]
 
-        # getting current row bounding box info
-        current_detection_threshold = row['detection_threshold']
-        cx = row['cx']
-        cy = row['cy']
-        width = row['width']
-        height = row['height']
-        angle = row['angle']
-        det_class = row['class']
-        evaluator = row['evaluator']
+    # getting current image detection/annotation counts
+    detections = current_image_df[current_image_df['evaluator'] == 'model']
+    annotations = current_image_df[current_image_df['evaluator'] == 'fornma']
+    detection_count = len(detections)
+    annotation_count = len(annotations)
 
-        # adding threshold limit
-        if current_detection_threshold < detection_threshold:
+    # defining base texts
+    model_text = f'model: {detection_count}'
+    fornma_text = f'fornma: {annotation_count}'
+    threshold_text = f'DT: {detection_threshold}'
 
-            # skipping if current threshold is filtered
-            continue
+    # adding base texts to image corner
+    cv2.putText(open_img,
+                model_text,
+                (10, 30),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.9,
+                color_dict['model'],
+                2)
+    cv2.putText(open_img,
+                fornma_text,
+                (10, 60),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.9,
+                color_dict['fornma'],
+                2)
+    cv2.putText(open_img,
+                threshold_text,
+                (10, 90),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.9,
+                color_dict['DT'],
+                2)
 
-        # defining color for overlay
-        overlay_color = color_dict[evaluator]
+    # adding overlays to image
+    add_multiple_overlays(open_img=open_img,
+                          current_image_df=current_image_df,
+                          color_dict=color_dict)
 
-
-        else:
-
-            # adding rectangle overlay
-            draw_rectangle(img=open_img,
-                           cx=cx,
-                           cy=cy,
-                           width=width,
-                           height=height,
-                           angle=angle,
-                           color=color)
-
-        # saving image in output folder
-        output_name = f'{name}_outlined.png'
-        output_path = join(output_folder, output_name)
-        open_img = cv2.cvtColor(open_img, cv2.COLOR_RGB2BGR)
-        cv2.imwrite(output_path, open_img)
-
-
+    # saving image in output path
+    open_img = cv2.cvtColor(open_img, cv2.COLOR_RGB2BGR)
+    cv2.imwrite(output_path, open_img)
 
 
 def add_overlays_to_multiple_images(input_folder: str,
@@ -310,18 +367,23 @@ def add_overlays_to_multiple_images(input_folder: str,
                        total=images_num)
 
         # getting image path
-        image_name = f'{image_name}{image_extension}'
-        image_path = join(input_folder, image_name)
+        image_name_w_extension = f'{image_name}{image_extension}'
+        image_path = join(input_folder, image_name_w_extension)
 
-        # getting current image detections/annotations
-        current_image_detections =
+        # getting output path
+        output_name = f'{image_name}_overlays.png'
+        output_path = join(output_folder, output_name)
 
-
-
-
+        # adding overlays to current image
+        add_overlays_to_single_image(image_name=image_name,
+                                     image_path=image_path,
+                                     merged_df=merged_df,
+                                     detection_threshold=detection_threshold,
+                                     output_path=output_path,
+                                     color_dict=color_dict)
 
     # printing execution message
-    f_string = f'overlays added to all {groups_num} images!'
+    f_string = f'overlays added to all {images_num} images!'
     print(f_string)
 
 ######################################################################
@@ -359,8 +421,7 @@ def main():
     f_string += f'detection file: {detection_file}\n'
     f_string += f'ground-truth file: {ground_truth_file}\n'
     f_string += f'output folder: {output_folder}\n'
-    f_string += f'detection threshold: {detection_threshold}\n'
-    f_string += f'overlay: {"centroid" if centroid_flag else "rectangle"}'
+    f_string += f'detection threshold: {detection_threshold}'
     spacer()
     print(f_string)
     spacer()
