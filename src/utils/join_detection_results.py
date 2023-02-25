@@ -14,6 +14,7 @@ from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
 from os.path import split as os_split
+from src.utils.aux_funcs import flush_or_print
 
 #####################################################################
 # argument parsing related functions
@@ -39,6 +40,13 @@ def get_args_dict() -> dict:
                         type=str,
                         help='defines input folder (folder containing detection files [normal and round txts])')
 
+    # output path param
+    parser.add_argument('-o', '--output-path',
+                        dest='output_path',
+                        required=True,
+                        type=str,
+                        help='defines output path (path to .csv file)')
+
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
 
@@ -49,58 +57,6 @@ def get_args_dict() -> dict:
 ######################################################################
 # defining auxiliary functions
 
-
-def flush_string(string: str) -> None:
-    """
-    Given a string, writes and flushes it in the console using
-    sys library, and resets cursor to the start of the line.
-    (writes N backspaces at the end of line, where N = len(string)).
-    :param string: String. Represents a message to be written in the console.
-    :return: None.
-    """
-    # getting string length
-    string_len = len(string)
-
-    # creating backspace line
-    backspace_line = '\b' * string_len
-
-    # writing string
-    stdout.write(string)
-
-    # flushing console
-    stdout.flush()
-
-    # resetting cursor to start of the line
-    stdout.write(backspace_line)
-
-
-def flush_or_print(string: str,
-                   index: int,
-                   total: int
-                   ) -> None:
-    """
-    Given a string, prints string if index
-    is equal to total, and flushes it on console
-    otherwise.
-    !(useful for progress tracking/progress bars)!
-    :param string: String. Represents a string to be printed on console.
-    :param index: Integer. Represents an iterable's index.
-    :param total: Integer. Represents an iterable's total.
-    :return: None.
-    """
-    # checking whether index is last
-
-    # if current element is last
-    if index == total:
-
-        # printing string
-        print(string)
-
-    # if current element is not last
-    else:
-
-        # flushing string
-        flush_string(string)
 
 
 def get_detection_files_paths(folder_path: str) -> list:

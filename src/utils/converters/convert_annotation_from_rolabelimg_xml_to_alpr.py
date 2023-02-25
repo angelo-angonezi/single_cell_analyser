@@ -8,11 +8,11 @@
 
 # importing required libraries
 import math
-from os import listdir
-from sys import stdout
 from os.path import join
 import xml.etree.ElementTree as ET
 from argparse import ArgumentParser
+from src.utils.aux_funcs import flush_or_print
+from src.utils.aux_funcs import get_specific_files_in_folder
 
 #####################################################################
 # argument parsing related functions
@@ -57,82 +57,8 @@ def get_args_dict() -> dict:
     # returning the arguments dictionary
     return args_dict
 
-
 ######################################################################
 # defining auxiliary functions
-
-
-def flush_string(string: str) -> None:
-    """
-    Given a string, writes and flushes it in the console using
-    sys library, and resets cursor to the start of the line.
-    (writes N backspaces at the end of line, where N = len(string)).
-    :param string: String. Represents a message to be written in the console.
-    :return: None.
-    """
-    # getting string length
-    string_len = len(string)
-
-    # creating backspace line
-    backspace_line = '\b' * string_len
-
-    # writing string
-    stdout.write(string)
-
-    # flushing console
-    stdout.flush()
-
-    # resetting cursor to start of the line
-    stdout.write(backspace_line)
-
-
-def flush_or_print(string: str,
-                   index: int,
-                   total: int
-                   ) -> None:
-    """
-    Given a string, prints string if index
-    is equal to total, and flushes it on console
-    otherwise.
-    !(useful for progress tracking/progress bars)!
-    :param string: String. Represents a string to be printed on console;
-    :param index: Integer. Represents an iterable's index;
-    :param total: Integer. Represents an iterable's total.
-    :return: None.
-    """
-    # checking whether index is last
-    if index == total:  # current element is last
-
-        # printing string
-        print(string)
-
-    else:  # current element is not last
-
-        # flushing string
-        flush_string(string)
-
-
-def get_specific_files_in_folder(path_to_folder: str,
-                                 extension: str
-                                 ) -> list:
-    """
-    Given a path to a folder, returns a list containing
-    all files in folder that match given extension.
-    :param path_to_folder: String. Represents a path to a folder.
-    :param extension: String. Represents a specific file extension.
-    :return: List[str]. Represents all files that match extension in given folder.
-    """
-    # getting specific files
-    files_in_dir = [file  # getting file
-                    for file  # iterating over files
-                    in listdir(path_to_folder)  # in input folder
-                    if file.endswith(extension)]  # only if file matches given extension
-
-    # sorting list
-    files_in_dir = sorted(files_in_dir)
-
-    # returning list
-    return files_in_dir
 
 
 def rotate(origin, point, angle):  # copied from stackoverflow

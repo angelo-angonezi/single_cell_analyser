@@ -7,6 +7,7 @@
 # importing required libraries
 
 from os import mkdir
+from os import listdir
 from sys import stdout
 from os.path import join
 from os.path import exists
@@ -89,6 +90,29 @@ def flush_or_print(string: str,
 
         # flushing string
         flush_string(string)
+
+
+def get_specific_files_in_folder(path_to_folder: str,
+                                 extension: str
+                                 ) -> list:
+    """
+    Given a path to a folder, returns a list containing
+    all files in folder that match given extension.
+    :param path_to_folder: String. Represents a path to a folder.
+    :param extension: String. Represents a specific file extension.
+    :return: List[str]. Represents all files that match extension in given folder.
+    """
+    # getting specific files
+    files_in_dir = [file  # getting file
+                    for file  # iterating over files
+                    in listdir(path_to_folder)  # in input folder
+                    if file.endswith(extension)]  # only if file matches given extension
+
+    # sorting list
+    files_in_dir = sorted(files_in_dir)
+
+    # returning list
+    return files_in_dir
 
 
 def get_data_from_consolidated_df(consolidated_df_file_path: str) -> DataFrame:
