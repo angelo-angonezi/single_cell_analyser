@@ -1,19 +1,16 @@
-#!/usr/bin/python3
+# add nucleus overlay module
 
-# given a path to a folder containing images
-# and a path to a detection output results file
-# and a path to an output folder,
-# generates images with OBBs overlay,
-# displaying detection thresholds ranges as different colors.
+print('initializing...')  # noqa
+
+# Code destined to generating images with nucleus
+# overlays based on model detections (and GT annotations).
 
 ######################################################################
 # imports
 
 # importing required libraries
-
 import cv2
 import numpy as np
-from os import listdir
 from sys import stdout
 from os.path import join
 from pandas import read_csv
@@ -29,7 +26,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = "generate outlined images\n"
+    description = "add nucleus overlays to images based on model detections (and GT annotations)"
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
@@ -52,7 +49,15 @@ def get_args_dict() -> dict:
     parser.add_argument('-d', '--detection_file',
                         dest='detection_file',
                         required=True,
-                        help='defines path to file containing detection info')
+                        help='defines path to file containing model detections')
+
+    # gt file param
+    gt_help = 'defines path to file containing ground-truth annotations.\n'
+    gt_help += 'if none is passed, adds only model detections.'
+    parser.add_argument('-g', '--ground-truth-file',
+                        dest='ground_truth_file',
+                        required=False,
+                        help=gt_help)
 
     # output folder param
     parser.add_argument('-o', '--output-folder',
