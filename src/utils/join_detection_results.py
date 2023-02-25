@@ -1,13 +1,12 @@
 # join detection results module
 
-# given a path to a folder containing detection files
-# (normal and round) joins them into a single file.
+# given a path to a folder containing model detection files
+# (multiple det_*class_name*.txt) joins them into a single file.
 
 ######################################################################
 # imports
 
 from os import listdir
-from sys import stdout
 from os.path import join
 from pandas import concat
 from pandas import read_csv
@@ -53,10 +52,8 @@ def get_args_dict() -> dict:
     # returning the arguments dictionary
     return args_dict
 
-
 ######################################################################
 # defining auxiliary functions
-
 
 
 def get_detection_files_paths(folder_path: str) -> list:
@@ -109,10 +106,9 @@ def create_dataframe_from_multiple_detection_files(input_folder: str,
     # iterating over detection files
     for detection_file in detection_files:
 
-        # checking whether file is round/normal cells
-        det_class = 'NormalCell'
-        if detection_file.endswith('mitoses.txt'):
-            det_class = 'RoundCell'
+        # checking file class
+        file_name_split = detection_file.split('_')
+        det_class = file_name_split[1]
 
         # opening file
         detection_file_df = read_csv(detection_file,

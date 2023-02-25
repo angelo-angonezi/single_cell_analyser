@@ -7,9 +7,7 @@
 # imports
 
 # importing required libraries
-from os import listdir
 from cv2 import imread
-from sys import stdout
 from math import radians
 from os.path import join
 from pandas import read_csv
@@ -69,29 +67,6 @@ def get_args_dict() -> dict:
 
 ######################################################################
 # defining auxiliary functions
-
-
-def get_specific_files_in_folder(path_to_folder: str,
-                                 extension: str
-                                 ) -> list:
-    """
-    Given a path to a folder, returns a list containing
-    all files in folder that match given extension.
-    :param path_to_folder: String. Represents a path to a folder.
-    :param extension: String. Represents a specific file extension.
-    :return: List[str]. Represents all files that match extension in given folder.
-    """
-    # getting specific files
-    files_in_dir = [file  # getting file
-                    for file  # iterating over files
-                    in listdir(path_to_folder)  # in input folder
-                    if file.endswith(extension)]  # only if file matches given extension
-
-    # sorting list
-    files_in_dir = sorted(files_in_dir)
-
-    # returning list
-    return files_in_dir
 
 
 def convert_single_file(img_name: str,
