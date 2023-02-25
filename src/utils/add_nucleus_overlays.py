@@ -9,12 +9,25 @@ print('initializing...')  # noqa
 # imports
 
 # importing required libraries
+print('importing required libraries...')  # noqa
 import cv2
 import numpy as np
-from sys import stdout
 from os.path import join
+from pandas import concat
 from pandas import read_csv
+from pandas import DataFrame
 from argparse import ArgumentParser
+from src.utils.aux_funcs import spacer
+from src.utils.aux_funcs import flush_or_print
+from src.utils.aux_funcs import get_specific_files_in_folder
+print('all required libraries successfully imported.')  # noqa
+
+#####################################################################
+# defining global variables
+
+COLOR_DICT = {'model': (),
+              'fornma': ()}
+
 
 #####################################################################
 # argument parsing related functions
@@ -34,51 +47,48 @@ def get_args_dict() -> dict:
     # adding arguments to parser
 
     # input folder param
+    input_help = 'defines input folder (folder containing images)'
     parser.add_argument('-i', '--input-folder',
                         dest='input_folder',
                         required=True,
-                        help='defines input folder (folder containing images)')
+                        help=input_help)
 
     # image extension param
+    extension_help = 'defines extension (.tif, .png, .jpg) of images in input folder'
     parser.add_argument('-x', '--image-extension',
                         dest='image_extension',
                         required=True,
-                        help='defines extension (.tif, .png, .jpg) of images in input folder')
+                        help=extension_help)
 
     # detection file param
+    detection_help = 'defines path to file containing model detections'
     parser.add_argument('-d', '--detection_file',
                         dest='detection_file',
                         required=True,
-                        help='defines path to file containing model detections')
+                        help=detection_help)
 
     # gt file param
-    gt_help = 'defines path to file containing ground-truth annotations.\n'
-    gt_help += 'if none is passed, adds only model detections.'
+    gt_help = 'defines path to file containing ground-truth annotations '
+    gt_help += '(if none is passed, adds only model detections)'
     parser.add_argument('-g', '--ground-truth-file',
                         dest='ground_truth_file',
                         required=False,
                         help=gt_help)
 
     # output folder param
+    output_help = 'defines output folder (folder that will contain outlined images)'
     parser.add_argument('-o', '--output-folder',
                         dest='output_folder',
                         required=True,
-                        help='defines output folder (folder that will contain outlined images)')
+                        help=output_help)
 
-    # output folder param
+    # detection threshold param
+    threshold_help = 'defines threshold to be applied (filters detections OBBs based on detection threshold)'
     parser.add_argument('-t', '--detection-threshold',
                         dest='detection_threshold',
                         required=False,
                         default=0.6,
-                        help='defines threshold to be applied (filters detections OBBs based on detection threshold)')
-
-    # centroid option param
-    parser.add_argument('-C', '--centroid',
-                        dest='centroid_flag',
-                        action='store_true',
-                        required=False,
-                        default=False,
-                        help='defines whether to draw outline (default) or centroid (if current flag is passed)')
+                        help=threshold_help)
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -88,30 +98,6 @@ def get_args_dict() -> dict:
 
 ######################################################################
 # defining auxiliary functions
-
-
-def flush_string(string: str) -> None:
-    """
-    Given a string, writes and flushes it in the console using
-    sys library, and resets cursor to the start of the line.
-    (writes N backspaces at the end of line, where N = len(string)).
-    :param string: String. Represents a message to be written in the console.
-    :return: None.
-    """
-    # getting string length
-    string_len = len(string)
-
-    # creating backspace line
-    backspace_line = '\b' * string_len
-
-    # writing string
-    stdout.write(string)
-
-    # flushing console
-    stdout.flush()
-
-    # resetting cursor to start of the line
-    stdout.write(backspace_line)
 
 
 def draw_rectangle(img,
@@ -159,13 +145,130 @@ def draw_circle(img,
     cv2.circle(img, (cx, cy), radius, color, thickness)
 
 
-def generate_outlined_images(input_folder: str,
-                             image_extension: str,
-                             detection_file_path: str,
-                             output_folder: str,
-                             detection_threshold: float,
-                             centroid_flag: bool
-                             ) -> None:
+def get_merged_detection_annotation_df(detections_df_path: str,
+                                       annotations_df_path: str or None
+                                       ) -> DataFrame:
+    """
+    Given a path to detections df and annotations df,
+    returns merged df, containing new column "evaluator",
+    representing detection/annotation info.
+    :param detections_df_path: String. Represents a path to a file.
+    :param annotations_df_path: String. Represents a path to a file.
+    :return: DataFrame. Represents merged detection/annotation data.
+    """
+    # defining placeholder value for dfs_list
+    dfs_list = []
+
+    # reading detections file
+    print('reading detections file...')
+    detections_df = read_csv(detections_df_path)
+
+    # adding evaluator constant column
+    detections_df['evaluator'] = 'model'
+
+    # adding detections df to dfs_list
+    dfs_list.append(detections_df)
+
+    # checking ground_truth_file_path
+    if annotations_df_path is not None:
+
+        # reading gt file
+        print('reading ground-truth file...')
+        ground_truth_df = read_csv(annotations_df_path)
+
+        # adding evaluator constant column
+        ground_truth_df['evaluator'] = 'fornma'
+
+        # adding annotations df to dfs_list
+        dfs_list.append(ground_truth_df)
+
+    # concatenating dfs in dfs_list
+    merged_df = concat(dfs_list)
+
+    # returning merged df
+    return merged_df
+
+
+def add_overlays_to_single_image(image_name: str,
+                                 image_path: str,
+                                 merged_df: DataFrame,
+                                 detection_threshold: float,
+                                 output_path: str,
+                                 color_dict: dict
+                                 ) -> None:
+    """
+    Given an image name and path, and a merged
+    detections/annotations data frame, save image
+    with overlays in given output path.
+    :param image_name: String. Represents an image name.
+    :param image_path: String. Represents a file path.
+    :param merged_df: DataFrame. Represents detections/annotations data.
+    :param detection_threshold: Float. Represents detection threshold to be applied as filter.
+    :param output_path: String. Represents a file path.
+    :param color_dict: Dictionary. Represents colors to be used in overlays.
+    :return: None.
+    """
+    # getting image data from df
+    current_image_df = merged_df[merged_df['img_file_name'] == image_name]
+
+    # opening image
+    open_img = cv2.imread(image_path)
+    open_img = cv2.cvtColor(open_img, cv2.COLOR_BGR2RGB)
+
+    # getting df rows
+    df_rows = current_image_df.iterrows()
+
+    # iterating over df_rows
+    for row in df_rows:
+
+        # getting current row bounding box info
+        current_detection_threshold = row['detection_threshold']
+        cx = row['cx']
+        cy = row['cy']
+        width = row['width']
+        height = row['height']
+        angle = row['angle']
+        det_class = row['class']
+        evaluator = row['evaluator']
+
+        # adding threshold limit
+        if current_detection_threshold < detection_threshold:
+
+            # skipping if current threshold is filtered
+            continue
+
+        # defining color for overlay
+        overlay_color = color_dict[evaluator]
+
+
+        else:
+
+            # adding rectangle overlay
+            draw_rectangle(img=open_img,
+                           cx=cx,
+                           cy=cy,
+                           width=width,
+                           height=height,
+                           angle=angle,
+                           color=color)
+
+        # saving image in output folder
+        output_name = f'{name}_outlined.png'
+        output_path = join(output_folder, output_name)
+        open_img = cv2.cvtColor(open_img, cv2.COLOR_RGB2BGR)
+        cv2.imwrite(output_path, open_img)
+
+
+
+
+def add_overlays_to_multiple_images(input_folder: str,
+                                    image_extension: str,
+                                    detection_file_path: str,
+                                    ground_truth_file_path: str or None,
+                                    output_folder: str,
+                                    detection_threshold: float,
+                                    color_dict: dict
+                                    ) -> None:
     """
     Given a path to a folder containing images,
     a path to a file containing detection info from
@@ -176,105 +279,46 @@ def generate_outlined_images(input_folder: str,
     :param input_folder: String. Represents a folder path.
     :param image_extension: String. Represents image extension.
     :param detection_file_path: String. Represents a file path.
+    :param ground_truth_file_path: String. Represents a file path.
     :param output_folder: String. Represents a folder path.
     :param detection_threshold: Float. Represents detection threshold to be applied as filter.
-    :param centroid_flag: Boolean. Represents a True/False flag.
+    :param color_dict: Dictionary. Represents colors to be used in overlays.
     :return: None.
     """
-    # printing execution message
-    print('reading detection file...')
+    # getting merged detections df
+    merged_df = get_merged_detection_annotation_df(detections_df_path=detection_file_path,
+                                                   annotations_df_path=ground_truth_file_path)
 
-    # reading detections file
-    detections_df = read_csv(detection_file_path)
+    # getting images in input folder
+    images = get_specific_files_in_folder(path_to_folder=input_folder,
+                                          extension=image_extension)
+    images_num = len(images)
+    images_names = [image_name.replace(image_extension, '')
+                    for image_name
+                    in images]
 
-    # grouping detections by image name
-    df_grouped_by_img_name = detections_df.groupby(['img_file_name'])
-
-    # printing execution message
-    groups_num = len(df_grouped_by_img_name)
-    f_string = f'detection info found for {groups_num} images'
-    print(f_string)
-
-    # iterating over grouped detections
-    for img_index, (name, img_name_group) in enumerate(df_grouped_by_img_name, 1):
-
-        # getting image path
-        image_name = f'{name}{image_extension}'
-        image_path = join(input_folder, image_name)
+    # iterating over images_names
+    for image_index, image_name in enumerate(images_names, 1):
 
         # printing execution message
-        percentage_progress = img_index * 100 / groups_num
-        round_percentage_progress = round(percentage_progress)
-        f_string = f'adding overlays to image {img_index} of {groups_num}'
-        f_string += f' ({round_percentage_progress}%)'
+        progress_ratio = image_index / images_num
+        progress_percentage = progress_ratio * 100
+        progress_percentage_round = round(progress_percentage)
+        progress_string = f'adding overlays to image {image_index} of {images_num} ({progress_percentage_round}%)'
+        flush_or_print(string=progress_string,
+                       index=image_index,
+                       total=images_num)
 
-        if img_index == groups_num:
-            print(f_string)
-        else:
-            flush_string(f_string)
+        # getting image path
+        image_name = f'{image_name}{image_extension}'
+        image_path = join(input_folder, image_name)
 
-        # opening image
-        open_img = cv2.imread(image_path)
-        open_img = cv2.cvtColor(open_img, cv2.COLOR_BGR2RGB)
+        # getting current image detections/annotations
+        current_image_detections =
 
-        # iterating over detections
-        for detection_index, detection in img_name_group.iterrows():
 
-            # getting current detection bounding box info
-            current_detection_threshold = detection['detection_threshold']
-            cx = detection['cx']
-            cy = detection['cy']
-            width = detection['width']
-            height = detection['height']
-            angle = detection['angle']
-            det_class = detection['class']
 
-            # adding threshold limit
-            if current_detection_threshold < detection_threshold:
-                continue
 
-            # defining color for outline
-            color = (0, 0, 0)
-            if det_class == 'normal':
-                if detection_threshold < 0.3:
-                    color = (20, 30, 250)  # dark blue
-                elif 0.3 <= detection_threshold < 0.6:
-                    color = (40, 230, 230)  # cyan
-                elif detection_threshold >= 0.6:
-                    color = (40, 230, 20)  # green
-            elif det_class == 'round':
-                if detection_threshold < 0.3:
-                    color = (250, 5, 5)  # red
-                elif 0.3 <= detection_threshold < 0.6:
-                    color = (250, 140, 20)  # orange
-                elif detection_threshold >= 0.6:
-                    color = (240, 230, 20)  # yellow
-
-            # checking centroid flag
-            if centroid_flag:
-
-                # adding centroid overlay
-                draw_circle(img=open_img,
-                            cx=cx,
-                            cy=cy,
-                            color=color)
-
-            else:
-
-                # adding rectangle overlay
-                draw_rectangle(img=open_img,
-                               cx=cx,
-                               cy=cy,
-                               width=width,
-                               height=height,
-                               angle=angle,
-                               color=color)
-
-        # saving image in output folder
-        output_name = f'{name}_outlined.png'
-        output_path = join(output_folder, output_name)
-        open_img = cv2.cvtColor(open_img, cv2.COLOR_RGB2BGR)
-        cv2.imwrite(output_path, open_img)
 
     # printing execution message
     f_string = f'overlays added to all {groups_num} images!'
@@ -298,6 +342,9 @@ def main():
     # getting detection file path
     detection_file = args_dict['detection_file']
 
+    # getting ground-truth file path
+    ground_truth_file = args_dict['ground_truth_file']
+
     # getting output folder
     output_folder = args_dict['output_folder']
 
@@ -305,30 +352,28 @@ def main():
     detection_threshold = args_dict['detection_threshold']
     detection_threshold = float(detection_threshold)
 
-    # getting centroid flag
-    centroid_flag = args_dict['centroid_flag']
-
     # printing execution parameters
-    spacer = '_' * 50
-    print(spacer)
     f_string = f'--Execution parameters--\n'
     f_string += f'input folder: {input_folder}\n'
     f_string += f'image extension: {image_extension}\n'
     f_string += f'detection file: {detection_file}\n'
+    f_string += f'ground-truth file: {ground_truth_file}\n'
     f_string += f'output folder: {output_folder}\n'
     f_string += f'detection threshold: {detection_threshold}\n'
     f_string += f'overlay: {"centroid" if centroid_flag else "rectangle"}'
+    spacer()
     print(f_string)
-    print(spacer)
-    input('press "enter" to continue')
+    spacer()
+    input('press "Enter" to continue')
 
     # running generate_outlined_images function
-    generate_outlined_images(input_folder=input_folder,
-                             image_extension=image_extension,
-                             detection_file_path=detection_file,
-                             output_folder=output_folder,
-                             detection_threshold=detection_threshold,
-                             centroid_flag=centroid_flag)
+    add_overlays_to_multiple_images(input_folder=input_folder,
+                                    image_extension=image_extension,
+                                    detection_file_path=detection_file,
+                                    ground_truth_file_path=ground_truth_file,
+                                    output_folder=output_folder,
+                                    detection_threshold=detection_threshold,
+                                    color_dict=COLOR_DICT)
 
 ######################################################################
 # running main function
