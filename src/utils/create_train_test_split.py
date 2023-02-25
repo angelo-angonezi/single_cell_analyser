@@ -6,10 +6,10 @@ print('initializing...')  # noqa
 # split, based on annotated data.
 
 ######################################################################
-# importing required libraries
+# imports
 
+# importing required libraries
 print('importing required libraries...')  # noqa
-from time import sleep
 from os import listdir
 from os.path import join
 from random import sample
@@ -20,7 +20,6 @@ from src.utils.aux_funcs import create_folder
 from src.utils.aux_funcs import copy_multiple_files
 from src.utils.aux_funcs import create_subfolders_in_folder
 print('all required libraries successfully imported.')  # noqa
-sleep(0.8)
 
 ######################################################################
 # defining global parameters
@@ -286,7 +285,7 @@ def create_train_test_split(images_folder_path: str,
 
 def main():
     """
-    Runs main code.
+    Gets arguments from cli and runs main code.
     """
     # getting data from Argument Parser
     args_dict = get_args_dict()

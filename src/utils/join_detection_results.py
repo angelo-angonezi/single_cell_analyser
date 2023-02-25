@@ -1,19 +1,25 @@
 # join detection results module
 
+print('initializing...')  # noqa
+
 # given a path to a folder containing model detection files
 # (multiple det_*class_name*.txt) joins them into a single file.
 
 ######################################################################
 # imports
 
-from os import listdir
+# importing required libraries
+print('importing required libraries...')  # noqa
 from os.path import join
 from pandas import concat
 from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
-from os.path import split as os_split
+from src.utils.aux_funcs import spacer
+from pandas.errors import EmptyDataError
 from src.utils.aux_funcs import flush_or_print
+from src.utils.aux_funcs import get_specific_files_in_folder
+print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
 # argument parsing related functions
@@ -56,64 +62,53 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_detection_files_paths(folder_path: str) -> list:
-    """
-    Given a path to a folder containing detection files,
-    returns sorted paths for detection files (csvs).
-    :param folder_path: String. Represents a path to a folder.
-    :return: List. Represents detection files' paths.
-    """
-    # getting detection files in folder (only csv files)
-    detection_files = [join(folder_path, file)    # getting file path
-                       for file                   # iterating over files
-                       in listdir(folder_path)    # in input directory
-                       if file.endswith('.txt')]  # if file matches extension ".txt"
-
-    # sorting paths
-    sorted(detection_files)
-
-    # returning files paths
-    return detection_files
-
-
-def create_dataframe_from_multiple_detection_files(input_folder: str,
-                                                   output_path: str
-                                                   ) -> None:
+def create_dataframe_from_multiple_detection_files(input_folder: str) -> DataFrame:
     """
     Given a path to a folder containing multiple detection files,
     saves an ordered DataFrame in which each row corresponds to a
     single detection, adding a new column corresponding
     to detection class.
     :param input_folder: String. Represents a path to a folder.
-    :param output_path: String. Represents a path to an output file.
     :return: DataFrame. Represents multiple cell detections info.
     """
-    # printing execution message
-    print('creating main dataframe...')
-
     # defining placeholder value for dfs_list
     dfs_list = []
 
-    # defining column names
-    column_names = []
-
     # getting detection files in input folder
-    detection_files = get_detection_files_paths(folder_path=input_folder)
-
-    # printing execution message
-    print('adding detections to dataframe...')
+    print('getting detection files in input folder...')
+    detection_files = get_specific_files_in_folder(path_to_folder=input_folder,
+                                                   extension='.txt')
 
     # iterating over detection files
     for detection_file in detection_files:
+
+        # printing execution message
+        f_string = f'getting detections from file "{detection_file}"...'
+        print(f_string)
 
         # checking file class
         file_name_split = detection_file.split('_')
         det_class = file_name_split[1]
 
+        # getting file path
+        file_path = join(input_folder,
+                         detection_file)
+
         # opening file
-        detection_file_df = read_csv(detection_file,
-                                     sep=' ',
-                                     header=None)
+        try:
+            detection_file_df = read_csv(file_path,
+                                         sep=' ',
+                                         header=None)
+
+        # if file is empty
+        except EmptyDataError:
+
+            # printing execution message
+            f_string = f'No detections found in "{detection_file}" file. Skipping to next file...'
+            print(f_string)
+
+            # skipping current file
+            continue
 
         # getting rows in input df
         rows = detection_file_df.iterrows()
@@ -163,44 +158,75 @@ def create_dataframe_from_multiple_detection_files(input_folder: str,
             dfs_list.append(current_row_df)
 
     # concatenating dfs in dfs_list
+    print('assembling joined dataframe...')
     final_df = concat(dfs_list,
                       ignore_index=True)
 
     # sorting final dataframe
+    print('sorting joined dataframe...')
     sorted_df = final_df.sort_values(['img_file_name'])
 
+    # returning sorted_df
+    return sorted_df
+
+
+def save_joined_dataframe(joined_df: DataFrame,
+                          output_path: str
+                          ) -> None:
+    """
+    Given a joined detections data frame, and a
+    path to an output csv file, saves df in given
+    output.
+    :param joined_df: DataFrame. Represents joined detections df.
+    :param output_path: String. Represents a path to an output file.
+    :return: None.
+    """
     # printing execution message
     print('saving dataframe...')
 
     # saving dataframe to output path
-    sorted_df.to_csv(output_path,
+    joined_df.to_csv(output_path,
                      index=False)
 
     # printing execution message
-    print(f'dataframe saved at "{output_path}"')
+    print(f'joined dataframe saved at "{output_path}"')
 
 ######################################################################
 # defining main function
 
 
 def main():
-    """Runs main code."""
+    """
+    Gets arguments from cli and runs main code.
+    """
     # getting args dict
     args_dict = get_args_dict()
 
     # getting input folder
     input_folder = args_dict['input_folder']
-    print(input_folder)
 
-    # getting output folder
-    output_name = os_split(input_folder)[-1]
-    print(output_name)
-    output_name = f'{output_name}_detections.csv'
-    output_path = join(input_folder, output_name)
+    # getting output path
+    output_path = args_dict['output_path']
 
-    # running create dataframe function
-    create_dataframe_from_multiple_detection_files(input_folder=input_folder,
-                                                   output_path=output_path)
+    # printing execution parameters
+    execution_parameters_str = '---Execution Parameters---\n'
+    execution_parameters_str += f'input_folder: {input_folder}\n'
+    execution_parameters_str += f'output_path: {output_path}'
+    spacer()
+    print(execution_parameters_str)
+    spacer()
+
+    # waiting user input
+    i_string = f'Press "Enter" to continue'
+    input(i_string)
+    spacer()
+
+    # creating joined data frame
+    joined_df = create_dataframe_from_multiple_detection_files(input_folder=input_folder)
+
+    # saving joined data frame
+    save_joined_dataframe(joined_df=joined_df,
+                          output_path=output_path)
 
 ######################################################################
 # running main function
