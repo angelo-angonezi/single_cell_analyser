@@ -216,7 +216,7 @@ def add_single_overlay(open_img: ndarray,
                 det_class,
                 (int(cx), int(cy)),
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.02,
+                0.0001,  # TODO: change this once we got more classes and think of better way to display class info
                 overlay_color,
                 2)
 
