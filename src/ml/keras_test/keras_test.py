@@ -1,5 +1,4 @@
 print('importing required libraries...')  # noqa
-import PIL
 import os.path
 import numpy as np
 import pandas as pd
