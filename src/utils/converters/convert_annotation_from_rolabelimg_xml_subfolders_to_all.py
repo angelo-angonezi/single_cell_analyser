@@ -187,7 +187,6 @@ def convert_files_in_multiple_dirs(images_folder_path: str,
                                     alpr_folder_path=alpr_folder_path,
                                     dota_folder_path=dota_folder_path,
                                     pascal_folder_path=pascal_folder_path)
-        exit()
 
     # printing execution message
     f_string = 'all annotation files converted!'
