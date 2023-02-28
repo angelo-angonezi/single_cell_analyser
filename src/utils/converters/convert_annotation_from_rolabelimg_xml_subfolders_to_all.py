@@ -8,6 +8,7 @@
 
 # importing required libraries
 from os import system
+from os import getcwd
 from os import listdir
 from os.path import join
 from os.path import isdir
@@ -17,9 +18,10 @@ from src.utils.aux_funcs import spacer
 #####################################################################
 # defining global parameters
 
-PATH_TO_CONVERTER_ROLABELIMG_TO_ALPR = 'Z:\\pycharm_projects\\single_cell_analyser\\src\\utils\\converters\\convert_annotation_from_rolabelimg_xml_to_alpr.py'
-PATH_TO_CONVERTER_ALPR_TO_DOTA = 'Z:\\pycharm_projects\\RotationDetection\\dataloader\\dataset\\UFRGS_CELL\\convert_ann2dota.py'
-PATH_TO_CONVERTER_DOTA_TO_PASCAL = 'Z:\\pycharm_projects\\RotationDetection\\dataloader\\dataset\\UFRGS_CELL\\txt2xml.py'
+PATH_TO_CONVERTER_ROLABELIMG_TO_ALPR_DIR = '/home/angelo/dados/pycharm_projects/single_cell_analyser/'
+PATH_TO_CONVERTER_ROLABELIMG_TO_ALPR = 'src.utils.converters.convert_annotation_from_rolabelimg_xml_to_alpr'
+PATH_TO_CONVERTER_ALPR_TO_DOTA = '/home/angelo/dados/pycharm_projects/RotationDetection/dataloader/dataset/UFRGS_CELL/convert_ann2dota.py'
+PATH_TO_CONVERTER_DOTA_TO_PASCAL = '/home/angelo/dados/pycharm_projects/RotationDetection/dataloader/dataset/UFRGS_CELL/txt2xml.py'
 
 #####################################################################
 # argument parsing related functions
@@ -134,7 +136,12 @@ def convert_files_in_single_dir(subfolder: str,
     subfolder_path_pascal = join(pascal_folder_path, subfolder)
 
     # creating rolabelimg to alpr command string
-    rolabelimg_to_alpr_command = f"python3 '{PATH_TO_CONVERTER_ROLABELIMG_TO_ALPR}' -i '{subfolder_path_rolabelimg}' -o '{subfolder_path_alpr}'"
+    current_dir = getcwd()
+    rolabelimg_to_alpr_command = f'cd {PATH_TO_CONVERTER_ROLABELIMG_TO_ALPR_DIR}'
+    rolabelimg_to_alpr_command += '&&'
+    rolabelimg_to_alpr_command += f"python3 -m '{PATH_TO_CONVERTER_ROLABELIMG_TO_ALPR}' -i '{subfolder_path_rolabelimg}' -o '{subfolder_path_alpr}'"
+    rolabelimg_to_alpr_command += '&&'
+    rolabelimg_to_alpr_command += f'cd {current_dir}'
 
     # creating alpr to dota command string
     alpr_to_dota_command = f"python3 '{PATH_TO_CONVERTER_ALPR_TO_DOTA}' '{images_folder_path}' '{subfolder_path_alpr}' '{subfolder_path_dota}'"
