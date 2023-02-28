@@ -187,7 +187,7 @@ def convert_multiple_files(images_folder_path: str,
     for img_index, (img_name, img_group) in enumerate(img_groups, 1):
 
         # getting image path
-        image_name_w_extension = f'{img_name}.tif'
+        image_name_w_extension = f'{img_name}.jpg'
         image_path = join(images_folder_path,
                           image_name_w_extension)
 
