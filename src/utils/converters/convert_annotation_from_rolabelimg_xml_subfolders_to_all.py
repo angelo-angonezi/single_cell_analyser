@@ -212,7 +212,7 @@ def main():
     f_string += f'rolabelimg folder: {rolabelimg_folder}\n'
     f_string += f'alpr folder: {alpr_folder}\n'
     f_string += f'dota folder: {dota_folder}\n'
-    f_string += f'lucas xmls folder: {pascal_folder}'
+    f_string += f'pascal folder: {pascal_folder}'
     spacer()
     print(f_string)
     spacer()
