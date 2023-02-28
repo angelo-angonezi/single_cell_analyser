@@ -164,7 +164,7 @@ def draw_rectangle(open_img: ndarray,
                          angle))
 
     # converting corners format
-    box = np.int0(box)
+    box = np.intp(box)
 
     # drawing lines
     cv2.drawContours(open_img,
