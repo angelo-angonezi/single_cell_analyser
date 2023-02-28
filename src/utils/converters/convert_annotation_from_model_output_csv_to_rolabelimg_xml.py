@@ -198,8 +198,8 @@ def convert_multiple_files(images_folder_path: str,
         try:
             img_size = current_img.shape
         except AttributeError:
-            f_string = f'Unable to get image "{image_path}"'
-            f_string += '.Using 1280x720 as default img dimensions.'
+            f_string = f'Unable to get image "{image_path}". '
+            f_string += 'Using 1280x720 as default img dimensions.'
             print(f_string)
             img_size = (720, 1280, 3)
 
@@ -227,7 +227,6 @@ def convert_multiple_files(images_folder_path: str,
 
     # printing execution message
     f_string = f'all {imgs_num} annotation files generated!'
-    print('')
     print(f_string)
 
 ######################################################################
