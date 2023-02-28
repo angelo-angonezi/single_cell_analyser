@@ -95,6 +95,9 @@ def run_command(command_string: str) -> None:
     run in console, executes command using os.system
     function.
     """
+    # adding spacer
+    spacer()
+
     # printing execution message
     f_string = f'running command "{command_string}"...'
     print(f_string)
