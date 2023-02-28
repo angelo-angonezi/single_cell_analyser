@@ -67,7 +67,7 @@ def get_args_dict() -> dict:
     # image extension param
     extension_help = 'defines extension (.tif, .png, .jpg) of images in input folder'
     parser.add_argument('-x', '--image-extension',
-                        dest='image_extension',
+                        dest='images_extension',
                         required=True,
                         help=extension_help)
 
@@ -328,7 +328,7 @@ def add_overlays_to_single_image(image_name: str,
 
 
 def add_overlays_to_multiple_images(input_folder: str,
-                                    image_extension: str,
+                                    images_extension: str,
                                     detection_file_path: str,
                                     ground_truth_file_path: str or None,
                                     output_folder: str,
@@ -343,7 +343,7 @@ def add_overlays_to_multiple_images(input_folder: str,
     flag is False, or centroids, if flag is True), saving
     new outlined images into output folder.
     :param input_folder: String. Represents a folder path.
-    :param image_extension: String. Represents image extension.
+    :param images_extension: String. Represents image extension.
     :param detection_file_path: String. Represents a file path.
     :param ground_truth_file_path: String. Represents a file path.
     :param output_folder: String. Represents a folder path.
@@ -357,9 +357,9 @@ def add_overlays_to_multiple_images(input_folder: str,
 
     # getting images in input folder
     images = get_specific_files_in_folder(path_to_folder=input_folder,
-                                          extension=image_extension)
+                                          extension=images_extension)
     images_num = len(images)
-    images_names = [image_name.replace(image_extension, '')
+    images_names = [image_name.replace(images_extension, '')
                     for image_name
                     in images]
 
@@ -376,7 +376,7 @@ def add_overlays_to_multiple_images(input_folder: str,
                        total=images_num)
 
         # getting image path
-        image_name_w_extension = f'{image_name}{image_extension}'
+        image_name_w_extension = f'{image_name}{images_extension}'
         image_path = join(input_folder, image_name_w_extension)
 
         # getting output path
@@ -408,7 +408,7 @@ def main():
     input_folder = args_dict['input_folder']
 
     # getting image extension
-    image_extension = args_dict['image_extension']
+    images_extension = args_dict['images_extension']
 
     # getting detection file path
     detection_file = args_dict['detection_file']
@@ -426,7 +426,7 @@ def main():
     # printing execution parameters
     f_string = f'--Execution parameters--\n'
     f_string += f'input folder: {input_folder}\n'
-    f_string += f'image extension: {image_extension}\n'
+    f_string += f'image extension: {images_extension}\n'
     f_string += f'detection file: {detection_file}\n'
     f_string += f'ground-truth file: {ground_truth_file}\n'
     f_string += f'output folder: {output_folder}\n'
@@ -438,7 +438,7 @@ def main():
 
     # running generate_outlined_images function
     add_overlays_to_multiple_images(input_folder=input_folder,
-                                    image_extension=image_extension,
+                                    images_extension=images_extension,
                                     detection_file_path=detection_file,
                                     ground_truth_file_path=ground_truth_file,
                                     output_folder=output_folder,
