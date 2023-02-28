@@ -10,18 +10,27 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-import cv2
-import numpy as np
+from numpy import intp
+from cv2 import imread
+from cv2 import imwrite
+from cv2 import putText
+from cv2 import cvtColor
 from os.path import join
 from numpy import ndarray
 from pandas import concat
 from pandas import Series
+from cv2 import boxPoints
 from pandas import read_csv
 from pandas import DataFrame
+from cv2 import drawContours
+from cv2 import COLOR_BGR2RGB
+from cv2 import COLOR_RGB2BGR
 from argparse import ArgumentParser
+from cv2 import FONT_HERSHEY_SIMPLEX
 from src.utils.aux_funcs import spacer
 from src.utils.aux_funcs import flush_or_print
 from src.utils.aux_funcs import get_specific_files_in_folder
+
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -159,19 +168,19 @@ def draw_rectangle(open_img: ndarray,
     returns image with OBB overlay.
     """
     # get the corner points
-    box = cv2.boxPoints(((cx, cy),
-                         (width, height),
-                         angle))
+    box = boxPoints(((cx, cy),
+                     (width, height),
+                     angle))
 
     # converting corners format
-    box = np.intp(box)
+    box = intp(box)
 
     # drawing lines
-    cv2.drawContours(open_img,
-                     [box],
-                     -1,
-                     color,
-                     2)
+    drawContours(open_img,
+                 [box],
+                 -1,
+                 color,
+                 2)
 
     # returning modified image
     return open_img
@@ -212,13 +221,13 @@ def add_single_overlay(open_img: ndarray,
                    color=overlay_color)
 
     # adding class text
-    cv2.putText(open_img,
-                det_class,
-                (int(cx), int(cy)),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.0001,  # TODO: change this once we got more classes and think of better way to display class info
-                overlay_color,
-                2)
+    putText(open_img,
+            det_class,
+            (int(cx), int(cy)),
+            FONT_HERSHEY_SIMPLEX,
+            0.0001,  # TODO: change this once we got more classes and think of better way to display class info
+            overlay_color,
+            2)
 
 
 def add_multiple_overlays(open_img: ndarray,
@@ -265,8 +274,8 @@ def add_overlays_to_single_image(image_name: str,
     :return: None.
     """
     # opening image
-    open_img = cv2.imread(image_path)
-    open_img = cv2.cvtColor(open_img, cv2.COLOR_BGR2RGB)
+    open_img = imread(image_path)
+    open_img = cvtColor(open_img, COLOR_BGR2RGB)
 
     # getting image data from df
     current_image_df = merged_df[merged_df['img_file_name'] == image_name]
@@ -286,27 +295,27 @@ def add_overlays_to_single_image(image_name: str,
     threshold_text = f'DT: {detection_threshold}'
 
     # adding base texts to image corner
-    cv2.putText(open_img,
-                model_text,
-                (10, 30),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.9,
-                color_dict['model'],
-                2)
-    cv2.putText(open_img,
-                fornma_text,
-                (10, 60),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.9,
-                color_dict['fornma'],
-                2)
-    cv2.putText(open_img,
-                threshold_text,
-                (10, 90),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.9,
-                color_dict['DT'],
-                2)
+    putText(open_img,
+            model_text,
+            (10, 30),
+            FONT_HERSHEY_SIMPLEX,
+            0.9,
+            color_dict['model'],
+            2)
+    putText(open_img,
+            fornma_text,
+            (10, 60),
+            FONT_HERSHEY_SIMPLEX,
+            0.9,
+            color_dict['fornma'],
+            2)
+    putText(open_img,
+            threshold_text,
+            (10, 90),
+            FONT_HERSHEY_SIMPLEX,
+            0.9,
+            color_dict['DT'],
+            2)
 
     # adding overlays to image
     add_multiple_overlays(open_img=open_img,
@@ -314,8 +323,8 @@ def add_overlays_to_single_image(image_name: str,
                           color_dict=color_dict)
 
     # saving image in output path
-    open_img = cv2.cvtColor(open_img, cv2.COLOR_RGB2BGR)
-    cv2.imwrite(output_path, open_img)
+    open_img = cvtColor(open_img, COLOR_RGB2BGR)
+    imwrite(output_path, open_img)
 
 
 def add_overlays_to_multiple_images(input_folder: str,
