@@ -138,9 +138,9 @@ def convert_files_in_single_dir(subfolder: str,
     # creating rolabelimg to alpr command string
     current_dir = getcwd()
     rolabelimg_to_alpr_command = f'cd {PATH_TO_CONVERTER_ROLABELIMG_TO_ALPR_DIR}'
-    rolabelimg_to_alpr_command += '&&'
+    rolabelimg_to_alpr_command += ' && '
     rolabelimg_to_alpr_command += f"python3 -m '{PATH_TO_CONVERTER_ROLABELIMG_TO_ALPR}' -i '{subfolder_path_rolabelimg}' -o '{subfolder_path_alpr}'"
-    rolabelimg_to_alpr_command += '&&'
+    rolabelimg_to_alpr_command += ' && '
     rolabelimg_to_alpr_command += f'cd {current_dir}'
 
     # creating alpr to dota command string
