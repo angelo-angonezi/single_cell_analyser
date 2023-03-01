@@ -118,7 +118,7 @@ def plot_prec_rec_curves(df: DataFrame) -> None:
     """
     # renaming hue column
     df_cols = df.columns
-    df_cols = [f.replace('ann2', 'Model')
+    df_cols = [f.replace('ann2', 'modelDT')
                for f
                in df_cols]
     df.columns = df_cols
@@ -132,7 +132,7 @@ def plot_prec_rec_curves(df: DataFrame) -> None:
     lineplot(data=df,
              x='rec',
              y='prec',
-             hue='Model',
+             hue='modelDT',
              hue_order=hue_order)
 
     # setting title/axis names
@@ -154,7 +154,7 @@ def plot_f1_score_curve(df: DataFrame) -> None:
     """
     # renaming hue column
     df_cols = df.columns
-    df_cols = [f.replace('ann2', 'Model')
+    df_cols = [f.replace('ann2', 'modelDT')
                for f
                in df_cols]
     df.columns = df_cols
@@ -168,7 +168,7 @@ def plot_f1_score_curve(df: DataFrame) -> None:
     lineplot(data=df,
              x='th',
              y='f1_score',
-             hue='Model',
+             hue='modelDT',
              hue_order=hue_order)
 
     # setting title/axis names
