@@ -105,13 +105,25 @@ def add_f1_score_column_to_df(df: DataFrame) -> DataFrame:
     return df
 
 
-def get_prec_rec_df(df:DataFrame) -> DataFrame:
+def get_prec_rec_df(df: DataFrame) -> DataFrame:
     """
-
+    Given a detections data frame, returns clean
+    data frame ready to plot precision-recall curves.
     :param df: DataFrame. Represents a detections data frame.
     :return: DataFrame. Represents ready-to-plot detections data frame.
     """
-    pass
+    # defining columns to keep
+    cols_to_keep = ['ann1',
+                    'ann2',
+                    'prec',
+                    'recall']
+
+    # filtering df
+    clean_df = df.filter(items=cols_to_keep,
+                         axis=1)
+
+    # returning clean df
+    return clean_df
 
 
 def plot_prec_rec_curves(df: DataFrame) -> None:
@@ -123,6 +135,34 @@ def plot_prec_rec_curves(df: DataFrame) -> None:
     :return: None.
     """
     pass
+
+
+def analyse_compare_annotations_output(input_file: str,
+                                       output_folder: str
+                                       ) -> None:
+    """
+    Given an input file (compare_annotations.py output),
+    generates precision-recall curves, and saves analysis
+    dfs in given output folder.
+    :param input_file: String. Represents a path to a file.
+    :param output_folder: String. Represents a path to a folder.
+    :return: None.
+    """
+    # reading input file
+    print('reading input df...')
+    input_df = read_csv(input_file)
+
+    # cleaning df from duplicates
+    print('cleaning df from duplicates...')
+    clean_df = clear_duplicates_from_df(df=input_df)
+
+    # getting ready-to-plot df
+    prec_rec_df = get_prec_rec_df(df=clean_df)
+
+    print(prec_rec_df)
+    exit()
+
+
 
 
 ######################################################################
