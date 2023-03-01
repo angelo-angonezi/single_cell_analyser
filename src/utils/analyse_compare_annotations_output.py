@@ -116,11 +116,29 @@ def plot_prec_rec_curves(df: DataFrame) -> None:
     :param df: DataFrame. Represents a detections data frame.
     :return: None.
     """
+    # renaming hue column
+    df_cols = df.columns
+    df_cols = [f.replace('ann2', 'Model')
+               for f
+               in df_cols]
+    df.columns = df_cols
+
+    # defining hue order
+    hue_order = ['model03',
+                 'model05',
+                 'model07']
+
     # plotting data
     lineplot(data=df,
              x='rec',
              y='prec',
-             hue='ann2')
+             hue='Model',
+             hue_order=hue_order)
+
+    # setting title/axis names
+    plt.title('Precision-Recall curves')
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
 
     # showing plot
     plt.show()
@@ -134,11 +152,29 @@ def plot_f1_score_curve(df: DataFrame) -> None:
     :param df: DataFrame. Represents a F1-Score data frame.
     :return: None.
     """
+    # renaming hue column
+    df_cols = df.columns
+    df_cols = [f.replace('ann2', 'Model')
+               for f
+               in df_cols]
+    df.columns = df_cols
+
+    # defining hue order
+    hue_order = ['model03',
+                 'model05',
+                 'model07']
+
     # plotting data
     lineplot(data=df,
              x='th',
              y='f1_score',
-             hue='ann2')
+             hue='Model',
+             hue_order=hue_order)
+
+    # setting title/axis names
+    plt.title('F1-Score curves')
+    plt.xlabel('IoU threshold')
+    plt.ylabel('F1-Score')
 
     # showing plot
     plt.show()
