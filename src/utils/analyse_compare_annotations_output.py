@@ -10,6 +10,8 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
+import pandas as pd
+from os.path import join
 from pandas import read_csv
 from pandas import DataFrame
 from seaborn import lineplot
@@ -17,6 +19,9 @@ from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 from src.utils.aux_funcs import spacer
 print('all required libraries successfully imported.')  # noqa
+
+# next line prevents "SettingWithCopyWarning" pandas warning
+pd.options.mode.chained_assignment = None  # default='warn'
 
 #####################################################################
 # argument parsing related functions
@@ -80,26 +85,27 @@ def clear_duplicates_from_df(df: DataFrame) -> DataFrame:
     return clean_df
 
 
-def get_prec_rec_df(df: DataFrame) -> DataFrame:
+def add_f1_score_column_to_df(df: DataFrame) -> DataFrame:
     """
-    Given a detections data frame, returns clean
-    data frame ready to plot precision-recall curves.
-    :param df: DataFrame. Represents a detections data frame.
-    :return: DataFrame. Represents ready-to-plot detections data frame.
+    Given an annotatorsVSmodels variability output
+    data frame, computes F1-score based on precision
+    and recall columns, returning a new data frame
+    containing F1-scores in new column.
     """
-    # defining columns to keep
-    cols_to_keep = ['ann1',
-                    'ann2',
-                    'th',
-                    'prec',
-                    'rec']
+    # adding precision*recall column to df
+    df['precision_times_recall'] = df['prec'] * df['rec']
 
-    # filtering df
-    clean_df = df.filter(items=cols_to_keep,
-                         axis=1)
+    # adding precision+recall column to df
+    df['precision_plus_recall'] = df['prec'] + df['rec']
 
-    # returning clean df
-    return clean_df
+    # adding div column to df
+    df['div'] = df['precision_times_recall'] / df['precision_plus_recall']
+
+    # adding f1_score column to df
+    df['f1_score'] = 2 * df['div']
+
+    # returning modified df
+    return df
 
 
 def plot_prec_rec_curves(df: DataFrame) -> None:
@@ -114,6 +120,24 @@ def plot_prec_rec_curves(df: DataFrame) -> None:
     lineplot(data=df,
              x='rec',
              y='prec',
+             hue='ann2')
+
+    # showing plot
+    plt.show()
+
+
+def plot_f1_score_curve(df: DataFrame) -> None:
+    """
+    Given a data frame containing F1-Score data,
+    plots line plot of F1-Score by thresholds,
+    coloring by evaluator.
+    :param df: DataFrame. Represents a F1-Score data frame.
+    :return: None.
+    """
+    # plotting data
+    lineplot(data=df,
+             x='th',
+             y='f1_score',
              hue='ann2')
 
     # showing plot
@@ -143,15 +167,28 @@ def analyse_compare_annotations_output(input_file: str,
     print('filtering df for fornmaVSmodels results only...')
     filtered_df = clean_df[clean_df['ann1'] == 'fornma']
 
-    # getting ready-to-plot df
-    print('getting precision-recall data...')
-    prec_rec_df = get_prec_rec_df(df=filtered_df)
+    # adding F1-Scores to df
+    print('adding F1-Scores to df...')
+    f1_score_df = add_f1_score_column_to_df(df=filtered_df)
 
-    print(prec_rec_df)
+    # saving F1-Scores df
+    print('saving F1-Scores df...')
+    f1_score_df_save_path = join(output_folder,
+                                 'f1_scores_df.csv')
+    f1_score_df.to_csv(f1_score_df_save_path,
+                       index=False)
+    print('saved F1-Scores df in output folder.')
 
     # plotting precision-recall curves
     print('plotting precision-recall curves...')
-    plot_prec_rec_curves(df=prec_rec_df)
+    plot_prec_rec_curves(df=f1_score_df)
+
+    # plotting F1-Score curve
+    print('plotting F1-Score curve...')
+    plot_f1_score_curve(df=f1_score_df)
+
+    # printing execution message
+    print('analysis complete.')
 
 ######################################################################
 # defining main function
