@@ -59,6 +59,71 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
+def clear_duplicates_from_df(df: DataFrame) -> DataFrame:
+    """
+    Given annotators and models names' list,
+    and an input data frame, returns data frame
+    filtered so that it does not contain duplicate
+    lines as follows:
+    | ann1   | ann2   | ... | ... |
+    | fornma | fornma | ... | ... |
+    | model    | model    | ... | ... |
+    ...
+    """
+    # defining keep condition
+    keep_condition = (df['ann1'] != df['ann2'])
+
+    # clearing df based on keep condition
+    clean_df = df[keep_condition]
+
+    # returning clean df
+    return clean_df
+
+
+def add_f1_score_column_to_df(df: DataFrame) -> DataFrame:
+    """
+    Given an annotatorsVSmodels variability output
+    data frame, computes F1-score based on precision
+    and recall columns, returning a new data frame
+    containing F1-scores in new column.
+    :param df: DataFrame. Represents a detections data frame.
+    :return: DataFrame. Represents a detections data frame.
+    """
+    # adding precision*recall column to df
+    df['precision_times_recall'] = df['prec'] * df['rec']
+
+    # adding precision+recall column to df
+    df['precision_plus_recall'] = df['prec'] + df['rec']
+
+    # adding div column to df
+    df['div'] = df['precision_times_recall'] / df['precision_plus_recall']
+
+    # adding f1_score column to df
+    df['f1_score'] = 2 * df['div']
+
+    # returning modified df
+    return df
+
+
+def get_prec_rec_df(df:DataFrame) -> DataFrame:
+    """
+
+    :param df: DataFrame. Represents a detections data frame.
+    :return: DataFrame. Represents ready-to-plot detections data frame.
+    """
+    pass
+
+
+def plot_prec_rec_curves(df: DataFrame) -> None:
+    """
+    Given a data frame containing precision and
+    recall data, plots precision-recall curves
+    coloring by evaluator.
+    :param df: DataFrame. Represents a detections data frame.
+    :return: None.
+    """
+    pass
+
 
 ######################################################################
 # defining main function
