@@ -30,7 +30,6 @@ from cv2 import FONT_HERSHEY_SIMPLEX
 from src.utils.aux_funcs import spacer
 from src.utils.aux_funcs import flush_or_print
 from src.utils.aux_funcs import get_specific_files_in_folder
-
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
