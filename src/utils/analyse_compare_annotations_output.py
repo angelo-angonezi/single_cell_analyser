@@ -10,12 +10,12 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-from pandas import concat
 from pandas import read_csv
 from pandas import DataFrame
+from seaborn import lineplot
 from argparse import ArgumentParser
+from matplotlib import pyplot as plt
 from src.utils.aux_funcs import spacer
-from src.utils.aux_funcs import flush_or_print
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -80,31 +80,6 @@ def clear_duplicates_from_df(df: DataFrame) -> DataFrame:
     return clean_df
 
 
-def add_f1_score_column_to_df(df: DataFrame) -> DataFrame:
-    """
-    Given an annotatorsVSmodels variability output
-    data frame, computes F1-score based on precision
-    and recall columns, returning a new data frame
-    containing F1-scores in new column.
-    :param df: DataFrame. Represents a detections data frame.
-    :return: DataFrame. Represents a detections data frame.
-    """
-    # adding precision*recall column to df
-    df['precision_times_recall'] = df['prec'] * df['rec']
-
-    # adding precision+recall column to df
-    df['precision_plus_recall'] = df['prec'] + df['rec']
-
-    # adding div column to df
-    df['div'] = df['precision_times_recall'] / df['precision_plus_recall']
-
-    # adding f1_score column to df
-    df['f1_score'] = 2 * df['div']
-
-    # returning modified df
-    return df
-
-
 def get_prec_rec_df(df: DataFrame) -> DataFrame:
     """
     Given a detections data frame, returns clean
@@ -115,8 +90,9 @@ def get_prec_rec_df(df: DataFrame) -> DataFrame:
     # defining columns to keep
     cols_to_keep = ['ann1',
                     'ann2',
+                    'th',
                     'prec',
-                    'recall']
+                    'rec']
 
     # filtering df
     clean_df = df.filter(items=cols_to_keep,
@@ -134,7 +110,14 @@ def plot_prec_rec_curves(df: DataFrame) -> None:
     :param df: DataFrame. Represents a detections data frame.
     :return: None.
     """
-    pass
+    # plotting data
+    lineplot(data=df,
+             x='rec',
+             y='prec',
+             hue='ann2')
+
+    # showing plot
+    plt.show()
 
 
 def analyse_compare_annotations_output(input_file: str,
@@ -156,14 +139,19 @@ def analyse_compare_annotations_output(input_file: str,
     print('cleaning df from duplicates...')
     clean_df = clear_duplicates_from_df(df=input_df)
 
+    # filtering df for fornmaVSmodels results only
+    print('filtering df for fornmaVSmodels results only...')
+    filtered_df = clean_df[clean_df['ann1'] == 'fornma']
+
     # getting ready-to-plot df
-    prec_rec_df = get_prec_rec_df(df=clean_df)
+    print('getting precision-recall data...')
+    prec_rec_df = get_prec_rec_df(df=filtered_df)
 
     print(prec_rec_df)
-    exit()
 
-
-
+    # plotting precision-recall curves
+    print('plotting precision-recall curves...')
+    plot_prec_rec_curves(df=prec_rec_df)
 
 ######################################################################
 # defining main function
@@ -189,7 +177,9 @@ def main():
     spacer()
     input('press "Enter" to continue')
 
-    # running
+    # running analyse_compare_annotations_output function
+    analyse_compare_annotations_output(input_file=input_file,
+                                       output_folder=output_folder)
 
 ######################################################################
 # running main function
