@@ -135,6 +135,8 @@ def get_obbs_from_df(df: DataFrame) -> list:
     a list of detected OBBs info, in following
     format:
     [(cx, cy, width, height, angle), ...]
+    :param df: DataFrame. Represents detections data frame.
+    :return: List. Represents OBBs in given data frame.
     """
     # getting cx values
     cxs = df['cx']
@@ -244,6 +246,55 @@ def copy_multiple_files(src_folder_path: str,
         # copying file from src to dst folder
         sh_copy(src=src_path,
                 dst=dst_path)
+
+
+def print_execution_parameters(params_dict: dict) -> None:
+    """
+    Given a list of execution parameters,
+    prints given parameters on console,
+    such as:
+    '''
+    --Execution parameters--
+    input_folder: /home/angelo/Desktop/ml_temp/imgs/
+    output_folder: /home/angelo/Desktop/ml_temp/overlays/
+    '''
+    :param params_dict: Dictionary. Represents execution parameters names and values.
+    :return: None.
+    """
+    # defining base params_string
+    params_string = f'--Execution parameters--'
+
+    # iterating over parameters in params_list
+    for dict_element in params_dict.items():
+
+        # getting params key/value
+        param_key, param_value = dict_element
+
+        # adding 'Enter' to params_string
+        params_string += '\n'
+
+        # getting current param string
+        current_param_string = f'{param_key}: {param_value}'
+
+        # appending current param string to params_string
+        params_string += current_param_string
+
+    # printing final params_string
+    spacer()
+    print(params_string)
+    spacer()
+
+
+def enter_to_continue():
+    """
+    Waits for user input ("Enter")
+    and once press, continues to run code.
+    """
+    # defining enter_string
+    enter_string = f'press "Enter" to continue'
+
+    # waiting for user input
+    input(enter_string)
 
 ######################################################################
 # end of current module

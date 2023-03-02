@@ -12,6 +12,8 @@ print('importing required libraries...')  # noqa
 from argparse import ArgumentParser
 from src.utils.aux_funcs import spacer
 from src.utils.aux_funcs import flush_or_print
+from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -34,12 +36,19 @@ def get_args_dict() -> dict:
 
     # adding arguments to parser
 
-    # input file param
-    input_help = 'defines path to input file (imgs_info_file.csv)'
+    # input_file param
+    input_file_help = 'defines path to input file (imgs_info_file.csv)'
     parser.add_argument('-i', '--input-file',
                         dest='input_file',
                         required=True,
-                        help=input_help)
+                        help=input_file_help)
+
+    # output_path param
+    output_path_help = 'defines path to output csv'
+    parser.add_argument('-i', '--output-path',
+                        dest='output_path',
+                        required=True,
+                        help=output_path_help)
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -51,7 +60,14 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def analyse_imgs_info_file(input_file: str) -> None:
+def analyse_imgs_info_file(input_file: str,
+                           output_path: str
+                           ) -> None:
+    """
+    Given a path to an imgs_info_file csv,
+    analyses df based on experimental setups,
+    saving summary file in given output path.
+    """
     pass
 
 ######################################################################
@@ -66,17 +82,18 @@ def main():
     # getting input file
     input_file = args_dict['input_file']
 
+    # getting output path
+    output_path = args_dict['output_path']
+
     # printing execution parameters
-    f_string = f'--Execution parameters--\n'
-    f_string += f'input file: {input_file}'
-    spacer()
-    print(f_string)
-    spacer()
-    input('press "Enter" to continue')
-    spacer()
+    print_execution_parameters(params_dict=args_dict)
+
+    # waiting for user input
+    enter_to_continue()
 
     # running analyse_imgs_info_file function
-    analyse_imgs_info_file(input_file=input_file)
+    analyse_imgs_info_file(input_file=input_file,
+                           output_path=output_path)
 
 ######################################################################
 # running main function

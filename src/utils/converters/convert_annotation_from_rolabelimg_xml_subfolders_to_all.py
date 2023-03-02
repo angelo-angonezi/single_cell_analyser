@@ -14,6 +14,8 @@ from os.path import join
 from os.path import isdir
 from argparse import ArgumentParser
 from src.utils.aux_funcs import spacer
+from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import print_execution_parameters
 
 #####################################################################
 # defining global parameters
@@ -216,20 +218,11 @@ def main():
     # getting lucas xmls folder
     pascal_folder = args_dict['pascal_folder']
 
-    # printing execution message
-    f_string = f'--Execution Parameters--\n'
-    f_string += f'images folder: {images_folder}\n'
-    f_string += f'rolabelimg folder: {rolabelimg_folder}\n'
-    f_string += f'alpr folder: {alpr_folder}\n'
-    f_string += f'dota folder: {dota_folder}\n'
-    f_string += f'pascal folder: {pascal_folder}'
-    spacer()
-    print(f_string)
-    spacer()
+    # printing execution parameters
+    print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    e_string = 'Press "Enter" to continue'
-    input(e_string)
+    enter_to_continue()
 
     # running multiple converter function
     convert_files_in_multiple_dirs(images_folder_path=images_folder,

@@ -18,6 +18,8 @@ from seaborn import lineplot
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 from src.utils.aux_funcs import spacer
+from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
 
 # next line prevents "SettingWithCopyWarning" pandas warning
@@ -246,13 +248,10 @@ def main():
     output_folder = args_dict['output_folder']
 
     # printing execution parameters
-    f_string = f'--Execution parameters--\n'
-    f_string += f'input file: {input_file}\n'
-    f_string += f'output folder: {output_folder}'
-    spacer()
-    print(f_string)
-    spacer()
-    input('press "Enter" to continue')
+    print_execution_parameters(params_dict=args_dict)
+
+    # waiting for user input
+    enter_to_continue()
 
     # running analyse_compare_annotations_output function
     analyse_compare_annotations_output(input_file=input_file,

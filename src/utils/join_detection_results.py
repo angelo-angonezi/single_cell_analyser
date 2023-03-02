@@ -15,9 +15,10 @@ from pandas import concat
 from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
-from src.utils.aux_funcs import spacer
 from pandas.errors import EmptyDataError
 from src.utils.aux_funcs import flush_or_print
+from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
 print('all required libraries successfully imported.')  # noqa
 
@@ -209,17 +210,10 @@ def main():
     output_path = args_dict['output_path']
 
     # printing execution parameters
-    execution_parameters_str = '---Execution Parameters---\n'
-    execution_parameters_str += f'input_folder: {input_folder}\n'
-    execution_parameters_str += f'output_path: {output_path}'
-    spacer()
-    print(execution_parameters_str)
-    spacer()
+    print_execution_parameters(params_dict=args_dict)
 
-    # waiting user input
-    i_string = f'Press "Enter" to continue'
-    input(i_string)
-    spacer()
+    # waiting for user input
+    enter_to_continue()
 
     # creating joined data frame
     joined_df = create_dataframe_from_multiple_detection_files(input_folder=input_folder)

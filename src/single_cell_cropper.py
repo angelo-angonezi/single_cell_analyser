@@ -23,10 +23,11 @@ from pandas import DataFrame
 from numpy import pad as np_pad
 from argparse import ArgumentParser
 from cv2 import resize as cv_resize
-from src.utils.aux_funcs import spacer
 from src.utils.aux_funcs import flush_or_print
 from scipy.ndimage import rotate as scp_rotate
 from src.utils.aux_funcs import get_obbs_from_df
+from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_data_from_consolidated_df
 print('all required libraries successfully imported.')  # noqa
 sleep(0.8)
@@ -521,21 +522,11 @@ def main():
     # getting resize toggle
     resize_toggle = args_dict['resize_toggle']
 
-    # printing execution message
-    execution_parameters_str = '---Execution Parameters---\n'
-    execution_parameters_str += f'input_folder: {input_folder}\n'
-    execution_parameters_str += f'detections_df_path: {detections_df_path}\n'
-    execution_parameters_str += f'output_folder: {output_folder}\n'
-    execution_parameters_str += f'detection_threshold: {detection_threshold}\n'
-    execution_parameters_str += f'resize_toggle: {resize_toggle}'
-    spacer()
-    print(execution_parameters_str)
-    spacer()
+    # printing execution parameters
+    print_execution_parameters(params_dict=args_dict)
 
-    # waiting user input
-    i_string = f'Press "Enter" to continue'
-    input(i_string)
-    spacer()
+    # waiting for user input
+    enter_to_continue()
 
     # running single cell cropper function
     single_cell_cropper(input_folder=input_folder,

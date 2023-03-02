@@ -29,6 +29,8 @@ from argparse import ArgumentParser
 from cv2 import FONT_HERSHEY_SIMPLEX
 from src.utils.aux_funcs import spacer
 from src.utils.aux_funcs import flush_or_print
+from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
 print('all required libraries successfully imported.')  # noqa
 
@@ -423,18 +425,10 @@ def main():
     detection_threshold = float(detection_threshold)
 
     # printing execution parameters
-    f_string = f'--Execution parameters--\n'
-    f_string += f'input folder: {input_folder}\n'
-    f_string += f'image extension: {images_extension}\n'
-    f_string += f'detection file: {detection_file}\n'
-    f_string += f'ground-truth file: {ground_truth_file}\n'
-    f_string += f'output folder: {output_folder}\n'
-    f_string += f'detection threshold: {detection_threshold}'
-    spacer()
-    print(f_string)
-    spacer()
-    input('press "Enter" to continue')
-    spacer()
+    print_execution_parameters(params_dict=args_dict)
+
+    # waiting for user input
+    enter_to_continue()
 
     # running add_overlays_to_multiple_images function
     add_overlays_to_multiple_images(input_folder=input_folder,

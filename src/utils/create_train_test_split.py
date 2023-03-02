@@ -17,7 +17,9 @@ from argparse import ArgumentParser
 from random import seed as set_seed
 from src.utils.aux_funcs import spacer
 from src.utils.aux_funcs import create_folder
+from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import copy_multiple_files
+from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import create_subfolders_in_folder
 print('all required libraries successfully imported.')  # noqa
 
@@ -300,18 +302,10 @@ def main():
     output_folder_path = args_dict['output_folder_path']
 
     # printing execution parameters
-    execution_parameters_str = '---Execution Parameters---\n'
-    execution_parameters_str += f'images_folder_path: {images_folder_path}\n'
-    execution_parameters_str += f'annotations_folder_path: {annotations_folder_path}\n'
-    execution_parameters_str += f'output_folder_path: {output_folder_path}'
-    spacer()
-    print(execution_parameters_str)
-    spacer()
+    print_execution_parameters(params_dict=args_dict)
 
-    # waiting user input
-    i_string = f'Press "Enter" to continue'
-    input(i_string)
-    spacer()
+    # waiting for user input
+    enter_to_continue()
 
     # running create_train_test_split function
     create_train_test_split(images_folder_path=images_folder_path,

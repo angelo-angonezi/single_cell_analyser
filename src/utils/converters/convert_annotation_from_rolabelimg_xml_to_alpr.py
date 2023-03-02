@@ -12,6 +12,8 @@ from os.path import join
 import xml.etree.ElementTree as ET
 from argparse import ArgumentParser
 from src.utils.aux_funcs import flush_or_print
+from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
 
 #####################################################################
@@ -267,16 +269,11 @@ def main():
     # getting disregard class flag
     disregard_class = args_dict['disregard_class']
 
-    # printing execution message
-    f_string = f'--Execution Parameters--\n'
-    f_string += f'input_folder: {input_folder}\n'
-    f_string += f'output_folder: {output_folder}\n'
-    f_string += f'disregard_class: {disregard_class}'
-    print(f_string)
+    # printing execution parameters
+    print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # e_string = 'Press "Enter" to continue'
-    # input(e_string)
+    enter_to_continue()
 
     # running multiple converter function
     convert_multiple_files(input_xml_folder=input_folder,

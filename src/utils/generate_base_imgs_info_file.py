@@ -12,6 +12,8 @@ print('importing required libraries...')  # noqa
 from argparse import ArgumentParser
 from src.utils.aux_funcs import spacer
 from src.utils.aux_funcs import flush_or_print
+from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
 print('all required libraries successfully imported.')  # noqa
 
@@ -73,7 +75,9 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def analyse_imgs_info_file(input_file: str) -> None:
+def generate_base_imgs_info_file(train_imgs_folder: str,
+                                 test_imgs_folder: str,
+                                 ) -> None:
     pass
 
 ######################################################################
@@ -89,13 +93,10 @@ def main():
     input_file = args_dict['input_file']
 
     # printing execution parameters
-    f_string = f'--Execution parameters--\n'
-    f_string += f'input file: {input_file}'
-    spacer()
-    print(f_string)
-    spacer()
-    input('press "Enter" to continue')
-    spacer()
+    print_execution_parameters(params_dict=args_dict)
+
+    # waiting for user input
+    enter_to_continue()
 
     # running analyse_imgs_info_file function
     analyse_imgs_info_file(input_file=input_file)
