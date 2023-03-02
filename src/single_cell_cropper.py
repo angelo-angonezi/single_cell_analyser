@@ -2,11 +2,8 @@
 
 print('initializing...')  # noqa
 
-# code destined to cropping single cells
+# Code destined to cropping single cells
 # using ML output.
-
-# debug execution
-# python -m src.single_cell_cropper_ml -i .\\data\\input_imgs\\samlai\\vis\\orig -d .\\data\\ml_detections\\samlai_r2cnn_detections.csv -o .\\data\\output_crops\\samlai -t 0.5
 
 ######################################################################
 # importing required libraries

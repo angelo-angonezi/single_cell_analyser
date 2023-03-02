@@ -1,6 +1,6 @@
 # auxiliary functions module
 
-# code destined to storing auxiliary
+# Code destined to storing auxiliary
 # functions to main module.
 
 ######################################################################

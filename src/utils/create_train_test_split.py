@@ -2,7 +2,7 @@
 
 print('initializing...')  # noqa
 
-# code destined to generating train/test
+# Code destined to generating train/test
 # split, based on annotated data.
 
 ######################################################################

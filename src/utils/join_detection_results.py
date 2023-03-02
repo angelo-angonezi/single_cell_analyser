@@ -2,7 +2,7 @@
 
 print('initializing...')  # noqa
 
-# given a path to a folder containing model detection files
+# Given a path to a folder containing model detection files
 # (multiple det_*class_name*.txt) joins them into a single file.
 
 ######################################################################

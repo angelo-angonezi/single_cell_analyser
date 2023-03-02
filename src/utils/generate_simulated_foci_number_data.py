@@ -2,7 +2,7 @@
 
 print('initializing...')  # noqa
 
-# code destined to generating random
+# Code destined to generating random
 # simulated data for ml codes testing only.
 
 ######################################################################

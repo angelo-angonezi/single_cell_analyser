@@ -2,7 +2,7 @@
 
 print('initializing...')  # noqa
 
-# code destined to automating single cell
+# Code destined to automating single cell
 # feature extraction and analyses.
 
 ######################################################################
