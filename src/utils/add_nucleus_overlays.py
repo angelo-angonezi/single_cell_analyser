@@ -434,8 +434,9 @@ def main():
     print(f_string)
     spacer()
     input('press "Enter" to continue')
+    spacer()
 
-    # running generate_outlined_images function
+    # running add_overlays_to_multiple_images function
     add_overlays_to_multiple_images(input_folder=input_folder,
                                     images_extension=images_extension,
                                     detection_file_path=detection_file,
