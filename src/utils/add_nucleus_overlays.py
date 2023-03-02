@@ -65,7 +65,7 @@ def get_args_dict() -> dict:
 
     # image extension param
     extension_help = 'defines extension (.tif, .png, .jpg) of images in input folder'
-    parser.add_argument('-x', '--image-extension',
+    parser.add_argument('-x', '--images-extension',
                         dest='images_extension',
                         required=True,
                         help=extension_help)

@@ -9,26 +9,9 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-from numpy import intp
-from cv2 import imread
-from cv2 import imwrite
-from cv2 import putText
-from cv2 import cvtColor
-from os.path import join
-from numpy import ndarray
-from pandas import concat
-from pandas import Series
-from cv2 import boxPoints
-from pandas import read_csv
-from pandas import DataFrame
-from cv2 import drawContours
-from cv2 import COLOR_BGR2RGB
-from cv2 import COLOR_RGB2BGR
 from argparse import ArgumentParser
-from cv2 import FONT_HERSHEY_SIMPLEX
 from src.utils.aux_funcs import spacer
 from src.utils.aux_funcs import flush_or_print
-from src.utils.aux_funcs import get_specific_files_in_folder
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -68,7 +51,8 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-
+def analyse_imgs_info_file(input_file: str) -> None:
+    pass
 
 ######################################################################
 # defining main function
@@ -91,14 +75,8 @@ def main():
     input('press "Enter" to continue')
     spacer()
 
-    # running generate_ function
-    add_overlays_to_multiple_images(input_folder=input_folder,
-                                    images_extension=images_extension,
-                                    detection_file_path=detection_file,
-                                    ground_truth_file_path=ground_truth_file,
-                                    output_folder=output_folder,
-                                    detection_threshold=detection_threshold,
-                                    color_dict=COLOR_DICT)
+    # running analyse_imgs_info_file function
+    analyse_imgs_info_file(input_file=input_file)
 
 ######################################################################
 # running main function
