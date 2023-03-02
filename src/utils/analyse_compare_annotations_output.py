@@ -47,7 +47,7 @@ def get_args_dict() -> dict:
                         required=True,
                         help=input_help)
 
-    # output file param
+    # output folder param
     output_help = 'defines output folder (folder that will contain output csvs)'
     parser.add_argument('-o', '--output-folder',
                         dest='output_folder',
@@ -74,6 +74,8 @@ def clear_duplicates_from_df(df: DataFrame) -> DataFrame:
     | fornma | fornma | ... | ... |
     | model    | model    | ... | ... |
     ...
+    :param df: DataFrame. Represents detections data frame.
+    :return: DataFrame. Represents detections data frame with new column.
     """
     # defining keep condition
     keep_condition = (df['ann1'] != df['ann2'])
@@ -91,6 +93,8 @@ def add_f1_score_column_to_df(df: DataFrame) -> DataFrame:
     data frame, computes F1-score based on precision
     and recall columns, returning a new data frame
     containing F1-scores in new column.
+    :param df: DataFrame. Represents detections data frame.
+    :return: DataFrame. Represents detections data frame with new column.
     """
     # adding precision*recall column to df
     df['precision_times_recall'] = df['prec'] * df['rec']
