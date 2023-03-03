@@ -132,5 +132,7 @@ dmypy.json
 .data/
 /data/
 .idea/
+.tmp.drivedownload/
+.tmp.driveupload/
 
 # end of current module
