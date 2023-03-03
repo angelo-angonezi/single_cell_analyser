@@ -9,17 +9,14 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
+from pandas import concat
 from pandas import DataFrame
 from argparse import ArgumentParser
-from src.utils.aux_funcs import spacer
 from src.utils.aux_funcs import flush_or_print
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
 print('all required libraries successfully imported.')  # noqa
-
-#####################################################################
-# defining global variables
 
 #####################################################################
 # argument parsing related functions
@@ -101,14 +98,24 @@ def generate_base_imgs_info_file(train_imgs_folder: str,
                                              extension=images_extension)
     test_imgs_num = len(test_imgs)
 
-    all_imgs = train_imgs.extend(test_imgs)
+    # adding train/test images to single list
+    all_imgs = []
+    all_imgs.extend(train_imgs)
+    all_imgs.extend(test_imgs)
     imgs_num = len(all_imgs)
 
     # printing execution message
+    train_ratio = train_imgs_num / imgs_num
+    train_percentage = train_ratio * 100
+    train_percentage_round = round(train_percentage)
+    test_percentage_round = 100 - train_percentage_round
     f_string = f'A total of {imgs_num} images were found in input folders\n'
-    f_string += f'train_imgs_num: {train_imgs_num}'
-    f_string += f'test_imgs_num: {test_imgs_num}'
+    f_string += f'train_imgs_num: {train_imgs_num} ({train_percentage_round}%)\n'
+    f_string += f'test_imgs_num: {test_imgs_num} ({test_percentage_round}%)'
     print(f_string)
+
+    # defining placeholder value for dfs_list
+    dfs_list = []
 
     # iterating over images
     for image_index, image_name in enumerate(all_imgs, 1):
@@ -124,19 +131,44 @@ def generate_base_imgs_info_file(train_imgs_folder: str,
 
         # getting current image data
         current_img_split = image_name.split('_')
-        current_img_experiment =
-        current_img_author =
-        current_img_cell_line =
-        current_img_treatment =
-        current_img_well =
-        current_img_frame =
+        current_img_experiment = '_'.join(current_img_split[:-4])
+        current_img_author = None
+        current_img_cell_line = None
+        current_img_treatment = None
+        current_img_well = current_img_split[-4]
+        current_img_field = current_img_split[-3]
+        current_img_day = current_img_split[-2]
+        current_img_time = current_img_split[-1].replace(images_extension, '')
+        current_img_datetime = ''.join([current_img_day, current_img_time])
+        current_img_group = 'train' if image_name in train_imgs else 'test'
 
         # creating current image dict
-        current_img_dict = {'img_name': image_name}
+        current_img_dict = {'img_name': image_name,
+                            'experiment': current_img_experiment,
+                            'author': current_img_author,
+                            'cell_line': current_img_cell_line,
+                            'treatment': current_img_treatment,
+                            'well': current_img_well,
+                            'field': current_img_field,
+                            'datetime': current_img_datetime,
+                            'group': current_img_group}
 
         # creating current image df
         current_img_df = DataFrame(current_img_dict,
                                    index=[0])
+
+        # appending current image df to dfs_list
+        dfs_list.append(current_img_df)
+
+    # concatenating dfs in dfs_list
+    print('concatenating dfs...')
+    final_df = concat(dfs_list)
+
+    # saving final_df
+    print('saving final df...')
+    final_df.to_csv(output_path,
+                    index=False)
+    print('final df saved in output path.')
 
 ######################################################################
 # defining main function
@@ -156,6 +188,9 @@ def main():
     # getting images_extension param
     images_extension = args_dict['images_extension']
 
+    # getting output_path param
+    output_path = args_dict['output_path']
+
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
@@ -165,7 +200,8 @@ def main():
     # running analyse_imgs_info_file function
     generate_base_imgs_info_file(train_imgs_folder=train_imgs_folder,
                                  test_imgs_folder=test_imgs_folder,
-                                 images_extension=images_extension)
+                                 images_extension=images_extension,
+                                 output_path=output_path)
 
 ######################################################################
 # running main function
