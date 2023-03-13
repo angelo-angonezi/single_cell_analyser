@@ -132,7 +132,10 @@ dmypy.json
 .data/
 /data/
 .idea/
+
+# GDrive related files/folders
 .tmp.drivedownload/
 .tmp.driveupload/
+*.ini
 
 # end of current module
