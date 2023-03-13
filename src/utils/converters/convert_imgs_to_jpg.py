@@ -77,7 +77,7 @@ def convert_multiple_files(input_folder_path: str,
     files = [file
              for file
              in listdir(input_folder_path)
-             if (file.endswith('.jpg'))
+             if (file.endswith('.png'))
              or (file.endswith('.tif'))]
     files_num = len(files)
 

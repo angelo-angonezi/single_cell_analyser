@@ -102,10 +102,13 @@ def get_specific_files_in_folder(path_to_folder: str,
     :param extension: String. Represents a specific file extension.
     :return: List[str]. Represents all files that match extension in given folder.
     """
+    # getting all files in folder
+    all_files_in_folder = listdir(path_to_folder)
+
     # getting specific files
-    files_in_dir = [file  # getting file
-                    for file  # iterating over files
-                    in listdir(path_to_folder)  # in input folder
+    files_in_dir = [file                          # getting file
+                    for file                      # iterating over files
+                    in all_files_in_folder        # in input folder
                     if file.endswith(extension)]  # only if file matches given extension
 
     # sorting list
