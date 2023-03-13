@@ -10,18 +10,11 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-from os import listdir
-from os.path import join
-from random import sample
 from argparse import ArgumentParser
-from random import seed as set_seed
 from src.utils.aux_funcs import spacer
-from src.utils.aux_funcs import create_folder
 from src.utils.aux_funcs import enter_to_continue
-from src.utils.aux_funcs import copy_multiple_files
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
-from src.utils.aux_funcs import create_subfolders_in_folder
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -92,6 +85,7 @@ def phase_matches_red(phase_images_folder: str,
     # printing execution message
     f_string = f'{phase_images_num} images [.jpg] found in phase folder.\n'
     f_string += f'{red_images_num} images [.tif] found in red folder.'
+    spacer()
     print(f_string)
 
     # checking whether image names match
