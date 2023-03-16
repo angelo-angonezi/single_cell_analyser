@@ -299,5 +299,49 @@ def enter_to_continue():
     # waiting for user input
     input(enter_string)
 
+
+def get_merged_detection_annotation_df(detections_df_path: str,
+                                       annotations_df_path: str or None
+                                       ) -> DataFrame:
+    """
+    Given a path to detections df and annotations df,
+    returns merged df, containing new column "evaluator",
+    representing detection/annotation info.
+    :param detections_df_path: String. Represents a path to a file.
+    :param annotations_df_path: String. Represents a path to a file.
+    :return: DataFrame. Represents merged detection/annotation data.
+    """
+    # defining placeholder value for dfs_list
+    dfs_list = []
+
+    # reading detections file
+    print('reading detections file...')
+    detections_df = read_csv(detections_df_path)
+
+    # adding evaluator constant column
+    detections_df['evaluator'] = 'model'
+
+    # adding detections df to dfs_list
+    dfs_list.append(detections_df)
+
+    # checking ground_truth_file_path
+    if annotations_df_path is not None:
+
+        # reading gt file
+        print('reading ground-truth file...')
+        ground_truth_df = read_csv(annotations_df_path)
+
+        # adding evaluator constant column
+        ground_truth_df['evaluator'] = 'fornma'
+
+        # adding annotations df to dfs_list
+        dfs_list.append(ground_truth_df)
+
+    # concatenating dfs in dfs_list
+    merged_df = concat(dfs_list)
+
+    # returning merged df
+    return merged_df
+
 ######################################################################
 # end of current module

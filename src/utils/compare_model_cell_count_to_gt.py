@@ -1,9 +1,9 @@
-# analyse compare annotations module
+# compare model cell count to ground-truth module
 
 print('initializing...')  # noqa
 
-# Code destined to analysing "compare_annotations.py" module
-# output (a csv file containing precision and recall data)
+# Code destined to comparing cell count data
+# between model detections and gt annotations.
 
 ######################################################################
 # imports
@@ -19,6 +19,7 @@ from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_execution_parameters
+from src.utils.aux_funcs import get_merged_detection_annotation_df
 print('all required libraries successfully imported.')  # noqa
 
 # next line prevents "SettingWithCopyWarning" pandas warning
@@ -41,15 +42,22 @@ def get_args_dict() -> dict:
 
     # adding arguments to parser
 
-    # input file param
-    input_help = 'defines path to compare_annotations.py output[.csv]'
-    parser.add_argument('-i', '--input-file',
-                        dest='input_file',
+    # detection file param
+    detection_help = 'defines path to csv file containing model detections'
+    parser.add_argument('-d', '--detection_file',
+                        dest='detection_file',
                         required=True,
-                        help=input_help)
+                        help=detection_help)
+
+    # gt file param
+    gt_help = 'defines path to csv file containing ground-truth annotations'
+    parser.add_argument('-g', '--ground-truth-file',
+                        dest='ground_truth_file',
+                        required=False,
+                        help=gt_help)
 
     # output folder param
-    output_help = 'defines output folder (folder that will contain output csvs)'
+    output_help = 'defines output folder (folder that will contain output csvs/pngs)'
     parser.add_argument('-o', '--output-folder',
                         dest='output_folder',
                         required=True,
@@ -65,144 +73,22 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def clear_duplicates_from_df(df: DataFrame) -> DataFrame:
-    """
-    Given annotators and models names' list,
-    and an input data frame, returns data frame
-    filtered so that it does not contain duplicate
-    lines as follows:
-    | ann1   | ann2   | ... | ... |
-    | fornma | fornma | ... | ... |
-    | model    | model    | ... | ... |
-    ...
-    :param df: DataFrame. Represents detections data frame.
-    :return: DataFrame. Represents detections data frame with new column.
-    """
-    # defining keep condition
-    keep_condition = (df['ann1'] != df['ann2'])
-
-    # clearing df based on keep condition
-    clean_df = df[keep_condition]
-
-    # returning clean df
-    return clean_df
-
-
-def add_f1_score_column_to_df(df: DataFrame) -> DataFrame:
-    """
-    Given an annotatorsVSmodels variability output
-    data frame, computes F1-score based on precision
-    and recall columns, returning a new data frame
-    containing F1-scores in new column.
-    :param df: DataFrame. Represents detections data frame.
-    :return: DataFrame. Represents detections data frame with new column.
-    """
-    # adding precision*recall column to df
-    df['precision_times_recall'] = df['prec'] * df['rec']
-
-    # adding precision+recall column to df
-    df['precision_plus_recall'] = df['prec'] + df['rec']
-
-    # adding div column to df
-    df['div'] = df['precision_times_recall'] / df['precision_plus_recall']
-
-    # adding f1_score column to df
-    df['f1_score'] = 2 * df['div']
-
-    # returning modified df
-    return df
-
-
-def plot_prec_rec_curves(df: DataFrame) -> None:
-    """
-    Given a data frame containing precision and
-    recall data, plots precision-recall curves
-    coloring by evaluator.
-    :param df: DataFrame. Represents a detections data frame.
-    :return: None.
-    """
-    # renaming hue column
-    df_cols = df.columns
-    df_cols = [f.replace('ann2', 'modelDT')
-               for f
-               in df_cols]
-    df.columns = df_cols
-
-    # defining hue order
-    hue_order = ['model03',
-                 'model05',
-                 'model07']
-
-    # plotting data
-    lineplot(data=df,
-             x='rec',
-             y='prec',
-             hue='modelDT',
-             hue_order=hue_order)
-
-    # setting title/axis names
-    plt.title('Precision-Recall curves')
-    plt.xlabel('Recall')
-    plt.ylabel('Precision')
-
-    # showing plot
-    plt.show()
-
-
-def plot_f1_score_curve(df: DataFrame) -> None:
-    """
-    Given a data frame containing F1-Score data,
-    plots line plot of F1-Score by thresholds,
-    coloring by evaluator.
-    :param df: DataFrame. Represents a F1-Score data frame.
-    :return: None.
-    """
-    # renaming hue column
-    df_cols = df.columns
-    df_cols = [f.replace('ann2', 'modelDT')
-               for f
-               in df_cols]
-    df.columns = df_cols
-
-    # defining hue order
-    hue_order = ['model03',
-                 'model05',
-                 'model07']
-
-    # plotting data
-    lineplot(data=df,
-             x='th',
-             y='f1_score',
-             hue='modelDT',
-             hue_order=hue_order)
-
-    # setting title/axis names
-    plt.title('F1-Score curves')
-    plt.xlabel('IoU threshold')
-    plt.ylabel('F1-Score')
-
-    # showing plot
-    plt.show()
-
-
-def analyse_compare_annotations_output(input_file: str,
-                                       output_folder: str
-                                       ) -> None:
+def compare_model_cell_count_to_gt(detection_file_path: str,
+                                   ground_truth_file_path: str,
+                                   output_folder: str
+                                   ) -> None:
     """
     Given an input file (compare_annotations.py output),
     generates precision-recall curves, and saves analysis
     dfs in given output folder.
-    :param input_file: String. Represents a path to a file.
+    :param detection_file_path: String. Represents a file path.
+    :param ground_truth_file_path: String. Represents a file path.
     :param output_folder: String. Represents a path to a folder.
     :return: None.
     """
-    # reading input file
-    print('reading input df...')
-    input_df = read_csv(input_file)
-
-    # cleaning df from duplicates
-    print('cleaning df from duplicates...')
-    clean_df = clear_duplicates_from_df(df=input_df)
+    # getting merged detections df
+    merged_df = get_merged_detection_annotation_df(detections_df_path=detection_file_path,
+                                                   annotations_df_path=ground_truth_file_path)
 
     # filtering df for fornmaVSmodels results only
     print('filtering df for fornmaVSmodels results only...')
@@ -253,8 +139,8 @@ def main():
     enter_to_continue()
 
     # running analyse_compare_annotations_output function
-    analyse_compare_annotations_output(input_file=input_file,
-                                       output_folder=output_folder)
+    compare_model_cell_count_to_gt(input_file=input_file,
+                                   output_folder=output_folder)
 
 ######################################################################
 # running main function
