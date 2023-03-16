@@ -1,4 +1,5 @@
 # compare model cell count to ground-truth module
+import matplotlib.pyplot as plt
 
 print('initializing...')  # noqa
 
@@ -11,8 +12,10 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 import pandas as pd
+from os.path import join
 from pandas import concat
 from pandas import DataFrame
+from seaborn import scatterplot
 from argparse import ArgumentParser
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_execution_parameters
@@ -53,13 +56,6 @@ def get_args_dict() -> dict:
                         required=False,
                         help=gt_help)
 
-    # output folder param
-    output_help = 'defines output folder (folder that will contain output csvs/pngs)'
-    parser.add_argument('-o', '--output-folder',
-                        dest='output_folder',
-                        required=True,
-                        help=output_help)
-
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
 
@@ -84,33 +80,91 @@ def get_cell_count_df(df: DataFrame) -> DataFrame:
     # defining placeholder value for dfs_list
     dfs_list = []
 
-    # grouping df by
-    print(df)
+    # grouping df
+    df_groups = df.groupby(['img_file_name', 'evaluator'])
+
+    # iterating over df groups
+    for df_name, df_group in df_groups:
+
+        # getting current df img_file_name and evaluator
+        current_img, current_evaluator = df_name
+
+        # getting current group cell count
+        current_cell_count = len(df_group)
+
+        # assembling current group dict
+        current_group_dict = {'img_name': current_img,
+                              'evaluator': current_evaluator,
+                              'cell_count': current_cell_count}
+
+        # assembling current group df
+        current_group_df = DataFrame(current_group_dict,
+                                     index=[0])
+
+        # appending current group df to dfs_list
+        dfs_list.append(current_group_df)
+
+    # concatenating dfs in dfs_list
+    final_df = concat(dfs_list,
+                      ignore_index=True)
+
+    # returning final_df
+    return final_df
 
 
+def plot_cell_count_data(df: DataFrame) -> None:
+    """
+    Given a cell count data frame,
+    plots scatter plot to compare
+    detectionsVSannotations.
+    :param df: DataFrame. Represents cell count data frame.
+    :return: None.
+    """
+    # sorting df by cell count
+    sorted_df = df.sort_values(by='cell_count')
 
-    exit()
+    # plotting data
+    scatterplot(data=sorted_df,
+                x='img_file',
+                y='cell_count',
+                hue='evaluator')
+
+    # setting title/axis names
+    plt.title('Cell count comparison')
+    plt.ylabel('Cell count')
+    plt.xlabel('Image name')
+
+    # adding legend
+    plt.legend(title='Evaluator',
+               loc='upper right')
+
+    # showing plot
+    plt.show()
 
 
 def compare_model_cell_count_to_gt(detection_file_path: str,
                                    ground_truth_file_path: str,
-                                   output_folder: str
                                    ) -> None:
     """
-    Given an input file (compare_annotations.py output),
-    generates precision-recall curves, and saves analysis
-    dfs in given output folder.
+    Given paths to model detections and gt annotations,
+    compares cell count between evaluators, plotting
+    comparison scatter plot.
     :param detection_file_path: String. Represents a file path.
     :param ground_truth_file_path: String. Represents a file path.
-    :param output_folder: String. Represents a path to a folder.
     :return: None.
     """
     # getting merged detections df
+    print('getting data from input files...')
     merged_df = get_merged_detection_annotation_df(detections_df_path=detection_file_path,
                                                    annotations_df_path=ground_truth_file_path)
 
-    # getting ready-to-plot data
+    # getting cell count data
+    print('getting cell count df...')
+    cell_count_df = get_cell_count_df(df=merged_df)
 
+    # plotting cell count data
+    print('plotting cell count data...')
+    plot_cell_count_data(df=cell_count_df)
 
     # printing execution message
     print('analysis complete.')
@@ -130,9 +184,6 @@ def main():
     # getting ground-truth file path
     ground_truth_file = args_dict['ground_truth_file']
 
-    # getting output folder
-    output_folder = args_dict['output_folder']
-
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
@@ -141,8 +192,7 @@ def main():
 
     # running compare_model_cell_count_to_gt function
     compare_model_cell_count_to_gt(detection_file_path=detection_file,
-                                   ground_truth_file_path=ground_truth_file,
-                                   output_folder=output_folder)
+                                   ground_truth_file_path=ground_truth_file)
 
 ######################################################################
 # running main function
