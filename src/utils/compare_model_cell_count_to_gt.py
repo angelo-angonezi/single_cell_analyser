@@ -12,7 +12,6 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 import pandas as pd
-from os.path import join
 from pandas import concat
 from pandas import DataFrame
 from seaborn import scatterplot
@@ -120,12 +119,9 @@ def plot_cell_count_data(df: DataFrame) -> None:
     :param df: DataFrame. Represents cell count data frame.
     :return: None.
     """
-    # sorting df by cell count
-    sorted_df = df.sort_values(by='cell_count')
-
     # plotting data
-    scatterplot(data=sorted_df,
-                x='img_file',
+    scatterplot(data=df,
+                x='img_name',
                 y='cell_count',
                 hue='evaluator')
 
@@ -133,6 +129,7 @@ def plot_cell_count_data(df: DataFrame) -> None:
     plt.title('Cell count comparison')
     plt.ylabel('Cell count')
     plt.xlabel('Image name')
+    plt.xticks(rotation=15)
 
     # adding legend
     plt.legend(title='Evaluator',
@@ -140,6 +137,7 @@ def plot_cell_count_data(df: DataFrame) -> None:
 
     # showing plot
     plt.show()
+    # plt.savefig('E:\Angelo\Desktop\ml_temp\output.png')
 
 
 def compare_model_cell_count_to_gt(detection_file_path: str,
