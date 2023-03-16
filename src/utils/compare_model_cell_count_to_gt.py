@@ -11,12 +11,9 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 import pandas as pd
-from os.path import join
-from pandas import read_csv
+from pandas import concat
 from pandas import DataFrame
-from seaborn import lineplot
 from argparse import ArgumentParser
-from matplotlib import pyplot as plt
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_merged_detection_annotation_df
@@ -73,6 +70,28 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
+def get_cell_count_df(df: DataFrame) -> DataFrame:
+    """
+    Given a merged detections/annotations data frame,
+    returns cell count data frame, of following structure:
+    | img_name | evaluator | cell_count |
+    | img1.png |   model   |     62     |
+    | img1.png |  fornma   |     58     |
+    ...
+    :param df: DataFrame. Represents merged detections/annotations data.
+    :return: DataFrame. Represents cell count data frame.
+    """
+    # defining placeholder value for dfs_list
+    dfs_list = []
+
+    # grouping df by
+    print(df)
+
+
+
+    exit()
+
+
 def compare_model_cell_count_to_gt(detection_file_path: str,
                                    ground_truth_file_path: str,
                                    output_folder: str
@@ -90,29 +109,8 @@ def compare_model_cell_count_to_gt(detection_file_path: str,
     merged_df = get_merged_detection_annotation_df(detections_df_path=detection_file_path,
                                                    annotations_df_path=ground_truth_file_path)
 
-    # filtering df for fornmaVSmodels results only
-    print('filtering df for fornmaVSmodels results only...')
-    filtered_df = clean_df[clean_df['ann1'] == 'fornma']
+    # getting ready-to-plot data
 
-    # adding F1-Scores to df
-    print('adding F1-Scores to df...')
-    f1_score_df = add_f1_score_column_to_df(df=filtered_df)
-
-    # saving F1-Scores df
-    print('saving F1-Scores df...')
-    f1_score_df_save_path = join(output_folder,
-                                 'f1_scores_df.csv')
-    f1_score_df.to_csv(f1_score_df_save_path,
-                       index=False)
-    print('saved F1-Scores df in output folder.')
-
-    # plotting precision-recall curves
-    print('plotting precision-recall curves...')
-    plot_prec_rec_curves(df=f1_score_df)
-
-    # plotting F1-Score curve
-    print('plotting F1-Score curve...')
-    plot_f1_score_curve(df=f1_score_df)
 
     # printing execution message
     print('analysis complete.')
@@ -126,8 +124,11 @@ def main():
     # getting args dict
     args_dict = get_args_dict()
 
-    # getting input file
-    input_file = args_dict['input_file']
+    # getting detection file path
+    detection_file = args_dict['detection_file']
+
+    # getting ground-truth file path
+    ground_truth_file = args_dict['ground_truth_file']
 
     # getting output folder
     output_folder = args_dict['output_folder']
@@ -138,8 +139,9 @@ def main():
     # waiting for user input
     enter_to_continue()
 
-    # running analyse_compare_annotations_output function
-    compare_model_cell_count_to_gt(input_file=input_file,
+    # running compare_model_cell_count_to_gt function
+    compare_model_cell_count_to_gt(detection_file_path=detection_file,
+                                   ground_truth_file_path=ground_truth_file,
                                    output_folder=output_folder)
 
 ######################################################################

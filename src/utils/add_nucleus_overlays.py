@@ -17,17 +17,14 @@ from cv2 import putText
 from cv2 import cvtColor
 from os.path import join
 from numpy import ndarray
-from pandas import concat
 from pandas import Series
 from cv2 import boxPoints
-from pandas import read_csv
 from pandas import DataFrame
 from cv2 import drawContours
 from cv2 import COLOR_BGR2RGB
 from cv2 import COLOR_RGB2BGR
 from argparse import ArgumentParser
 from cv2 import FONT_HERSHEY_SIMPLEX
-from src.utils.aux_funcs import spacer
 from src.utils.aux_funcs import flush_or_print
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_execution_parameters
