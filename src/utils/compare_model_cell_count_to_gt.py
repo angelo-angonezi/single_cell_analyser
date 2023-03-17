@@ -65,28 +65,43 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_cell_count_df(df: DataFrame) -> DataFrame:
+def get_cell_count_df(df: DataFrame,
+                      detection_threshold: float
+                      ) -> DataFrame:
     """
     Given a merged detections/annotations data frame,
     returns cell count data frame, of following structure:
-    | img_name | evaluator | cell_count |
-    | img1.png |   model   |     62     |
-    | img1.png |  fornma   |     58     |
+    | img_name | model_count | fornma_count |
+    | img1.png |     62      |      58      |
+    | img2.png |     45      |      51     |
     ...
     :param df: DataFrame. Represents merged detections/annotations data.
+    :param detection_threshold: Float. Represents detection threshold to be applied as filter.
     :return: DataFrame. Represents cell count data frame.
     """
     # defining placeholder value for dfs_list
     dfs_list = []
 
     # grouping df
-    df_groups = df.groupby(['img_file_name', 'evaluator'])
+    df_groups = df.groupby('img_file_name')
 
     # iterating over df groups
-    for df_name, df_group in df_groups:
+    for img_name, df_group in df_groups:
 
-        # getting current df img_file_name and evaluator
-        current_img, current_evaluator = df_name
+        print(img_name)
+        print(df_group)
+
+        # getting current image fornma cell count
+        try:
+            fornma_df = df_group[df_group['evaluator'] == 'fornma']
+            fornma_cell_count = len(fornma_df)
+        except Exception as e:
+            print('forma could')
+            print(e)
+
+        exit()
+        #
+
 
         # getting current group cell count
         current_cell_count = len(df_group)
@@ -142,6 +157,7 @@ def plot_cell_count_data(df: DataFrame) -> None:
 
 def compare_model_cell_count_to_gt(detection_file_path: str,
                                    ground_truth_file_path: str,
+                                   detection_threshold: float
                                    ) -> None:
     """
     Given paths to model detections and gt annotations,
@@ -149,6 +165,7 @@ def compare_model_cell_count_to_gt(detection_file_path: str,
     comparison scatter plot.
     :param detection_file_path: String. Represents a file path.
     :param ground_truth_file_path: String. Represents a file path.
+    :param detection_threshold: Float. Represents detection threshold to be applied as filter.
     :return: None.
     """
     # getting merged detections df
@@ -182,6 +199,10 @@ def main():
     # getting ground-truth file path
     ground_truth_file = args_dict['ground_truth_file']
 
+    # getting detection threshold
+    detection_threshold = args_dict['detection_threshold']
+    detection_threshold = float(detection_threshold)
+
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
@@ -190,7 +211,8 @@ def main():
 
     # running compare_model_cell_count_to_gt function
     compare_model_cell_count_to_gt(detection_file_path=detection_file,
-                                   ground_truth_file_path=ground_truth_file)
+                                   ground_truth_file_path=ground_truth_file,
+                                   detection_threshold=detection_threshold)
 
 ######################################################################
 # running main function
