@@ -10,7 +10,6 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-import pandas as pd
 from pandas import concat
 from seaborn import regplot
 from pandas import DataFrame
@@ -22,9 +21,6 @@ from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_merged_detection_annotation_df
 print('all required libraries successfully imported.')  # noqa
-
-# next line prevents "SettingWithCopyWarning" pandas warning
-pd.options.mode.chained_assignment = None  # default='warn'
 
 #####################################################################
 # argument parsing related functions
@@ -269,7 +265,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running compare_model_cell_count_to_gt function
     compare_model_cell_count_to_gt(detection_file_path=detection_file,
