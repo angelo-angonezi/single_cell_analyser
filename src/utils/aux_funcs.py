@@ -4,8 +4,9 @@
 # functions to main module.
 
 ######################################################################
-# importing required libraries
+# imports
 
+# importing required libraries
 from os import mkdir
 from os import listdir
 from sys import stdout
@@ -339,6 +340,7 @@ def get_merged_detection_annotation_df(detections_df_path: str,
         dfs_list.append(ground_truth_df)
 
     # concatenating dfs in dfs_list
+    print('merging dfs...')
     merged_df = concat(dfs_list)
 
     # returning merged df

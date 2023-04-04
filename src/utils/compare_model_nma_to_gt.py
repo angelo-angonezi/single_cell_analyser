@@ -12,6 +12,7 @@ print('initializing...')  # noqa
 print('importing required libraries...')  # noqa
 import pandas as pd
 from pandas import concat
+from seaborn import catplot
 from seaborn import regplot
 from pandas import DataFrame
 from seaborn import scatterplot
@@ -74,6 +75,164 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
+def add_cell_area_col(df: DataFrame) -> None:
+    """
+    Given a merged detections/annotations data frame,
+    adds 'cell_area' column, calculated by
+    multiplying width/height cols.
+    """
+    # adding cell area column to df
+    df['cell_area'] = df['width'] * df['height']
+
+
+def add_hue_col(df: DataFrame) -> None:
+    """
+    Given a merged detections/annotations data frame,
+    adds 'hue_col' column, obtained by merging
+    evaluator and treatment cols.
+    """
+    # adding cell area column to df
+    df['hue_col'] = df['evaluator'] + df['treatment']
+
+
+def get_axis_ratio(width: float,
+                   height: float
+                   ) -> float:
+    """
+    Given width and height values, checks which one
+    is larger, and returns ratio between longer
+    and shorter axis.
+    """
+    # defining long and short axis based on width/height values
+    long_axis = width if width > height else height
+    short_axis = width if width < height else height
+
+    # calculating axis_ratio
+    axis_ratio = long_axis / short_axis
+
+    # returning axis_ratio
+    return axis_ratio
+
+
+def add_axis_ratio_col(df: DataFrame) -> None:
+    """
+    Given a merged detections/annotations data frame,
+    adds 'cell_area' column, calculated by dividing
+    width/height cols (order varies depending on
+    which is larger).
+    """
+    # adding axis ratio placeholder column to df
+    df['axis_ratio'] = None
+
+    # getting df rows
+    df_rows = df.iterrows()
+
+    # iterating over df rows
+    for row_index, row_data in df_rows:
+
+        # getting current row width/height data
+        current_width = row_data['width']
+        current_height = row_data['height']
+
+        # getting axis ratio
+        current_axis_ratio = get_axis_ratio(width=current_width,
+                                            height=current_height)
+
+        # updating current line axis ratio value
+        df.at[row_index, 'axis_ratio'] = current_axis_ratio
+
+
+def add_treatment_col(df: DataFrame) -> None:
+    """
+    Given a merged detections/annotations data frame,
+    adds 'treatment' column, obtained by file name.
+    """
+    # adding treatment placeholder column to df
+    df['treatment'] = None
+
+    # getting df rows
+    df_rows = df.iterrows()
+
+    # iterating over df rows
+    for row_index, row_data in df_rows:
+
+        # getting current row treatment data
+        img_file_name = row_data['img_file_name']
+        img_file_name_split = img_file_name.split('_')
+        treatment_col = img_file_name_split[1]
+        current_treatment = treatment_col[0]
+
+        # updating current line axis ratio value
+        df.at[row_index, 'treatment'] = current_treatment
+
+
+def get_nma_df(df: DataFrame) -> DataFrame:
+    """
+    Given a merged detections/annotations data frame,
+    returns a new df, of following structure:
+    | evaluator | cell_area | axis_ratio |
+    |   model   |   633.6   |   1.60913  |
+    |   fornma  |   267.1   |   1.77106  |
+    ...
+    """
+    # adding cell area column to df
+    add_cell_area_col(df=df)
+
+    # adding axis ratio column to df
+    add_axis_ratio_col(df=df)
+
+    # adding treatment column to df
+    add_treatment_col(df=df)
+
+    # adding hue col to df
+    add_hue_col(df=df)
+
+    # dropping unrequired cols
+    all_cols = df.columns.to_list()
+    keep_cols = ['cell_area', 'axis_ratio', 'evaluator', 'treatment', 'hue_col']
+    drop_cols = [col
+                 for col
+                 in all_cols
+                 if col not in keep_cols]
+    final_df = df.drop(drop_cols,
+                       axis=1)
+
+    # returning final df
+    return final_df
+
+
+def plot_nma_data(df: DataFrame) -> None:
+    """
+    Given a nma data frame, plots nma (cell_area X axis_ratio),
+    coloring data by evaluator (model detections and fornma
+    annotations).
+    """
+    # plotting scatter plot
+    # scatterplot(data=df,
+    #             x='axis_ratio',
+    #             y='cell_area',
+    #             hue='evaluator')
+    from seaborn import FacetGrid
+
+    g = FacetGrid(data=df, col='treatment', hue='evaluator')
+    g.map(scatterplot, 'axis_ratio', 'cell_area', alpha=.7)
+    g.add_legend()
+
+    # setting plot title
+    # title = 'NMA plots comparison (model VS fornma)'
+    # plt.title(title)
+
+    # setting plot axis labels
+    # plt.xlabel('Axis ratio (whole OBB long/short axis)')
+    # plt.ylabel('Cell area (whole OBB pixels)')
+
+    # showing plot
+    plt.show()
+
+    # closing plot
+    plt.close()
+
+
 def compare_model_cell_count_to_gt(detection_file_path: str,
                                    ground_truth_file_path: str,
                                    detection_threshold: float
@@ -91,6 +250,14 @@ def compare_model_cell_count_to_gt(detection_file_path: str,
     print('getting data from input files...')
     merged_df = get_merged_detection_annotation_df(detections_df_path=detection_file_path,
                                                    annotations_df_path=ground_truth_file_path)
+
+    # getting nma data
+    print('getting nma df...')
+    nma_df = get_nma_df(df=merged_df)
+
+    # plotting nma data
+    print('plotting nma...')
+    plot_nma_data(df=nma_df)
 
     # printing execution message
     print('analysis complete.')
@@ -118,7 +285,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running compare_model_cell_count_to_gt function
     compare_model_cell_count_to_gt(detection_file_path=detection_file,
