@@ -1,5 +1,4 @@
 # compare model cell count to ground-truth module
-import matplotlib.pyplot as plt
 
 print('initializing...')  # noqa
 
@@ -16,6 +15,7 @@ from pandas import concat
 from pandas import DataFrame
 from seaborn import scatterplot
 from argparse import ArgumentParser
+from matplotlib import pyplot as plt
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_merged_detection_annotation_df
@@ -52,8 +52,15 @@ def get_args_dict() -> dict:
     gt_help = 'defines path to csv file containing ground-truth annotations'
     parser.add_argument('-g', '--ground-truth-file',
                         dest='ground_truth_file',
-                        required=False,
+                        required=True,
                         help=gt_help)
+
+    # dt file param
+    dt_help = 'defines detection threshold to be used as filter for model detections'
+    parser.add_argument('-t', '--detection-threshold',
+                        dest='detection_threshold',
+                        required=False,
+                        help=dt_help)
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -73,7 +80,7 @@ def get_cell_count_df(df: DataFrame,
     returns cell count data frame, of following structure:
     | img_name | model_count | fornma_count |
     | img1.png |     62      |      58      |
-    | img2.png |     45      |      51     |
+    | img2.png |     45      |      51      |
     ...
     :param df: DataFrame. Represents merged detections/annotations data.
     :param detection_threshold: Float. Represents detection threshold to be applied as filter.
