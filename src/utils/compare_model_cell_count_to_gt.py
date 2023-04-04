@@ -95,30 +95,23 @@ def get_cell_count_df(df: DataFrame,
     # iterating over df groups
     for img_name, df_group in df_groups:
 
-        print(img_name)
-        print(df_group)
+        # getting current image fornma/model dfs
+        fornma_df = df_group[df_group['evaluator'] == 'fornma']
+        model_df = df_group[df_group['evaluator'] == 'model']
 
-        # getting current image fornma cell count
-        try:
-            fornma_df = df_group[df_group['evaluator'] == 'fornma']
-            fornma_cell_count = len(fornma_df)
-        except Exception as e:
-            print('forma could')
-            print(e)
+        # filtering current image model df by detection threshold
+        filtered_model_df = model_df[model_df['detection_threshold'] >= detection_threshold]
 
-        exit()
-        #
+        # getting current image fornma/model cell counts
+        fornma_cell_count = len(fornma_df)
+        model_cell_count = len(filtered_model_df)
 
+        # assembling current image dict
+        current_group_dict = {'img_name': img_name,
+                              'fornma_cell_count': fornma_cell_count,
+                              'model_cell_count': model_cell_count}
 
-        # getting current group cell count
-        current_cell_count = len(df_group)
-
-        # assembling current group dict
-        current_group_dict = {'img_name': current_img,
-                              'evaluator': current_evaluator,
-                              'cell_count': current_cell_count}
-
-        # assembling current group df
+        # assembling current image df
         current_group_df = DataFrame(current_group_dict,
                                      index=[0])
 
@@ -182,7 +175,8 @@ def compare_model_cell_count_to_gt(detection_file_path: str,
 
     # getting cell count data
     print('getting cell count df...')
-    cell_count_df = get_cell_count_df(df=merged_df)
+    cell_count_df = get_cell_count_df(df=merged_df,
+                                      detection_threshold=detection_threshold)
 
     # plotting cell count data
     print('plotting cell count data...')
@@ -214,7 +208,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running compare_model_cell_count_to_gt function
     compare_model_cell_count_to_gt(detection_file_path=detection_file,
