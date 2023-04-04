@@ -12,8 +12,10 @@ print('initializing...')  # noqa
 print('importing required libraries...')  # noqa
 import pandas as pd
 from pandas import concat
+from seaborn import regplot
 from pandas import DataFrame
 from seaborn import scatterplot
+from scipy.stats import linregress
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 from src.utils.aux_funcs import enter_to_continue
@@ -70,6 +72,61 @@ def get_args_dict() -> dict:
 
 ######################################################################
 # defining auxiliary functions
+
+
+def plot_linear_regression(df: DataFrame,
+                           x_col: str,
+                           y_col: str
+                           ) -> None:
+    """
+    Given a df, calculates linear regression for given x and y cols.
+    :param df: DataFrame. Represents esiCancer joined output file (with pop groups col added).
+    :param x_col: String. Represents a data frame column name.
+    :param y_col: String. Represents a data frame column name.
+    :return:
+    """
+    # getting xy data from current group
+    x_data = df[x_col]
+    y_data = df[y_col]
+
+    # calculating linear regression with xy data
+    linreg = linregress(x_data, y_data)
+
+    # splitting results' coefficients
+    slope, intercept, r_value, p_value, std_err = linreg
+
+    # rounding values for plot
+    round_slope = round(slope, 5)
+    round_intercept = round(intercept, 5)
+    round_r_value = round(r_value, 2)
+    round_p_value = round(p_value, 2)
+    round_std_err = round(std_err, 2)
+
+    # defining label for regplot
+    regplot_label = f'slope: {round_slope}\n'
+    regplot_label += f'intercept: {round_intercept}\n'
+    regplot_label += f'r_value: {round_r_value}\n'
+    regplot_label += f'p_value: {round_p_value}\n'
+    regplot_label += f'std_err: {round_std_err}\n'
+
+    # plotting regression plot
+    ax = regplot(x=x_col,
+                 y=y_col,
+                 data=df,
+                 ci=None,
+                 color='b',
+                 line_kws={'label': regplot_label,
+                           'linewidth': 1},
+                 scatter_kws={'s': 5})
+
+    # adding legend
+    ax.legend()
+
+    # showing plot
+    plt.show()
+
+    # closing plot
+    plt.close()
 
 
 def get_cell_count_df(df: DataFrame,
@@ -136,23 +193,22 @@ def plot_cell_count_data(df: DataFrame) -> None:
     """
     # plotting data
     scatterplot(data=df,
-                x='img_name',
-                y='cell_count',
-                hue='evaluator')
+                x='fornma_cell_count',
+                y='model_cell_count')
 
-    # setting title/axis names
+    # setting title/axes names
     plt.title('Cell count comparison')
-    plt.ylabel('Cell count')
-    plt.xlabel('Image name')
-    plt.xticks(rotation=15)
+    plt.xlabel('Fornma Cell Counts (GT)')
+    plt.ylabel('Model Cell Counts (detections)')
 
-    # adding legend
-    plt.legend(title='Evaluator',
-               loc='upper right')
+    # setting axes ticks
+    plt.xticks(range(df['fornma_cell_count'].min(), df['fornma_cell_count'].max(), 5))
+    plt.yticks(range(df['model_cell_count'].min(), df['model_cell_count'].max(), 5))
+
+    print(df)
 
     # showing plot
     plt.show()
-    # plt.savefig('E:\Angelo\Desktop\ml_temp\output.png')
 
 
 def compare_model_cell_count_to_gt(detection_file_path: str,
@@ -181,6 +237,11 @@ def compare_model_cell_count_to_gt(detection_file_path: str,
     # plotting cell count data
     print('plotting cell count data...')
     plot_cell_count_data(df=cell_count_df)
+
+    # plotting linear regression
+    plot_linear_regression(df=cell_count_df,
+                           x_col='fornma_cell_count',
+                           y_col='model_cell_count')
 
     # printing execution message
     print('analysis complete.')
