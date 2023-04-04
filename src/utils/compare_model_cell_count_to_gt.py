@@ -32,7 +32,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = "analyse compare_annotations.py output module"
+    description = "compare model cell count to gt module"
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
