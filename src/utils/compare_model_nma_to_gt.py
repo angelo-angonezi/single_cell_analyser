@@ -10,7 +10,6 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-import pandas as pd
 from pandas import concat
 from seaborn import catplot
 from seaborn import regplot
@@ -23,9 +22,6 @@ from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_merged_detection_annotation_df
 print('all required libraries successfully imported.')  # noqa
-
-# next line prevents "SettingWithCopyWarning" pandas warning
-pd.options.mode.chained_assignment = None  # default='warn'
 
 #####################################################################
 # argument parsing related functions
@@ -80,6 +76,8 @@ def add_cell_area_col(df: DataFrame) -> None:
     Given a merged detections/annotations data frame,
     adds 'cell_area' column, calculated by
     multiplying width/height cols.
+    :param df: DataFrame. Represents merged detections/annotations data.
+    :return: None.
     """
     # adding cell area column to df
     df['cell_area'] = df['width'] * df['height']
@@ -90,6 +88,8 @@ def add_hue_col(df: DataFrame) -> None:
     Given a merged detections/annotations data frame,
     adds 'hue_col' column, obtained by merging
     evaluator and treatment cols.
+    :param df: DataFrame. Represents merged detections/annotations data.
+    :return: None.
     """
     # adding cell area column to df
     df['hue_col'] = df['evaluator'] + df['treatment']
@@ -102,6 +102,9 @@ def get_axis_ratio(width: float,
     Given width and height values, checks which one
     is larger, and returns ratio between longer
     and shorter axis.
+    :param width: Float. Represents OBB width.
+    :param height: Float. Represents OBB height.
+    :return: Float. Represents axis ratio.
     """
     # defining long and short axis based on width/height values
     long_axis = width if width > height else height
@@ -120,6 +123,8 @@ def add_axis_ratio_col(df: DataFrame) -> None:
     adds 'cell_area' column, calculated by dividing
     width/height cols (order varies depending on
     which is larger).
+    :param df: DataFrame. Represents merged detections/annotations data.
+    :return: None.
     """
     # adding axis ratio placeholder column to df
     df['axis_ratio'] = None
@@ -146,6 +151,8 @@ def add_treatment_col(df: DataFrame) -> None:
     """
     Given a merged detections/annotations data frame,
     adds 'treatment' column, obtained by file name.
+    :param df: DataFrame. Represents merged detections/annotations data.
+    :return: None.
     """
     # adding treatment placeholder column to df
     df['treatment'] = None
@@ -160,7 +167,10 @@ def add_treatment_col(df: DataFrame) -> None:
         img_file_name = row_data['img_file_name']
         img_file_name_split = img_file_name.split('_')
         treatment_col = img_file_name_split[1]
-        current_treatment = treatment_col[0]
+        treatment_str = treatment_col[0]
+
+        # defining current treatment
+        current_treatment = 'Control' if treatment_str == 'B' else 'ATF6'
 
         # updating current line axis ratio value
         df.at[row_index, 'treatment'] = current_treatment
@@ -174,6 +184,8 @@ def get_nma_df(df: DataFrame) -> DataFrame:
     |   model   |   633.6   |   1.60913  |
     |   fornma  |   267.1   |   1.77106  |
     ...
+    :param df: DataFrame. Represents merged detections/annotations data.
+    :return: None.
     """
     # adding cell area column to df
     add_cell_area_col(df=df)
@@ -201,11 +213,23 @@ def get_nma_df(df: DataFrame) -> DataFrame:
     return final_df
 
 
+def plot_control_histograms(df: DataFrame) -> None:
+    """
+    Given a nma data frame, plots cell_area and axis_ratio
+    histograms, filtering df by control group.
+    :param df: DataFrame. Represents NMA data.
+    :return: None.
+    """
+    pass
+
+
 def plot_nma_data(df: DataFrame) -> None:
     """
     Given a nma data frame, plots nma (cell_area X axis_ratio),
     coloring data by evaluator (model detections and fornma
     annotations).
+    :param df: DataFrame. Represents NMA data.
+    :return: None.
     """
     # plotting scatter plot
     # scatterplot(data=df,
