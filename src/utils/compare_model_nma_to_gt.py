@@ -11,6 +11,7 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 from pandas import DataFrame
+from seaborn import histplot
 from seaborn import FacetGrid
 from seaborn import scatterplot
 from argparse import ArgumentParser
@@ -78,18 +79,6 @@ def add_cell_area_col(df: DataFrame) -> None:
     """
     # adding cell area column to df
     df['cell_area'] = df['width'] * df['height']
-
-
-def add_hue_col(df: DataFrame) -> None:
-    """
-    Given a merged detections/annotations data frame,
-    adds 'hue_col' column, obtained by merging
-    evaluator and treatment cols.
-    :param df: DataFrame. Represents merged detections/annotations data.
-    :return: None.
-    """
-    # adding cell area column to df
-    df['hue_col'] = df['evaluator'] + df['treatment']
 
 
 def get_axis_ratio(width: float,
@@ -185,20 +174,20 @@ def get_nma_df(df: DataFrame) -> DataFrame:
     :return: None.
     """
     # adding cell area column to df
+    print('adding cell area column to df...')
     add_cell_area_col(df=df)
 
     # adding axis ratio column to df
+    print('adding axis ratio column to df...')
     add_axis_ratio_col(df=df)
 
     # adding treatment column to df
+    print('adding treatment column to df...')
     add_treatment_col(df=df)
-
-    # adding hue col to df
-    add_hue_col(df=df)
 
     # dropping unrequired cols
     all_cols = df.columns.to_list()
-    keep_cols = ['cell_area', 'axis_ratio', 'evaluator', 'treatment', 'hue_col']
+    keep_cols = ['cell_area', 'axis_ratio', 'evaluator', 'treatment']
     drop_cols = [col
                  for col
                  in all_cols
@@ -210,14 +199,33 @@ def get_nma_df(df: DataFrame) -> DataFrame:
     return final_df
 
 
-def plot_control_histograms(df: DataFrame) -> None:
+def plot_annotations_histograms(df: DataFrame) -> None:
     """
     Given a nma data frame, plots cell_area and axis_ratio
     histograms, filtering df by control group.
     :param df: DataFrame. Represents NMA data.
     :return: None.
     """
-    pass
+    # filtering df for annotations data only
+    annotator_df = df[df['evaluator'] == 'fornma']
+
+    # defining x_cols
+    x_cols = ['cell_area', 'axis_ratio']
+
+    # iterating over x_cols
+    for x_col in x_cols:
+
+        # creating histogram
+        histplot(data=annotator_df,
+                 x=x_col,
+                 hue='treatment',
+                 kde=True)
+    
+        # showing plot
+        plt.show()
+
+        # closing plot
+        plt.close()
 
 
 def plot_nma_data(df: DataFrame) -> None:
@@ -228,25 +236,21 @@ def plot_nma_data(df: DataFrame) -> None:
     :param df: DataFrame. Represents NMA data.
     :return: None.
     """
+    # creating grid for plot
+    plot_grid = FacetGrid(data=df,
+                          col='treatment',
+                          hue='evaluator')
 
+    # mapping scatter plot
+    plot_grid.map(scatterplot,
+                  'axis_ratio',
+                  'cell_area')
 
-    g = FacetGrid(data=df, col='treatment', hue='evaluator')
-    g.map(scatterplot, 'axis_ratio', 'cell_area', alpha=.7)
-    g.add_legend()
-
-    # setting plot title
-    # title = 'NMA plots comparison (model VS fornma)'
-    # plt.title(title)
-
-    # setting plot axis labels
-    # plt.xlabel('Axis ratio (whole OBB long/short axis)')
-    # plt.ylabel('Cell area (whole OBB pixels)')
+    # adding legend
+    plot_grid.add_legend()
 
     # showing plot
     plt.show()
-
-    # closing plot
-    plt.close()
 
 
 def compare_model_cell_count_to_gt(detection_file_path: str,
@@ -270,6 +274,10 @@ def compare_model_cell_count_to_gt(detection_file_path: str,
     # getting nma data
     print('getting nma df...')
     nma_df = get_nma_df(df=merged_df)
+
+    # plotting nma data
+    print('plotting nma histograms...')
+    plot_annotations_histograms(df=nma_df)
 
     # plotting nma data
     print('plotting nma...')
