@@ -10,12 +10,9 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-from pandas import concat
-from seaborn import catplot
-from seaborn import regplot
 from pandas import DataFrame
+from seaborn import FacetGrid
 from seaborn import scatterplot
-from scipy.stats import linregress
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 from src.utils.aux_funcs import enter_to_continue
@@ -231,12 +228,7 @@ def plot_nma_data(df: DataFrame) -> None:
     :param df: DataFrame. Represents NMA data.
     :return: None.
     """
-    # plotting scatter plot
-    # scatterplot(data=df,
-    #             x='axis_ratio',
-    #             y='cell_area',
-    #             hue='evaluator')
-    from seaborn import FacetGrid
+
 
     g = FacetGrid(data=df, col='treatment', hue='evaluator')
     g.map(scatterplot, 'axis_ratio', 'cell_area', alpha=.7)
