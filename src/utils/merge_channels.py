@@ -1,9 +1,9 @@
-# check incucyte export module
+# merge channels module
 
 print('initializing...')  # noqa
 
-# Code destined to checking incucyte
-# exported images.
+# Code destined to merging channels
+# for forNMA integration.
 
 ######################################################################
 # imports
@@ -27,25 +27,25 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'check incucyte export (if phase/red images match)'
+    description = 'merge channels module - join red/green data into single image'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
 
     # adding arguments to parser
 
-    # phase images folder path param
-    parser.add_argument('-p', '--phase-folder-path',
-                        dest='phase_folder_path',
-                        type=str,
-                        help='defines path to folder containing phase images (.jpg)',
-                        required=True)
-
     # red images folder path param
     parser.add_argument('-r', '--red-folder-path',
                         dest='red_folder_path',
                         type=str,
                         help='defines path to folder containing red images (.tif)',
+                        required=True)
+
+    # red images folder path param
+    parser.add_argument('-g', '--green-folder-path',
+                        dest='green_folder_path',
+                        type=str,
+                        help='defines path to folder containing green images (.tif)',
                         required=True)
 
     # creating arguments dictionary
@@ -58,69 +58,24 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def phase_matches_red(phase_images_folder: str,
-                      red_images_folder: str
-                      ) -> bool:
+def merge_single_image(red_img_path: str,
+                       green_img_path: str,
+                       output_path: str
+                       ) -> None:
     """
-    Given a path to phase/red folders, returns True
-    if all images contained in folders match, and
-    False otherwise.
+    Given paths for red/green images,
+    saves images merge into output path.
+    :param red_img_path: String. Represents a file path.
+    :param green_img_path: String. Represents a file path.
+    :param output_path: String. Represents a file path.
+    :return: None.
     """
-    # getting images in phase folder
-    phase_images = get_specific_files_in_folder(path_to_folder=phase_images_folder,
-                                                extension='.jpg')
-
-    # getting images in red folder
-    red_images = get_specific_files_in_folder(path_to_folder=red_images_folder,
-                                              extension='.tif')
-
-    # getting image names
-    phase_image_names = [f.replace('.jpg', '') for f in phase_images]
-    red_image_names = [f.replace('.tif', '') for f in red_images]
-
-    # getting image numbers
-    phase_images_num = len(phase_image_names)
-    red_images_num = len(red_image_names)
-
-    # printing execution message
-    f_string = f'{phase_images_num} images [.jpg] found in phase folder.\n'
-    f_string += f'{red_images_num} images [.tif] found in red folder.'
-    spacer()
-    print(f_string)
-
-    # checking whether image names match
-    match_bool = (phase_image_names == red_image_names)
-
-    # returning boolean value
-    return match_bool
+    pass
 
 
-def check_incucyte_export(phase_images_folder: str,
-                          red_images_folder: str
-                          ) -> None:
-    """
-    Given a path to phase/red folders, checks whether
-    all images have respective equivalents in each folder,
-    printing execution message as output.
-    """
-    # getting match bool
-    images_match = phase_matches_red(phase_images_folder=phase_images_folder,
-                                     red_images_folder=red_images_folder)
+def merge_multiple_images(red_imgs_folder: str):
+    pass
 
-    # checking whether images match
-    if images_match:
-
-        # defining execution message
-        e_string = 'All images match!'
-
-    else:
-
-        # defining execution message
-        e_string = 'Not all images match!\n'
-        e_string += 'Please, check incucyte export folders.'
-
-    # printing execution message
-    print(e_string)
 
 ######################################################################
 # defining main function
@@ -133,11 +88,11 @@ def main():
     # getting data from Argument Parser
     args_dict = get_args_dict()
 
-    # getting phase images folder param
-    phase_folder_path = args_dict['phase_folder_path']
-
     # getting red images folder param
     red_folder_path = args_dict['red_folder_path']
+
+    # getting green images folder param
+    green_folder_path = args_dict['green_folder_path']
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
@@ -145,9 +100,8 @@ def main():
     # waiting for user input
     enter_to_continue()
 
-    # running check_incucyte_export function
-    check_incucyte_export(phase_images_folder=phase_folder_path,
-                          red_images_folder=red_folder_path)
+    # running asdasdasdasd function
+
 
 ######################################################################
 # running main function
