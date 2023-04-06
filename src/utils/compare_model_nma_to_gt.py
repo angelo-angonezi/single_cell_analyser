@@ -10,6 +10,8 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
+from pandas import concat
+from pandas import read_csv
 from pandas import DataFrame
 from seaborn import histplot
 from seaborn import FacetGrid
@@ -274,6 +276,14 @@ def compare_model_cell_count_to_gt(detection_file_path: str,
     # getting nma data
     print('getting nma df...')
     nma_df = get_nma_df(df=merged_df)
+
+    # adding manual values
+    manual_df = read_csv('/home/angelo/Desktop/fer_nma_data.csv',
+                         decimal=',')
+    print(manual_df)
+    print(nma_df)
+    dfs_list = [manual_df, nma_df]
+    final_df = concat(dfs_list)
 
     # plotting nma data
     print('plotting nma histograms...')
