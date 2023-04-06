@@ -10,6 +10,8 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
+from cv2 import imread
+from os.path import join
 from argparse import ArgumentParser
 from src.utils.aux_funcs import spacer
 from src.utils.aux_funcs import enter_to_continue
@@ -95,19 +97,32 @@ def merge_single_image(red_image_path: str,
     pass
 
 
-def merge_multiple_images(red_images_paths: str,
-                          green_images_paths: str,
+def merge_multiple_images(red_images_paths: list,
+                          green_images_paths: list,
                           output_folder: str
                           ) -> None:
     """
     Given paths for red/green images,
     saves images merge into output path.
-    :param red_images_paths: String. Represents a path to a file.
-    :param green_images_paths: String. Represents a path to a file.
+    :param red_images_paths: List. Represents paths to files.
+    :param green_images_paths: List. Represents paths to files.
     :param output_folder: String. Represents a path to a folder.
     :return: None.
     """
-    pass
+    # creating images zip
+    red_green_zip = zip(red_images_paths, green_images_paths)
+
+    # iterating over zip items
+    for red_image_path, green_image_path in red_green_zip:
+
+        # opening red/green images
+        red_image = imread(red_image_path, 0)
+        green_image = imread(green_image_path, 0)
+
+        print(red_image)
+        print(green_image)
+
+        exit()
 
 
 def merge_channels(red_images_folder: str,
@@ -133,6 +148,14 @@ def merge_channels(red_images_folder: str,
     red_images_num = len(red_images)
     green_images_num = len(green_images)
 
+    # getting images paths
+    red_images_paths = [join(red_images_folder, img_name)
+                        for img_name
+                        in red_images]
+    green_images_paths = [join(green_images_folder, img_name)
+                          for img_name
+                          in green_images]
+
     # printing execution message
     f_string = f'{red_images_num} red images found in input folder\n'
     f_string += f'{green_images_num} red images found in input folder'
@@ -143,18 +166,17 @@ def merge_channels(red_images_folder: str,
                          green_images=green_images):
 
         # running merge_multiple_images functions
-        merge_multiple_images()
+        merge_multiple_images(red_images_paths=red_images_paths,
+                              green_images_paths=green_images_paths,
+                              output_folder=output_folder)
 
     # if images do not match
-    if not images_match:
+    else:
+
         # printing error message
         e_string = "red and green images don't match!\n"
         e_string += 'Please, check input folders and try again.'
         print(e_string)
-
-        # returning None (quitting)
-        return None
-
 
 ######################################################################
 # defining main function
@@ -182,10 +204,10 @@ def main():
     # waiting for user input
     enter_to_continue()
 
-    # running merge_multiple_images function
-    merge_multiple_images(red_images_folder=red_folder_path,
-                          green_images_folder=green_folder_path,
-                          output_folder=output_folder_path)
+    # running merge_channels function
+    merge_channels(red_images_folder=red_folder_path,
+                   green_images_folder=green_folder_path,
+                   output_folder=output_folder_path)
 
 ######################################################################
 # running main function
