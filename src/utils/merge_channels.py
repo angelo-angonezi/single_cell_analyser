@@ -65,6 +65,21 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
+def red_matches_green(red_images: list,
+                      green_images: list
+                      ) -> bool:
+    """
+    Given red/green images lists, returns True
+    if all images contained in folders match,
+    and False otherwise.
+    """
+    # checking whether image names match
+    match_bool = (red_images == green_images)
+
+    # returning boolean value
+    return match_bool
+
+
 def merge_single_image(red_image_path: str,
                        green_image_path: str,
                        output_path: str
@@ -80,10 +95,25 @@ def merge_single_image(red_image_path: str,
     pass
 
 
-def merge_multiple_images(red_images_folder: str,
-                          green_images_folder: str,
+def merge_multiple_images(red_images_paths: str,
+                          green_images_paths: str,
                           output_folder: str
                           ) -> None:
+    """
+    Given paths for red/green images,
+    saves images merge into output path.
+    :param red_images_paths: String. Represents a path to a file.
+    :param green_images_paths: String. Represents a path to a file.
+    :param output_folder: String. Represents a path to a folder.
+    :return: None.
+    """
+    pass
+
+
+def merge_channels(red_images_folder: str,
+                   green_images_folder: str,
+                   output_folder: str
+                   ) -> None:
     """
     Given paths for red/green images folders,
     merges each image based on both channels,
@@ -93,7 +123,37 @@ def merge_multiple_images(red_images_folder: str,
     :param output_folder: String. Represents a path to a folder.
     :return: None.
     """
-    pass
+    # getting images in red/green folders
+    red_images = get_specific_files_in_folder(path_to_folder=red_images_folder,
+                                              extension='.tif')
+    green_images = get_specific_files_in_folder(path_to_folder=green_images_folder,
+                                                extension='.tif')
+
+    # getting images num
+    red_images_num = len(red_images)
+    green_images_num = len(green_images)
+
+    # printing execution message
+    f_string = f'{red_images_num} red images found in input folder\n'
+    f_string += f'{green_images_num} red images found in input folder'
+    print(f_string)
+
+    # checking whether image names match
+    if red_matches_green(red_images=red_images,
+                         green_images=green_images):
+
+        # running merge_multiple_images functions
+        merge_multiple_images()
+
+    # if images do not match
+    if not images_match:
+        # printing error message
+        e_string = "red and green images don't match!\n"
+        e_string += 'Please, check input folders and try again.'
+        print(e_string)
+
+        # returning None (quitting)
+        return None
 
 
 ######################################################################
@@ -122,8 +182,10 @@ def main():
     # waiting for user input
     enter_to_continue()
 
-    # running asdasdasdasd function
-
+    # running merge_multiple_images function
+    merge_multiple_images(red_images_folder=red_folder_path,
+                          green_images_folder=green_folder_path,
+                          output_folder=output_folder_path)
 
 ######################################################################
 # running main function
