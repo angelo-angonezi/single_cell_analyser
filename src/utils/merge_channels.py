@@ -65,22 +65,34 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def merge_single_image(red_img_path: str,
-                       green_img_path: str,
+def merge_single_image(red_image_path: str,
+                       green_image_path: str,
                        output_path: str
                        ) -> None:
     """
     Given paths for red/green images,
     saves images merge into output path.
-    :param red_img_path: String. Represents a file path.
-    :param green_img_path: String. Represents a file path.
-    :param output_path: String. Represents a file path.
+    :param red_image_path: String. Represents a path to a file.
+    :param green_image_path: String. Represents a path to a file.
+    :param output_path: String. Represents a path to a file.
     :return: None.
     """
     pass
 
 
-def merge_multiple_images(red_imgs_folder: str):
+def merge_multiple_images(red_images_folder: str,
+                          green_images_folder: str,
+                          output_folder: str
+                          ) -> None:
+    """
+    Given paths for red/green images folders,
+    merges each image based on both channels,
+    and saves them to given output folder.
+    :param red_images_folder: String. Represents a path to a folder.
+    :param green_images_folder: String. Represents a path to a folder.
+    :param output_folder: String. Represents a path to a folder.
+    :return: None.
+    """
     pass
 
 
