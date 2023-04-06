@@ -48,6 +48,13 @@ def get_args_dict() -> dict:
                         help='defines path to folder containing green images (.tif)',
                         required=True)
 
+    # output folder path param
+    parser.add_argument('-o', '--output-folder-path',
+                        dest='output_folder_path',
+                        type=str,
+                        help='defines path to folder which will contain merged images (.tif)',
+                        required=True)
+
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
 
@@ -93,6 +100,9 @@ def main():
 
     # getting green images folder param
     green_folder_path = args_dict['green_folder_path']
+
+    # getting output folder param
+    output_folder_path = args_dict['output_folder_path']
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
