@@ -11,8 +11,12 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 from cv2 import imread
+from cv2 import imwrite
 from os.path import join
+from numpy import add as np_add
+from cv2 import IMREAD_UNCHANGED
 from argparse import ArgumentParser
+from os.path import split as os_split
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
@@ -84,7 +88,8 @@ def red_matches_green(red_images: list,
 
 def merge_single_image(red_image_path: str,
                        green_image_path: str,
-                       output_path: str
+                       output_path: str,
+                       red_multiplier: int
                        ) -> None:
     """
     Given paths for red/green images,
@@ -92,9 +97,24 @@ def merge_single_image(red_image_path: str,
     :param red_image_path: String. Represents a path to a file.
     :param green_image_path: String. Represents a path to a file.
     :param output_path: String. Represents a path to a file.
+    :param red_multiplier: Integer. Represents red channel weight.
     :return: None.
     """
-    pass
+    # opening red/green images
+    red_image = imread(red_image_path, IMREAD_UNCHANGED)
+    green_image = imread(green_image_path, IMREAD_UNCHANGED)
+
+    # adding weights to red channel
+    red_image = red_image * 2
+
+    # merging images
+    merge_image = np_add(red_image, green_image)
+
+    # saving merged image
+    imwrite(filename=output_path,
+            img=merge_image)
+
+    exit()
 
 
 def merge_multiple_images(red_images_paths: list,
@@ -124,14 +144,21 @@ def merge_multiple_images(red_images_paths: list,
                                index=img_index,
                                total=total_imgs_num)
 
-        # opening red/green images
-        red_image = imread(red_image_path, 0)
-        green_image = imread(green_image_path, 0)
+        # getting save path
+        name_split = os_split(red_image_path)
+        save_name = name_split[-1]
+        save_name = str(save_name)
+        save_path = join(output_folder,
+                         save_name)
 
-        print(red_image)
-        print(green_image)
+        # running merge_single_image function
+        merge_single_image(red_image_path=red_image_path,
+                           green_image_path=green_image_path,
+                           output_path=save_path)
 
-        exit()
+    # printing execution message
+    f_string = f'all {total_imgs_num} images merged!'
+    print(f_string)
 
 
 def merge_channels(red_images_folder: str,
@@ -166,15 +193,20 @@ def merge_channels(red_images_folder: str,
                           in green_images]
 
     # printing execution message
-    f_string = f'{red_images_num} red images found in input folder\n'
-    f_string += f'{green_images_num} red images found in input folder'
+    f_string = f'{red_images_num} red images found in input folder.\n'
+    f_string += f'{green_images_num} green images found in input folder.'
     print(f_string)
 
     # checking whether image names match
     if red_matches_green(red_images=red_images,
                          green_images=green_images):
 
+        # printing error message
+        e_string = 'red and green images match!'
+        print(e_string)
+
         # running merge_multiple_images functions
+        print('merging images...')
         merge_multiple_images(red_images_paths=red_images_paths,
                               green_images_paths=green_images_paths,
                               output_folder=output_folder)

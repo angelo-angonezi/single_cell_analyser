@@ -117,6 +117,7 @@ def print_progress_message(base_string: str,
     # assembling progress string
     progress_string = base_string.replace('#INDEX#', str(index))
     progress_string = progress_string.replace('#TOTAL#', str(total))
+    progress_string += '...'
     progress_string += f' ({progress_percentage_round}%)'
 
     # showing progress message
