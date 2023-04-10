@@ -11,7 +11,7 @@ from pandas import concat
 from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
-from src.utils.aux_funcs import flush_or_print
+from src.utils.aux_funcs import print_progress_message
 
 #####################################################################
 # argument parsing related functions
@@ -87,13 +87,10 @@ def convert_single_file(input_csv_file_path: str,
         row_index += 1
 
         # flushing/printing execution message
-        percentage_progress = row_index / rows_num
-        percentage_progress *= 100
-        percentage_progress = round(percentage_progress)
-        f_string = f'getting info on OBB {row_index} of {rows_num}... ({percentage_progress}%)'
-        flush_or_print(string=f_string,
-                       index=row_index,
-                       total=rows_num)
+        f_string = f'getting info on OBB #INDEX# of #TOTAL#'
+        print_progress_message(base_string=f_string,
+                               index=row_index,
+                               total=rows_num)
 
         # getting file name
         file_name = row_data['Image_name_53bp1']

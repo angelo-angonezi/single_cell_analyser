@@ -13,7 +13,7 @@ from os.path import join
 from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
-from src.utils.aux_funcs import flush_or_print
+from src.utils.aux_funcs import print_progress_message
 
 #####################################################################
 # argument parsing related functions
@@ -210,13 +210,10 @@ def convert_multiple_files(images_folder_path: str,
         output_path = join(output_xml_folder, output_name)
 
         # printing execution message
-        progress_ratio = img_index / imgs_num
-        progress_percentage = progress_ratio * 100
-        progress_percentage_round = round(progress_percentage)
-        f_string = f'converting annotations for file {img_index} of {imgs_num} ({progress_percentage_round}%)'
-        flush_or_print(string=f_string,
-                       index=img_index,
-                       total=imgs_num)
+        f_string = f'converting annotations for file #INDEX# of #TOTAL#'
+        print_progress_message(base_string=f_string,
+                               index=img_index,
+                               total=imgs_num)
 
         # running single converter function
         convert_single_file(img_name=img_name,

@@ -13,8 +13,8 @@ print('importing required libraries...')  # noqa
 from cv2 import imread
 from os.path import join
 from argparse import ArgumentParser
-from src.utils.aux_funcs import spacer
 from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
 print('all required libraries successfully imported.')  # noqa
@@ -109,11 +109,20 @@ def merge_multiple_images(red_images_paths: list,
     :param output_folder: String. Represents a path to a folder.
     :return: None.
     """
+    # getting total imgs num
+    total_imgs_num = len(red_images_paths)
+
     # creating images zip
     red_green_zip = zip(red_images_paths, green_images_paths)
 
     # iterating over zip items
-    for red_image_path, green_image_path in red_green_zip:
+    for img_index, (red_image_path, green_image_path) in enumerate(red_green_zip, 1):
+
+        # printing execution message
+        progress_base_string = 'merging image #INDEX# of #TOTAL#'
+        print_progress_message(base_string=progress_base_string,
+                               index=img_index,
+                               total=total_imgs_num)
 
         # opening red/green images
         red_image = imread(red_image_path, 0)

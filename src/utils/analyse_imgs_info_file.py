@@ -10,14 +10,9 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 from argparse import ArgumentParser
-from src.utils.aux_funcs import spacer
-from src.utils.aux_funcs import flush_or_print
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
-
-#####################################################################
-# defining global variables
 
 #####################################################################
 # argument parsing related functions

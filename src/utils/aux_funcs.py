@@ -94,6 +94,37 @@ def flush_or_print(string: str,
         flush_string(string)
 
 
+def print_progress_message(base_string: str,
+                           index: int,
+                           total: int
+                           ) -> None:
+    """
+    Given a base string (containing keywords #INDEX#
+    and #TOTAL#) an index and a total (integers),
+    prints execution message, substituting #INDEX#
+    and #TOTAL# keywords by respective integers.
+    !!!Useful for FOR loops execution messages!!!
+    :param base_string: String. Represents a base string.
+    :param index: Integer. Represents an execution index.
+    :param total: Integer. Represents iteration maximum value.
+    :return: None.
+    """
+    # getting percentage progress
+    progress_ratio = index / total
+    progress_percentage = progress_ratio * 100
+    progress_percentage_round = round(progress_percentage)
+
+    # assembling progress string
+    progress_string = base_string.replace('#INDEX#', str(index))
+    progress_string = progress_string.replace('#TOTAL#', str(total))
+    progress_string += f' ({progress_percentage_round}%)'
+
+    # showing progress message
+    flush_or_print(string=progress_string,
+                   index=index,
+                   total=total)
+
+
 def get_specific_files_in_folder(path_to_folder: str,
                                  extension: str
                                  ) -> list:
@@ -118,20 +149,6 @@ def get_specific_files_in_folder(path_to_folder: str,
 
     # returning list
     return files_in_dir
-
-
-def get_data_from_consolidated_df(consolidated_df_file_path: str) -> DataFrame:
-    """
-    Given a path to a consolidated dataframe,
-    returns processed dataframe.
-    :param consolidated_df_file_path: String. Represents a path to a file.
-    :return: DataFrame. Represents data contained in input file.
-    """
-    # reading df from file path
-    consolidated_df = read_csv(consolidated_df_file_path)
-
-    # returning df
-    return consolidated_df
 
 
 def get_obbs_from_df(df: DataFrame) -> list:
@@ -240,13 +257,10 @@ def copy_multiple_files(src_folder_path: str,
         dst_path = join(dst_folder_path, file_path)
 
         # printing execution message
-        progress_ratio = file_index / files_num
-        progress_percentage = progress_ratio * 100
-        progress_percentage_round = round(progress_percentage)
-        f_string = f'copying file {file_index} of {files_num} ({progress_percentage_round}%)'
-        flush_or_print(string=f_string,
-                       index=file_index,
-                       total=files_num)
+        f_string = f'copying file #INDEX# of #TOTAL#'
+        print_progress_message(base_string=f_string,
+                               index=file_index,
+                               total=files_num)
 
         # copying file from src to dst folder
         sh_copy(src=src_path,

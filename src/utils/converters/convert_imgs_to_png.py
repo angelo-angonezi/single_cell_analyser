@@ -8,7 +8,7 @@ from PIL import Image
 from os import listdir
 from os.path import join
 from argparse import ArgumentParser
-from src.utils.aux_funcs import flush_or_print
+from src.utils.aux_funcs import print_progress_message
 
 #####################################################################
 # argument parsing related functions
@@ -85,13 +85,10 @@ def convert_multiple_files(input_folder_path: str,
     for file_index, file in enumerate(files, 1):
 
         # printing execution message
-        progress_ratio = file_index / files_num
-        progress_percentage = progress_ratio * 100
-        progress_percentage_round = round(progress_percentage)
-        f_string = f'converting image {file_index} of {files_num} ({progress_percentage_round}%)      '
-        flush_or_print(string=f_string,
-                       index=file_index,
-                       total=files_num)
+        f_string = f'converting image #INDEX# of #TOTAL#'
+        print_progress_message(base_string=f_string,
+                               index=file_index,
+                               total=files_num)
 
         # getting input file path
         input_file_path = join(input_folder_path, file)

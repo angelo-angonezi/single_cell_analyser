@@ -25,8 +25,8 @@ from cv2 import COLOR_BGR2RGB
 from cv2 import COLOR_RGB2BGR
 from argparse import ArgumentParser
 from cv2 import FONT_HERSHEY_SIMPLEX
-from src.utils.aux_funcs import flush_or_print
 from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
 from src.utils.aux_funcs import get_merged_detection_annotation_df
@@ -322,13 +322,10 @@ def add_overlays_to_multiple_images(input_folder: str,
     for image_index, image_name in enumerate(images_names, 1):
 
         # printing execution message
-        progress_ratio = image_index / images_num
-        progress_percentage = progress_ratio * 100
-        progress_percentage_round = round(progress_percentage)
-        progress_string = f'adding overlays to image {image_index} of {images_num} ({progress_percentage_round}%)'
-        flush_or_print(string=progress_string,
-                       index=image_index,
-                       total=images_num)
+        progress_base_string = f'adding overlays to image #INDEX# of #TOTAL#'
+        print_progress_message(base_string=progress_base_string,
+                               index=image_index,
+                               total=images_num)
 
         # getting image path
         image_name_w_extension = f'{image_name}{images_extension}'

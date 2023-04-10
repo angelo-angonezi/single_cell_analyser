@@ -16,8 +16,8 @@ from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
 from pandas.errors import EmptyDataError
-from src.utils.aux_funcs import flush_or_print
 from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
 print('all required libraries successfully imported.')  # noqa
@@ -127,10 +127,10 @@ def create_dataframe_from_multiple_detection_files(input_folder: str) -> DataFra
             row_index += 1
 
             # flushing execution message
-            f_string = f'reading row {row_index} of {rows_num} ({det_class})...'
-            flush_or_print(string=f_string,
-                           index=row_index,
-                           total=rows_num)
+            f_string = f'reading row #INDEX of #TOTAL#'
+            print_progress_message(base_string=f_string,
+                                   index=row_index,
+                                   total=rows_num)
 
             # getting current row info
             img_file_name = row_data[0]

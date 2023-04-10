@@ -10,7 +10,7 @@ print('initializing...')  # noqa
 
 print('importing required libraries...')  # noqa
 from time import sleep
-from src.utils.aux_funcs import get_data_from_consolidated_df
+from pandas import read_csv
 print('all required libraries successfully imported.')  # noqa
 sleep(0.8)
 
@@ -26,7 +26,7 @@ def main():
     """
     # getting data from consolidated df csv
     print('getting data from consolidated df...')
-    main_df = get_data_from_consolidated_df(consolidated_df_file_path=CONSOLIDATED_DATAFRAME_PATH)
+    main_df = read_csv(consolidated_df_file_path=CONSOLIDATED_DATAFRAME_PATH)
 
     pass
 

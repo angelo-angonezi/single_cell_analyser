@@ -12,8 +12,8 @@ print('importing required libraries...')  # noqa
 from pandas import concat
 from pandas import DataFrame
 from argparse import ArgumentParser
-from src.utils.aux_funcs import flush_or_print
 from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
 print('all required libraries successfully imported.')  # noqa
@@ -121,13 +121,10 @@ def generate_base_imgs_info_file(train_imgs_folder: str,
     for image_index, image_name in enumerate(all_imgs, 1):
 
         # printing execution message
-        progress_ratio = image_index / imgs_num
-        progress_percentage = progress_ratio * 100
-        progress_percentage_round = round(progress_percentage)
-        progress_string = f'analysing image {image_index} of {imgs_num} ({progress_percentage_round}%)'
-        flush_or_print(string=progress_string,
-                       index=image_index,
-                       total=imgs_num)
+        progress_string = f'analysing image #INDEX# of #TOTAL#'
+        print_progress_message(base_string=progress_string,
+                               index=image_index,
+                               total=imgs_num)
 
         # getting current image data
         current_img_split = image_name.split('_')

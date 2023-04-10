@@ -9,10 +9,10 @@
 # importing required libraries
 import math
 from os.path import join
-import xml.etree.ElementTree as ET
+from xml.etree import ElementTree
 from argparse import ArgumentParser
-from src.utils.aux_funcs import flush_or_print
 from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
 
@@ -91,10 +91,10 @@ def convert_single_file(input_xml_file_path: str,
     :return: None.
     """
     # opening xml file
-    tree = ET.parse(input_xml_file_path)
+    tree = ElementTree.parse(input_xml_file_path)
     root = tree.getroot()
 
-    # defining placeholder values for width and heigth (updated below)
+    # defining placeholder values for width and height (updated below)
     images_width = 0.0
     images_height = 0.0
 
@@ -238,10 +238,10 @@ def convert_multiple_files(input_xml_folder: str,
         output_path = join(output_txt_folder, output_name)
 
         # running single converter function
-        f_string = f'converting annotations for file {index} of {num_of_files}'
-        flush_or_print(string=f_string,
-                       index=index,
-                       total=num_of_files)
+        f_string = f'converting annotations for file #INDEX of #TOTAL#'
+        print_progress_message(base_string=f_string,
+                               index=index,
+                               total=num_of_files)
 
         convert_single_file(input_xml_file_path=input_path,
                             output_txt_file_path=output_path,
