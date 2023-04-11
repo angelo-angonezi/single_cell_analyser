@@ -62,6 +62,13 @@ def get_args_dict() -> dict:
                         help='defines path to folder which will contain merged images (.tif)',
                         required=True)
 
+    # red multiplier param
+    parser.add_argument('-m', '--red-multiplier',
+                        dest='red_multiplier',
+                        type=int,
+                        help='defines weights for red channel',
+                        required=True)
+
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
 
@@ -119,7 +126,8 @@ def merge_single_image(red_image_path: str,
 
 def merge_multiple_images(red_images_paths: list,
                           green_images_paths: list,
-                          output_folder: str
+                          output_folder: str,
+                          red_multiplier: int
                           ) -> None:
     """
     Given paths for red/green images,
@@ -127,6 +135,7 @@ def merge_multiple_images(red_images_paths: list,
     :param red_images_paths: List. Represents paths to files.
     :param green_images_paths: List. Represents paths to files.
     :param output_folder: String. Represents a path to a folder.
+    :param red_multiplier: Integer. Represents weights for red channel.
     :return: None.
     """
     # getting total imgs num
@@ -155,7 +164,7 @@ def merge_multiple_images(red_images_paths: list,
         merge_single_image(red_image_path=red_image_path,
                            green_image_path=green_image_path,
                            output_path=save_path,
-                           red_multiplier=3)
+                           red_multiplier=red_multiplier)
 
     # printing execution message
     f_string = f'all {total_imgs_num} images merged!'
@@ -164,7 +173,8 @@ def merge_multiple_images(red_images_paths: list,
 
 def merge_channels(red_images_folder: str,
                    green_images_folder: str,
-                   output_folder: str
+                   output_folder: str,
+                   red_multiplier: int
                    ) -> None:
     """
     Given paths for red/green images folders,
@@ -173,6 +183,7 @@ def merge_channels(red_images_folder: str,
     :param red_images_folder: String. Represents a path to a folder.
     :param green_images_folder: String. Represents a path to a folder.
     :param output_folder: String. Represents a path to a folder.
+    :param red_multiplier: Integer. Represents weights for red channel.
     :return: None.
     """
     # getting images in red/green folders
@@ -210,7 +221,8 @@ def merge_channels(red_images_folder: str,
         print('merging images...')
         merge_multiple_images(red_images_paths=red_images_paths,
                               green_images_paths=green_images_paths,
-                              output_folder=output_folder)
+                              output_folder=output_folder,
+                              red_multiplier=red_multiplier)
 
     # if images do not match
     else:
@@ -240,6 +252,9 @@ def main():
     # getting output folder param
     output_folder_path = args_dict['output_folder_path']
 
+    # getting red multiplier param
+    red_multiplier = args_dict['red_multiplier']
+
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
@@ -249,7 +264,8 @@ def main():
     # running merge_channels function
     merge_channels(red_images_folder=red_folder_path,
                    green_images_folder=green_folder_path,
-                   output_folder=output_folder_path)
+                   output_folder=output_folder_path,
+                   red_multiplier=red_multiplier)
 
 ######################################################################
 # running main function
