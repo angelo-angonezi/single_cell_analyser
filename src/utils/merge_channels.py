@@ -10,13 +10,14 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-from cv2 import imread
-from cv2 import imwrite
 from os.path import join
 from numpy import add as np_add
+from cv2 import imread
 from cv2 import IMREAD_UNCHANGED
 from argparse import ArgumentParser
 from os.path import split as os_split
+from tifffile import imread as tiff_imread
+from tifffile import imwrite as tiff_imwrite
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
@@ -101,20 +102,19 @@ def merge_single_image(red_image_path: str,
     :return: None.
     """
     # opening red/green images
-    red_image = imread(red_image_path, IMREAD_UNCHANGED)
-    green_image = imread(green_image_path, IMREAD_UNCHANGED)
+    red_image = tiff_imread(red_image_path)
+
+    green_image = tiff_imread(green_image_path)
 
     # adding weights to red channel
-    red_image = red_image * 2
+    red_image = red_image * red_multiplier
 
     # merging images
     merge_image = np_add(red_image, green_image)
 
     # saving merged image
-    imwrite(filename=output_path,
-            img=merge_image)
-
-    exit()
+    tiff_imwrite(file=output_path,
+                 data=merge_image)
 
 
 def merge_multiple_images(red_images_paths: list,
@@ -154,7 +154,8 @@ def merge_multiple_images(red_images_paths: list,
         # running merge_single_image function
         merge_single_image(red_image_path=red_image_path,
                            green_image_path=green_image_path,
-                           output_path=save_path)
+                           output_path=save_path,
+                           red_multiplier=3)
 
     # printing execution message
     f_string = f'all {total_imgs_num} images merged!'
