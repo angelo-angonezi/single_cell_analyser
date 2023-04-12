@@ -16,7 +16,13 @@ from numpy import ndarray
 from seaborn import histplot
 from numpy import concatenate
 from numpy import add as np_add
+from numpy import std as np_std
+from numpy import max as np_max
+from numpy import min as np_min
+from numpy import mean as np_mean
+from numpy import sort as np_sort
 from argparse import ArgumentParser
+from matplotlib import pyplot as plt
 from os.path import split as os_split
 from tifffile import imread as tiff_imread
 from tifffile import imwrite as tiff_imwrite
@@ -25,6 +31,11 @@ from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
 print('all required libraries successfully imported.')  # noqa
+
+#####################################################################
+# defining global variables
+
+IMAGE_PIXEL_DEPTH = 65536  # constant value for 16bit images (2**16)
 
 #####################################################################
 # argument parsing related functions
@@ -89,6 +100,99 @@ def red_matches_green(red_images: list,
     return match_bool
 
 
+def get_single_array(images_paths: list) -> ndarray:
+    """
+    Given a list paths to images, returns
+    single concatenated array of all images.
+    :param images_paths: List. Represents paths to files.
+    :return: ndarray: Represents all pixels in all images.
+    """
+    # defining placeholder value for arrays_list
+    arrays_list = []
+
+    # iterating over images paths
+    for image_path in images_paths:
+        # reading image
+        open_image = tiff_imread(image_path)
+
+        # flattening image array
+        flat_array = open_image.flatten()
+
+        # appending flat array to arrays_list
+        arrays_list.append(flat_array)
+
+    # concatenating arrays in arrays_list
+    concatenated_array = concatenate(arrays_list)
+
+    # returning concatenated_array
+    return concatenated_array
+
+
+def get_normalization_value(concatenated_array: ndarray,
+                            current_channel_weight: float = 0.5
+                            ) -> int:
+    """
+    Given a numpy array, returns a normalization
+    value, based on array mean/std values.
+    :param concatenated_array: ndarray. Represents
+    multiple images' arrays joined together.
+    :param current_channel_weight: Float. Represents,
+    contribution of current channel in image total.
+    :return: Integer. Represents normalization value.
+    """
+    # sorting array
+    print('sorting array...')
+    sorted_array = np_sort(concatenated_array)
+
+    # getting array sample for histogram
+    print('getting histogram sample...')
+    array_sample = sorted_array[::100000]
+    sample_len = len(array_sample)
+    f_string = f'{sample_len} pixels in sample.'
+    print(f_string)
+
+    # plotting pixels histogram
+    print('plotting pixels histogram...')
+    # histplot(data=array_sample)
+    # plt.show()
+
+    # getting array mean/std
+    array_mean = np_mean(sorted_array)
+    array_std = np_std(sorted_array)
+
+    # calculating max value
+    max_value = array_mean + (3 * array_std)
+
+    # calculating normalization value
+    normalization_value = IMAGE_PIXEL_DEPTH / max_value
+
+    # adding current channel weight
+    normalization_value *= current_channel_weight
+
+    # converting value to int
+    normalization_value = int(normalization_value)
+
+    # retuning normalization_value
+    return normalization_value
+
+
+def get_channel_normalization_values(images_paths: list) -> int:
+    """
+    Given a list paths to images, returns
+    normalization values for each channel.
+    :param images_paths: List. Represents paths to files.
+    :return: Integer. Represents channel normalization value.
+    """
+    # getting concatenated array from input images
+    concatenated_array = get_single_array(images_paths=images_paths)
+
+    # calculating normalization value
+    normalization_value = get_normalization_value(concatenated_array=concatenated_array)
+
+    # retuning normalization_value
+    return normalization_value
+
+
 def merge_single_image(red_image_path: str,
                        green_image_path: str,
                        red_normalizer: int,
@@ -109,12 +213,36 @@ def merge_single_image(red_image_path: str,
     red_image = tiff_imread(red_image_path)
     green_image = tiff_imread(green_image_path)
 
+    # normalizing images based on normalization values
+    red_image_normalized = red_image * red_normalizer
+    green_image_normalized = green_image * green_normalizer
+
     # merging images
     merge_image = np_add(red_image, green_image)
+    merge_image_normalized = np_add(red_image_normalized, green_image_normalized)
+
+    # print(merge_image_normalized)
+    # print(np_max(merge_image_normalized))
+    # print(np_min(merge_image_normalized))
 
     # saving merged image
     tiff_imwrite(file=output_path,
                  data=merge_image)
+
+    # tiff_imwrite(file=output_path.replace('.tif', '_red.tif'),
+    #              data=red_image)
+    #
+    # tiff_imwrite(file=output_path.replace('.tif', '_green.tif'),
+    #              data=green_image)
+    #
+    # tiff_imwrite(file=output_path.replace('.tif', '_red_normalized.tif'),
+    #              data=red_image_normalized)
+    #
+    # tiff_imwrite(file=output_path.replace('.tif', '_green_normalized.tif'),
+    #              data=green_image_normalized)
+    #
+    # tiff_imwrite(file=output_path.replace('.tif', '_normalized.tif'),
+    #              data=merge_image_normalized)
 
 
 def merge_multiple_images(red_images_paths: list,
@@ -167,80 +295,7 @@ def merge_multiple_images(red_images_paths: list,
     print(f_string)
 
 
-def get_single_array(images_paths: list) -> ndarray:
-    """
-    Given a list paths to images, returns
-    single concatenated array of all images.
-    :param images_paths: List. Represents paths to files.
-    :return: ndarray: Represents all pixels in all images.
-    """
-    # defining placeholder value for arrays_list
-    arrays_list = []
 
-    # iterating over images paths
-    for image_path in images_paths:
-        # reading image
-        open_image = tiff_imread(image_path)
-
-        # flattening image array
-        flat_array = open_image.flatten()
-
-        # appending flat array to arrays_list
-        arrays_list.append(flat_array)
-
-    # concatenating arrays in arrays_list
-    concatenated_array = concatenate(arrays_list)
-
-    # returning concatenated_array
-    return concatenated_array
-
-
-def get_normalization_value(concatenated_array: ndarray) -> int:
-    """
-    Given a numpy array, returns a normalization
-    value, based on array mean/std values.
-    :param concatenated_array: ndarray. Represents
-    multiple images' arrays joined together.
-    :return: Integer. Represents normalization value.
-    """
-    a = concatenated_array.tolist()
-    print(len(a))
-    b = sorted(a)
-    print(len(b))
-    c = b[::1000]
-    print(len(c))
-
-    # TODO: rewrite this function to work with arrays all the way through
-
-    # plotting histogram
-    histplot(data=c)
-    from matplotlib import pyplot as plt
-    plt.show()
-
-    exit()
-
-    # calculating normalization value
-    normalization_value = 0
-
-    # retuning normalization_value
-    return normalization_value
-
-
-def get_channel_normalization_values(images_paths: list) -> int:
-    """
-    Given a list paths to images, returns
-    normalization values for each channel.
-    :param images_paths: List. Represents paths to files.
-    :return: Integer. Represents channel normalization value.
-    """
-    # getting concatenated array from input images
-    concatenated_array = get_single_array(images_paths=images_paths)
-
-    # calculating normalization value
-    normalization_value = get_normalization_value(concatenated_array=concatenated_array)
-
-    # retuning normalization_value
-    return normalization_value
 
 
 def merge_channels(red_images_folder: str,
@@ -288,12 +343,13 @@ def merge_channels(red_images_folder: str,
         print(e_string)
 
         # getting normalization values
-        print('getting normalization values...')
+        print('getting red channel normalization values...')
         red_normalizer = get_channel_normalization_values(images_paths=red_images_paths)
+        print('getting green channel normalization values...')
         green_normalizer = get_channel_normalization_values(images_paths=green_images_paths)
 
         # printing execution message
-        f_string = 'normalization values acquired.'
+        f_string = 'normalization values acquired.\n'
         f_string += f'red_normalizer: {red_normalizer}\n'
         f_string += f'green_normalizer: {green_normalizer}'
         print(f_string)
