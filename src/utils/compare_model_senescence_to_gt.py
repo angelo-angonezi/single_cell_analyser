@@ -1,8 +1,8 @@
-# compare model nma to ground-truth module
+# compare model senescence to ground-truth module
 
 print('initializing...')  # noqa
 
-# Code destined to comparing NMA results
+# Code destined to comparing senescence results
 # between model detections and gt annotations.
 
 ######################################################################
@@ -319,7 +319,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running compare_model_cell_count_to_gt function
     compare_model_cell_count_to_gt(detection_file_path=detection_file,
