@@ -73,7 +73,6 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-
 def add_treatment_col(df: DataFrame) -> None:
     """
     Given a merged detections/annotations data frame,
@@ -81,6 +80,7 @@ def add_treatment_col(df: DataFrame) -> None:
     :param df: DataFrame. Represents merged detections/annotations data.
     :return: None.
     """
+    # TODO: adjust this function to add TMZ/CTR column
     # adding treatment placeholder column to df
     df['treatment'] = None
 
@@ -103,13 +103,67 @@ def add_treatment_col(df: DataFrame) -> None:
         df.at[row_index, 'treatment'] = current_treatment
 
 
-def get_nma_df(df: DataFrame) -> DataFrame:
+def add_senescence_col(df: DataFrame) -> None:
+    """
+    Given a merged detections/annotations data frame,
+    adds 'senescence' column, obtained by analysing
+    each evaluator group mean/std area and axis ratio
+    values.
+    :param df: DataFrame. Represents merged detections/annotations data.
+    :return: None.
+    """
+    # adding senescence placeholder column to df
+    df['senescent'] = None
+
+    # grouping df by evaluator
+    df_groups = df.groupby('evaluator')
+
+    # iterating over df_groups
+    for evaluator_name, evaluator_group in df_groups:
+
+        # getting current evaluator mean/std area values
+        area_mean = evaluator_group['cell_area'].mean()
+        area_std = evaluator_group['cell_area'].std()
+
+        # getting current evaluator mean/std axis ratio values
+        axis_ratio_mean = evaluator_group['axis_ratio'].mean()
+        axis_ratio_std = evaluator_group['axis_ratio'].std()
+
+        # defining cutoff values
+        # TODO: check whether these cutoff values make sense
+        area_min = area_mean - (3 * area_std)
+        area_max = area_mean + (3 * area_std)
+        axis_ratio_min = axis_ratio_mean - (3 * axis_ratio_std)
+        axis_ratio_max = axis_ratio_mean + (3 * axis_ratio_std)
+
+        print('area_mean: ', area_mean)
+        exit()
+
+        # getting current evaluator df rows
+        df_rows = evaluator_group.iterrows()
+
+        # iterating over df rows
+        for row_index, row_data in df_rows:
+
+            # getting current row area and axis ratio values
+            current_row_area = None
+            current_row_axis_ratio = None
+
+            # checking if current cell is senescent
+            senescence_bool = False
+            # TODO: add logic to change bool based on area and axis ratio here
+
+            # updating current line axis ratio value
+            df.at[row_index, 'senescent'] = senescence_bool
+
+
+def get_senescence_df(df: DataFrame) -> DataFrame:
     """
     Given a merged detections/annotations data frame,
     returns a new df, of following structure:
-    | evaluator | cell_area | axis_ratio |
-    |   model   |   633.6   |   1.60913  |
-    |   fornma  |   267.1   |   1.77106  |
+    | evaluator | cell_area | axis_ratio | treatment | senescent |
+    |   model   |   633.6   |   1.60913  |    TMZ    |   True    |
+    |   fornma  |   267.1   |   1.77106  |    CTR    |   False   |
     ...
     :param df: DataFrame. Represents merged detections/annotations data.
     :return: None.
@@ -126,9 +180,13 @@ def get_nma_df(df: DataFrame) -> DataFrame:
     print('adding treatment column to df...')
     add_treatment_col(df=df)
 
+    # adding senescent column to df
+    print('adding senescence column to df...')
+    add_senescence_col(df=df)
+
     # dropping unrequired cols
     all_cols = df.columns.to_list()
-    keep_cols = ['cell_area', 'axis_ratio', 'evaluator', 'treatment']
+    keep_cols = ['cell_area', 'axis_ratio', 'evaluator', 'treatment', 'senescent']
     drop_cols = [col
                  for col
                  in all_cols
@@ -214,7 +272,7 @@ def compare_model_cell_count_to_gt(detection_file_path: str,
 
     # getting nma data
     print('getting nma df...')
-    nma_df = get_nma_df(df=merged_df)
+    nma_df = get_senescence_df(df=merged_df)
 
     # adding manual values
     manual_df = read_csv('/home/angelo/Desktop/fer_nma_data.csv',

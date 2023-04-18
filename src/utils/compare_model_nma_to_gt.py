@@ -96,7 +96,7 @@ def add_treatment_col(df: DataFrame) -> None:
         treatment_str = treatment_col[0]
 
         # defining current treatment
-        current_treatment = 'Control' if treatment_str == 'B' else 'ATF6'
+        current_treatment = 'CTR' if treatment_str == 'B' else 'ATF6'
 
         # updating current line axis ratio value
         df.at[row_index, 'treatment'] = current_treatment
