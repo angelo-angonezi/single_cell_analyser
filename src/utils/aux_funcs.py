@@ -361,5 +361,69 @@ def get_merged_detection_annotation_df(detections_df_path: str,
     # returning merged df
     return merged_df
 
+
+def add_cell_area_col(df: DataFrame) -> None:
+    """
+    Given a merged detections/annotations data frame,
+    adds 'cell_area' column, calculated by
+    multiplying width/height cols.
+    :param df: DataFrame. Represents merged detections/annotations data.
+    :return: None.
+    """
+    # adding cell area column to df
+    df['cell_area'] = df['width'] * df['height']
+
+
+def get_axis_ratio(width: float,
+                   height: float
+                   ) -> float:
+    """
+    Given width and height values, checks which one
+    is larger, and returns ratio between longer
+    and shorter axis.
+    :param width: Float. Represents OBB width.
+    :param height: Float. Represents OBB height.
+    :return: Float. Represents axis ratio.
+    """
+    # defining long and short axis based on width/height values
+    long_axis = width if width > height else height
+    short_axis = width if width < height else height
+
+    # calculating axis_ratio
+    axis_ratio = long_axis / short_axis
+
+    # returning axis_ratio
+    return axis_ratio
+
+
+def add_axis_ratio_col(df: DataFrame) -> None:
+    """
+    Given a merged detections/annotations data frame,
+    adds 'cell_area' column, calculated by dividing
+    width/height cols (order varies depending on
+    which is larger).
+    :param df: DataFrame. Represents merged detections/annotations data.
+    :return: None.
+    """
+    # adding axis ratio placeholder column to df
+    df['axis_ratio'] = None
+
+    # getting df rows
+    df_rows = df.iterrows()
+
+    # iterating over df rows
+    for row_index, row_data in df_rows:
+
+        # getting current row width/height data
+        current_width = row_data['width']
+        current_height = row_data['height']
+
+        # getting axis ratio
+        current_axis_ratio = get_axis_ratio(width=current_width,
+                                            height=current_height)
+
+        # updating current line axis ratio value
+        df.at[row_index, 'axis_ratio'] = current_axis_ratio
+
 ######################################################################
 # end of current module
