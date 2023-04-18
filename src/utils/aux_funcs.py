@@ -425,5 +425,64 @@ def add_axis_ratio_col(df: DataFrame) -> None:
         # updating current line axis ratio value
         df.at[row_index, 'axis_ratio'] = current_axis_ratio
 
+
+def add_treatment_col_fer(df: DataFrame) -> None:
+    """
+    Given a merged detections/annotations data frame,
+    adds 'treatment' column, obtained by file name.
+    :param df: DataFrame. Represents merged detections/annotations data.
+    :return: None.
+    """
+    # adding treatment placeholder column to df
+    df['treatment'] = None
+
+    # getting df rows
+    df_rows = df.iterrows()
+
+    # iterating over df rows
+    for row_index, row_data in df_rows:
+
+        # getting current row treatment data
+        img_file_name = row_data['img_file_name']
+        img_file_name_split = img_file_name.split('_')
+        treatment_col = img_file_name_split[1]
+        treatment_str = treatment_col[0]
+
+        # defining current treatment
+        current_treatment = 'CTR' if treatment_str == 'B' else 'ATF6'
+
+        # updating current line axis ratio value
+        df.at[row_index, 'treatment'] = current_treatment
+
+
+def add_treatment_col_debs(df: DataFrame) -> None:
+    """
+    Given a merged detections/annotations data frame,
+    adds 'treatment' column, obtained by file name.
+    :param df: DataFrame. Represents merged detections/annotations data.
+    :return: None.
+    """
+    # TODO: adjust this function to add TMZ/CTR column
+    # adding treatment placeholder column to df
+    df['treatment'] = None
+
+    # getting df rows
+    df_rows = df.iterrows()
+
+    # iterating over df rows
+    for row_index, row_data in df_rows:
+
+        # getting current row treatment data
+        img_file_name = row_data['img_file_name']
+        img_file_name_split = img_file_name.split('_')
+        treatment_col = img_file_name_split[1]
+        treatment_str = treatment_col[0]
+
+        # defining current treatment
+        current_treatment = 'CTR' if treatment_str == 'B' else 'TTO'
+
+        # updating current line axis ratio value
+        df.at[row_index, 'treatment'] = current_treatment
+
 ######################################################################
 # end of current module

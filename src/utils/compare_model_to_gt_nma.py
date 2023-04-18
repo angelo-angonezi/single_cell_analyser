@@ -21,6 +21,7 @@ from matplotlib import pyplot as plt
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import add_cell_area_col
 from src.utils.aux_funcs import add_axis_ratio_col
+from src.utils.aux_funcs import add_treatment_col_fer
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_merged_detection_annotation_df
 print('all required libraries successfully imported.')  # noqa
@@ -73,35 +74,6 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def add_treatment_col(df: DataFrame) -> None:
-    """
-    Given a merged detections/annotations data frame,
-    adds 'treatment' column, obtained by file name.
-    :param df: DataFrame. Represents merged detections/annotations data.
-    :return: None.
-    """
-    # adding treatment placeholder column to df
-    df['treatment'] = None
-
-    # getting df rows
-    df_rows = df.iterrows()
-
-    # iterating over df rows
-    for row_index, row_data in df_rows:
-
-        # getting current row treatment data
-        img_file_name = row_data['img_file_name']
-        img_file_name_split = img_file_name.split('_')
-        treatment_col = img_file_name_split[1]
-        treatment_str = treatment_col[0]
-
-        # defining current treatment
-        current_treatment = 'CTR' if treatment_str == 'B' else 'ATF6'
-
-        # updating current line axis ratio value
-        df.at[row_index, 'treatment'] = current_treatment
-
-
 def get_nma_df(df: DataFrame) -> DataFrame:
     """
     Given a merged detections/annotations data frame,
@@ -123,7 +95,7 @@ def get_nma_df(df: DataFrame) -> DataFrame:
 
     # adding treatment column to df
     print('adding treatment column to df...')
-    add_treatment_col(df=df)
+    add_treatment_col_fer(df=df)
 
     # dropping unrequired cols
     all_cols = df.columns.to_list()
@@ -193,13 +165,13 @@ def plot_nma_data(df: DataFrame) -> None:
     plt.show()
 
 
-def compare_model_nma_to_gt(detection_file_path: str,
+def compare_model_to_gt_nma(detection_file_path: str,
                             ground_truth_file_path: str,
                             detection_threshold: float
                             ) -> None:
     """
     Given paths to model detections and gt annotations,
-    compares cell count between evaluators, plotting
+    compares nma between evaluators, plotting
     comparison scatter plot.
     :param detection_file_path: String. Represents a file path.
     :param ground_truth_file_path: String. Represents a file path.
@@ -263,8 +235,8 @@ def main():
     # waiting for user input
     enter_to_continue()
 
-    # running compare_model_cell_count_to_gt function
-    compare_model_nma_to_gt(detection_file_path=detection_file,
+    # running compare_model_to_gt_nma function
+    compare_model_to_gt_nma(detection_file_path=detection_file,
                             ground_truth_file_path=ground_truth_file,
                             detection_threshold=detection_threshold)
 

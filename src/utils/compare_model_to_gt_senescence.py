@@ -10,6 +10,7 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
+import pandas as pd
 from pandas import concat
 from pandas import read_csv
 from pandas import DataFrame
@@ -21,9 +22,19 @@ from matplotlib import pyplot as plt
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import add_cell_area_col
 from src.utils.aux_funcs import add_axis_ratio_col
+from src.utils.aux_funcs import add_treatment_col_debs
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_merged_detection_annotation_df
 print('all required libraries successfully imported.')  # noqa
+
+# next line prevents "SettingWithCopyWarning" pandas warning
+pd.options.mode.chained_assignment = None  # default='warn'
+
+#####################################################################
+# defining global variables
+
+GRAY_AREA_MIN_STD = 1.7
+GRAY_AREA_MAX_STD = 3.0
 
 #####################################################################
 # argument parsing related functions
@@ -35,7 +46,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = "compare model nma to gt module"
+    description = "compare model senescence to gt module"
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
@@ -73,120 +84,123 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def add_treatment_col(df: DataFrame) -> None:
+def get_gray_area_cutoff_values(df: DataFrame,
+                                evaluator: str
+                                ) -> tuple:
     """
     Given a merged detections/annotations data frame,
-    adds 'treatment' column, obtained by file name.
+    and an evaluator name, returns gray area cutoff
+    values for current evaluator.
+    OBS: Takes only CTR treatment group into consideration.
     :param df: DataFrame. Represents merged detections/annotations data.
+    :param evaluator: str. Represents an evaluator name ('model'/'fornma').
+    :return: Tuple. Represents min and max cutoff values for gray area.
+    """
+    # filtering df by evaluator
+    df = df[df['evaluator'] == evaluator]
+
+    # getting control group df
+    control_df = df[df['treatment'] == 'CTR']
+
+    # getting current evaluator mean/std area values
+    area_mean = control_df['cell_area'].mean()
+    area_std = control_df['cell_area'].std()
+
+    # defining cutoff values
+    gray_area_min = area_mean + (GRAY_AREA_MIN_STD * area_std)
+    gray_area_max = area_mean + (GRAY_AREA_MAX_STD * area_std)
+
+    # assembling cutoff_tuple
+    cutoff_tuple = (gray_area_min, gray_area_max)
+
+    # returning cutoff_tuple
+    return cutoff_tuple
+
+
+def add_cell_size_col(df: DataFrame,
+                      fornma_cutoff_values: tuple,
+                      model_cutoff_values: tuple
+                      ) -> None:
+    """
+    Given a merged detections/annotations data frame,
+    adds 'cell_size' column, obtained by analysing
+    each evaluator group mean/std area values and
+    comparing them to given cutoff values.
+    :param df: DataFrame. Represents merged detections/annotations data.
+    :param fornma_cutoff_values: Tuple. Represents cell_area cutoff values.
+    :param model_cutoff_values: Tuple. Represents cell_area cutoff values.
     :return: None.
     """
-    # TODO: adjust this function to add TMZ/CTR column
-    # adding treatment placeholder column to df
-    df['treatment'] = None
+    # adding senescence placeholder column to df
+    df['cell_size'] = None
 
-    # getting df rows
+    # getting current evaluator df rows
     df_rows = df.iterrows()
 
     # iterating over df rows
     for row_index, row_data in df_rows:
 
-        # getting current row treatment data
-        img_file_name = row_data['img_file_name']
-        img_file_name_split = img_file_name.split('_')
-        treatment_col = img_file_name_split[1]
-        treatment_str = treatment_col[0]
+        # getting current cell evaluator
+        current_cell_evaluator = row_data['evaluator']
 
-        # defining current treatment
-        current_treatment = 'Control' if treatment_str == 'B' else 'ATF6'
+        # defining current cell cutoffs
+        gray_area_tuple = fornma_cutoff_values if current_cell_evaluator == 'fornma' else model_cutoff_values
+        gray_area_min, gray_area_max = gray_area_tuple
 
-        # updating current line axis ratio value
-        df.at[row_index, 'treatment'] = current_treatment
+        # getting current cell area value
+        current_cell_area = row_data['cell_area']
 
+        # defining current cell size
+        current_cell_size = 'Small'
+        if current_cell_area > gray_area_min:
+            current_cell_size = 'Medium'
+        if current_cell_area > gray_area_max:
+            current_cell_size = 'Large'
 
-def add_senescence_col(df: DataFrame) -> None:
-    """
-    Given a merged detections/annotations data frame,
-    adds 'senescence' column, obtained by analysing
-    each evaluator group mean/std area and axis ratio
-    values.
-    :param df: DataFrame. Represents merged detections/annotations data.
-    :return: None.
-    """
-    # adding senescence placeholder column to df
-    df['senescent'] = None
-
-    # grouping df by evaluator
-    df_groups = df.groupby('evaluator')
-
-    # iterating over df_groups
-    for evaluator_name, evaluator_group in df_groups:
-
-        # getting current evaluator mean/std area values
-        area_mean = evaluator_group['cell_area'].mean()
-        area_std = evaluator_group['cell_area'].std()
-
-        # getting current evaluator mean/std axis ratio values
-        axis_ratio_mean = evaluator_group['axis_ratio'].mean()
-        axis_ratio_std = evaluator_group['axis_ratio'].std()
-
-        # defining cutoff values
-        # TODO: check whether these cutoff values make sense
-        area_min = area_mean - (3 * area_std)
-        area_max = area_mean + (3 * area_std)
-        axis_ratio_min = axis_ratio_mean - (3 * axis_ratio_std)
-        axis_ratio_max = axis_ratio_mean + (3 * axis_ratio_std)
-
-        print('area_mean: ', area_mean)
-        exit()
-
-        # getting current evaluator df rows
-        df_rows = evaluator_group.iterrows()
-
-        # iterating over df rows
-        for row_index, row_data in df_rows:
-
-            # getting current row area and axis ratio values
-            current_row_area = None
-            current_row_axis_ratio = None
-
-            # checking if current cell is senescent
-            senescence_bool = False
-            # TODO: add logic to change bool based on area and axis ratio here
-
-            # updating current line axis ratio value
-            df.at[row_index, 'senescent'] = senescence_bool
+        # updating current line cell_size value
+        df.at[row_index, 'cell_size'] = current_cell_size
 
 
-def get_senescence_df(df: DataFrame) -> DataFrame:
+def get_cell_size_df(df: DataFrame) -> DataFrame:
     """
     Given a merged detections/annotations data frame,
     returns a new df, of following structure:
-    | evaluator | cell_area | axis_ratio | treatment | senescent |
-    |   model   |   633.6   |   1.60913  |    TMZ    |   True    |
-    |   fornma  |   267.1   |   1.77106  |    CTR    |   False   |
+    | evaluator | cell_area | axis_ratio | treatment | cell_size |
+    |   model   |   633.6   |   1.60913  |    TMZ    |   Small   |
+    |   fornma  |   267.1   |   1.77106  |    CTR    |  Medium   |
+    |   fornma  |   328.9   |   1.58120  |    CTR    |   Large   |
     ...
     :param df: DataFrame. Represents merged detections/annotations data.
-    :return: None.
+    :return: DataFrame. Represents a cell size data frame.
     """
     # adding cell area column to df
     print('adding cell area column to df...')
     add_cell_area_col(df=df)
 
-    # adding axis ratio column to df
-    print('adding axis ratio column to df...')
-    add_axis_ratio_col(df=df)
-
     # adding treatment column to df
     print('adding treatment column to df...')
-    add_treatment_col(df=df)
+    add_treatment_col_debs(df=df)
 
-    # adding senescent column to df
-    print('adding senescence column to df...')
-    add_senescence_col(df=df)
+    # getting evaluators gray area cutoff values
+    fornma_cutoff_values = get_gray_area_cutoff_values(df=df,
+                                                       evaluator='fornma')
+    model_cutoff_values = get_gray_area_cutoff_values(df=df,
+                                                      evaluator='model')
+
+    # printing execution message
+    f_string = f'fornma gray area min/max cutoffs: {fornma_cutoff_values}\n'
+    f_string += f'model gray area min/max cutoffs: {model_cutoff_values}'
+    print(f_string)
+
+    # adding cell size column to df
+    print('adding cell size column to df...')
+    add_cell_size_col(df=df,
+                      fornma_cutoff_values=fornma_cutoff_values,
+                      model_cutoff_values=model_cutoff_values)
 
     # dropping unrequired cols
     all_cols = df.columns.to_list()
-    keep_cols = ['cell_area', 'axis_ratio', 'evaluator', 'treatment', 'senescent']
+    keep_cols = ['cell_area', 'evaluator', 'treatment', 'cell_size']
     drop_cols = [col
                  for col
                  in all_cols
@@ -198,28 +212,29 @@ def get_senescence_df(df: DataFrame) -> DataFrame:
     return final_df
 
 
-def plot_annotations_histograms(df: DataFrame) -> None:
+def plot_cell_area_histograms(df: DataFrame) -> None:
     """
-    Given a nma data frame, plots cell_area and axis_ratio
+    Given a senescence data frame, plots cell_area and axis_ratio
     histograms, filtering df by control group.
-    :param df: DataFrame. Represents NMA data.
+    :param df: DataFrame. Represents senescence data.
     :return: None.
     """
-    # filtering df for annotations data only
-    annotator_df = df[df['evaluator'] == 'fornma']
+    # grouping df by evaluator
+    evaluator_groups = df.groupby('evaluator')
 
-    # defining x_cols
-    x_cols = ['cell_area', 'axis_ratio']
-
-    # iterating over x_cols
-    for x_col in x_cols:
+    # iterating over evaluator groups
+    for evaluator_name, evaluator_group in evaluator_groups:
 
         # creating histogram
-        histplot(data=annotator_df,
-                 x=x_col,
+        histplot(data=evaluator_group,
+                 x='cell_area',
                  hue='treatment',
                  kde=True)
-    
+
+        # setting plot title
+        title = f'Cell area histogram ({evaluator_name})'
+        plt.title(title)
+
         # showing plot
         plt.show()
 
@@ -227,32 +242,21 @@ def plot_annotations_histograms(df: DataFrame) -> None:
         plt.close()
 
 
-def plot_nma_data(df: DataFrame) -> None:
+def plot_senescence_data(df: DataFrame) -> None:
     """
-    Given a nma data frame, plots nma (cell_area X axis_ratio),
-    coloring data by evaluator (model detections and fornma
-    annotations).
-    :param df: DataFrame. Represents NMA data.
+    Given a senescence data frame, plots senescence data,
+    coloring data by evaluator (model detections and
+    fornma annotations).
+    :param df: DataFrame. Represents senescence data.
     :return: None.
     """
-    # creating grid for plot
-    plot_grid = FacetGrid(data=df,
-                          col='treatment',
-                          hue='evaluator')
-
-    # mapping scatter plot
-    plot_grid.map(scatterplot,
-                  'axis_ratio',
-                  'cell_area')
-
-    # adding legend
-    plot_grid.add_legend()
+    pass
 
     # showing plot
     plt.show()
 
 
-def compare_model_cell_count_to_gt(detection_file_path: str,
+def compare_model_to_gt_senescence(detection_file_path: str,
                                    ground_truth_file_path: str,
                                    detection_threshold: float
                                    ) -> None:
@@ -274,25 +278,17 @@ def compare_model_cell_count_to_gt(detection_file_path: str,
     print('filtering df by detection threshold...')
     filtered_df = merged_df[merged_df['detection_threshold'] >= detection_threshold]
 
-    # getting nma data
-    print('getting nma df...')
-    nma_df = get_senescence_df(df=filtered_df)
+    # getting cell size data
+    print('getting cell size df...')
+    cell_size_df = get_cell_size_df(df=filtered_df)
 
-    # adding manual values
-    manual_df = read_csv('/home/angelo/Desktop/fer_nma_data.csv',
-                         decimal=',')
-    print(manual_df)
-    print(nma_df)
-    dfs_list = [manual_df, nma_df]
-    final_df = concat(dfs_list)
+    # plotting senescence data
+    print('plotting cell area histograms...')
+    plot_cell_area_histograms(df=cell_size_df)
 
-    # plotting nma data
-    print('plotting nma histograms...')
-    plot_annotations_histograms(df=nma_df)
-
-    # plotting nma data
-    print('plotting nma...')
-    plot_nma_data(df=nma_df)
+    # plotting senescence data
+    print('plotting senescence data...')
+    plot_senescence_data(df=cell_size_df)
 
     # printing execution message
     print('analysis complete.')
@@ -320,10 +316,10 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
-    # running compare_model_cell_count_to_gt function
-    compare_model_cell_count_to_gt(detection_file_path=detection_file,
+    # running compare_model_to_gt_senescence function
+    compare_model_to_gt_senescence(detection_file_path=detection_file,
                                    ground_truth_file_path=ground_truth_file,
                                    detection_threshold=detection_threshold)
 

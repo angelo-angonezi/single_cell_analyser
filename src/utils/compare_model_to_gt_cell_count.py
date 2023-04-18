@@ -201,7 +201,7 @@ def plot_cell_count_data(df: DataFrame) -> None:
     plt.show()
 
 
-def compare_model_cell_count_to_gt(detection_file_path: str,
+def compare_model_to_gt_cell_count(detection_file_path: str,
                                    ground_truth_file_path: str,
                                    detection_threshold: float
                                    ) -> None:
@@ -264,8 +264,8 @@ def main():
     # waiting for user input
     enter_to_continue()
 
-    # running compare_model_cell_count_to_gt function
-    compare_model_cell_count_to_gt(detection_file_path=detection_file,
+    # running compare_model_to_gt_cell_count function
+    compare_model_to_gt_cell_count(detection_file_path=detection_file,
                                    ground_truth_file_path=ground_truth_file,
                                    detection_threshold=detection_threshold)
 
