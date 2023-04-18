@@ -270,9 +270,13 @@ def compare_model_cell_count_to_gt(detection_file_path: str,
     merged_df = get_merged_detection_annotation_df(detections_df_path=detection_file_path,
                                                    annotations_df_path=ground_truth_file_path)
 
+    # filtering df by detection threshold
+    print('filtering df by detection threshold...')
+    filtered_df = merged_df[merged_df['detection_threshold'] >= detection_threshold]
+
     # getting nma data
     print('getting nma df...')
-    nma_df = get_senescence_df(df=merged_df)
+    nma_df = get_senescence_df(df=filtered_df)
 
     # adding manual values
     manual_df = read_csv('/home/angelo/Desktop/fer_nma_data.csv',
@@ -316,7 +320,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running compare_model_cell_count_to_gt function
     compare_model_cell_count_to_gt(detection_file_path=detection_file,

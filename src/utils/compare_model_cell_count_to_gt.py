@@ -125,9 +125,7 @@ def plot_linear_regression(df: DataFrame,
     plt.close()
 
 
-def get_cell_count_df(df: DataFrame,
-                      detection_threshold: float
-                      ) -> DataFrame:
+def get_cell_count_df(df: DataFrame) -> DataFrame:
     """
     Given a merged detections/annotations data frame,
     returns cell count data frame, of following structure:
@@ -136,7 +134,6 @@ def get_cell_count_df(df: DataFrame,
     | img2.png |     45      |      51      |
     ...
     :param df: DataFrame. Represents merged detections/annotations data.
-    :param detection_threshold: Float. Represents detection threshold to be applied as filter.
     :return: DataFrame. Represents cell count data frame.
     """
     # defining placeholder value for dfs_list
@@ -152,12 +149,9 @@ def get_cell_count_df(df: DataFrame,
         fornma_df = df_group[df_group['evaluator'] == 'fornma']
         model_df = df_group[df_group['evaluator'] == 'model']
 
-        # filtering current image model df by detection threshold
-        filtered_model_df = model_df[model_df['detection_threshold'] >= detection_threshold]
-
         # getting current image fornma/model cell counts
         fornma_cell_count = len(fornma_df)
-        model_cell_count = len(filtered_model_df)
+        model_cell_count = len(model_df)
 
         # assembling current image dict
         current_group_dict = {'img_name': img_name,
@@ -225,10 +219,13 @@ def compare_model_cell_count_to_gt(detection_file_path: str,
     merged_df = get_merged_detection_annotation_df(detections_df_path=detection_file_path,
                                                    annotations_df_path=ground_truth_file_path)
 
+    # filtering df by detection threshold
+    print('filtering df by detection threshold...')
+    filtered_df = merged_df[merged_df['detection_threshold'] >= detection_threshold]
+
     # getting cell count data
     print('getting cell count df...')
-    cell_count_df = get_cell_count_df(df=merged_df,
-                                      detection_threshold=detection_threshold)
+    cell_count_df = get_cell_count_df(df=filtered_df)
 
     # plotting cell count data
     print('plotting cell count data...')

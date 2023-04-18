@@ -193,10 +193,10 @@ def plot_nma_data(df: DataFrame) -> None:
     plt.show()
 
 
-def compare_model_cell_count_to_gt(detection_file_path: str,
-                                   ground_truth_file_path: str,
-                                   detection_threshold: float
-                                   ) -> None:
+def compare_model_nma_to_gt(detection_file_path: str,
+                            ground_truth_file_path: str,
+                            detection_threshold: float
+                            ) -> None:
     """
     Given paths to model detections and gt annotations,
     compares cell count between evaluators, plotting
@@ -211,9 +211,13 @@ def compare_model_cell_count_to_gt(detection_file_path: str,
     merged_df = get_merged_detection_annotation_df(detections_df_path=detection_file_path,
                                                    annotations_df_path=ground_truth_file_path)
 
+    # filtering df by detection threshold
+    print('filtering df by detection threshold...')
+    filtered_df = merged_df[merged_df['detection_threshold'] >= detection_threshold]
+
     # getting nma data
     print('getting nma df...')
-    nma_df = get_nma_df(df=merged_df)
+    nma_df = get_nma_df(df=filtered_df)
 
     # adding manual values
     manual_df = read_csv('/home/angelo/Desktop/fer_nma_data.csv',
@@ -260,9 +264,9 @@ def main():
     enter_to_continue()
 
     # running compare_model_cell_count_to_gt function
-    compare_model_cell_count_to_gt(detection_file_path=detection_file,
-                                   ground_truth_file_path=ground_truth_file,
-                                   detection_threshold=detection_threshold)
+    compare_model_nma_to_gt(detection_file_path=detection_file,
+                            ground_truth_file_path=ground_truth_file,
+                            detection_threshold=detection_threshold)
 
 ######################################################################
 # running main function
