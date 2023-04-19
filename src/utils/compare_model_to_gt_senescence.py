@@ -11,6 +11,7 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 import pandas as pd
+from seaborn import barplot
 from pandas import DataFrame
 from seaborn import histplot
 from argparse import ArgumentParser
@@ -89,7 +90,7 @@ def get_gray_area_cutoff_values(df: DataFrame,
     OBS: Takes only CTR treatment group into consideration.
     :param df: DataFrame. Represents merged detections/annotations data.
     :param evaluator: str. Represents an evaluator name ('model'/'fornma').
-    :return: Tuple. Represents min and max cutoff values for gray area.
+    :return: Tuple. Represents mean, min and max cutoff values for gray area.
     """
     # filtering df by evaluator
     df = df[df['evaluator'] == evaluator]
@@ -106,7 +107,7 @@ def get_gray_area_cutoff_values(df: DataFrame,
     gray_area_max = area_mean + (GRAY_AREA_MAX_STD * area_std)
 
     # assembling cutoff_tuple
-    cutoff_tuple = (gray_area_min, gray_area_max)
+    cutoff_tuple = (area_mean, gray_area_min, gray_area_max)
 
     # returning cutoff_tuple
     return cutoff_tuple
@@ -140,17 +141,19 @@ def add_cell_size_col(df: DataFrame,
 
         # defining current cell cutoffs
         gray_area_tuple = fornma_cutoff_values if current_cell_evaluator == 'fornma' else model_cutoff_values
-        gray_area_min, gray_area_max = gray_area_tuple
+        area_mean, gray_area_min, gray_area_max = gray_area_tuple
 
         # getting current cell area value
         current_cell_area = row_data['cell_area']
 
         # defining current cell size
-        current_cell_size = 'Small'
+        current_cell_size = 'A_Small1'
+        if current_cell_area > area_mean:
+            current_cell_size = 'B_Small2'
         if current_cell_area > gray_area_min:
-            current_cell_size = 'Medium'
+            current_cell_size = 'C_Medium'
         if current_cell_area > gray_area_max:
-            current_cell_size = 'Large'
+            current_cell_size = 'D_Large'
 
         # updating current line cell_size value
         df.at[row_index, 'cell_size'] = current_cell_size
@@ -245,10 +248,63 @@ def plot_senescence_data(df: DataFrame) -> None:
     :param df: DataFrame. Represents senescence data.
     :return: None.
     """
-    pass
+    # setting figure size
+    plt.figure(figsize=(10, 6))
+
+    # sorting df
+    sorted_df = df.sort_values(by='cell_size')
+
+    # plotting bar plot
+    histplot(data=sorted_df,
+             x='cell_size',
+             hue='evaluator',
+             hue_order=['model', 'fornma'],
+             stat='count')
+
+    # setting plot title
+    title = 'Cell size histogram (all groups)'
+    plt.title(title)
+
+    # setting plot axis label
+    plt.xlabel('Cell size')
 
     # showing plot
     plt.show()
+
+    # closing plot
+    plt.close()
+
+    # grouping df by treatment
+    treatment_groups = df.groupby('treatment')
+
+    # iterating over treatments
+    for treatment_name, treatment_group in treatment_groups:
+
+        # setting figure size
+        plt.figure(figsize=(10, 6))
+
+        # sorting df
+        sorted_df = treatment_group.sort_values(by='cell_size')
+
+        # plotting bar plot
+        histplot(data=sorted_df,
+                 x='cell_size',
+                 hue='evaluator',
+                 hue_order=['model', 'fornma'],
+                 stat='count')
+
+        # setting plot title
+        title = f'Cell size histogram ({treatment_name} groups)'
+        plt.title(title)
+
+        # setting plot axis label
+        plt.xlabel('Cell size')
+
+        # showing plot
+        plt.show()
+
+        # closing plot
+        plt.close()
 
 
 def compare_model_to_gt_senescence(detection_file_path: str,
@@ -276,10 +332,11 @@ def compare_model_to_gt_senescence(detection_file_path: str,
     # getting cell size data
     print('getting cell size df...')
     cell_size_df = get_cell_size_df(df=filtered_df)
+    print(cell_size_df)
 
     # plotting senescence data
     print('plotting cell area histograms...')
-    plot_cell_area_histograms(df=cell_size_df)
+    # plot_cell_area_histograms(df=cell_size_df)
 
     # plotting senescence data
     print('plotting senescence data...')
