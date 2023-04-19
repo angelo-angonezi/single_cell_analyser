@@ -11,17 +11,12 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 import pandas as pd
-from pandas import concat
-from pandas import read_csv
 from pandas import DataFrame
 from seaborn import histplot
-from seaborn import FacetGrid
-from seaborn import scatterplot
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import add_cell_area_col
-from src.utils.aux_funcs import add_axis_ratio_col
 from src.utils.aux_funcs import add_treatment_col_debs
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_merged_detection_annotation_df
