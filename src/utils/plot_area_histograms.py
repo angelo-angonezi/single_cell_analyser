@@ -1,9 +1,9 @@
-# compare model nma to ground-truth module
+# plot area histogram module
 
 print('initializing...')  # noqa
 
-# Code destined to comparing NMA results
-# between model detections and gt annotations.
+# Code destined to plotting area
+# histograms for model and annotator data.
 
 ######################################################################
 # imports
@@ -21,10 +21,15 @@ from matplotlib import pyplot as plt
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import add_cell_area_col
 from src.utils.aux_funcs import add_axis_ratio_col
-from src.utils.aux_funcs import add_treatment_col_fer
+from src.utils.aux_funcs import add_treatment_col_daph
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_merged_detection_annotation_df
 print('all required libraries successfully imported.')  # noqa
+
+#####################################################################
+# defining global variables
+
+DETECTION_THRESHOLD = 0.5
 
 #####################################################################
 # argument parsing related functions
@@ -36,7 +41,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = "compare model nma to gt module"
+    description = "plot area histograms module"
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
@@ -57,12 +62,12 @@ def get_args_dict() -> dict:
                         required=True,
                         help=gt_help)
 
-    # dt file param
-    dt_help = 'defines detection threshold to be used as filter for model detections'
-    parser.add_argument('-t', '--detection-threshold',
-                        dest='detection_threshold',
+    # output folder param
+    output_help = 'defines path to output folder'
+    parser.add_argument('-o', '--output-folder',
+                        dest='output_folder',
                         required=False,
-                        help=dt_help)
+                        help=output_help)
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -95,7 +100,7 @@ def get_nma_df(df: DataFrame) -> DataFrame:
 
     # adding treatment column to df
     print('adding treatment column to df...')
-    add_treatment_col_fer(df=df)
+    add_treatment_col_daph(df=df)
 
     # dropping unrequired cols
     all_cols = df.columns.to_list()
@@ -111,71 +116,27 @@ def get_nma_df(df: DataFrame) -> DataFrame:
     return final_df
 
 
-def plot_annotations_histograms(df: DataFrame) -> None:
+def plot_histograms(df: DataFrame) -> None:
     """
     Given a nma data frame, plots cell_area and axis_ratio
     histograms, filtering df by control group.
     :param df: DataFrame. Represents NMA data.
     :return: None.
     """
-    # filtering df for annotations data only
-    annotator_df = df[df['evaluator'] == 'fornma']
-
-    # defining x_cols
-    x_cols = ['cell_area', 'axis_ratio']
-
-    # iterating over x_cols
-    for x_col in x_cols:
-
-        # creating histogram
-        histplot(data=annotator_df,
-                 x=x_col,
-                 hue='treatment',
-                 kde=True)
-    
-        # showing plot
-        plt.show()
-
-        # closing plot
-        plt.close()
+    pass
 
 
-def plot_nma_data(df: DataFrame) -> None:
-    """
-    Given a nma data frame, plots nma (cell_area X axis_ratio),
-    coloring data by evaluator (model detections and fornma
-    annotations).
-    :param df: DataFrame. Represents NMA data.
-    :return: None.
-    """
-    # creating grid for plot
-    plot_grid = FacetGrid(data=df,
-                          col='treatment',
-                          hue='evaluator')
-
-    # mapping scatter plot
-    plot_grid.map(scatterplot,
-                  'axis_ratio',
-                  'cell_area')
-
-    # adding legend
-    plot_grid.add_legend()
-
-    # showing plot
-    plt.show()
-
-
-def compare_model_to_gt_nma(detection_file_path: str,
-                            ground_truth_file_path: str,
-                            detection_threshold: float
-                            ) -> None:
+def plot_area_histograms(detection_file_path: str,
+                         ground_truth_file_path: str,
+                         output_folder: float = 0.5
+                         ) -> None:
     """
     Given paths to model detections and gt annotations,
     compares nma between evaluators, plotting
     comparison scatter plot.
     :param detection_file_path: String. Represents a file path.
     :param ground_truth_file_path: String. Represents a file path.
-    :param detection_threshold: Float. Represents detection threshold to be applied as filter.
+    :param output_folder: String. Represents detection threshold to be applied as filter.
     :return: None.
     """
     # getting merged detections df
@@ -185,27 +146,13 @@ def compare_model_to_gt_nma(detection_file_path: str,
 
     # filtering df by detection threshold
     print('filtering df by detection threshold...')
-    filtered_df = merged_df[merged_df['detection_threshold'] >= detection_threshold]
+    filtered_df = merged_df[merged_df['detection_threshold'] >= DETECTION_THRESHOLD]
 
-    # getting nma data
-    print('getting nma df...')
+    # getting nma df
     nma_df = get_nma_df(df=filtered_df)
 
-    # adding manual values
-    manual_df = read_csv('/home/angelo/Desktop/fer_nma_data.csv',
-                         decimal=',')
-    print(manual_df)
-    print(nma_df)
-    dfs_list = [manual_df, nma_df]
-    final_df = concat(dfs_list)
-
-    # plotting nma data
-    print('plotting nma histograms...')
-    plot_annotations_histograms(df=nma_df)
-
-    # plotting nma data
-    print('plotting nma...')
-    plot_nma_data(df=nma_df)
+    # plotting histograms
+    plot_histograms(df=nma_df)
 
     # printing execution message
     print('analysis complete.')
@@ -225,9 +172,8 @@ def main():
     # getting ground-truth file path
     ground_truth_file = args_dict['ground_truth_file']
 
-    # getting detection threshold
-    detection_threshold = args_dict['detection_threshold']
-    detection_threshold = float(detection_threshold)
+    # getting output folder
+    output_folder = args_dict['output_folder']
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
@@ -235,10 +181,10 @@ def main():
     # waiting for user input
     enter_to_continue()
 
-    # running compare_model_to_gt_nma function
-    compare_model_to_gt_nma(detection_file_path=detection_file,
-                            ground_truth_file_path=ground_truth_file,
-                            detection_threshold=detection_threshold)
+    # running plot_area_histograms function
+    plot_area_histograms(detection_file_path=detection_file,
+                         ground_truth_file_path=ground_truth_file,
+                         output_folder=output_folder)
 
 ######################################################################
 # running main function

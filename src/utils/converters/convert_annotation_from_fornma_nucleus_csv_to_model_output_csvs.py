@@ -93,7 +93,8 @@ def convert_single_file(input_csv_file_path: str,
                                total=rows_num)
 
         # getting file name
-        file_name = row_data['Image_name_53bp1']
+        # file_name = row_data['Image_name_53bp1']
+        file_name = row_data['Image_name_red']
         file_name = file_name.replace('.tif', '')
 
         # getting center x value
@@ -117,7 +118,8 @@ def convert_single_file(input_csv_file_path: str,
         angle_in_degs_float = float(angle_in_degs_text)
 
         # getting current nucleus foci count
-        foci_count = row_data['Total_foci_53bp1']
+        # foci_count = row_data['Total_foci_53bp1']
+        foci_count = row_data['Total_foci_red']
         foci_count = int(foci_count)
 
         # defining current class based on foci count
@@ -144,6 +146,7 @@ def convert_single_file(input_csv_file_path: str,
     final_df = concat(dfs_list)
 
     # saving final df in output path
+    print('saving output file...')
     final_df.to_csv(output_path,
                     index=False)
 
