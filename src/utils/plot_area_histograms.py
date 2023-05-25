@@ -123,7 +123,13 @@ def plot_histograms(df: DataFrame) -> None:
     :param df: DataFrame. Represents NMA data.
     :return: None.
     """
-    pass
+    # plotting data
+    histplot(data=df,
+             x='cell_area',
+             hue='treatment')
+
+    # showing plot
+    plt.show()
 
 
 def plot_area_histograms(detection_file_path: str,
