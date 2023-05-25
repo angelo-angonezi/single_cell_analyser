@@ -179,7 +179,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running plot_area_histograms function
     plot_area_histograms(detection_file_path=detection_file,

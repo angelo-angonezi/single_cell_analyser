@@ -333,7 +333,9 @@ def get_merged_detection_annotation_df(detections_df_path: str,
 
     # reading detections file
     print('reading detections file...')
-    detections_df = read_csv(detections_df_path)
+    # TODO: remove this once senescence test is completed!
+    # detections_df = read_csv(detections_df_path)
+    detections_df = DataFrame()
 
     # adding evaluator constant column
     detections_df['evaluator'] = 'model'
@@ -498,6 +500,16 @@ def add_treatment_col_daph(df: DataFrame) -> None:
     # getting df rows
     df_rows = df.iterrows()
 
+    # defining treatment_dict
+    treatment_dict = {'B1': 'CTR',
+                      'C1': 'CTR',
+                      'B4': 'TMZ_10uM',
+                      'C4': 'TMZ_10uM',
+                      'B5': 'TMZ_50uM',
+                      'C5': 'TMZ_50uM',
+                      'B6': 'TMZ_100uM',
+                      'C6': 'TMZ_100uM'}
+
     # iterating over df rows
     for row_index, row_data in df_rows:
 
@@ -505,12 +517,9 @@ def add_treatment_col_daph(df: DataFrame) -> None:
         img_file_name = row_data['img_file_name']
         img_file_name_split = img_file_name.split('_')
         treatment_col = img_file_name_split[1]
-        treatment_str = treatment_col[0]
 
         # defining current treatment
-        current_treatment = None
-        print(treatment_str)
-        exit()
+        current_treatment = treatment_dict[treatment_col]
 
         # updating current line axis ratio value
         df.at[row_index, 'treatment'] = current_treatment
