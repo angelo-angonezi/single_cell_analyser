@@ -487,18 +487,21 @@ def add_treatment_col_debs(df: DataFrame) -> None:
         df.at[row_index, 'treatment'] = current_treatment
 
 
-def add_treatment_col_daph(df: DataFrame) -> None:
+def add_treatment_col_daph(df: DataFrame,
+                           data_format: str
+                           ) -> None:
     """
     Given a merged detections/annotations data frame,
     adds 'treatment' column, obtained by file name.
     :param df: DataFrame. Represents merged detections/annotations data.
+    :param data_format: DataFrame. Represents merged detections/annotations data.
     :return: None.
     """
     # adding treatment placeholder column to df
     df['treatment'] = None
 
-    # getting df rows
-    df_rows = df.iterrows()
+    # defining file_name_col based on data_type string
+    file_name_col = 'Image_name_red' if data_format == 'fornma' else 'img_file_name'
 
     # defining treatment_dict
     treatment_dict = {'B1': 'CTR',
@@ -510,11 +513,14 @@ def add_treatment_col_daph(df: DataFrame) -> None:
                       'B6': 'TMZ_100uM',
                       'C6': 'TMZ_100uM'}
 
+    # getting df rows
+    df_rows = df.iterrows()
+
     # iterating over df rows
     for row_index, row_data in df_rows:
 
         # getting current row treatment data
-        img_file_name = row_data['img_file_name']
+        img_file_name = row_data[file_name_col]
         img_file_name_split = img_file_name.split('_')
         treatment_col = img_file_name_split[1]
 

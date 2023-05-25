@@ -62,6 +62,13 @@ def get_args_dict() -> dict:
                         required=True,
                         help=gt_help)
 
+    # fornma file param
+    fornma_help = 'defines path to csv file containing ground-truth annotations'
+    parser.add_argument('-f', '--fornma-file',
+                        dest='fornma_file',
+                        required=True,
+                        help=fornma_help)
+
     # output folder param
     output_help = 'defines path to output folder'
     parser.add_argument('-o', '--output-folder',
@@ -100,7 +107,8 @@ def get_nma_df(df: DataFrame) -> DataFrame:
 
     # adding treatment column to df
     print('adding treatment column to df...')
-    add_treatment_col_daph(df=df)
+    add_treatment_col_daph(df=df,
+                           data_format='model')
 
     # dropping unrequired cols
     all_cols = df.columns.to_list()
@@ -116,6 +124,42 @@ def get_nma_df(df: DataFrame) -> DataFrame:
     return final_df
 
 
+def get_fornma_df(fornma_file_path: str) -> DataFrame:
+    """
+    Given a merged detections/annotations data frame,
+    returns a new df, of following structure:
+    | evaluator | cell_area | axis_ratio |
+    |   model   |   633.6   |   1.60913  |
+    |   fornma  |   267.1   |   1.77106  |
+    ...
+    :param fornma_file_path: String. Represents a path to a file.
+    :return: None.
+    """
+    # reading input df
+    df = read_csv(fornma_file_path)
+
+    # adding treatment column to df
+    print('adding treatment column to df...')
+    add_treatment_col_daph(df=df,
+                           data_format='fornma')
+
+    # dropping unrequired cols
+    all_cols = df.columns.to_list()
+    keep_cols = ['Area', 'treatment']
+    drop_cols = [col
+                 for col
+                 in all_cols
+                 if col not in keep_cols]
+    final_df = df.drop(drop_cols,
+                       axis=1)
+
+    # renaming cols
+    final_df.columns = ['cell_area', 'treatment']
+
+    # returning final df
+    return final_df
+
+
 def plot_histograms(df: DataFrame) -> None:
     """
     Given a nma data frame, plots cell_area and axis_ratio
@@ -126,7 +170,12 @@ def plot_histograms(df: DataFrame) -> None:
     # plotting data
     histplot(data=df,
              x='cell_area',
-             hue='treatment')
+             hue='treatment',
+             kde=True)
+
+    # setting xy lims
+    plt.xlim(0, 8000)
+    plt.ylim(0, 450)
 
     # showing plot
     plt.show()
@@ -134,6 +183,7 @@ def plot_histograms(df: DataFrame) -> None:
 
 def plot_area_histograms(detection_file_path: str,
                          ground_truth_file_path: str,
+                         fornma_file_path: str,
                          output_folder: float = 0.5
                          ) -> None:
     """
@@ -157,8 +207,12 @@ def plot_area_histograms(detection_file_path: str,
     # getting nma df
     nma_df = get_nma_df(df=filtered_df)
 
+    # getting fornma df
+    fornma_df = get_fornma_df(fornma_file_path=fornma_file_path)
+
     # plotting histograms
     plot_histograms(df=nma_df)
+    plot_histograms(df=fornma_df)
 
     # printing execution message
     print('analysis complete.')
@@ -178,6 +232,9 @@ def main():
     # getting ground-truth file path
     ground_truth_file = args_dict['ground_truth_file']
 
+    # getting fornma file path
+    fornma_file = args_dict['fornma_file']
+
     # getting output folder
     output_folder = args_dict['output_folder']
 
@@ -190,6 +247,7 @@ def main():
     # running plot_area_histograms function
     plot_area_histograms(detection_file_path=detection_file,
                          ground_truth_file_path=ground_truth_file,
+                         fornma_file_path=fornma_file,
                          output_folder=output_folder)
 
 ######################################################################
