@@ -1,7 +1,7 @@
 # check incucyte export module
 
 print('initializing...')  # noqa
-
+# TODO: write this code!
 # Code destined to checking incucyte
 # exported images.
 
