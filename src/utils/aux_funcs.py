@@ -333,9 +333,7 @@ def get_merged_detection_annotation_df(detections_df_path: str,
 
     # reading detections file
     print('reading detections file...')
-    # TODO: remove this once senescence test is completed!
-    # detections_df = read_csv(detections_df_path)
-    detections_df = DataFrame()
+    detections_df = read_csv(detections_df_path)
 
     # adding evaluator constant column
     detections_df['evaluator'] = 'model'

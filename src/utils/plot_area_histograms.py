@@ -214,14 +214,6 @@ def plot_area_histograms(detection_file_path: str,
     fornma_df = get_fornma_df(fornma_file_path=fornma_file_path)
 
     # plotting histograms
-    nma_groups = nma_df.groupby('treatment')
-    for group_name, nma_group in nma_groups:
-        group_mean = nma_group['cell_area'].mean()
-        group_std = nma_group['cell_area'].std()
-        print(group_name)
-        print(group_mean)
-        print(group_std)
-    exit()
     plot_histograms(df=nma_df)
     plot_histograms(df=fornma_df)
 
