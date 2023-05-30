@@ -127,7 +127,7 @@ def create_dataframe_from_multiple_detection_files(input_folder: str) -> DataFra
             row_index += 1
 
             # flushing execution message
-            f_string = f'reading row #INDEX of #TOTAL#'
+            f_string = f'reading row #INDEX# of #TOTAL#'
             print_progress_message(base_string=f_string,
                                    index=row_index,
                                    total=rows_num)
