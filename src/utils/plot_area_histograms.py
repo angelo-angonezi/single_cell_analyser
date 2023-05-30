@@ -18,8 +18,8 @@ from seaborn import FacetGrid
 from seaborn import scatterplot
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
+from src.utils.aux_funcs import add_nma_col
 from src.utils.aux_funcs import enter_to_continue
-from src.utils.aux_funcs import add_cell_area_col
 from src.utils.aux_funcs import add_axis_ratio_col
 from src.utils.aux_funcs import add_treatment_col_daph
 from src.utils.aux_funcs import print_execution_parameters
@@ -97,21 +97,23 @@ def get_nma_df(df: DataFrame) -> DataFrame:
     :param df: DataFrame. Represents merged detections/annotations data.
     :return: None.
     """
-    # adding cell area column to df
-    print('adding cell area column to df...')
-    add_cell_area_col(df=df)
+    # adding area column to df
+    print('adding area column to df...')
+    add_nma_col(df=df,
+                col_name='area')
 
     # adding axis ratio column to df
     print('adding axis ratio column to df...')
-    add_axis_ratio_col(df=df)
+    add_nma_col(df=df,
+                col_name='axis_ratio')
+
+    print(df)
+    exit()
 
     # adding treatment column to df
     print('adding treatment column to df...')
     add_treatment_col_daph(df=df,
                            data_format='model')
-
-    # TODO: normalizar os valores para "proporção" de células,
-    #  e não células brutas.
 
     # dropping unrequired cols
     all_cols = df.columns.to_list()
@@ -163,6 +165,25 @@ def get_fornma_df(fornma_file_path: str) -> DataFrame:
     return final_df
 
 
+def get_normalized_df(df: DataFrame,
+                      group_col: str
+                      ) -> DataFrame:
+    """
+    Given a nma data frame, returns normalized
+    data frame, destined to plot proportions,
+    rather than histograms, histograms.
+    """
+    # grouping df by given group_col
+    df_groups = df.groupby(group_col)
+
+    # iterating over df_groups
+    for df_name, df_group in df_groups:
+
+        print(df_name)
+        print(df_group)
+        exit()
+
+
 def plot_histograms(df: DataFrame) -> None:
     """
     Given a nma data frame, plots cell_area and axis_ratio
@@ -207,8 +228,10 @@ def plot_area_histograms(detection_file_path: str,
     print('filtering df by detection threshold...')
     filtered_df = merged_df[merged_df['detection_threshold'] >= DETECTION_THRESHOLD]
 
-    # getting nma df
+    # getting nma dfs
     nma_df = get_nma_df(df=filtered_df)
+    normalized_nma_df = get_normalized_df(df=nma_df,
+                                          group_col='treatment')
 
     # getting fornma df
     fornma_df = get_fornma_df(fornma_file_path=fornma_file_path)
