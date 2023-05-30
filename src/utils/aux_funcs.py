@@ -406,7 +406,7 @@ def add_nma_col(df: DataFrame,
     current_row_index = 1
 
     # defining progress base string
-    progress_base_string = f'adding {col_name} col to row #INDEX# of #TOTAL#'
+    progress_base_string = f'adding {col_name} column to row #INDEX# of #TOTAL#'
 
     # iterating over df rows
     for row_index, row_data in df_rows:
@@ -593,8 +593,22 @@ def add_treatment_col_daph(df: DataFrame,
     # getting df rows
     df_rows = df.iterrows()
 
+    # getting rows total
+    rows_num = len(df)
+
+    # defining placeholder value for current_row_index
+    current_row_index = 1
+
+    # defining progress base string
+    progress_base_string = f'adding treatment col to row #INDEX# of #TOTAL#'
+
     # iterating over df rows
     for row_index, row_data in df_rows:
+
+        # printing execution message
+        print_progress_message(base_string=progress_base_string,
+                               index=current_row_index,
+                               total=rows_num)
 
         # getting current row treatment data
         img_file_name = row_data[file_name_col]
@@ -606,6 +620,9 @@ def add_treatment_col_daph(df: DataFrame,
 
         # updating current line axis ratio value
         df.at[row_index, 'treatment'] = current_treatment
+
+        # updating row index
+        current_row_index += 1
 
 ######################################################################
 # end of current module

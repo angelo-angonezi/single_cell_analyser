@@ -107,9 +107,6 @@ def get_nma_df(df: DataFrame) -> DataFrame:
     add_nma_col(df=df,
                 col_name='axis_ratio')
 
-    print(df)
-    exit()
-
     # adding treatment column to df
     print('adding treatment column to df...')
     add_treatment_col_daph(df=df,
@@ -117,7 +114,7 @@ def get_nma_df(df: DataFrame) -> DataFrame:
 
     # dropping unrequired cols
     all_cols = df.columns.to_list()
-    keep_cols = ['cell_area', 'axis_ratio', 'evaluator', 'treatment']
+    keep_cols = ['area', 'axis_ratio', 'evaluator', 'treatment']
     drop_cols = [col
                  for col
                  in all_cols
@@ -150,7 +147,7 @@ def get_fornma_df(fornma_file_path: str) -> DataFrame:
 
     # dropping unrequired cols
     all_cols = df.columns.to_list()
-    keep_cols = ['Area', 'treatment']
+    keep_cols = ['Area', 'Radius_ratio', 'treatment']
     drop_cols = [col
                  for col
                  in all_cols
@@ -159,29 +156,13 @@ def get_fornma_df(fornma_file_path: str) -> DataFrame:
                        axis=1)
 
     # renaming cols
-    final_df.columns = ['cell_area', 'treatment']
+    final_df.columns = ['area', 'axis_ratio', 'treatment']
+
+    # adding evaluator column
+    final_df['evaluator'] = 'fornma_nuc'
 
     # returning final df
     return final_df
-
-
-def get_normalized_df(df: DataFrame,
-                      group_col: str
-                      ) -> DataFrame:
-    """
-    Given a nma data frame, returns normalized
-    data frame, destined to plot proportions,
-    rather than histograms, histograms.
-    """
-    # grouping df by given group_col
-    df_groups = df.groupby(group_col)
-
-    # iterating over df_groups
-    for df_name, df_group in df_groups:
-
-        print(df_name)
-        print(df_group)
-        exit()
 
 
 def plot_histograms(df: DataFrame) -> None:
@@ -191,24 +172,55 @@ def plot_histograms(df: DataFrame) -> None:
     :param df: DataFrame. Represents NMA data.
     :return: None.
     """
-    # plotting data
-    histplot(data=df,
-             x='cell_area',
-             hue='treatment',
-             kde=True)
+    # grouping df by evaluator
+    df_groups = df.groupby('evaluator')
 
-    # setting xy lims
-    plt.xlim(0, 8000)
-    plt.ylim(0, 450)
+    # iterating over df_groups
+    for df_name, df_group in df_groups:
 
-    # showing plot
-    plt.show()
+        # printing execution message
+        f_string = f'plotting "{df_name}" histogram...'
+        print(f_string)
+
+        # plotting data
+        histplot(data=df_group,
+                 x='area',
+                 hue='treatment',
+                 kde=True,
+                 stat='percent')
+
+        # TODO: check w Guido changes to previous line based on documentation below.
+        """
+        'stat' param
+        Aggregate statistic to compute in each bin.
+            count: show the number of observations in each bin
+            frequency: show the number of observations divided by the bin width
+            probability or proportion: normalize such that bar heights sum to 1
+            percent: normalize such that bar heights sum to 100
+            density: normalize such that the total area of the histogram equals 1
+        from: https://seaborn.pydata.org/generated/seaborn.histplot.html
+        """
+
+        # setting xy lims
+        plt.xlim(0, 10000)
+        plt.ylim(0, 2)
+
+        # setting plot title
+        plt_title = f'{df_name} histogram'
+        plt.title(plt_title)
+
+        # showing plot
+        plt.show()
+        exit()
+
+        # closing plot
+        plt.close()
 
 
 def plot_area_histograms(detection_file_path: str,
                          ground_truth_file_path: str,
                          fornma_file_path: str,
-                         output_folder: float = 0.5
+                         output_folder: str
                          ) -> None:
     """
     Given paths to model detections and gt annotations,
@@ -216,7 +228,8 @@ def plot_area_histograms(detection_file_path: str,
     comparison scatter plot.
     :param detection_file_path: String. Represents a file path.
     :param ground_truth_file_path: String. Represents a file path.
-    :param output_folder: String. Represents detection threshold to be applied as filter.
+    :param fornma_file_path: String. Represents a file path.
+    :param output_folder: String. Represents a folder path.
     :return: None.
     """
     # getting merged detections df
@@ -228,17 +241,22 @@ def plot_area_histograms(detection_file_path: str,
     print('filtering df by detection threshold...')
     filtered_df = merged_df[merged_df['detection_threshold'] >= DETECTION_THRESHOLD]
 
-    # getting nma dfs
-    nma_df = get_nma_df(df=filtered_df)
-    normalized_nma_df = get_normalized_df(df=nma_df,
-                                          group_col='treatment')
+    # getting nma df
+    from os.path import join
+    s = join(output_folder, 'aaa_tmp.csv')
+    # nma_df = get_nma_df(df=filtered_df)
+    # nma_df.to_csv(s, index=False)
+    nma_df = read_csv(s)
 
     # getting fornma df
     fornma_df = get_fornma_df(fornma_file_path=fornma_file_path)
 
+    # concatenating nma/fornma dfs
+    dfs_list = [nma_df, fornma_df]
+    final_df = concat(dfs_list)
+
     # plotting histograms
-    plot_histograms(df=nma_df)
-    plot_histograms(df=fornma_df)
+    plot_histograms(df=final_df)
 
     # printing execution message
     print('analysis complete.')
@@ -268,7 +286,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running plot_area_histograms function
     plot_area_histograms(detection_file_path=detection_file,
