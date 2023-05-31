@@ -10,6 +10,7 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
+from os.path import join
 from pandas import concat
 from pandas import read_csv
 from pandas import DataFrame
@@ -165,7 +166,9 @@ def get_fornma_df(fornma_file_path: str) -> DataFrame:
     return final_df
 
 
-def plot_histograms(df: DataFrame) -> None:
+def plot_histograms(df: DataFrame,
+                    output_folder: str
+                    ) -> None:
     """
     Given a nma data frame, plots cell_area and axis_ratio
     histograms, filtering df by control group.
@@ -182,12 +185,15 @@ def plot_histograms(df: DataFrame) -> None:
         f_string = f'plotting "{df_name}" histogram...'
         print(f_string)
 
+        # setting figure size
+        plt.figure(figsize=(20, 10))
+
         # plotting data
         histplot(data=df_group,
                  x='area',
                  hue='treatment',
                  kde=True,
-                 stat='percent')
+                 stat='count')
 
         # TODO: check w Guido changes to previous line based on documentation below.
         """
@@ -202,16 +208,18 @@ def plot_histograms(df: DataFrame) -> None:
         """
 
         # setting xy lims
-        plt.xlim(0, 10000)
-        plt.ylim(0, 2)
+        # plt.xlim(0, 10000)
+        # plt.ylim(0, 2)
 
         # setting plot title
         plt_title = f'{df_name} histogram'
         plt.title(plt_title)
 
-        # showing plot
-        plt.show()
-        exit()
+        # saving plot
+        save_name = f'area_histograms_{df_name}.png'
+        save_path = join(output_folder,
+                         save_name)
+        plt.savefig(save_path)
 
         # closing plot
         plt.close()
@@ -245,20 +253,25 @@ def plot_area_histograms(detection_file_path: str,
     from os.path import join
     s = join(output_folder, 'aaa_tmp.csv')
     # nma_df = get_nma_df(df=filtered_df)
-    # nma_df.to_csv(s, index=False)
-    nma_df = read_csv(s)
 
     # getting fornma df
-    fornma_df = get_fornma_df(fornma_file_path=fornma_file_path)
+    # fornma_df = get_fornma_df(fornma_file_path=fornma_file_path)
 
     # concatenating nma/fornma dfs
-    dfs_list = [nma_df, fornma_df]
-    final_df = concat(dfs_list)
+    # dfs_list = [nma_df, fornma_df]
+    # final_df = concat(dfs_list)
+    final_df_path = join(output_folder, 'senescence_df.csv')
+    # final_df.to_csv(final_df_path,
+    #                 index=False)
+    final_df = read_csv(final_df_path)
+    print(final_df)
 
     # plotting histograms
-    plot_histograms(df=final_df)
+    plot_histograms(df=final_df,
+                    output_folder=output_folder)
 
     # printing execution message
+    print(f'results saved in folder "{output_folder}"')
     print('analysis complete.')
 
 ######################################################################
