@@ -307,8 +307,6 @@ def crop_multiple_obbs(image: ndarray,
         # saving current crop
         imwrite(filename=current_crop_output_path,
                 img=current_obb_crop)
-        print('aaaaa')
-        exit()
 
         # getting current obb info
         cx, cy, width, height, angle = obb
@@ -552,6 +550,7 @@ def main():
 
     # getting expansion ratio
     expansion_ratio = args_dict['expansion_ratio']
+    expansion_ratio = float(expansion_ratio)
 
     # getting resize toggle
     resize_toggle = args_dict['resize_toggle']
