@@ -358,12 +358,12 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
                              resize_toggle: bool
                              ) -> DataFrame:
     """
-    Given ML detections consolidated data frame,
+    Given a detections consolidated data frame,
     a path to an input folder containing images,
     saves obbs crops in output folder, returning
     a data frame with crops info.
-    :param consolidated_df: DataFrame. Represents ML obbs
-    detections for images in input folder.
+    :param consolidated_df: DataFrame. Represents obbs
+    detections for images in input folder (in model output format).
     :param input_folder: String. Represents a path to a folder.
     :param output_folder: String. Represents a path to a folder.
     :param resize_toggle: Boolean. Represents a toggle.
@@ -379,7 +379,7 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
     ITERATIONS_TOTAL = iterations_total
 
     # printing execution message
-    f_string = f'a total of {ITERATIONS_TOTAL} obbs were found in ml detections file.'
+    f_string = f'a total of {ITERATIONS_TOTAL} obbs were found in detections file.'
     print(f_string)
 
     # grouping detections data frame by images
