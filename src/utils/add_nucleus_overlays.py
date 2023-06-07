@@ -63,12 +63,12 @@ def get_args_dict() -> dict:
                         required=True,
                         help=input_help)
 
-    # image extension param
-    extension_help = 'defines extension (.tif, .png, .jpg) of images in input folder'
-    parser.add_argument('-x', '--images-extension',
-                        dest='images_extension',
+    # output folder param
+    output_help = 'defines output folder (folder that will contain outlined images)'
+    parser.add_argument('-o', '--output-folder',
+                        dest='output_folder',
                         required=True,
-                        help=extension_help)
+                        help=output_help)
 
     # detection file param
     detection_help = 'defines path to csv file containing model detections'
@@ -85,12 +85,12 @@ def get_args_dict() -> dict:
                         required=False,
                         help=gt_help)
 
-    # output folder param
-    output_help = 'defines output folder (folder that will contain outlined images)'
-    parser.add_argument('-o', '--output-folder',
-                        dest='output_folder',
+    # image extension param
+    extension_help = 'defines extension (.tif, .png, .jpg) of images in input folder'
+    parser.add_argument('-x', '--images-extension',
+                        dest='images_extension',
                         required=True,
-                        help=output_help)
+                        help=extension_help)
 
     # detection threshold param
     threshold_help = 'defines threshold to be applied (filters detections OBBs based on detection threshold)'
