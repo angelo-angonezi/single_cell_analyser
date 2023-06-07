@@ -7,6 +7,7 @@
 # imports
 
 # importing required libraries
+import pandas as pd
 from os import mkdir
 from os import listdir
 from sys import stdout
@@ -16,6 +17,9 @@ from os.path import exists
 from pandas import read_csv
 from pandas import DataFrame
 from shutil import copy as sh_copy
+
+# preventing "SettingWithoutCopyWarning" messages
+pd.options.mode.chained_assignment = None  # default='warn'
 
 ######################################################################
 # defining auxiliary functions
@@ -362,16 +366,91 @@ def get_merged_detection_annotation_df(detections_df_path: str,
     return merged_df
 
 
-def add_cell_area_col(df: DataFrame) -> None:
+def get_area(width: float,
+             height: float
+             ) -> float:
+    """
+    Given width and height values, returns
+    area (multiplication of width and height).
+    :param width: Float. Represents OBB width.
+    :param height: Float. Represents OBB height.
+    :return: Float. Represents axis ratio.
+    """
+    # calculating area
+    area = width * height
+
+    # returning area
+    return area
+
+
+def add_nma_col(df: DataFrame,
+                col_name: str
+                ) -> None:
     """
     Given a merged detections/annotations data frame,
-    adds 'cell_area' column, calculated by
-    multiplying width/height cols.
+    adds 'area' or 'axis_ratio' column, calculated by
+    multiplying/dividing width/height cols.
     :param df: DataFrame. Represents merged detections/annotations data.
     :return: None.
     """
-    # adding cell area column to df
-    df['cell_area'] = df['width'] * df['height']
+    # adding placeholder column to df
+    df[col_name] = None
+
+    # getting df rows
+    df_rows = df.iterrows()
+
+    # getting rows total
+    rows_num = len(df)
+
+    # defining placeholder value for current_row_index
+    current_row_index = 1
+
+    # defining progress base string
+    progress_base_string = f'adding {col_name} column to row #INDEX# of #TOTAL#'
+
+    # iterating over df rows
+    for row_index, row_data in df_rows:
+
+        # printing execution message
+        print_progress_message(base_string=progress_base_string,
+                               index=current_row_index,
+                               total=rows_num)
+
+        # defining placeholder value for current_row_value
+        current_row_value = None
+
+        # getting current row width/height data
+        current_width = row_data['width']
+        current_height = row_data['height']
+
+        # updating current_row_value
+
+        if col_name == 'area':
+
+            # getting current area
+            current_row_value = get_area(width=current_width,
+                                         height=current_height)
+
+        elif col_name == 'axis_ratio':
+
+            # getting current axis ratio
+            current_row_value = get_axis_ratio(width=current_width,
+                                               height=current_height)
+
+        else:
+
+            # printing error message
+            e_string = f'{col_name} undefined.'
+            e_string += f'Valid inputs are : "area" and "axis_ratio"'
+            e_string += f'Please, check and try again.'
+            print(e_string)
+            exit()
+
+        # updating current line axis ratio value
+        df.at[row_index, col_name] = current_row_value
+
+        # updating row index
+        current_row_index += 1
 
 
 def get_axis_ratio(width: float,
@@ -399,7 +478,7 @@ def get_axis_ratio(width: float,
 def add_axis_ratio_col(df: DataFrame) -> None:
     """
     Given a merged detections/annotations data frame,
-    adds 'cell_area' column, calculated by dividing
+    adds 'area' column, calculated by dividing
     width/height cols (order varies depending on
     which is larger).
     :param df: DataFrame. Represents merged detections/annotations data.
@@ -514,8 +593,22 @@ def add_treatment_col_daph(df: DataFrame,
     # getting df rows
     df_rows = df.iterrows()
 
+    # getting rows total
+    rows_num = len(df)
+
+    # defining placeholder value for current_row_index
+    current_row_index = 1
+
+    # defining progress base string
+    progress_base_string = f'adding treatment col to row #INDEX# of #TOTAL#'
+
     # iterating over df rows
     for row_index, row_data in df_rows:
+
+        # printing execution message
+        print_progress_message(base_string=progress_base_string,
+                               index=current_row_index,
+                               total=rows_num)
 
         # getting current row treatment data
         img_file_name = row_data[file_name_col]
@@ -527,6 +620,9 @@ def add_treatment_col_daph(df: DataFrame,
 
         # updating current line axis ratio value
         df.at[row_index, 'treatment'] = current_treatment
+
+        # updating row index
+        current_row_index += 1
 
 ######################################################################
 # end of current module
