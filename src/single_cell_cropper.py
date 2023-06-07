@@ -73,6 +73,12 @@ def get_args_dict() -> dict:
                         help='defines detection threshold for ml model results',
                         required=True)
 
+    parser.add_argument('-x', '--expansion-ratio',
+                        dest='expansion_ratio',
+                        help='defines ratio of expansion of width/height to generate larger-than-og-nucleus crops',
+                        required=False,
+                        default=1.0)
+
     parser.add_argument('-r', '--resize',
                         dest='resize_toggle',
                         action='store_true',
@@ -152,7 +158,8 @@ def rotate_image(image: ndarray,
 
 
 def crop_single_obb(image: ndarray,
-                    obb: tuple
+                    obb: tuple,
+                    expansion_ratio: float = 1.0
                     ) -> ndarray:
     """
     Given an array representing an image,
@@ -161,10 +168,15 @@ def crop_single_obb(image: ndarray,
     be aligned to x-axis.
     :param image: Array. Represents an open image.
     :param obb: Tuple. Represents obb's info.
+    :param expansion_ratio: Float. Represents a ratio to expand width/height.
     :return: Array. Represents obb crop from image.
     """
     # getting current obb info
     cx, cy, width, height, angle = obb
+
+    # expanding with/height
+    width = width * expansion_ratio
+    height = height * expansion_ratio
 
     # getting rotation angle (opposite to OBB angle, since the image
     # will be rotated to match OBB orientation)
@@ -203,6 +215,7 @@ def crop_multiple_obbs(image: ndarray,
                        image_name: str,
                        obbs_list: list,
                        output_folder: str,
+                       expansion_ratio: float,
                        resize_toggle: bool,
                        progress_string: str
                        ) -> DataFrame:
@@ -217,6 +230,7 @@ def crop_multiple_obbs(image: ndarray,
     :param image_name: String. Represents an image name.
     :param obbs_list: List. Represents a list of obbs.
     :param output_folder: String. Represents a path to a folder.
+    :param expansion_ratio: Float. Represents a ratio to expand width/height.
     :param resize_toggle: Boolean. Represents a toggle.
     :param progress_string: String. Represents a progress string.
     :return: Data Frame. Represents crops info.
@@ -258,14 +272,20 @@ def crop_multiple_obbs(image: ndarray,
 
         # getting current obb crop
         current_obb_crop = crop_single_obb(image=image,
-                                           obb=obb)
+                                           obb=obb,
+                                           expansion_ratio=expansion_ratio)
 
+        # TODO: skipping next part to work with
+        #  fluorescence crops. I should find
+        #  a better way to find if obb is in
+        #  the corner of the image to prevent
+        #  skipping all crops (current problem).
         # checking if there black pixels in current crop
         # (meaning its OBB is in image corner)
-        if black_pixels_in_crop(crop=current_obb_crop):
-
-            # skipping to next crop
-            continue
+        # if black_pixels_in_crop(crop=current_obb_crop):
+        #
+        #     # skipping to next crop
+        #     continue
 
         # checking resize toggle
         if resize_toggle:
@@ -287,6 +307,8 @@ def crop_multiple_obbs(image: ndarray,
         # saving current crop
         imwrite(filename=current_crop_output_path,
                 img=current_obb_crop)
+        print('aaaaa')
+        exit()
 
         # getting current obb info
         cx, cy, width, height, angle = obb
@@ -320,6 +342,7 @@ def get_single_image_crops(image: ndarray,
                            image_name: str,
                            image_group: DataFrame,
                            output_folder: str,
+                           expansion_ratio: float,
                            resize_toggle: bool,
                            progress_string: str
                            ) -> DataFrame:
@@ -333,6 +356,7 @@ def get_single_image_crops(image: ndarray,
     :param image_name: String. Represents an image name.
     :param image_group: DataFrame. Represents current image obbs.
     :param output_folder: String. Represents a path to a folder.
+    :param expansion_ratio: Float. Represents a ratio to expand width/height.
     :param resize_toggle: Boolean. Represents a toggle.
     :param progress_string: String. Represents a progress string.
     :return: Data Frame. Represents crops info.
@@ -345,6 +369,7 @@ def get_single_image_crops(image: ndarray,
                                   image_name=image_name,
                                   obbs_list=current_image_obbs,
                                   output_folder=output_folder,
+                                  expansion_ratio=expansion_ratio,
                                   resize_toggle=resize_toggle,
                                   progress_string=progress_string)
 
@@ -355,6 +380,7 @@ def get_single_image_crops(image: ndarray,
 def get_multiple_image_crops(consolidated_df: DataFrame,
                              input_folder: str,
                              output_folder: str,
+                             expansion_ratio: float,
                              resize_toggle: bool
                              ) -> DataFrame:
     """
@@ -366,6 +392,7 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
     detections for images in input folder (in model output format).
     :param input_folder: String. Represents a path to a folder.
     :param output_folder: String. Represents a path to a folder.
+    :param expansion_ratio: Float. Represents a ratio to expand width/height.
     :param resize_toggle: Boolean. Represents a toggle.
     :return: Data Frame. Represents crops info.
     """
@@ -431,6 +458,7 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
                                           image_name=image_name,
                                           image_group=image_group,
                                           output_folder=output_folder,
+                                          expansion_ratio=expansion_ratio,
                                           resize_toggle=resize_toggle,
                                           progress_string=progress_string)
 
@@ -452,6 +480,7 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
 def single_cell_cropper(input_folder: str,
                         detections_df_path: str,
                         detection_threshold: float,
+                        expansion_ratio: float,
                         output_folder: str,
                         resize_toggle: bool
                         ) -> None:
@@ -461,6 +490,7 @@ def single_cell_cropper(input_folder: str,
     :param input_folder: String. Represents a path to a folder.
     :param detections_df_path: String. Represents a path to a file.
     :param detection_threshold: Float. Represents threshold for ml model results.
+    :param expansion_ratio: Float. Represents a ratio to expand width/height.
     :param output_folder: String. Represents a path to a folder.
     :param resize_toggle: Bool. Represents a toggle.
     :return: None.
@@ -482,6 +512,7 @@ def single_cell_cropper(input_folder: str,
     crops_df = get_multiple_image_crops(consolidated_df=sorted_df,
                                         input_folder=input_folder,
                                         output_folder=output_folder,
+                                        expansion_ratio=expansion_ratio,
                                         resize_toggle=resize_toggle)
     print(f'image crops saved at "{output_folder}".')
 
@@ -519,6 +550,9 @@ def main():
     detection_threshold = args_dict['detection_threshold']
     detection_threshold = float(detection_threshold)
 
+    # getting expansion ratio
+    expansion_ratio = args_dict['expansion_ratio']
+
     # getting resize toggle
     resize_toggle = args_dict['resize_toggle']
 
@@ -532,6 +566,7 @@ def main():
     single_cell_cropper(input_folder=input_folder,
                         detections_df_path=detections_df_path,
                         detection_threshold=detection_threshold,
+                        expansion_ratio=expansion_ratio,
                         output_folder=output_folder,
                         resize_toggle=resize_toggle)
 
