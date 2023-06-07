@@ -467,7 +467,7 @@ def single_cell_cropper(input_folder: str,
     """
     # getting data from consolidated df csv
     print('getting data from consolidated df...')
-    consolidated_df = read_csv(consolidated_df_file_path=detections_df_path)
+    consolidated_df = read_csv(detections_df_path)
 
     # filtering df
     print('filtering df by detection threshold...')
