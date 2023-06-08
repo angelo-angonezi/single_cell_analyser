@@ -93,7 +93,6 @@ def convert_single_file(input_csv_file_path: str,
                                total=rows_num)
 
         # getting file name
-        # file_name = row_data['Image_name_53bp1']
         file_name = row_data['Image_name_red']
         file_name = file_name.replace('.tif', '')
 

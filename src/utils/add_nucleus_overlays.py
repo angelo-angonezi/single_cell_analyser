@@ -238,10 +238,6 @@ def add_overlays_to_single_image(image_name: str,
     # filtering current image data based on detection threshold
     current_image_df = current_image_df[current_image_df['detection_threshold'] >= detection_threshold]
 
-    print(image_name)
-    print(current_image_df)
-    exit()
-
     # getting current image detection/annotation counts
     detections = current_image_df[current_image_df['evaluator'] == 'model']
     annotations = current_image_df[current_image_df['evaluator'] == 'fornma']
@@ -385,7 +381,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running add_overlays_to_multiple_images function
     add_overlays_to_multiple_images(input_folder=input_folder,
