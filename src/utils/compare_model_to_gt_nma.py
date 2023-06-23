@@ -19,7 +19,6 @@ from seaborn import scatterplot
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 from src.utils.aux_funcs import enter_to_continue
-from src.utils.aux_funcs import add_cell_area_col
 from src.utils.aux_funcs import add_axis_ratio_col
 from src.utils.aux_funcs import add_treatment_col_fer
 from src.utils.aux_funcs import print_execution_parameters
