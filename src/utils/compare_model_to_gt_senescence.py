@@ -15,6 +15,7 @@ from pandas import DataFrame
 from seaborn import histplot
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
+from src.utils.aux_funcs import add_nma_col
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import add_treatment_col_debs
 from src.utils.aux_funcs import print_execution_parameters
@@ -171,7 +172,8 @@ def get_cell_size_df(df: DataFrame) -> DataFrame:
     """
     # adding cell area column to df
     print('adding cell area column to df...')
-    add_cell_area_col(df=df)
+    add_nma_col(df=df,
+                col_name='area')
 
     # adding treatment column to df
     print('adding treatment column to df...')

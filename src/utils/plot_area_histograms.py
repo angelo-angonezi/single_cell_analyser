@@ -173,6 +173,7 @@ def plot_histograms(df: DataFrame,
     Given a nma data frame, plots cell_area and axis_ratio
     histograms, filtering df by control group.
     :param df: DataFrame. Represents NMA data.
+    :param output_folder: String. Represents a path to a folder.
     :return: None.
     """
     # grouping df by evaluator
