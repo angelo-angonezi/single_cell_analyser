@@ -7,11 +7,14 @@
 # imports
 
 # importing required libraries
+print('importing required libraries...')  # noqa
 from pandas import concat
 from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
 from src.utils.aux_funcs import print_progress_message
+print('all required libraries successfully imported.')  # noqa
+
 
 #####################################################################
 # argument parsing related functions
