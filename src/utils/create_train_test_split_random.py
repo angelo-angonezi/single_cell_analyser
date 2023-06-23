@@ -1,9 +1,9 @@
-# create train/test split module
+# create train/test split random module
 
 print('initializing...')  # noqa
 
 # Code destined to generating train/test
-# split, based on annotated data.
+# split randomly, based on annotated data.
 
 ######################################################################
 # imports

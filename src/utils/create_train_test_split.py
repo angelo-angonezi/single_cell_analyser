@@ -3,7 +3,8 @@
 print('initializing...')  # noqa
 
 # Code destined to generating train/test
-# split, based on annotated data.
+# split, based on annotated data and imgs
+# info file.
 
 ######################################################################
 # imports
