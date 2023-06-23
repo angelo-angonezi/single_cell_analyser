@@ -11,11 +11,10 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-from os import listdir
 from os.path import join
-from random import sample
+from pandas import read_csv
+from pandas import DataFrame
 from argparse import ArgumentParser
-from random import seed as set_seed
 from src.utils.aux_funcs import spacer
 from src.utils.aux_funcs import create_folder
 from src.utils.aux_funcs import enter_to_continue
@@ -27,16 +26,11 @@ print('all required libraries successfully imported.')  # noqa
 ######################################################################
 # defining global parameters
 
-SEED = 53
-SPLIT_RATIO = 0.7
 ANNOTATIONS_SUBFOLDERS = ['alpr_format',
                           'dota_format',
                           'pascal_format',
                           'rolabelimg_format',
                           'tfrecords_format']
-
-# setting seed (so that all executions result in same sample)
-set_seed(SEED)
 
 #####################################################################
 # argument parsing related functions
@@ -59,7 +53,7 @@ def get_args_dict() -> dict:
     parser.add_argument('-i', '--images-folder-path',
                         dest='images_folder_path',
                         type=str,
-                        help='defines path to folder containing images (.tif)',
+                        help='defines path to folder containing images (.jpg)',
                         required=True)
 
     # annotations folder path param
@@ -67,6 +61,13 @@ def get_args_dict() -> dict:
                         dest='annotations_folder_path',
                         type=str,
                         help='defines path to folder containing annotations (.xml) [rolabelimg]',
+                        required=True)
+
+    # images info file param
+    parser.add_argument('-f', '--images-info-file-path',
+                        dest='images_info_file_path',
+                        type=str,
+                        help='defines path to file containing images info - which dataset they belong to (.csv)',
                         required=True)
 
     # output folder path param
@@ -123,9 +124,7 @@ def create_subfolders_in_output_folder(output_folder_path: str,
                                 subfolders_list=annotations_subfolder_list)
 
 
-def get_train_test_split_lists(images_names_list: list,
-                               split_ratio: float = 0.7
-                               ) -> tuple:
+def get_train_test_split_lists(images_info_df: DataFrame) -> tuple:
     """
     Given a list of image names (no extension),
     and a split ratio (0.0-1.0) representing
@@ -133,40 +132,43 @@ def get_train_test_split_lists(images_names_list: list,
     returns a tuple of two lists, of following
     structure:
     ([train_images_names], [test_images_names])
-    :param images_names_list: List. Represents a list of image names.
-    :param split_ratio: Float. Represents desired proportion of train set.
+    :param images_info_df: List. Represents a list of image names.
     :return: Tuple. Represents train/test split.
     """
-    # getting number of images found in input folder
-    images_num = len(images_names_list)
+    # getting number of images found in info df
+    images_num = len(images_info_df)
 
-    # getting train/test image numbers based on split ratio
-    train_num = int(images_num * split_ratio)
-    test_num = images_num - train_num
+    # getting train/test dfs
+    train_df = images_info_df[images_info_df['dataset'] == 'train']
+    test_df = images_info_df[images_info_df['dataset'] == 'test']
+
+    # getting train/test image nums
+    train_num = len(train_df)
+    test_num = len(test_df)
+
+    # getting train/test image ratios
+    train_ratio = train_num / images_num
+    test_ratio = test_num / images_num
+
+    # getting train/test image percentages
+    train_percentage = round(train_ratio * 100)
+    test_percentage = round(test_ratio * 100)
 
     # printing execution message
     f_string = f'A total of {images_num} images were found in input folder.\n'
-    f_string += f'Train imgs: {train_num} ({round(split_ratio * 100)}%)\n'
-    f_string += f'Test imgs: {test_num} ({round((1 - split_ratio) * 100)}%)'
+    f_string += f'Train imgs: {train_num} ({train_percentage}%)\n'
+    f_string += f'Test imgs: {test_num} ({test_percentage}%)'
     spacer()
     print(f_string)
     spacer()
 
-    # getting train sample from images names list
-    train_sample = sample(images_names_list,
-                          train_num)
-    print('train set created!')
-
-    # getting test sample from images names list
-    test_sample = [image_name
-                   for image_name
-                   in images_names_list
-                   if image_name
-                   not in train_sample]
-    print('test set created!')
+    # getting train images' names
+    train_images = train_df['img_name']
+    test_images = test_df['img_name']
 
     # adding samples to final tuple
-    final_tuple = (train_sample, test_sample)
+    final_tuple = (train_images, test_images)
+    print('train/test set created!')
 
     # returning final tuple
     return final_tuple
@@ -211,7 +213,7 @@ def copy_images_and_annotations(images_folder_path: str,
     copy_multiple_files(src_folder_path=images_folder_path,
                         dst_folder_path=train_images_dst_folder,
                         files_list=train_list,
-                        file_extension='.tif')
+                        file_extension='.jpg')
 
     spacer()
     print('copying train annotations to train folder...')
@@ -226,7 +228,7 @@ def copy_images_and_annotations(images_folder_path: str,
     copy_multiple_files(src_folder_path=images_folder_path,
                         dst_folder_path=test_images_dst_folder,
                         files_list=test_list,
-                        file_extension='.tif')
+                        file_extension='.jpg')
 
     spacer()
     print('copying test annotations to test folder...')
@@ -243,6 +245,7 @@ def copy_images_and_annotations(images_folder_path: str,
 
 def create_train_test_split(images_folder_path: str,
                             annotations_folder_path: str,
+                            images_info_file_path: str,
                             output_folder_path: str
                             ) -> None:
     """
@@ -252,6 +255,7 @@ def create_train_test_split(images_folder_path: str,
     into train/test data sets.
     :param images_folder_path: String. Represents a path to a folder.
     :param annotations_folder_path: String. Represents a path to a folder.
+    :param images_info_file_path: String. Represents a path to a file.
     :param output_folder_path: String. Represents a path to a folder.
     :return: None.
     """
@@ -260,18 +264,13 @@ def create_train_test_split(images_folder_path: str,
     create_subfolders_in_output_folder(output_folder_path=output_folder_path,
                                        annotations_subfolder_list=ANNOTATIONS_SUBFOLDERS)
 
-    # getting images names (no extension) in input folder
-    print('getting images in input folder...')
-    images = listdir(images_folder_path)
-    images_names_list = [image.replace('.tif', '')
-                         for image
-                         in images
-                         if image.endswith('.tif')]
+    # getting images info df
+    print('getting images info df...')
+    images_info_df = read_csv(images_info_file_path)
 
     # getting train/test split lists
     print('getting train/test split lists...')
-    train_list, test_list = get_train_test_split_lists(images_names_list=images_names_list,
-                                                       split_ratio=SPLIT_RATIO)
+    train_list, test_list = get_train_test_split_lists(images_info_df=images_info_df)
 
     # moving images/annotation files
     spacer()
