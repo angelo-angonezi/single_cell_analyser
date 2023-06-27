@@ -94,6 +94,10 @@ def flush_or_print(string: str,
     # if current element is not last
     else:
 
+        # adding spacer to string
+        blank_string = ' ' * 20
+        string += blank_string
+
         # flushing string
         flush_string(string)
 
