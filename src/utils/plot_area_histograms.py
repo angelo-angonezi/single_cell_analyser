@@ -11,6 +11,8 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 from os.path import join
+from pandas import concat
+from os.path import exists
 from pandas import read_csv
 from pandas import DataFrame
 from seaborn import histplot
@@ -53,14 +55,14 @@ def get_args_dict() -> dict:
                         help=detection_help)
 
     # gt file param
-    gt_help = 'defines path to csv file containing ground-truth annotations'
+    gt_help = 'defines path to csv file containing ground-truth annotations in model format'
     parser.add_argument('-g', '--ground-truth-file',
                         dest='ground_truth_file',
                         required=True,
                         help=gt_help)
 
     # fornma file param
-    fornma_help = 'defines path to csv file containing ground-truth annotations'
+    fornma_help = 'defines path to csv file containing ground-truth annotations in fornma format'
     parser.add_argument('-f', '--fornma-file',
                         dest='fornma_file',
                         required=True,
@@ -237,31 +239,42 @@ def plot_area_histograms(detection_file_path: str,
     :param output_folder: String. Represents a folder path.
     :return: None.
     """
-    # getting merged detections df
-    print('getting data from input files...')
-    merged_df = get_merged_detection_annotation_df(detections_df_path=detection_file_path,
-                                                   annotations_df_path=ground_truth_file_path)
+    # defining csv output path
+    save_name = 'area_df.csv'
+    save_path = join(output_folder,
+                     save_name)
 
-    # filtering df by detection threshold
-    print('filtering df by detection threshold...')
-    filtered_df = merged_df[merged_df['detection_threshold'] >= DETECTION_THRESHOLD]
+    # defining placeholder value for final_df
+    final_df = None
 
-    # getting nma df
-    from os.path import join
-    s = join(output_folder, 'aaa_tmp.csv')
-    # nma_df = get_nma_df(df=filtered_df)
+    # checking if csv output already exists
+    if exists(save_path):
 
-    # getting fornma df
-    # fornma_df = get_fornma_df(fornma_file_path=fornma_file_path)
+        # reading already existent area data frame
+        print('reading already existent area data frame...')
+        final_df = read_csv(save_path)
 
-    # concatenating nma/fornma dfs
-    # dfs_list = [nma_df, fornma_df]
-    # final_df = concat(dfs_list)
-    final_df_path = join(output_folder, 'senescence_df.csv')
-    # final_df.to_csv(final_df_path,
-    #                 index=False)
-    final_df = read_csv(final_df_path)
-    print(final_df)
+    # if output csv does not already exist
+    else:
+
+        # getting merged detections df
+        print('getting data from input files...')
+        merged_df = get_merged_detection_annotation_df(detections_df_path=detection_file_path,
+                                                       annotations_df_path=ground_truth_file_path)
+
+        # filtering df by detection threshold
+        print('filtering df by detection threshold...')
+        filtered_df = merged_df[merged_df['detection_threshold'] >= DETECTION_THRESHOLD]
+
+        # getting nma df
+        nma_df = get_nma_df(df=filtered_df)
+
+        # getting fornma df
+        fornma_df = get_fornma_df(fornma_file_path=fornma_file_path)
+
+        # concatenating nma/fornma dfs
+        dfs_list = [nma_df, fornma_df]
+        final_df = concat(dfs_list)
 
     # plotting histograms
     plot_histograms(df=final_df,
@@ -296,7 +309,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running plot_area_histograms function
     plot_area_histograms(detection_file_path=detection_file,
