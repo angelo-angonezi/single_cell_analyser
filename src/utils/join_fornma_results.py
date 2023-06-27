@@ -82,7 +82,7 @@ def create_dataframe_from_multiple_detection_files(input_folder: str) -> DataFra
     detection_files_num = len(detection_files)
 
     # iterating over detection files
-    for detection_file_index, detection_file in enumerate(detection_files):
+    for detection_file_index, detection_file in enumerate(detection_files, 1):
 
         # printing execution message
         progress_base_string = f'getting detections from file #INDEX# of #TOTAL#'
