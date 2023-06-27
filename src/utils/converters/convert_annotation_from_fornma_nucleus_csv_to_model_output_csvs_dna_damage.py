@@ -12,7 +12,9 @@ from pandas import concat
 from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
+from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
+from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -70,6 +72,7 @@ def convert_single_file(input_csv_file_path: str,
     model output format.
     """
     # opening csv file
+    print('reading input file...')
     fornma_df = read_csv(input_csv_file_path)
 
     # defining placeholder value for dfs list

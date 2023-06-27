@@ -65,6 +65,7 @@ def convert_single_file(input_csv_file_path: str,
     model output format.
     """
     # opening csv file
+    print('reading input file...')
     fornma_df = read_csv(input_csv_file_path)
 
     # defining placeholder value for dfs list
