@@ -1,9 +1,9 @@
-# join detection results module
+# join fornma results module
 
 print('initializing...')  # noqa
 
-# Given a path to a folder containing model detection files
-# (multiple det_*class_name*.txt) joins them into a single file.
+# Given a path to a folder containing fornma detection files
+# (multiple .csv files) joins them into a single file.
 
 ######################################################################
 # imports
@@ -32,7 +32,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = "join detection results"
+    description = "join fornma results"
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
@@ -44,7 +44,7 @@ def get_args_dict() -> dict:
                         dest='input_folder',
                         required=True,
                         type=str,
-                        help='defines input folder (folder containing detection files [normal and round txts])')
+                        help='defines input folder (folder containing detection files [.csv])')
 
     # output path param
     parser.add_argument('-o', '--output-path',
@@ -78,7 +78,7 @@ def create_dataframe_from_multiple_detection_files(input_folder: str) -> DataFra
     # getting detection files in input folder
     print('getting detection files in input folder...')
     detection_files = get_specific_files_in_folder(path_to_folder=input_folder,
-                                                   extension='.txt')
+                                                   extension='.csv')
 
     # iterating over detection files
     for detection_file in detection_files:
@@ -99,9 +99,10 @@ def create_dataframe_from_multiple_detection_files(input_folder: str) -> DataFra
         try:
 
             # reading csv
-            detection_file_df = read_csv(file_path,
-                                         sep=' ',
-                                         header=None)
+            detection_file_df = read_csv(file_path)
+
+            # appending current df to dfs_list
+            dfs_list.append(detection_file_df)
 
         # if file is empty
         except EmptyDataError:
@@ -113,53 +114,6 @@ def create_dataframe_from_multiple_detection_files(input_folder: str) -> DataFra
             # skipping current file
             continue
 
-        # getting rows in input df
-        rows = detection_file_df.iterrows()
-
-        # getting number of rows
-        rows_num = len(detection_file_df)
-
-        # iterating over rows in input df
-        for row in rows:
-
-            # getting row index/data
-            row_index, row_data = row
-
-            # correcting index
-            row_index += 1
-
-            # flushing execution message
-            f_string = f'reading row #INDEX# of #TOTAL#'
-            print_progress_message(base_string=f_string,
-                                   index=row_index,
-                                   total=rows_num)
-
-            # getting current row info
-            img_file_name = row_data[0]
-            detection_threshold = round(row_data[1], 3)
-            cx = row_data[2]
-            cy = row_data[3]
-            width = row_data[4]
-            height = row_data[5]
-            angle = row_data[6]
-
-            # creating current row dictionary
-            current_row_dict = {'img_file_name': img_file_name,
-                                'detection_threshold': detection_threshold,
-                                'cx': cx,
-                                'cy': cy,
-                                'width': width,
-                                'height': height,
-                                'angle': angle,
-                                'class': det_class}
-
-            # converting current row dict to df
-            current_row_df = DataFrame(current_row_dict,
-                                       index=[0])
-
-            # appending current df to dfs_list
-            dfs_list.append(current_row_df)
-
     # concatenating dfs in dfs_list
     print('assembling joined dataframe...')
     final_df = concat(dfs_list,
@@ -167,7 +121,9 @@ def create_dataframe_from_multiple_detection_files(input_folder: str) -> DataFra
 
     # sorting final dataframe
     print('sorting joined dataframe...')
-    sorted_df = final_df.sort_values(['img_file_name'])
+    print(final_df.columns)
+    exit()
+    # sorted_df = final_df.sort_values(['img_file_name'])
 
     # returning sorted_df
     return sorted_df
