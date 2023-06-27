@@ -72,9 +72,10 @@ def get_args_dict() -> dict:
 
     # detection file param
     detection_help = 'defines path to csv file containing model detections'
+    detection_help += '(if none is passed, adds only fornma annotations)'
     parser.add_argument('-d', '--detection_file',
                         dest='detection_file',
-                        required=True,
+                        required=False,
                         help=detection_help)
 
     # gt file param
@@ -284,7 +285,7 @@ def add_overlays_to_single_image(image_name: str,
 
 def add_overlays_to_multiple_images(input_folder: str,
                                     images_extension: str,
-                                    detection_file_path: str,
+                                    detection_file_path: str or None,
                                     ground_truth_file_path: str or None,
                                     output_folder: str,
                                     detection_threshold: float,

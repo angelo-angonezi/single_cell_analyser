@@ -335,15 +335,18 @@ def get_merged_detection_annotation_df(detections_df_path: str,
     # defining placeholder value for dfs_list
     dfs_list = []
 
-    # reading detections file
-    print('reading detections file...')
-    detections_df = read_csv(detections_df_path)
+    # checking detections_df_path
+    if detections_df_path is not None:
 
-    # adding evaluator constant column
-    detections_df['evaluator'] = 'model'
+        # reading detections file
+        print('reading detections file...')
+        detections_df = read_csv(detections_df_path)
 
-    # adding detections df to dfs_list
-    dfs_list.append(detections_df)
+        # adding evaluator constant column
+        detections_df['evaluator'] = 'model'
+
+        # adding annotations df to dfs_list
+        dfs_list.append(detections_df)
 
     # checking ground_truth_file_path
     if annotations_df_path is not None:
