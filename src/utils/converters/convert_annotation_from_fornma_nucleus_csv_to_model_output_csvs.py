@@ -12,7 +12,9 @@ from pandas import concat
 from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
+from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
+from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -161,6 +163,12 @@ def main():
     # getting output path
     output_path = args_dict['output_path']
     output_path = str(output_path)
+
+    # printing execution parameters
+    print_execution_parameters(params_dict=args_dict)
+
+    # waiting for user input
+    enter_to_continue()
 
     # running multiple converter function
     convert_single_file(input_csv_file_path=input_file,

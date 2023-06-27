@@ -178,6 +178,12 @@ def main():
     foci_threshold = args_dict['foci_threshold']
     foci_threshold = int(foci_threshold)
 
+    # printing execution parameters
+    print_execution_parameters(params_dict=args_dict)
+
+    # waiting for user input
+    enter_to_continue()
+
     # running multiple converter function
     convert_single_file(input_csv_file_path=input_file,
                         output_path=output_path,

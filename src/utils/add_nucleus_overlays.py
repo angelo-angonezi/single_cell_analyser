@@ -381,7 +381,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running add_overlays_to_multiple_images function
     add_overlays_to_multiple_images(input_folder=input_folder,
