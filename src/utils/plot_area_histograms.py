@@ -276,6 +276,10 @@ def plot_area_histograms(detection_file_path: str,
         dfs_list = [nma_df, fornma_df]
         final_df = concat(dfs_list)
 
+    # saving output csv
+    final_df.to_csv(save_path,
+                    index=False)
+
     # plotting histograms
     plot_histograms(df=final_df,
                     output_folder=output_folder)
