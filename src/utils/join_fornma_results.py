@@ -79,17 +79,16 @@ def create_dataframe_from_multiple_detection_files(input_folder: str) -> DataFra
     print('getting detection files in input folder...')
     detection_files = get_specific_files_in_folder(path_to_folder=input_folder,
                                                    extension='.csv')
+    detection_files_num = len(detection_files)
 
     # iterating over detection files
-    for detection_file in detection_files:
+    for detection_file_index, detection_file in enumerate(detection_files):
 
         # printing execution message
-        f_string = f'getting detections from file "{detection_file}"...'
-        print(f_string)
-
-        # checking file class
-        file_name_split = detection_file.split('_')
-        det_class = file_name_split[1]
+        progress_base_string = f'getting detections from file #INDEX# of #TOTAL#'
+        print_progress_message(base_string=progress_base_string,
+                               index=detection_file_index,
+                               total=detection_files_num)
 
         # getting file path
         file_path = join(input_folder,
