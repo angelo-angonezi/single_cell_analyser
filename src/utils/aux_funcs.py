@@ -335,6 +335,16 @@ def get_merged_detection_annotation_df(detections_df_path: str or None,
     # defining placeholder value for dfs_list
     dfs_list = []
 
+    # checking if there's at least one file path
+    both_none = (detections_df_path is None) and (annotations_df_path is None)
+    if both_none:
+
+        # printing execution message
+        f_string = 'No input file containing detections provided\n'
+        f_string += 'Please, check input and try again.'
+        print(f_string)
+        exit()
+
     # checking detections_df_path
     if detections_df_path is not None:
 
