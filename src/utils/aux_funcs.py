@@ -321,7 +321,7 @@ def enter_to_continue():
     input(enter_string)
 
 
-def get_merged_detection_annotation_df(detections_df_path: str,
+def get_merged_detection_annotation_df(detections_df_path: str or None,
                                        annotations_df_path: str or None
                                        ) -> DataFrame:
     """
