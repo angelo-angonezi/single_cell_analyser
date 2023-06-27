@@ -120,9 +120,7 @@ def create_dataframe_from_multiple_detection_files(input_folder: str) -> DataFra
 
     # sorting final dataframe
     print('sorting joined dataframe...')
-    print(final_df.columns)
-    exit()
-    # sorted_df = final_df.sort_values(['img_file_name'])
+    sorted_df = final_df.sort_values(['Image_name_red'])
 
     # returning sorted_df
     return sorted_df
