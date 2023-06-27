@@ -144,6 +144,7 @@ def convert_single_file(input_csv_file_path: str,
         dfs_list.append(current_obb_df)
 
     # concatenating dfs in dfs list
+    print('assembling final df...')
     final_df = concat(dfs_list)
 
     # saving final df in output path
