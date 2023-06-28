@@ -256,6 +256,45 @@ def generate_histograms(df: DataFrame,
         plt.close()
 
 
+def create_histograms_df(detection_file_path: str,
+                         ground_truth_file_path: str,
+                         fornma_file_path: str
+                         ) -> DataFrame:
+    """
+    Given paths to model detections and gt annotations,
+    returns merged dfs to plot area/axis_ratio histograms.
+    :param detection_file_path: String. Represents a file path.
+    :param ground_truth_file_path: String. Represents a file path.
+    :param fornma_file_path: String. Represents a file path.
+    """
+    # getting merged detections df
+    print('getting data from input files...')
+    merged_df = get_merged_detection_annotation_df(detections_df_path=detection_file_path,
+                                                   annotations_df_path=ground_truth_file_path)
+
+    # filtering df by detection threshold
+    print('filtering df by detection threshold...')
+    filtered_df = merged_df[merged_df['detection_threshold'] >= DETECTION_THRESHOLD]
+
+    # getting nma df
+    nma_df = get_nma_df(df=filtered_df,
+                        tt='daph')
+
+    # getting fornma df
+    fornma_df = get_fornma_df(fornma_file_path=fornma_file_path,
+                              tt='daph')
+
+    # adding date col to fornma df
+    add_date_col(df=fornma_df)
+
+    # concatenating nma/fornma dfs
+    dfs_list = [nma_df, fornma_df]
+    final_df = concat(dfs_list)
+
+    # returning final_df
+    return final_df
+
+
 def get_histograms_df(detection_file_path: str,
                       ground_truth_file_path: str,
                       fornma_file_path: str,
@@ -263,7 +302,9 @@ def get_histograms_df(detection_file_path: str,
                       ) -> DataFrame:
     """
     Given paths to model detections and gt annotations,
-    returns merged dfs to plot area/axis_ratio histograms.
+    returns merged dfs to plot area/axis_ratio histograms,
+    saving histograms df to output folder if file does not
+    already exist.
     :param detection_file_path: String. Represents a file path.
     :param ground_truth_file_path: String. Represents a file path.
     :param fornma_file_path: String. Represents a file path.
@@ -275,49 +316,29 @@ def get_histograms_df(detection_file_path: str,
     save_path = join(output_folder,
                      save_name)
 
-    # defining placeholder value for final_df
-    final_df = None
+    # defining placeholder value for histograms_df
+    histograms_df = None
 
     # checking if csv output already exists
     if exists(save_path):
 
         # reading already existent data frame
         print('reading already existent data frame...')
-        final_df = read_csv(save_path)
+        histograms_df = read_csv(save_path)
 
     # if output csv does not already exist
     else:
 
-        # getting merged detections df
-        print('getting data from input files...')
-        merged_df = get_merged_detection_annotation_df(detections_df_path=detection_file_path,
-                                                       annotations_df_path=ground_truth_file_path)
+        # creating histograms_df
+        print('creating histograms df...')
+        histograms_df = create_histograms_df()
 
-        # filtering df by detection threshold
-        print('filtering df by detection threshold...')
-        filtered_df = merged_df[merged_df['detection_threshold'] >= DETECTION_THRESHOLD]
+        # saving output csv
+        histograms_df.to_csv(save_path,
+                             index=False)
 
-        # getting nma df
-        nma_df = get_nma_df(df=filtered_df,
-                            tt='daph')
-
-        # getting fornma df
-        fornma_df = get_fornma_df(fornma_file_path=fornma_file_path,
-                                  tt='daph')
-
-        # adding date col to fornma df
-        add_date_col(df=fornma_df)
-
-        # concatenating nma/fornma dfs
-        dfs_list = [nma_df, fornma_df]
-        final_df = concat(dfs_list)
-
-    # saving output csv
-    final_df.to_csv(save_path,
-                    index=False)
-
-    # returning final_df
-    return final_df
+    # returning histograms_df
+    return histograms_df
 
 
 def plot_histograms(detection_file_path: str,
