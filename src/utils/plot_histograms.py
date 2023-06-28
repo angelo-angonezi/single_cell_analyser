@@ -20,7 +20,9 @@ from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 from src.utils.aux_funcs import add_nma_col
 from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import add_treatment_col_fer
 from src.utils.aux_funcs import add_treatment_col_daph
+from src.utils.aux_funcs import add_treatment_col_debs
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_merged_detection_annotation_df
 print('all required libraries successfully imported.')  # noqa
@@ -85,7 +87,9 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_nma_df(df: DataFrame) -> DataFrame:
+def get_nma_df(df: DataFrame,
+               tt: str
+               ) -> DataFrame:
     """
     Given a merged detections/annotations data frame,
     returns a new df, of following structure:
@@ -94,6 +98,7 @@ def get_nma_df(df: DataFrame) -> DataFrame:
     |   fornma  |   267.1   |   1.77106  |
     ...
     :param df: DataFrame. Represents merged detections/annotations data.
+    :param tt: String. Represents treatment type (researcher name).
     :return: None.
     """
     # adding area column to df
@@ -108,8 +113,12 @@ def get_nma_df(df: DataFrame) -> DataFrame:
 
     # adding treatment column to df
     print('adding treatment column to df...')
-    add_treatment_col_daph(df=df,
-                           data_format='model')
+    if tt == 'daph':
+        add_treatment_col_daph(df=df,
+                               data_format='model')
+    else:
+        print('treatment type undefined')
+        exit()
 
     # dropping unrequired cols
     all_cols = df.columns.to_list()
@@ -125,7 +134,9 @@ def get_nma_df(df: DataFrame) -> DataFrame:
     return final_df
 
 
-def get_fornma_df(fornma_file_path: str) -> DataFrame:
+def get_fornma_df(fornma_file_path: str,
+                  tt: str
+                  ) -> DataFrame:
     """
     Given a merged detections/annotations data frame,
     returns a new df, of following structure:
@@ -134,6 +145,7 @@ def get_fornma_df(fornma_file_path: str) -> DataFrame:
     |   fornma  |   267.1   |   1.77106  |
     ...
     :param fornma_file_path: String. Represents a path to a file.
+    :param tt: String. Represents treatment type (researcher name).
     :return: None.
     """
     # reading input df
@@ -141,8 +153,12 @@ def get_fornma_df(fornma_file_path: str) -> DataFrame:
 
     # adding treatment column to df
     print('adding treatment column to df...')
-    add_treatment_col_daph(df=df,
-                           data_format='fornma')
+    if tt == 'daph':
+        add_treatment_col_daph(df=df,
+                               data_format='model')
+    else:
+        print('treatment type undefined')
+        exit()
 
     # dropping unrequired cols
     all_cols = df.columns.to_list()
@@ -183,7 +199,7 @@ def generate_histograms(df: DataFrame,
     for df_name, df_group in df_groups:
 
         # printing execution message
-        f_string = f'plotting "{df_name}" histogram...'
+        f_string = f'plotting {df_name} {col_name} histogram...'
         print(f_string)
 
         # setting figure size
@@ -264,10 +280,12 @@ def plot_histograms(detection_file_path: str,
         filtered_df = merged_df[merged_df['detection_threshold'] >= DETECTION_THRESHOLD]
 
         # getting nma df
-        nma_df = get_nma_df(df=filtered_df)
+        nma_df = get_nma_df(df=filtered_df,
+                            tt='daph')
 
         # getting fornma df
-        fornma_df = get_fornma_df(fornma_file_path=fornma_file_path)
+        fornma_df = get_fornma_df(fornma_file_path=fornma_file_path,
+                                  tt='daph')
 
         # concatenating nma/fornma dfs
         dfs_list = [nma_df, fornma_df]
