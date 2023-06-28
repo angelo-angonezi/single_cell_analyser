@@ -207,24 +207,21 @@ def generate_histograms(df: DataFrame,
     :param col_name: String. Represents a column name ('area' or 'axis_ratio').
     :return: None.
     """
-    # grouping df by evaluator
-    df_groups = df.groupby('evaluator')
+    # grouping df
+    df_groups = df.groupby(['evaluator', 'date'])
 
     # iterating over df_groups
     for df_name, df_group in df_groups:
 
+        # getting evaluator/date
+        evaluator, date = df_name
+
         # printing execution message
-        f_string = f'plotting {df_name} {col_name} histogram...'
+        f_string = f'plotting {col_name} histogram ({evaluator}, {date} group)...'
         print(f_string)
 
         # setting figure size
         plt.figure(figsize=(20, 10))
-
-        # adding hue_col
-        df_group['hue_col'] = df_group['date'] + df_group['treatment']
-        print(df_group)
-        print(df_group.columns)
-        exit()
 
         # plotting data
         histplot(data=df_group,
@@ -246,11 +243,11 @@ def generate_histograms(df: DataFrame,
         """
 
         # setting plot title
-        plt_title = f'{df_name} histogram'
+        plt_title = f'{evaluator} {col_name} histogram (date: {date})'
         plt.title(plt_title)
 
         # saving plot
-        save_name = f'{col_name}_histograms_{df_name}.png'
+        save_name = f'{col_name}_histograms_{evaluator}_{date}.png'
         save_path = join(output_folder,
                          save_name)
         plt.savefig(save_path)
