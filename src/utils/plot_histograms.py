@@ -128,7 +128,7 @@ def get_nma_df(df: DataFrame,
 
     # dropping unrequired cols
     all_cols = df.columns.to_list()
-    keep_cols = ['area', 'axis_ratio', 'evaluator', 'treatment']
+    keep_cols = ['area', 'axis_ratio', 'evaluator', 'img_file_name', 'treatment', 'date']
     drop_cols = [col
                  for col
                  in all_cols
@@ -183,6 +183,10 @@ def get_fornma_df(fornma_file_path: str,
     current_names = final_df['img_file_name']
     new_names = [f.replace('.tif', '') for f in current_names]
     final_df['img_file_name'] = new_names
+
+    # adding date column to df
+    print('adding date column to df...')
+    add_date_col(df=final_df)
 
     # adding evaluator column
     final_df['evaluator'] = 'fornma_nuc'
