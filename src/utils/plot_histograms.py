@@ -18,6 +18,7 @@ from pandas import DataFrame
 from seaborn import histplot
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
+from src.utils.aux_funcs import spacer
 from src.utils.aux_funcs import add_nma_col
 from src.utils.aux_funcs import add_date_col
 from src.utils.aux_funcs import enter_to_continue
@@ -105,8 +106,6 @@ def get_nma_df(df: DataFrame,
     # adding date column to df
     print('adding date column to df...')
     add_date_col(df=df)
-    print(df)
-    exit()
 
     # adding area column to df
     print('adding area column to df...')
@@ -124,7 +123,7 @@ def get_nma_df(df: DataFrame,
         add_treatment_col_daph(df=df,
                                data_format='model')
     else:
-        print('treatment type undefined')
+        print('treatment type undefined.')
         exit()
 
     # dropping unrequired cols
@@ -160,18 +159,16 @@ def get_fornma_df(fornma_file_path: str,
 
     # adding treatment column to df
     print('adding treatment column to df...')
-    # if tt == 'daph':
-    #     add_treatment_col_daph(df=df,
-    #                            data_format='model')
-    # else:
-    #     print('treatment type undefined')
-    #     exit()
+    if tt == 'daph':
+        add_treatment_col_daph(df=df,
+                               data_format='fornma')
+    else:
+        print('treatment type undefined.')
+        exit()
 
     # dropping unrequired cols
     all_cols = df.columns.to_list()
-    print(all_cols)
-    exit()
-    keep_cols = ['Area', 'Radius_ratio', 'treatment', 'Image_name_red']
+    keep_cols = ['Area', 'Radius_ratio', 'Image_name_red', 'treatment']
     drop_cols = [col
                  for col
                  in all_cols
@@ -180,7 +177,12 @@ def get_fornma_df(fornma_file_path: str,
                        axis=1)
 
     # renaming cols
-    final_df.columns = ['area', 'axis_ratio', 'treatment', 'img_file_name']
+    final_df.columns = ['area', 'axis_ratio', 'img_file_name', 'treatment']
+
+    # removing file extension from name column
+    current_names = final_df['img_file_name']
+    new_names = [f.replace('.tif', '') for f in current_names]
+    final_df['img_file_name'] = new_names
 
     # adding evaluator column
     final_df['evaluator'] = 'fornma_nuc'
@@ -253,14 +255,14 @@ def generate_histograms(df: DataFrame,
         plt.close()
 
 
-def plot_histograms(detection_file_path: str,
-                    ground_truth_file_path: str,
-                    fornma_file_path: str,
-                    output_folder: str
-                    ) -> None:
+def get_histograms_df(detection_file_path: str,
+                      ground_truth_file_path: str,
+                      fornma_file_path: str,
+                      output_folder: str
+                      ) -> DataFrame:
     """
     Given paths to model detections and gt annotations,
-    merged dfs and plots area/axis_ratio histograms.
+    returns merged dfs to plot area/axis_ratio histograms.
     :param detection_file_path: String. Represents a file path.
     :param ground_truth_file_path: String. Represents a file path.
     :param fornma_file_path: String. Represents a file path.
@@ -287,40 +289,73 @@ def plot_histograms(detection_file_path: str,
 
         # getting merged detections df
         print('getting data from input files...')
-        # merged_df = get_merged_detection_annotation_df(detections_df_path=detection_file_path,
-        #                                                annotations_df_path=ground_truth_file_path)
+        merged_df = get_merged_detection_annotation_df(detections_df_path=detection_file_path,
+                                                       annotations_df_path=ground_truth_file_path)
 
         # filtering df by detection threshold
         print('filtering df by detection threshold...')
-        # filtered_df = merged_df[merged_df['detection_threshold'] >= DETECTION_THRESHOLD]
+        filtered_df = merged_df[merged_df['detection_threshold'] >= DETECTION_THRESHOLD]
 
         # getting nma df
-        # nma_df = get_nma_df(df=filtered_df,
-        #                     tt='daph')
+        nma_df = get_nma_df(df=filtered_df,
+                            tt='daph')
 
         # getting fornma df
         fornma_df = get_fornma_df(fornma_file_path=fornma_file_path,
                                   tt='daph')
-        exit()
+
+        # adding date col to fornma df
+        add_date_col(df=fornma_df)
 
         # concatenating nma/fornma dfs
-        # dfs_list = [nma_df, fornma_df]
-        # final_df = concat(dfs_list)
+        dfs_list = [nma_df, fornma_df]
+        final_df = concat(dfs_list)
 
     # saving output csv
     final_df.to_csv(save_path,
                     index=False)
 
+    # returning final_df
+    return final_df
+
+
+def plot_histograms(detection_file_path: str,
+                    ground_truth_file_path: str,
+                    fornma_file_path: str,
+                    output_folder: str
+                    ) -> None:
+    """
+    Given paths to model detections and gt annotations,
+    merged dfs and plots area/axis_ratio histograms.
+    :param detection_file_path: String. Represents a file path.
+    :param ground_truth_file_path: String. Represents a file path.
+    :param fornma_file_path: String. Represents a file path.
+    :param output_folder: String. Represents a folder path.
+    :return: None.
+    """
+    # getting histograms df
+    spacer()
+    print('getting histograms df...')
+    histograms_df = get_histograms_df(detection_file_path=detection_file_path,
+                                      ground_truth_file_path=ground_truth_file_path,
+                                      fornma_file_path=fornma_file_path,
+                                      output_folder=output_folder)
+
     # plotting histograms
-    generate_histograms(df=final_df,
+    spacer()
+    print('plotting area histograms...')
+    generate_histograms(df=histograms_df,
                         output_folder=output_folder,
                         col_name='area')
 
-    generate_histograms(df=final_df,
+    spacer()
+    print('plotting axis ratio histograms...')
+    generate_histograms(df=histograms_df,
                         output_folder=output_folder,
                         col_name='axis_ratio')
 
     # printing execution message
+    spacer()
     print(f'results saved in folder "{output_folder}"')
     print('analysis complete.')
 
