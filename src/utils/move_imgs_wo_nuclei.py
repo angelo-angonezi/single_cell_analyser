@@ -4,18 +4,22 @@ from os.path import join
 from shutil import copy as sh_copy
 
 # defining global variables
-FORNMA_OUTPUT_FOLDER = '/home/angelo/dados/ml_imgs/TreinoMLIncucyteNucleus/fornma_output/red/53bp1'
+BASE_FOLDER = '/home/angelo/dados/pycharm_projects/single_cell_analyser/data/ml/nucleus_detection/NucleusDetectorMerge'
 
-RED = '/home/angelo/dados/ml_imgs/TreinoMLIncucyteNucleus/imgs/red'
-RED_FORNMA_FOUND = '/home/angelo/dados/ml_imgs/TreinoMLIncucyteNucleus/imgs/red_fornma_found'
-RED_FORNMA_MISSED = '/home/angelo/dados/ml_imgs/TreinoMLIncucyteNucleus/imgs/red_fornma_missed'
+FORNMA_OUTPUT_FOLDER = join(BASE_FOLDER,
+                            'fornma_output')
 
-PHASE = '/home/angelo/dados/ml_imgs/TreinoMLIncucyteNucleus/imgs/phase'
-PHASE_FORNMA_FOUND = '/home/angelo/dados/ml_imgs/TreinoMLIncucyteNucleus/imgs/phase_fornma_found'
-PHASE_FORNMA_MISSED = '/home/angelo/dados/ml_imgs/TreinoMLIncucyteNucleus/imgs/phase_fornma_missed'
+RED = join(BASE_FOLDER, 'imgs', 'red')
+RED_FORNMA_FOUND = join(BASE_FOLDER, 'imgs', 'red_fornma_found')
+RED_FORNMA_MISSED = join(BASE_FOLDER, 'imgs', 'red_fornma_missed')
+
+PHASE = join(BASE_FOLDER, 'imgs', 'phase')
+PHASE_FORNMA_FOUND = join(BASE_FOLDER, 'imgs', 'phase_fornma_found')
+PHASE_FORNMA_MISSED = join(BASE_FOLDER, 'imgs', 'phase_fornma_missed')
 
 # getting images found by forNMA
 FORNMA_FOUND_FILES = listdir(FORNMA_OUTPUT_FOLDER)
+FORNMA_FOUND_FILES = [f.replace('.csv', '.tif') for f in FORNMA_FOUND_FILES]
 ALL_FILES = listdir(RED)
 ALL_FILES_NUM = len(ALL_FILES)
 
@@ -35,6 +39,8 @@ for file_index, file in enumerate(ALL_FILES, 1):
         old_red_file_path = join(RED, file)
         new_red_file_path = join(RED_FORNMA_FOUND, file)
 
+        # adapting file format for phase images
+        file = file.replace('.tif', '.jpg')
         old_phase_file_path = join(PHASE, file)
         new_phase_file_path = join(PHASE_FORNMA_FOUND, file)
 
@@ -47,6 +53,8 @@ for file_index, file in enumerate(ALL_FILES, 1):
         old_red_file_path = join(RED, file)
         new_red_file_path = join(RED_FORNMA_MISSED, file)
 
+        # adapting file format for phase images
+        file = file.replace('.tif', '.jpg')
         old_phase_file_path = join(PHASE, file)
         new_phase_file_path = join(PHASE_FORNMA_MISSED, file)
 
