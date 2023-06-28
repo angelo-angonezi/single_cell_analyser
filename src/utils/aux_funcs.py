@@ -482,8 +482,53 @@ def add_nma_col(df: DataFrame,
             print(e_string)
             exit()
 
-        # updating current line axis ratio value
+        # updating current line area/axis_ratio value
         df.at[row_index, col_name] = current_row_value
+
+        # updating row index
+        current_row_index += 1
+
+
+def add_date_col(df: DataFrame) -> None:
+    """
+    Given a merged detections/annotations data frame,
+    adds 'date' column, to enable grouping by time stamp.
+    :param df: DataFrame. Represents merged detections/annotations data.
+    :return: None.
+    """
+    # defining column name
+    col_name = 'date'
+
+    # adding placeholder column to df
+    df[col_name] = None
+
+    # getting df rows
+    df_rows = df.iterrows()
+
+    # getting rows total
+    rows_num = len(df)
+
+    # defining placeholder value for current_row_index
+    current_row_index = 1
+
+    # defining progress base string
+    progress_base_string = f'adding {col_name} column to row #INDEX# of #TOTAL#'
+
+    # iterating over df rows
+    for row_index, row_data in df_rows:
+
+        # printing execution message
+        print_progress_message(base_string=progress_base_string,
+                               index=current_row_index,
+                               total=rows_num)
+
+        # getting current row date data
+        current_img_name = row_data['img_file_name']
+        current_img_name_split = current_img_name.split('_')
+        current_img_date = current_img_name_split[-1]
+
+        # updating current row value
+        df.at[row_index, col_name] = current_img_date
 
         # updating row index
         current_row_index += 1

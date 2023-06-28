@@ -19,6 +19,7 @@ from seaborn import histplot
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 from src.utils.aux_funcs import add_nma_col
+from src.utils.aux_funcs import add_date_col
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import add_treatment_col_fer
 from src.utils.aux_funcs import add_treatment_col_daph
@@ -101,6 +102,12 @@ def get_nma_df(df: DataFrame,
     :param tt: String. Represents treatment type (researcher name).
     :return: None.
     """
+    # adding date column to df
+    print('adding date column to df...')
+    add_date_col(df=df)
+    print(df)
+    exit()
+
     # adding area column to df
     print('adding area column to df...')
     add_nma_col(df=df,
@@ -153,16 +160,18 @@ def get_fornma_df(fornma_file_path: str,
 
     # adding treatment column to df
     print('adding treatment column to df...')
-    if tt == 'daph':
-        add_treatment_col_daph(df=df,
-                               data_format='model')
-    else:
-        print('treatment type undefined')
-        exit()
+    # if tt == 'daph':
+    #     add_treatment_col_daph(df=df,
+    #                            data_format='model')
+    # else:
+    #     print('treatment type undefined')
+    #     exit()
 
     # dropping unrequired cols
     all_cols = df.columns.to_list()
-    keep_cols = ['Area', 'Radius_ratio', 'treatment']
+    print(all_cols)
+    exit()
+    keep_cols = ['Area', 'Radius_ratio', 'treatment', 'Image_name_red']
     drop_cols = [col
                  for col
                  in all_cols
@@ -171,7 +180,7 @@ def get_fornma_df(fornma_file_path: str,
                        axis=1)
 
     # renaming cols
-    final_df.columns = ['area', 'axis_ratio', 'treatment']
+    final_df.columns = ['area', 'axis_ratio', 'treatment', 'img_file_name']
 
     # adding evaluator column
     final_df['evaluator'] = 'fornma_nuc'
@@ -204,6 +213,12 @@ def generate_histograms(df: DataFrame,
 
         # setting figure size
         plt.figure(figsize=(20, 10))
+
+        # adding hue_col
+        df_group['hue_col'] = df_group['date'] + df_group['treatment']
+        print(df_group)
+        print(df_group.columns)
+        exit()
 
         # plotting data
         histplot(data=df_group,
@@ -272,24 +287,25 @@ def plot_histograms(detection_file_path: str,
 
         # getting merged detections df
         print('getting data from input files...')
-        merged_df = get_merged_detection_annotation_df(detections_df_path=detection_file_path,
-                                                       annotations_df_path=ground_truth_file_path)
+        # merged_df = get_merged_detection_annotation_df(detections_df_path=detection_file_path,
+        #                                                annotations_df_path=ground_truth_file_path)
 
         # filtering df by detection threshold
         print('filtering df by detection threshold...')
-        filtered_df = merged_df[merged_df['detection_threshold'] >= DETECTION_THRESHOLD]
+        # filtered_df = merged_df[merged_df['detection_threshold'] >= DETECTION_THRESHOLD]
 
         # getting nma df
-        nma_df = get_nma_df(df=filtered_df,
-                            tt='daph')
+        # nma_df = get_nma_df(df=filtered_df,
+        #                     tt='daph')
 
         # getting fornma df
         fornma_df = get_fornma_df(fornma_file_path=fornma_file_path,
                                   tt='daph')
+        exit()
 
         # concatenating nma/fornma dfs
-        dfs_list = [nma_df, fornma_df]
-        final_df = concat(dfs_list)
+        # dfs_list = [nma_df, fornma_df]
+        # final_df = concat(dfs_list)
 
     # saving output csv
     final_df.to_csv(save_path,
