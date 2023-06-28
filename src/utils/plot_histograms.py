@@ -1,8 +1,8 @@
-# plot area histogram module
+# plot histograms (area/axis_ratio) module
 
 print('initializing...')  # noqa
 
-# Code destined to plotting area
+# Code destined to plotting area and axis ratio
 # histograms for model and annotator data.
 
 ######################################################################
@@ -164,14 +164,16 @@ def get_fornma_df(fornma_file_path: str) -> DataFrame:
     return final_df
 
 
-def plot_histograms(df: DataFrame,
-                    output_folder: str
-                    ) -> None:
+def generate_histograms(df: DataFrame,
+                        output_folder: str,
+                        col_name: str
+                        ) -> None:
     """
-    Given a nma data frame, plots cell_area and axis_ratio
+    Given a nma data frame, plots area or axis_ratio
     histograms, filtering df by control group.
     :param df: DataFrame. Represents NMA data.
     :param output_folder: String. Represents a path to a folder.
+    :param col_name: String. Represents a column name ('area' or 'axis_ratio').
     :return: None.
     """
     # grouping df by evaluator
@@ -189,7 +191,7 @@ def plot_histograms(df: DataFrame,
 
         # plotting data
         histplot(data=df_group,
-                 x='area',
+                 x=col_name,
                  hue='treatment',
                  kde=True,
                  stat='count')
@@ -206,16 +208,12 @@ def plot_histograms(df: DataFrame,
         from: https://seaborn.pydata.org/generated/seaborn.histplot.html
         """
 
-        # setting xy lims
-        # plt.xlim(0, 10000)
-        # plt.ylim(0, 2)
-
         # setting plot title
         plt_title = f'{df_name} histogram'
         plt.title(plt_title)
 
         # saving plot
-        save_name = f'area_histograms_{df_name}.png'
+        save_name = f'{col_name}_histograms_{df_name}.png'
         save_path = join(output_folder,
                          save_name)
         plt.savefig(save_path)
@@ -224,15 +222,14 @@ def plot_histograms(df: DataFrame,
         plt.close()
 
 
-def plot_area_histograms(detection_file_path: str,
-                         ground_truth_file_path: str,
-                         fornma_file_path: str,
-                         output_folder: str
-                         ) -> None:
+def plot_histograms(detection_file_path: str,
+                    ground_truth_file_path: str,
+                    fornma_file_path: str,
+                    output_folder: str
+                    ) -> None:
     """
     Given paths to model detections and gt annotations,
-    compares nma between evaluators, plotting
-    comparison scatter plot.
+    merged dfs and plots area/axis_ratio histograms.
     :param detection_file_path: String. Represents a file path.
     :param ground_truth_file_path: String. Represents a file path.
     :param fornma_file_path: String. Represents a file path.
@@ -240,7 +237,7 @@ def plot_area_histograms(detection_file_path: str,
     :return: None.
     """
     # defining csv output path
-    save_name = 'area_df.csv'
+    save_name = 'histograms_df.csv'
     save_path = join(output_folder,
                      save_name)
 
@@ -250,8 +247,8 @@ def plot_area_histograms(detection_file_path: str,
     # checking if csv output already exists
     if exists(save_path):
 
-        # reading already existent area data frame
-        print('reading already existent area data frame...')
+        # reading already existent data frame
+        print('reading already existent data frame...')
         final_df = read_csv(save_path)
 
     # if output csv does not already exist
@@ -281,8 +278,13 @@ def plot_area_histograms(detection_file_path: str,
                     index=False)
 
     # plotting histograms
-    plot_histograms(df=final_df,
-                    output_folder=output_folder)
+    generate_histograms(df=final_df,
+                        output_folder=output_folder,
+                        col_name='area')
+
+    generate_histograms(df=final_df,
+                        output_folder=output_folder,
+                        col_name='axis_ratio')
 
     # printing execution message
     print(f'results saved in folder "{output_folder}"')
@@ -316,10 +318,10 @@ def main():
     enter_to_continue()
 
     # running plot_area_histograms function
-    plot_area_histograms(detection_file_path=detection_file,
-                         ground_truth_file_path=ground_truth_file,
-                         fornma_file_path=fornma_file,
-                         output_folder=output_folder)
+    plot_histograms(detection_file_path=detection_file,
+                    ground_truth_file_path=ground_truth_file,
+                    fornma_file_path=fornma_file,
+                    output_folder=output_folder)
 
 ######################################################################
 # running main function
