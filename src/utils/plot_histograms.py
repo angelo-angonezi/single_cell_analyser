@@ -331,9 +331,12 @@ def get_histograms_df(detection_file_path: str,
 
         # creating histograms_df
         print('creating histograms df...')
-        histograms_df = create_histograms_df()
+        histograms_df = create_histograms_df(detection_file_path=detection_file_path,
+                                             ground_truth_file_path=ground_truth_file_path,
+                                             fornma_file_path=fornma_file_path)
 
         # saving output csv
+        print('saving histograms df...')
         histograms_df.to_csv(save_path,
                              index=False)
 
