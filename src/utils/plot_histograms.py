@@ -14,6 +14,7 @@ from os.path import join
 from pandas import concat
 from os.path import exists
 from pandas import read_csv
+from seaborn import kdeplot
 from pandas import DataFrame
 from seaborn import histplot
 from argparse import ArgumentParser
@@ -224,14 +225,18 @@ def generate_histograms(df: DataFrame,
         print(f_string)
 
         # setting figure size
-        plt.figure(figsize=(20, 10))
+        plt.figure(figsize=(10, 8))
 
         # plotting data
-        histplot(data=df_group,
-                 x=col_name,
-                 hue='treatment',
-                 kde=True,
-                 stat='count')
+        # histplot(data=df_group,
+        #          x=col_name,
+        #          hue='treatment',
+        #          kde=True,
+        #          stat='count')
+
+        kdeplot(data=df_group,
+                x=col_name,
+                hue='treatment')
 
         # TODO: check w Guido changes to previous line based on documentation below.
         """
@@ -250,7 +255,7 @@ def generate_histograms(df: DataFrame,
         plt.title(plt_title)
 
         # saving plot
-        save_name = f'{col_name}_histograms_{evaluator}_{date}.png'
+        save_name = f'{col_name}_histograms_{evaluator}_{date}_kde.png'
         save_path = join(output_folder,
                          save_name)
         plt.savefig(save_path)
