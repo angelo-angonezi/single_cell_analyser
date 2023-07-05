@@ -30,11 +30,6 @@ from src.utils.aux_funcs import get_merged_detection_annotation_df
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
-# defining global variables
-
-DETECTION_THRESHOLD = 0.5
-
-#####################################################################
 # argument parsing related functions
 
 
@@ -78,6 +73,14 @@ def get_args_dict() -> dict:
                         dest='output_folder',
                         required=False,
                         help=output_help)
+
+    # detection threshold param
+    threshold_help = 'defines threshold to be applied (filters detections OBBs based on detection threshold)'
+    parser.add_argument('-t', '--detection-threshold',
+                        dest='detection_threshold',
+                        required=False,
+                        default=0.5,
+                        help=threshold_help)
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -258,7 +261,8 @@ def generate_histograms(df: DataFrame,
 
 def create_histograms_df(detection_file_path: str,
                          ground_truth_file_path: str,
-                         fornma_file_path: str
+                         fornma_file_path: str,
+                         detection_threshold: float
                          ) -> DataFrame:
     """
     Given paths to model detections and gt annotations,
@@ -266,6 +270,8 @@ def create_histograms_df(detection_file_path: str,
     :param detection_file_path: String. Represents a file path.
     :param ground_truth_file_path: String. Represents a file path.
     :param fornma_file_path: String. Represents a file path.
+    :param detection_threshold: Float. Represents detection threshold to be applied as filter.
+    :return: DataFrame. Represents a histograms df.
     """
     # getting merged detections df
     print('getting data from input files...')
@@ -274,7 +280,7 @@ def create_histograms_df(detection_file_path: str,
 
     # filtering df by detection threshold
     print('filtering df by detection threshold...')
-    filtered_df = merged_df[merged_df['detection_threshold'] >= DETECTION_THRESHOLD]
+    filtered_df = merged_df[merged_df['detection_threshold'] >= detection_threshold]
 
     # getting nma df
     nma_df = get_nma_df(df=filtered_df,
@@ -298,7 +304,8 @@ def create_histograms_df(detection_file_path: str,
 def get_histograms_df(detection_file_path: str,
                       ground_truth_file_path: str,
                       fornma_file_path: str,
-                      output_folder: str
+                      output_folder: str,
+                      detection_threshold: float
                       ) -> DataFrame:
     """
     Given paths to model detections and gt annotations,
@@ -309,6 +316,7 @@ def get_histograms_df(detection_file_path: str,
     :param ground_truth_file_path: String. Represents a file path.
     :param fornma_file_path: String. Represents a file path.
     :param output_folder: String. Represents a folder path.
+    :param detection_threshold: Float. Represents detection threshold to be applied as filter.
     :return: None.
     """
     # defining csv output path
@@ -333,7 +341,8 @@ def get_histograms_df(detection_file_path: str,
         print('creating histograms df...')
         histograms_df = create_histograms_df(detection_file_path=detection_file_path,
                                              ground_truth_file_path=ground_truth_file_path,
-                                             fornma_file_path=fornma_file_path)
+                                             fornma_file_path=fornma_file_path,
+                                             detection_threshold=detection_threshold)
 
         # saving output csv
         print('saving histograms df...')
@@ -347,7 +356,8 @@ def get_histograms_df(detection_file_path: str,
 def plot_histograms(detection_file_path: str,
                     ground_truth_file_path: str,
                     fornma_file_path: str,
-                    output_folder: str
+                    output_folder: str,
+                    detection_threshold: float
                     ) -> None:
     """
     Given paths to model detections and gt annotations,
@@ -356,6 +366,7 @@ def plot_histograms(detection_file_path: str,
     :param ground_truth_file_path: String. Represents a file path.
     :param fornma_file_path: String. Represents a file path.
     :param output_folder: String. Represents a folder path.
+    :param detection_threshold: Float. Represents detection threshold to be applied as filter.
     :return: None.
     """
     # getting histograms df
@@ -364,7 +375,8 @@ def plot_histograms(detection_file_path: str,
     histograms_df = get_histograms_df(detection_file_path=detection_file_path,
                                       ground_truth_file_path=ground_truth_file_path,
                                       fornma_file_path=fornma_file_path,
-                                      output_folder=output_folder)
+                                      output_folder=output_folder,
+                                      detection_threshold=detection_threshold)
 
     # plotting histograms
     spacer()
@@ -405,6 +417,9 @@ def main():
     # getting output folder
     output_folder = args_dict['output_folder']
 
+    # getting detection threshold
+    detection_threshold = args_dict['detection_threshold']
+
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
@@ -415,7 +430,8 @@ def main():
     plot_histograms(detection_file_path=detection_file,
                     ground_truth_file_path=ground_truth_file,
                     fornma_file_path=fornma_file,
-                    output_folder=output_folder)
+                    output_folder=output_folder,
+                    detection_threshold=detection_threshold)
 
 ######################################################################
 # running main function

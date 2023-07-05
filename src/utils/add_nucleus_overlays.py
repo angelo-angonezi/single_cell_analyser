@@ -98,8 +98,15 @@ def get_args_dict() -> dict:
     parser.add_argument('-t', '--detection-threshold',
                         dest='detection_threshold',
                         required=False,
-                        default=0.6,
+                        default=0.5,
                         help=threshold_help)
+
+    # input folder param
+    input_help = 'defines input folder (folder containing images)'
+    parser.add_argument('-i', '--input-folder',
+                        dest='input_folder',
+                        required=True,
+                        help=input_help)
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -344,7 +351,8 @@ def add_overlays_to_multiple_images(input_folder: str,
                                      merged_df=merged_df,
                                      detection_threshold=detection_threshold,
                                      output_path=output_path,
-                                     color_dict=color_dict)
+                                     color_dict=color_dict,
+                                     style='rectangle')
 
     # printing execution message
     f_string = f'overlays added to all {images_num} images!'
