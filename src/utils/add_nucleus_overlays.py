@@ -107,6 +107,7 @@ def get_args_dict() -> dict:
     parser.add_argument('-s', '--overlay-style',
                         dest='overlays_style',
                         required=False,
+                        default='rectangle',
                         help=style_help)
 
     # creating arguments dictionary
@@ -187,8 +188,8 @@ def add_single_overlay(open_img: ndarray,
     :return: None.
     """
     # getting current row bounding box info
-    cx = float(obbs_df_row['cx'])
-    cy = float(obbs_df_row['cy'])
+    cx = int(obbs_df_row['cx'])
+    cy = int(obbs_df_row['cy'])
     width = float(obbs_df_row['width'])
     height = float(obbs_df_row['height'])
     angle = float(obbs_df_row['angle'])
@@ -214,7 +215,8 @@ def add_single_overlay(open_img: ndarray,
     elif style == 'circle':
 
         # getting obb radius
-        radius = (width / height) / 2
+        radius = (width + height) / 2
+        radius = int(radius)
 
         # adding circle overlay
         draw_circle(open_img=open_img,
@@ -257,7 +259,7 @@ def add_multiple_overlays(open_img: ndarray,
         add_single_overlay(open_img=open_img,
                            obbs_df_row=row_data,
                            color_dict=color_dict,
-                           style=str)
+                           style=style)
 
 
 def add_overlays_to_single_image(image_name: str,
