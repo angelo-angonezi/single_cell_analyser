@@ -12,6 +12,7 @@ print('initializing...')  # noqa
 print('importing required libraries...')  # noqa
 from numpy import intp
 from cv2 import imread
+from cv2 import circle
 from cv2 import imwrite
 from cv2 import putText
 from cv2 import cvtColor
@@ -101,12 +102,12 @@ def get_args_dict() -> dict:
                         default=0.5,
                         help=threshold_help)
 
-    # input folder param
-    input_help = 'defines input folder (folder containing images)'
-    parser.add_argument('-i', '--input-folder',
-                        dest='input_folder',
-                        required=True,
-                        help=input_help)
+    # overlay style param
+    style_help = 'defines overlay style (rectangle/circle)'
+    parser.add_argument('-s', '--overlay-style',
+                        dest='overlays_style',
+                        required=False,
+                        help=style_help)
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -128,7 +129,7 @@ def draw_rectangle(open_img: ndarray,
                    ) -> ndarray:
     """
     Given an open image, and coordinates for OBB,
-    returns image with OBB overlay.
+    returns image with OBB rectangular overlay.
     """
     # get the corner points
     box = boxPoints(((cx, cy),
@@ -138,7 +139,7 @@ def draw_rectangle(open_img: ndarray,
     # converting corners format
     box = intp(box)
 
-    # drawing lines
+    # drawing rectangle on image
     drawContours(open_img,
                  [box],
                  -1,
@@ -149,9 +150,31 @@ def draw_rectangle(open_img: ndarray,
     return open_img
 
 
+def draw_circle(open_img: ndarray,
+                cx: float,
+                cy: float,
+                radius: float,
+                color: tuple
+                ) -> ndarray:
+    """
+    Given an open image, and coordinates for OBB,
+    returns image with OBB circular overlay.
+    """
+    # drawing circle on image
+    circle(open_img,
+           (cx, cy),
+           radius,
+           color,
+           2)
+
+    # returning modified image
+    return open_img
+
+
 def add_single_overlay(open_img: ndarray,
                        obbs_df_row: Series,
-                       color_dict: dict
+                       color_dict: dict,
+                       style: str = 'rectangle'
                        ) -> None:
     """
     Given an open image and respective obb row
@@ -160,6 +183,7 @@ def add_single_overlay(open_img: ndarray,
     :param open_img: ndarray. Represents an open image.
     :param obbs_df_row: Series. Represents single obb data.
     :param color_dict: Dictionary. Represents colors to be used in overlays.
+    :param style: String. Represents overlays style (rectangle/circle).
     :return: None.
     """
     # getting current row bounding box info
@@ -174,14 +198,30 @@ def add_single_overlay(open_img: ndarray,
     # defining color for overlay
     overlay_color = color_dict[evaluator]
 
-    # adding rectangle overlay
-    draw_rectangle(open_img=open_img,
-                   cx=cx,
-                   cy=cy,
-                   width=width,
-                   height=height,
-                   angle=angle,
-                   color=overlay_color)
+    # checking overlay style
+
+    if style == 'rectangle':
+
+        # adding rectangle overlay
+        draw_rectangle(open_img=open_img,
+                       cx=cx,
+                       cy=cy,
+                       width=width,
+                       height=height,
+                       angle=angle,
+                       color=overlay_color)
+
+    elif style == 'circle':
+
+        # getting obb radius
+        radius = (width / height) / 2
+
+        # adding circle overlay
+        draw_circle(open_img=open_img,
+                    cx=cx,
+                    cy=cy,
+                    radius=radius,
+                    color=overlay_color)
 
     # adding class text
     putText(open_img,
@@ -195,7 +235,8 @@ def add_single_overlay(open_img: ndarray,
 
 def add_multiple_overlays(open_img: ndarray,
                           current_image_df: DataFrame,
-                          color_dict: dict
+                          color_dict: dict,
+                          style: str = 'rectangle'
                           ) -> None:
     """
     Given an open image and current image data frame,
@@ -203,6 +244,7 @@ def add_multiple_overlays(open_img: ndarray,
     :param open_img: ndarray. Represents an open image.
     :param current_image_df: DataFrame. Represents current image detection/annotation data.
     :param color_dict: Dictionary. Represents colors to be used in overlays.
+    :param style: String. Represents overlays style (rectangle/circle).
     :return: None.
     """
     # getting df rows
@@ -214,7 +256,8 @@ def add_multiple_overlays(open_img: ndarray,
         # adding current row overlay
         add_single_overlay(open_img=open_img,
                            obbs_df_row=row_data,
-                           color_dict=color_dict)
+                           color_dict=color_dict,
+                           style=str)
 
 
 def add_overlays_to_single_image(image_name: str,
@@ -222,7 +265,8 @@ def add_overlays_to_single_image(image_name: str,
                                  merged_df: DataFrame,
                                  detection_threshold: float,
                                  output_path: str,
-                                 color_dict: dict
+                                 color_dict: dict,
+                                 style: str = 'rectangle'
                                  ) -> None:
     """
     Given an image name and path, and a merged
@@ -234,6 +278,7 @@ def add_overlays_to_single_image(image_name: str,
     :param detection_threshold: Float. Represents detection threshold to be applied as filter.
     :param output_path: String. Represents a file path.
     :param color_dict: Dictionary. Represents colors to be used in overlays.
+    :param style: String. Represents overlays style (rectangle/circle).
     :return: None.
     """
     # opening image
@@ -283,7 +328,8 @@ def add_overlays_to_single_image(image_name: str,
     # adding overlays to image
     add_multiple_overlays(open_img=open_img,
                           current_image_df=current_image_df,
-                          color_dict=color_dict)
+                          color_dict=color_dict,
+                          style=style)
 
     # saving image in output path
     open_img = cvtColor(open_img, COLOR_RGB2BGR)
@@ -296,7 +342,8 @@ def add_overlays_to_multiple_images(input_folder: str,
                                     ground_truth_file_path: str or None,
                                     output_folder: str,
                                     detection_threshold: float,
-                                    color_dict: dict
+                                    color_dict: dict,
+                                    style: str
                                     ) -> None:
     """
     Given a path to a folder containing images,
@@ -312,6 +359,7 @@ def add_overlays_to_multiple_images(input_folder: str,
     :param output_folder: String. Represents a folder path.
     :param detection_threshold: Float. Represents detection threshold to be applied as filter.
     :param color_dict: Dictionary. Represents colors to be used in overlays.
+    :param style: String. Represents overlays style (rectangle/circle).
     :return: None.
     """
     # getting merged detections df
@@ -352,7 +400,7 @@ def add_overlays_to_multiple_images(input_folder: str,
                                      detection_threshold=detection_threshold,
                                      output_path=output_path,
                                      color_dict=color_dict,
-                                     style='rectangle')
+                                     style=style)
 
     # printing execution message
     f_string = f'overlays added to all {images_num} images!'
@@ -382,6 +430,9 @@ def main():
     # getting output folder
     output_folder = args_dict['output_folder']
 
+    # getting overlays style
+    overlays_style = args_dict['overlays_style']
+
     # getting detection threshold
     detection_threshold = args_dict['detection_threshold']
     detection_threshold = float(detection_threshold)
@@ -399,7 +450,8 @@ def main():
                                     ground_truth_file_path=ground_truth_file,
                                     output_folder=output_folder,
                                     detection_threshold=detection_threshold,
-                                    color_dict=COLOR_DICT)
+                                    color_dict=COLOR_DICT,
+                                    style=overlays_style)
 
 ######################################################################
 # running main function
