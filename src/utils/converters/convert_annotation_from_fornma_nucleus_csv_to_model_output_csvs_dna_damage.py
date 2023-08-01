@@ -88,6 +88,9 @@ def convert_single_file(input_csv_file_path: str,
         # getting row index and row data
         row_index, row_data = row
 
+        # correcting row index type
+        row_index = int(row_index)
+
         # correcting index
         row_index += 1
 

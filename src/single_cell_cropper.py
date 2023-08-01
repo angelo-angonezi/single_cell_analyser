@@ -34,7 +34,7 @@ sleep(0.8)
 
 ITERATIONS_TOTAL = 0
 CURRENT_ITERATION = 1
-RESIZE_DIMENSIONS = (500, 500)
+RESIZE_DIMENSIONS = (100, 100)
 
 #####################################################################
 # argument parsing related functions
@@ -75,7 +75,7 @@ def get_args_dict() -> dict:
 
     parser.add_argument('-x', '--expansion-ratio',
                         dest='expansion_ratio',
-                        help='defines ratio of expansion of width/height to generate larger-than-og-nucleus crops',
+                        help='defines ratio of expansion of width/height to generate larger-than-orig-nucleus crops',
                         required=False,
                         default=1.0)
 
@@ -172,7 +172,7 @@ def crop_single_obb(image: ndarray,
     :return: Array. Represents obb crop from image.
     """
     # getting current obb info
-    cx, cy, width, height, angle = obb
+    cx, cy, width, height, angle, cell_class = obb
 
     # expanding with/height
     width = width * expansion_ratio
@@ -309,7 +309,7 @@ def crop_multiple_obbs(image: ndarray,
                 img=current_obb_crop)
 
         # getting current obb info
-        cx, cy, width, height, angle = obb
+        cx, cy, width, height, angle, cell_class = obb
 
         # assembling current crop dict
         current_crop_dict = {'img_name': image_name,
@@ -319,14 +319,17 @@ def crop_multiple_obbs(image: ndarray,
                              'cy': cy,
                              'width': width,
                              'height': height,
-                             'angle': angle}
+                             'angle': angle,
+                             'class': cell_class}
 
         # getting current crop df
-        current_crop_dict = DataFrame(current_crop_dict,
-                                      index=[0])
+        current_crop_df = DataFrame(current_crop_dict,
+                                    index=[0])
+        print(current_crop_df)
+        exit()
 
         # appending current crop df to dfs list
-        dfs_list.append(current_crop_dict)
+        dfs_list.append(current_crop_df)
 
     # concatenating dfs in dfs list
     crops_df = concat(dfs_list,
@@ -425,10 +428,10 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
         image_name = str(image_name)
 
         # TODO: remove this once test completed!
-        if image_name != 'TTO_10':
-            print(f'skipping img {image_name}...')
-            continue
-        print(image_name)
+        # if image_name != 'TTO_10':
+        #     print(f'skipping img {image_name}...')
+        #     continue
+        # print(image_name)
 
         # getting current image name with extension
         image_name_w_extension = f'{image_name}.tif'
@@ -565,7 +568,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running single cell cropper function
     single_cell_cropper(input_folder=input_folder,

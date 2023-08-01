@@ -184,10 +184,14 @@ def get_obbs_from_df(df: DataFrame) -> list:
     # getting angle values
     angles = df['angle']
 
+    # getting class values
+    cell_classes = df['class']
+    cell_classes = cell_classes.astype(str)
+
     # creating zip list
-    centroids_list = [(cx, cy, width, height, angle)
-                      for cx, cy, width, height, angle
-                      in zip(cxs, cys, widths, heights, angles)]
+    centroids_list = [(cx, cy, width, height, angle, cell_class)
+                      for cx, cy, width, height, angle, cell_class
+                      in zip(cxs, cys, widths, heights, angles, cell_classes)]
 
     # returning centroids list
     return centroids_list
