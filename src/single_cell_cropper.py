@@ -21,10 +21,10 @@ from pandas import DataFrame
 from numpy import pad as np_pad
 from argparse import ArgumentParser
 from cv2 import resize as cv_resize
-from src.utils.aux_funcs import flush_or_print
 from scipy.ndimage import rotate as scp_rotate
 from src.utils.aux_funcs import get_obbs_from_df
 from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
 sleep(0.8)
@@ -252,20 +252,11 @@ def crop_multiple_obbs(image: ndarray,
         # getting current crop string
         current_crop_str = f'{obb_index:0{obbs_total_str_len}d}'
 
-        # getting current percentage progress
-        current_percentage_ratio = CURRENT_ITERATION / ITERATIONS_TOTAL
-        current_percentage_progress = current_percentage_ratio * 100
-        current_percentage_round_progress = round(current_percentage_progress, 2)
-        current_percentage_round_progress_str = '{:.2f}'.format(current_percentage_round_progress)
-
         # printing execution message
-        current_progress_string = f'{progress_string} '
-        current_progress_string += f'(crop: {current_crop_str} '
-        current_progress_string += f'of {obbs_total}) '
-        current_progress_string += f'| {current_percentage_round_progress_str}%'
-        flush_or_print(string=current_progress_string,
-                       index=CURRENT_ITERATION,
-                       total=ITERATIONS_TOTAL)
+        current_progress_string = f'{progress_string} (crop: #INDEX# of #TOTAL#)'
+        print_progress_message(base_string=current_progress_string,
+                               index=CURRENT_ITERATION,
+                               total=ITERATIONS_TOTAL)
 
         # updating global parameters
         CURRENT_ITERATION += 1
@@ -325,8 +316,6 @@ def crop_multiple_obbs(image: ndarray,
         # getting current crop df
         current_crop_df = DataFrame(current_crop_dict,
                                     index=[0])
-        print(current_crop_df)
-        exit()
 
         # appending current crop df to dfs list
         dfs_list.append(current_crop_df)
@@ -458,7 +447,7 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
 
         # assembling current progress string
         progress_string = f'generating crops for image {image_index:0{image_total_str_len}d}'
-        progress_string += f' of {image_total}...'
+        progress_string += f' of {image_total}'
 
         # running single image cropper
         crops_df = get_single_image_crops(image=current_image_array,
