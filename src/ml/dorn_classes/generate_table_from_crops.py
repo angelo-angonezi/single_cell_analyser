@@ -10,27 +10,13 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-from numpy import intp
-from cv2 import imread
-from cv2 import circle
-from cv2 import imwrite
-from cv2 import putText
-from cv2 import cvtColor
 from os.path import join
-from numpy import ndarray
-from pandas import Series
-from cv2 import boxPoints
-from pandas import DataFrame
-from cv2 import drawContours
-from cv2 import COLOR_BGR2RGB
-from cv2 import COLOR_RGB2BGR
+from pandas import read_csv
 from argparse import ArgumentParser
-from cv2 import FONT_HERSHEY_SIMPLEX
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
-from src.utils.aux_funcs import get_merged_detection_annotation_df
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -57,19 +43,19 @@ def get_args_dict() -> dict:
                         required=True,
                         help=input_help)
 
-    # crops file param
-    crops_help = 'defines path to crops file (containing crops info)'
-    parser.add_argument('-c', '--crops-file',
-                        dest='crops_file',
-                        required=True,
-                        help=crops_help)
-
     # images_extension param
     images_extension_help = 'defines extension (.tif, .png, .jpg) of images in input folders'
     parser.add_argument('-x', '--images-extension',
                         dest='images_extension',
                         required=True,
                         help=images_extension_help)
+
+    # crops file param
+    crops_help = 'defines path to crops file (containing crops info)'
+    parser.add_argument('-c', '--crops-file',
+                        dest='crops_file',
+                        required=True,
+                        help=crops_help)
 
     # output folder param
     output_help = 'defines output folder (folder that will contain outlined images)'
@@ -90,33 +76,21 @@ def get_args_dict() -> dict:
 
 def generate_table_from_crops(input_folder: str,
                               images_extension: str,
-                              detection_file_path: str or None,
-                              ground_truth_file_path: str or None,
+                              crops_file: str,
                               output_folder: str,
-                              detection_threshold: float,
-                              color_dict: dict,
-                              style: str
                               ) -> None:
     """
-    Given a path to a folder containing images,
-    a path to a file containing detection info from
-    mentioned images, and a path to an output folder,
-    generates images with detection outlines (if centroid
-    flag is False, or centroids, if flag is True), saving
-    new outlined images into output folder.
-    :param input_folder: String. Represents a folder path.
+    Given a path to a folder containing crops,
+    and a path to a file containing crops info,
+    generates ML input compatible tables
+    :param input_folder: String. Represents a path to a folder.
     :param images_extension: String. Represents image extension.
-    :param detection_file_path: String. Represents a file path.
-    :param ground_truth_file_path: String. Represents a file path.
-    :param output_folder: String. Represents a folder path.
-    :param detection_threshold: Float. Represents detection threshold to be applied as filter.
-    :param color_dict: Dictionary. Represents colors to be used in overlays.
-    :param style: String. Represents overlays style (rectangle/circle).
+    :param crops_file: String. Represents a path to a file.
+    :param output_folder: String. Represents a path to a folder.
     :return: None.
     """
-    # getting merged detections df
-    merged_df = get_merged_detection_annotation_df(detections_df_path=detection_file_path,
-                                                   annotations_df_path=ground_truth_file_path)
+    # getting crops df
+    crops_df = read_csv(crops_file)
 
     # getting images in input folder
     images = get_specific_files_in_folder(path_to_folder=input_folder,
@@ -188,12 +162,8 @@ def main():
     # running add_overlays_to_multiple_images function
     generate_table_from_crops(input_folder=input_folder,
                               images_extension=images_extension,
-                              detection_file_path=detection_file,
-                              ground_truth_file_path=ground_truth_file,
-                              output_folder=output_folder,
-                              detection_threshold=detection_threshold,
-                              color_dict=COLOR_DICT,
-                              style=overlays_style)
+                              crops_file=crops_file,
+                              output_folder=output_folder)
 
 ######################################################################
 # running main function
