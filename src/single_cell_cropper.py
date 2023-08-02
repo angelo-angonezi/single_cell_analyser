@@ -71,7 +71,8 @@ def get_args_dict() -> dict:
     parser.add_argument('-t', '--detection-threshold',
                         dest='detection_threshold',
                         help='defines detection threshold for ml model results',
-                        required=True)
+                        required=False,
+                        default=0.5)
 
     parser.add_argument('-x', '--expansion-ratio',
                         dest='expansion_ratio',
