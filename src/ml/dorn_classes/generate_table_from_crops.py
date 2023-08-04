@@ -18,6 +18,7 @@ from pandas import Series
 from pandas import read_csv
 from pandas import DataFrame
 from cv2 import IMREAD_GRAYSCALE
+from numpy import sort as np_sort
 from argparse import ArgumentParser
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import drop_unrequired_cols
@@ -44,7 +45,7 @@ def get_args_dict() -> dict:
     # adding arguments to parser
 
     # input folder param
-    input_help = 'defines input folder (folder containing images)'
+    input_help = 'defines input folder (folder containing crops)'
     parser.add_argument('-i', '--input-folder',
                         dest='input_folder',
                         required=True,
@@ -65,7 +66,7 @@ def get_args_dict() -> dict:
                         help=crops_help)
 
     # output folder param
-    output_help = 'defines output folder (folder that will contain outlined images)'
+    output_help = 'defines output folder (folder that will contain output files)'
     parser.add_argument('-o', '--output-folder',
                         dest='output_folder',
                         required=True,
@@ -222,14 +223,17 @@ def get_crops_ml_df(input_folder: str,
         # getting current crop pixels
         current_crop_pixels = get_crop_pixels(crop_path=current_crop_path)
 
+        # getting current crop sorted pixels
+        current_crop_sorted_pixels = np_sort(current_crop_pixels)
+
         # assembling current cell dict
         current_dict = {'crop_path': current_crop_path,
                         'class': current_crop_class,
-                        'pixels': [current_crop_pixels]}
+                        'pixels': [current_crop_pixels],
+                        'sorted_pixels': [current_crop_sorted_pixels]}
 
         # assembling current cell df
         current_df = DataFrame(current_dict)
-        current_df = current_df.astype(object)
 
         # appending current df to dfs list
         dfs_list.append(current_df)
@@ -266,11 +270,10 @@ def generate_table_from_crops(input_folder: str,
                                   crops_df=crops_df)
 
     # saving final df
-    save_name = f'crops_ml_df.csv'
+    save_name = f'crops_ml_df.pickle'
     save_path = join(output_folder,
                      save_name)
-    crops_ml_df.to_csv(save_path,
-                       index=False)
+    crops_ml_df.to_pickle(save_path)
 
     # printing execution message
     print(f'files saved to {output_folder}')
