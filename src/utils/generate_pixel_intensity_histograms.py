@@ -2,8 +2,8 @@
 
 print('initializing...')  # noqa
 
-# Code destined to generating ML input
-# table, based on crops info.
+# Code destined to generating pixel intensity
+# histograms - Fucci related.
 
 ######################################################################
 # imports
@@ -37,26 +37,30 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'generate ML table from crops module'
+    description = 'generate pixel intensity histograms for single-cell crops'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
 
     # adding arguments to parser
 
-    # input folder param
-    input_help = 'defines input folder (folder containing crops)'
-    parser.add_argument('-i', '--input-folder',
-                        dest='input_folder',
+    # red folder param
+    parser.add_argument('-r', '--red-folder',
+                        dest='red_folder',
                         required=True,
-                        help=input_help)
+                        help='defines red input folder (folder containing crops in fluorescence channel)')
 
-    # images_extension param
-    images_extension_help = 'defines extension (.tif, .png, .jpg) of images in input folders'
+    # green folder param
+    parser.add_argument('-g', '--green-folder',
+                        dest='green_folder',
+                        required=True,
+                        help='defines green input folder (folder containing crops in fluorescence channel)')
+
+    # images extension param
     parser.add_argument('-x', '--images-extension',
                         dest='images_extension',
                         required=True,
-                        help=images_extension_help)
+                        help='defines extension (.tif, .png, .jpg) of images in input folders')
 
     # crops file param
     crops_help = 'defines path to crops file (containing crops info)'
@@ -246,11 +250,11 @@ def get_crops_ml_df(input_folder: str,
     return final_df
 
 
-def generate_table_from_crops(input_folder: str,
-                              images_extension: str,
-                              crops_file: str,
-                              output_folder: str,
-                              ) -> None:
+def generate_pixel_intensity_histograms(input_folder: str,
+                                        images_extension: str,
+                                        crops_file: str,
+                                        output_folder: str,
+                                        ) -> None:
     """
     Given a path to a folder containing crops,
     and a path to a file containing crops info,
@@ -306,11 +310,11 @@ def main():
     # waiting for user input
     enter_to_continue()
 
-    # running generate_table_from_crops function
-    generate_table_from_crops(input_folder=input_folder,
-                              images_extension=images_extension,
-                              crops_file=crops_file,
-                              output_folder=output_folder)
+    # running generate_pixel_intensity_histograms function
+    generate_pixel_intensity_histograms(input_folder=input_folder,
+                                        images_extension=images_extension,
+                                        crops_file=crops_file,
+                                        output_folder=output_folder)
 
 ######################################################################
 # running main function
