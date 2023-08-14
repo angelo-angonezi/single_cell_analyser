@@ -16,7 +16,6 @@ from pandas import DataFrame
 from argparse import ArgumentParser
 from src.utils.aux_funcs import get_crop_pixels
 from src.utils.aux_funcs import enter_to_continue
-from src.utils.aux_funcs import drop_unrequired_cols
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
@@ -103,13 +102,6 @@ def get_crops_df(crops_file: str) -> DataFrame:
     crops_df = read_csv(crops_file,
                         dtype=col_types)
 
-    # defining cols to keep
-    cols_to_keep = ['crop_name', 'class']
-
-    # dropping unrequired cols
-    drop_unrequired_cols(df=crops_df,
-                         cols_to_keep=cols_to_keep)
-
     # returning crops df
     return crops_df
 
@@ -134,7 +126,41 @@ def generate_pixel_intensity_histograms(red_folder: str,
     # getting crops df
     crops_df = get_crops_df(crops_file=crops_file)
 
-    print(crops_df)
+    # getting crops num
+    crops_num = len(crops_df)
+
+    # getting df rows
+    df_rows = crops_df.iterrows()
+
+    # defining start value for current_crop_index
+    current_crop_index = 1
+
+    # iterating over df rows
+    for row_index, row_data in df_rows:
+
+        # printing execution message
+        f_string = f'generating histogram for crop #INDEX# of #TOTAL#'
+        print_progress_message(base_string=f_string,
+                               index=current_crop_index,
+                               total=crops_num)
+
+        # updating index
+        current_crop_index += 1
+
+        # getting current crop name
+        crop_name = row_data['crop_name']
+        crop_name_w_extension = f'{crop_name}{images_extension}'
+
+        # getting current crop paths
+        red_path = join(red_folder, crop_name_w_extension)
+        green_path = join(green_folder, crop_name_w_extension)
+
+        print(red_path)
+        print(green_path)
+        from os.path import exists
+        print(exists(red_path))
+        exit()
+
     exit()
 
     # getting final df
@@ -178,7 +204,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running generate_pixel_intensity_histograms function
     generate_pixel_intensity_histograms(red_folder=red_folder,
