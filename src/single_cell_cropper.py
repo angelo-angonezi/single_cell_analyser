@@ -417,12 +417,6 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
         # getting image name string
         image_name = str(image_name)
 
-        # TODO: remove this once test completed!
-        # if image_name != 'TTO_10':
-        #     print(f'skipping img {image_name}...')
-        #     continue
-        # print(image_name)
-
         # getting current image name with extension
         image_name_w_extension = f'{image_name}.tif'
 
