@@ -10,16 +10,11 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-from cv2 import imread
 from os.path import join
-from pandas import concat
-from numpy import ndarray
-from pandas import Series
 from pandas import read_csv
 from pandas import DataFrame
-from cv2 import IMREAD_GRAYSCALE
-from numpy import sort as np_sort
 from argparse import ArgumentParser
+from src.utils.aux_funcs import get_crop_pixels
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import drop_unrequired_cols
 from src.utils.aux_funcs import print_progress_message
@@ -119,138 +114,8 @@ def get_crops_df(crops_file: str) -> DataFrame:
     return crops_df
 
 
-def get_crop_path(row_data: Series,
-                  input_folder: str,
-                  images_extension: str
-                  ) -> str:
-    """
-    Given a crops data frame row, and
-    a path to input folder+images extension,
-    returns given crop path.
-    :param row_data: Series. Represents a crops data frame row.
-    :param input_folder: String. Represents a path to a folder.
-    :param images_extension: String. Represents image extension.
-    :return: String. Represents a path to a crop.
-    """
-    # getting current row crop name
-    crop_name = row_data['crop_name']
-
-    # getting current crop name+extension
-    crop_name_w_extension = f'{crop_name}{images_extension}'
-
-    # getting current row crop path
-    crop_path = join(input_folder,
-                     crop_name_w_extension)
-
-    # returning crop path
-    return crop_path
-
-
-def get_crop_class(row_data: Series) -> str:
-    """
-    Given a crops data frame row,
-    returns given crop class.
-    :param row_data: Series. Represents a crops data frame row.
-    :return: String. Represents a crop's class.
-    """
-    # getting current row crop name
-    crop_class = row_data['class']
-
-    # returning crop class
-    return crop_class
-
-
-def get_crop_pixels(crop_path: str) -> ndarray:
-    """
-    Given a path to a crop, returns
-    crops pixels, in a linearized array.
-    :param crop_path: String. Represents a path to a crop.
-    :return: ndarray. Represents a crop's pixels.
-    """
-    # opening image
-    open_crop = imread(crop_path,
-                       IMREAD_GRAYSCALE)
-
-    # linearizing pixels
-    linearized_pixels = open_crop.flatten()
-
-    # returning crop's linearized pixels
-    return linearized_pixels
-
-
-def get_crops_ml_df(input_folder: str,
-                    images_extension: str,
-                    crops_df: DataFrame
-                    ) -> DataFrame:
-    """
-    Given a crops data frame, returns
-    ml input ready data frame.
-    :param input_folder: String. Represents a path to a folder.
-    :param images_extension: String. Represents image extension.
-    :param crops_df: DataFrame. Represents a crops data frame.
-    :return: DataFrame. Represents a ml crops data frame.
-    """
-    # defining placeholder value for dfs list
-    dfs_list = []
-
-    # getting rows num
-    rows_num = len(crops_df)
-
-    # getting df rows
-    df_rows = crops_df.iterrows()
-
-    # defining progress base string
-    progress_string = 'converting crop #INDEX# of #TOTAL#'
-
-    # iterating over df rows (crops)
-    for row_index, row_data in df_rows:
-
-        # converting row index to int
-        row_index = int(row_index)
-
-        # getting adapted current row index (required for print_progress_message)
-        row_index += 1
-
-        # printing execution message
-        print_progress_message(base_string=progress_string,
-                               index=row_index,
-                               total=rows_num)
-
-        # getting current crop path
-        current_crop_path = get_crop_path(row_data=row_data,
-                                          input_folder=input_folder,
-                                          images_extension=images_extension)
-
-        # getting current crop class
-        current_crop_class = get_crop_class(row_data=row_data)
-
-        # getting current crop pixels
-        current_crop_pixels = get_crop_pixels(crop_path=current_crop_path)
-
-        # getting current crop sorted pixels
-        current_crop_sorted_pixels = np_sort(current_crop_pixels)
-
-        # assembling current cell dict
-        current_dict = {'crop_path': current_crop_path,
-                        'class': current_crop_class,
-                        'pixels': [current_crop_pixels],
-                        'sorted_pixels': [current_crop_sorted_pixels]}
-
-        # assembling current cell df
-        current_df = DataFrame(current_dict)
-
-        # appending current df to dfs list
-        dfs_list.append(current_df)
-
-    # concatenating dfs in dfs list
-    final_df = concat(dfs_list,
-                      ignore_index=True)
-
-    # returning final df
-    return final_df
-
-
-def generate_pixel_intensity_histograms(input_folder: str,
+def generate_pixel_intensity_histograms(red_folder: str,
+                                        green_folder: str,
                                         images_extension: str,
                                         crops_file: str,
                                         output_folder: str,
@@ -259,7 +124,8 @@ def generate_pixel_intensity_histograms(input_folder: str,
     Given a path to a folder containing crops,
     and a path to a file containing crops info,
     generates ML input compatible tables
-    :param input_folder: String. Represents a path to a folder.
+    :param red_folder: String. Represents a path to a folder.
+    :param green_folder: String. Represents a path to a folder.
     :param images_extension: String. Represents image extension.
     :param crops_file: String. Represents a path to a file.
     :param output_folder: String. Represents a path to a folder.
@@ -268,16 +134,17 @@ def generate_pixel_intensity_histograms(input_folder: str,
     # getting crops df
     crops_df = get_crops_df(crops_file=crops_file)
 
-    # getting crops ml df
-    crops_ml_df = get_crops_ml_df(input_folder=input_folder,
-                                  images_extension=images_extension,
-                                  crops_df=crops_df)
+    print(crops_df)
+    exit()
+
+    # getting final df
+    final_df = DataFrame()
 
     # saving final df
     save_name = f'crops_ml_df.pickle'
     save_path = join(output_folder,
                      save_name)
-    crops_ml_df.to_pickle(save_path)
+    final_df.to_csv(save_path)
 
     # printing execution message
     print(f'files saved to {output_folder}')
@@ -292,8 +159,11 @@ def main():
     # getting args dict
     args_dict = get_args_dict()
 
-    # getting input folder
-    input_folder = args_dict['input_folder']
+    # getting red folder
+    red_folder = args_dict['red_folder']
+
+    # getting green folder
+    green_folder = args_dict['green_folder']
 
     # getting image extension
     images_extension = args_dict['images_extension']
@@ -311,7 +181,8 @@ def main():
     enter_to_continue()
 
     # running generate_pixel_intensity_histograms function
-    generate_pixel_intensity_histograms(input_folder=input_folder,
+    generate_pixel_intensity_histograms(red_folder=red_folder,
+                                        green_folder=green_folder,
                                         images_extension=images_extension,
                                         crops_file=crops_file,
                                         output_folder=output_folder)

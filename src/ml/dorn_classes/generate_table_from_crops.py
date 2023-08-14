@@ -10,21 +10,18 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-from cv2 import imread
 from os.path import join
 from pandas import concat
-from numpy import ndarray
 from pandas import Series
 from pandas import read_csv
 from pandas import DataFrame
-from cv2 import IMREAD_GRAYSCALE
 from numpy import sort as np_sort
 from argparse import ArgumentParser
+from src.utils.aux_funcs import get_crop_pixels
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import drop_unrequired_cols
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
-from src.utils.aux_funcs import get_specific_files_in_folder
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -154,24 +151,6 @@ def get_crop_class(row_data: Series) -> str:
 
     # returning crop class
     return crop_class
-
-
-def get_crop_pixels(crop_path: str) -> ndarray:
-    """
-    Given a path to a crop, returns
-    crops pixels, in a linearized array.
-    :param crop_path: String. Represents a path to a crop.
-    :return: ndarray. Represents a crop's pixels.
-    """
-    # opening image
-    open_crop = imread(crop_path,
-                       IMREAD_GRAYSCALE)
-
-    # linearizing pixels
-    linearized_pixels = open_crop.flatten()
-
-    # returning crop's linearized pixels
-    return linearized_pixels
 
 
 def get_crops_ml_df(input_folder: str,

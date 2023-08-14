@@ -10,12 +10,15 @@
 import pandas as pd
 from os import mkdir
 from os import listdir
+from cv2 import imread
 from sys import stdout
 from os.path import join
+from numpy import ndarray
 from pandas import concat
 from os.path import exists
 from pandas import read_csv
 from pandas import DataFrame
+from cv2 import IMREAD_GRAYSCALE
 from shutil import copy as sh_copy
 
 # preventing "SettingWithoutCopyWarning" messages
@@ -688,6 +691,24 @@ def add_treatment_col_daph(df: DataFrame,
 
         # updating row index
         current_row_index += 1
+
+
+def get_crop_pixels(crop_path: str) -> ndarray:
+    """
+    Given a path to a crop, returns
+    crops pixels, in a linearized array.
+    :param crop_path: String. Represents a path to a crop.
+    :return: ndarray. Represents a crop's pixels.
+    """
+    # opening image
+    open_crop = imread(crop_path,
+                       IMREAD_GRAYSCALE)
+
+    # linearizing pixels
+    linearized_pixels = open_crop.flatten()
+
+    # returning crop's linearized pixels
+    return linearized_pixels
 
 ######################################################################
 # end of current module
