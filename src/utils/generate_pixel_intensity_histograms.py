@@ -13,12 +13,14 @@ print('importing required libraries...')  # noqa
 from os.path import join
 from pandas import read_csv
 from pandas import DataFrame
+from seaborn import histplot
+from numpy import all as np_all
 from argparse import ArgumentParser
+from matplotlib import pyplot as plt
 from src.utils.aux_funcs import get_crop_pixels
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
-from src.utils.aux_funcs import get_specific_files_in_folder
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -129,6 +131,9 @@ def generate_pixel_intensity_histograms(red_folder: str,
     # getting crops num
     crops_num = len(crops_df)
 
+    # defining placeholder value for dfs_list
+    dfs_list = []
+
     # getting df rows
     df_rows = crops_df.iterrows()
 
@@ -155,19 +160,55 @@ def generate_pixel_intensity_histograms(red_folder: str,
         red_path = join(red_folder, crop_name_w_extension)
         green_path = join(green_folder, crop_name_w_extension)
 
-        print(red_path)
-        print(green_path)
-        from os.path import exists
-        print(exists(red_path))
-        exit()
+        # getting current crop pixels
+        red_pixels = get_crop_pixels(crop_path=red_path)
+        green_pixels = get_crop_pixels(crop_path=green_path)
 
-    exit()
+        # checking if all pixels are zero
+        # TODO: remove this if unused
+        red_is_zero = np_all(red_pixels == 0)
+        green_is_zero = np_all(green_pixels == 0)
+
+        # assembling current crop pair dict
+        red_list = ['red' for _ in red_pixels]
+        green_list = ['green' for _ in green_pixels]
+        red_list.extend(green_list)
+        red_pixels_list = [pixel for pixel in red_pixels]
+        green_pixels_list = [pixel for pixel in green_pixels]
+        red_pixels_list.extend(green_pixels_list)
+        name_list = [crop_name for _ in red_pixels_list]
+        current_dict = {'crop_name': name_list,
+                        'channel': red_list,
+                        'pixel_intensity': red_pixels_list}
+
+        # assembling current crop pair df
+        current_df = DataFrame(current_dict)
+
+        # appending current df to dfs_list
+        dfs_list.append(current_df)
+
+        # generating current crop pair histogram
+        histplot(data=current_df,
+                 x='pixel_intensity',
+                 hue='channel',
+                 hue_order=['red', 'green'],
+                 palette=['r', 'g'],
+                 kde=False)
+
+        # saving plot
+        save_name = f'{crop_name}.png'
+        save_path = join(output_folder,
+                         save_name)
+        plt.savefig(save_path)
+
+        # closing plot
+        plt.close()
 
     # getting final df
     final_df = DataFrame()
 
     # saving final df
-    save_name = f'crops_ml_df.pickle'
+    save_name = f'crops_pixels_df.csv'
     save_path = join(output_folder,
                      save_name)
     final_df.to_csv(save_path)
@@ -204,7 +245,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running generate_pixel_intensity_histograms function
     generate_pixel_intensity_histograms(red_folder=red_folder,
