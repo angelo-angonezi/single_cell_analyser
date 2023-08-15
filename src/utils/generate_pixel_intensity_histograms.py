@@ -11,6 +11,7 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 from os.path import join
+from pandas import concat
 from pandas import read_csv
 from pandas import DataFrame
 from seaborn import histplot
@@ -143,6 +144,10 @@ def generate_pixel_intensity_histograms(red_folder: str,
     # iterating over df rows
     for row_index, row_data in df_rows:
 
+        # TODO: remove this after tests!
+        if current_crop_index == 11:
+            break
+
         # printing execution message
         f_string = f'generating histogram for crop #INDEX# of #TOTAL#'
         print_progress_message(base_string=f_string,
@@ -204,14 +209,16 @@ def generate_pixel_intensity_histograms(red_folder: str,
         # closing plot
         plt.close()
 
-    # getting final df
-    final_df = DataFrame()
+    # concatenating dfs in dfs_list
+    final_df = concat(dfs_list,
+                      ignore_index=True)
 
     # saving final df
     save_name = f'crops_pixels_df.csv'
     save_path = join(output_folder,
                      save_name)
-    final_df.to_csv(save_path)
+    final_df.to_csv(save_path,
+                    index=False)
 
     # printing execution message
     print(f'files saved to {output_folder}')
