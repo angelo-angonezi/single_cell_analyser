@@ -157,10 +157,8 @@ def generate_crops_pixels_df(red_folder: str,
         # updating index
         current_crop_index += 1
 
-        # getting current crop image
-        print(row_data)
-        exit()
-        crop_image = row_data['']
+        # getting current crop image name
+        crop_img_name = row_data['img_name']
 
         # getting current crop name
         crop_name = row_data['crop_name']
@@ -182,7 +180,9 @@ def generate_crops_pixels_df(red_folder: str,
         green_pixels_list = [pixel for pixel in green_pixels]
         red_pixels_list.extend(green_pixels_list)
         name_list = [crop_name for _ in red_pixels_list]
-        current_dict = {'crop_name': name_list,
+        img_name_list = [crop_img_name for _ in red_pixels_list]
+        current_dict = {'img_name': img_name_list,
+                        'crop_name': name_list,
                         'channel': red_list,
                         'pixel_intensity': red_pixels_list}
 
@@ -235,7 +235,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running generate_crops_pixels_df function
     generate_crops_pixels_df(red_folder=red_folder,
