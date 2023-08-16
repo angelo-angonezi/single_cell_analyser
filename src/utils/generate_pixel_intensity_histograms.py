@@ -63,23 +63,109 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def generate_pixel_intensity_histograms(crops_file: str,
-                                        output_folder: str,
-                                        ) -> None:
+def get_pixels_df(crops_file: str) -> DataFrame:
     """
-    Given a path to a folder containing crops,
-    and a path to a file containing crops info,
-    generates ML input compatible tables
+    Given a path to a crops info csv,
+    returns crops data frame.
     :param crops_file: String. Represents a path to a file.
+    :return: DataFrame. Represents crops pixels data frame.
+    """
+    # defining col types
+    col_types = {'img_name': str,
+                 'crop_name': str,
+                 'channel': str,
+                 'pixel_intensity': int}
+
+    # reading crops file
+    crops_df = read_csv(crops_file,
+                        dtype=col_types)
+
+    # returning crops df
+    return crops_df
+
+
+def get_normalized_df(df: DataFrame) -> DataFrame:
+    """
+    Given a crops pixels data frame,
+    returns a normalized copy of given
+    df, in which pixels have been adjusted
+    according to image minimum/maximum
+    (for each channel).
+    :param df: DataFrame. Represents a crops pixels data frame.
+    :return: DataFrame. Represents a normalized pixels data frame.
+    """
+    # defining placeholder value for dfs_list
+    dfs_list = []
+
+    # grouping df by images
+    image_groups = df.groupby('img_name')
+
+    # getting images num
+    images_num = len(image_groups)
+
+    # defining start value for current_img_index
+    current_img_index = 1
+
+    # iterating over image groups
+    for image_name, image_group in image_groups:
+
+        # printing execution message
+        f_string = f'normalizing values for image #INDEX# of #TOTAL#'
+        print_progress_message(base_string=f_string,
+                               index=current_img_index,
+                               total=images_num)
+
+        # updating index
+        current_img_index += 1
+
+        # getting current image red/green dfs
+        red_df = image_group[image_group['channel'] == 'red']
+        green_df = image_group[image_group['channel'] == 'green']
+
+        # filtering dfs for zero pixel values
+        red_df = red_df[red_df['pixel_intensity'] > 0]
+        green_df = green_df[green_df['pixel_intensity'] > 0]
+
+        # checking whether dfs are not empty (meaning all values were 0)
+        # TODO: add logic here
+        if len(red_df) == 0:
+            red_pixels = [0]
+
+        # getting current image red/green pixels
+        red_pixels = red_df['pixel_intensity']
+        green_pixels = green_df['pixel_intensity']
+
+        # getting current image red/green min/max values
+        red_min = red_pixels.min()
+        red_max = red_pixels.max()
+        green_min = green_pixels.min()
+        green_max = green_pixels.max()
+
+        print(green_pixels)
+        print(red_min)
+        # TODO: check this logic
+        # normalizing pixels by min values
+        red_pixels -= red_min
+        green_pixels = green_pixels - green_min
+
+        print(green_pixels)
+        exit()
+
+
+def plot_pixel_histograms(df: DataFrame,
+                          output_folder: str
+                          ) -> None:
+    """
+    Given a normalized pixels data frame,
+    creates pixel intensity histograms,
+    saving output to given folder.
+    :param df: DataFrame. Represents a normalized pixels data frame.
     :param output_folder: String. Represents a path to a folder.
     :return: None.
     """
-    # reading crops pixels df
-    crops_pixels_df = read_csv(crops_file)
-
     # generating current crop pair histogram
     # TODO: add grouping/loop before running this part
-    histplot(data=crops_pixels_df,
+    histplot(data=df,
              x='pixel_intensity',
              hue='channel',
              hue_order=['red', 'green'],
@@ -94,6 +180,27 @@ def generate_pixel_intensity_histograms(crops_file: str,
 
     # closing plot
     plt.close()
+
+
+def generate_pixel_intensity_histograms(crops_file: str,
+                                        output_folder: str,
+                                        ) -> None:
+    """
+    Given a path to a folder containing crops,
+    and a path to a file containing crops info,
+    generates ML input compatible tables
+    :param crops_file: String. Represents a path to a file.
+    :param output_folder: String. Represents a path to a folder.
+    :return: None.
+    """
+    # reading crops pixels df
+    crops_pixels_df = get_pixels_df(crops_file=crops_file)
+
+    # normalizing pixel intensities
+    normalized_pixels_df = get_normalized_df(df=crops_pixels_df)
+
+    # generating plots
+    # plot_pixel_histograms(df=normalized_pixels_df)
 
     # printing execution message
     print(f'files saved to {output_folder}')
@@ -118,7 +225,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running generate_pixel_intensity_histograms function
     generate_pixel_intensity_histograms(crops_file=crops_file,

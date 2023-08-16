@@ -14,10 +14,7 @@ from os.path import join
 from pandas import concat
 from pandas import read_csv
 from pandas import DataFrame
-from seaborn import histplot
-from numpy import all as np_all
 from argparse import ArgumentParser
-from matplotlib import pyplot as plt
 from src.utils.aux_funcs import get_crop_pixels
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
@@ -197,14 +194,11 @@ def generate_crops_pixels_df(red_folder: str,
                       ignore_index=True)
 
     # saving final df
-    save_name = f'crops_pixels_df.csv'
-    save_path = join(output_path,
-                     save_name)
-    final_df.to_csv(save_path,
+    final_df.to_csv(output_path,
                     index=False)
 
     # printing execution message
-    print(f'files saved to {output_path}')
+    print(f'output saved to {output_path}')
     print('analysis complete!')
 
 ######################################################################
