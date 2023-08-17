@@ -99,6 +99,8 @@ def get_normalized_df(df: DataFrame) -> DataFrame:
 
     # grouping df by images
     image_groups = df.groupby('img_name')
+    print(df['img_name'].unique())
+    exit()
 
     # getting images num
     images_num = len(image_groups)
@@ -122,14 +124,15 @@ def get_normalized_df(df: DataFrame) -> DataFrame:
         red_df = image_group[image_group['channel'] == 'red']
         green_df = image_group[image_group['channel'] == 'green']
 
-        # filtering dfs for zero pixel values
-        red_df = red_df[red_df['pixel_intensity'] > 0]
-        green_df = green_df[green_df['pixel_intensity'] > 0]
-
-        # checking whether dfs are not empty (meaning all values were 0)
-        # TODO: add logic here
-        if len(red_df) == 0:
-            red_pixels = [0]
+        histplot(data=image_group,
+                 x='pixel_intensity',
+                 hue='channel',
+                 hue_order=['red', 'green'],
+                 palette=['r', 'g'],
+                 kde=False)
+        plt.show()
+        plt.close()
+        continue
 
         # getting current image red/green pixels
         red_pixels = red_df['pixel_intensity']

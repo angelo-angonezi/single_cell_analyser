@@ -141,10 +141,6 @@ def generate_crops_pixels_df(red_folder: str,
     # iterating over df rows
     for row_index, row_data in df_rows:
 
-        # TODO: remove this after tests!
-        if current_crop_index == 11:
-            break
-
         # printing execution message
         f_string = f'getting data on crop #INDEX# of #TOTAL#'
         print_progress_message(base_string=f_string,
