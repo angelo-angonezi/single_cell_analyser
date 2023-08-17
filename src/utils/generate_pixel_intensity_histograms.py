@@ -99,8 +99,6 @@ def get_normalized_df(df: DataFrame) -> DataFrame:
 
     # grouping df by images
     image_groups = df.groupby('img_name')
-    print(df['img_name'].unique())
-    exit()
 
     # getting images num
     images_num = len(image_groups)
@@ -120,19 +118,14 @@ def get_normalized_df(df: DataFrame) -> DataFrame:
         # updating index
         current_img_index += 1
 
+        # TODO: remove this once test completed
+        # skipping to next
+        dfs_list.append(image_group)
+        continue
+
         # getting current image red/green dfs
         red_df = image_group[image_group['channel'] == 'red']
         green_df = image_group[image_group['channel'] == 'green']
-
-        histplot(data=image_group,
-                 x='pixel_intensity',
-                 hue='channel',
-                 hue_order=['red', 'green'],
-                 palette=['r', 'g'],
-                 kde=False)
-        plt.show()
-        plt.close()
-        continue
 
         # getting current image red/green pixels
         red_pixels = red_df['pixel_intensity']
@@ -154,6 +147,12 @@ def get_normalized_df(df: DataFrame) -> DataFrame:
         print(green_pixels)
         exit()
 
+    # concatenating dfs in dfs_list
+    final_df = concat(dfs_list)
+
+    # returning final df
+    return final_df
+
 
 def plot_pixel_histograms(df: DataFrame,
                           output_folder: str
@@ -166,23 +165,43 @@ def plot_pixel_histograms(df: DataFrame,
     :param output_folder: String. Represents a path to a folder.
     :return: None.
     """
-    # generating current crop pair histogram
-    # TODO: add grouping/loop before running this part
-    histplot(data=df,
-             x='pixel_intensity',
-             hue='channel',
-             hue_order=['red', 'green'],
-             palette=['r', 'g'],
-             kde=False)
+    # grouping df by crop
+    crop_groups = df.groupby('crop_name')
 
-    # saving plot
-    save_name = f'crop.png'
-    save_path = join(output_folder,
-                     save_name)
-    plt.savefig(save_path)
+    # getting crops num
+    crops_num = len(crop_groups)
 
-    # closing plot
-    plt.close()
+    # defining start value for current_crop_index
+    current_crop_index = 1
+
+    # iterating over crop groups
+    for crop_name, crop_group in crop_groups:
+
+        # printing execution message
+        f_string = f'generating histograms for crop #INDEX# of #TOTAL#'
+        print_progress_message(base_string=f_string,
+                               index=current_crop_index,
+                               total=crops_num)
+
+        # updating index
+        current_crop_index += 1
+
+        # generating current crop pixel pairs histogram
+        histplot(data=crop_group,
+                 x='pixel_intensity',
+                 hue='channel',
+                 hue_order=['red', 'green'],
+                 palette=['r', 'g'],
+                 kde=False)
+
+        # saving plot
+        save_name = f'{crop_name}_histograms.png'
+        save_path = join(output_folder,
+                         save_name)
+        plt.savefig(save_path)
+
+        # closing plot
+        plt.close()
 
 
 def generate_pixel_intensity_histograms(crops_file: str,
@@ -203,7 +222,8 @@ def generate_pixel_intensity_histograms(crops_file: str,
     normalized_pixels_df = get_normalized_df(df=crops_pixels_df)
 
     # generating plots
-    # plot_pixel_histograms(df=normalized_pixels_df)
+    plot_pixel_histograms(df=normalized_pixels_df,
+                          output_folder=output_folder)
 
     # printing execution message
     print(f'files saved to {output_folder}')
