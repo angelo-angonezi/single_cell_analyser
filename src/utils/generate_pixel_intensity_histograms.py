@@ -16,6 +16,8 @@ from numpy import ndarray
 from pandas import read_csv
 from pandas import DataFrame
 from seaborn import histplot
+from numpy import min as np_min
+from numpy import max as np_max
 from numpy import all as np_all
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
@@ -85,25 +87,24 @@ def get_pixels_df(crops_file: str) -> DataFrame:
     return crops_df
 
 
-def get_normalization_value(arr: ndarray) -> float:
+def get_normalized_array(arr: ndarray) -> ndarray:
     """
-    Given a numpy array representing pixel
-    values, returns a float, which represents
-    a normalization value, upon which multiplication
-    will result in a normalized array.
+    Given a pixels' array, returns array
+    normalized by min/max pixel values.
     """
-    pass
+    # getting array min/max values
+    arr_min = np_min(arr)
+    arr_max = np_max(arr)
 
+    # TODO: check this logic!
+    # subtracting min value from all elements in array (lower normalization)
+    arr = arr - arr_min
 
-def get_normalized_array(arr: ndarray,
-                         normalization_value: float
-                         ) -> ndarray:
-    """
-    Given an array and a normalization value,
-    returns normalized array (multiplies all
-    elements in array by given value).
-    """
-    pass
+    # dividing all elements in array by max value (upper normalization)
+    arr = arr / arr_max
+
+    # returning normalized array
+    return arr
 
 
 def get_normalized_df(df: DataFrame) -> DataFrame:
@@ -140,11 +141,6 @@ def get_normalized_df(df: DataFrame) -> DataFrame:
         # updating index
         current_img_index += 1
 
-        # TODO: remove this once test completed
-        # skipping to next
-        # dfs_list.append(image_group)
-        # continue
-
         # getting current image red/green dfs
         red_df = image_group[image_group['channel'] == 'red']
         green_df = image_group[image_group['channel'] == 'green']
@@ -153,25 +149,33 @@ def get_normalized_df(df: DataFrame) -> DataFrame:
         red_pixels = red_df['pixel_intensity'].to_numpy()
         green_pixels = green_df['pixel_intensity'].to_numpy()
 
-        # getting normalization values
-        red_normalizer = get_normalization_value(arr=red_pixels)
-        green_normalizer = get_normalization_value(arr=green_pixels)
+        # normalizing arrays
+        red_pixels_normalized = get_normalized_array(arr=red_pixels)
+        green_pixels_normalized = get_normalized_array(arr=green_pixels)
 
-        # getting current image red/green min/max values
-        red_min = red_pixels.min()
-        red_max = red_pixels.max()
-        green_min = green_pixels.min()
-        green_max = green_pixels.max()
+        # getting image names
+        image_names = image_group['img_name']
 
-        print(green_pixels)
-        print(red_min)
-        # TODO: check this logic
-        # normalizing pixels by min values
-        red_pixels -= red_min
-        green_pixels = green_pixels - green_min
+        # getting crop names
+        crop_names = image_group['crop_name']
 
-        print(green_pixels)
-        exit()
+        #  assembling current crop pair dict
+        red_list = ['red' for _ in red_pixels]
+        green_list = ['green' for _ in green_pixels]
+        red_list.extend(green_list)
+        red_pixels_list = [pixel for pixel in red_pixels_normalized]
+        green_pixels_list = [pixel for pixel in green_pixels_normalized]
+        red_pixels_list.extend(green_pixels_list)
+        current_dict = {'img_name': image_names,
+                        'crop_name': crop_names,
+                        'channel': red_list,
+                        'pixel_intensity': red_pixels_list}
+
+        # assembling current image dict
+        current_dict = {'img_name': ,
+                        'crop_name': str,
+                        'channel': str,
+                        'pixel_intensity': int}
 
     # concatenating dfs in dfs_list
     final_df = concat(dfs_list)
