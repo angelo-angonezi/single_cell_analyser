@@ -12,6 +12,7 @@ print('initializing...')  # noqa
 print('importing required libraries...')  # noqa
 from os.path import join
 from pandas import concat
+from numpy import ndarray
 from pandas import read_csv
 from pandas import DataFrame
 from seaborn import histplot
@@ -84,6 +85,27 @@ def get_pixels_df(crops_file: str) -> DataFrame:
     return crops_df
 
 
+def get_normalization_value(arr: ndarray) -> float:
+    """
+    Given a numpy array representing pixel
+    values, returns a float, which represents
+    a normalization value, upon which multiplication
+    will result in a normalized array.
+    """
+    pass
+
+
+def get_normalized_array(arr: ndarray,
+                         normalization_value: float
+                         ) -> ndarray:
+    """
+    Given an array and a normalization value,
+    returns normalized array (multiplies all
+    elements in array by given value).
+    """
+    pass
+
+
 def get_normalized_df(df: DataFrame) -> DataFrame:
     """
     Given a crops pixels data frame,
@@ -120,16 +142,20 @@ def get_normalized_df(df: DataFrame) -> DataFrame:
 
         # TODO: remove this once test completed
         # skipping to next
-        dfs_list.append(image_group)
-        continue
+        # dfs_list.append(image_group)
+        # continue
 
         # getting current image red/green dfs
         red_df = image_group[image_group['channel'] == 'red']
         green_df = image_group[image_group['channel'] == 'green']
 
-        # getting current image red/green pixels
-        red_pixels = red_df['pixel_intensity']
-        green_pixels = green_df['pixel_intensity']
+        # getting current image red/green pixels (as numpy arrays)
+        red_pixels = red_df['pixel_intensity'].to_numpy()
+        green_pixels = green_df['pixel_intensity'].to_numpy()
+
+        # getting normalization values
+        red_normalizer = get_normalization_value(arr=red_pixels)
+        green_normalizer = get_normalization_value(arr=green_pixels)
 
         # getting current image red/green min/max values
         red_min = red_pixels.min()
