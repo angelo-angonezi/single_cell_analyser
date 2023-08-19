@@ -159,7 +159,7 @@ def get_normalized_df(df: DataFrame) -> DataFrame:
         # getting crop names
         crop_names = image_group['crop_name']
 
-        #  assembling current crop pair dict
+        #  assembling current image dict
         red_list = ['red' for _ in red_pixels]
         green_list = ['green' for _ in green_pixels]
         red_list.extend(green_list)
@@ -171,11 +171,11 @@ def get_normalized_df(df: DataFrame) -> DataFrame:
                         'channel': red_list,
                         'pixel_intensity': red_pixels_list}
 
-        # assembling current image dict
-        current_dict = {'img_name': ,
-                        'crop_name': str,
-                        'channel': str,
-                        'pixel_intensity': int}
+        # assembling current image df
+        current_df = DataFrame(current_dict)
+
+        # appending current image df to dfs_list
+        dfs_list.append(current_df)
 
     # concatenating dfs in dfs_list
     final_df = concat(dfs_list)

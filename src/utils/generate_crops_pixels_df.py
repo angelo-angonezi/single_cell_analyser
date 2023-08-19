@@ -165,19 +165,19 @@ def generate_crops_pixels_df(red_folder: str,
         red_pixels = get_crop_pixels(crop_path=red_path)
         green_pixels = get_crop_pixels(crop_path=green_path)
 
+        # getting pixel range list
+        pixels_num = len(red_pixels)
+        pixel_range = range(pixels_num)
+        pixel_ids = [i for i in pixel_range]
+
         # assembling current crop pair dict
-        red_list = ['red' for _ in red_pixels]
-        green_list = ['green' for _ in green_pixels]
-        red_list.extend(green_list)
-        red_pixels_list = [pixel for pixel in red_pixels]
-        green_pixels_list = [pixel for pixel in green_pixels]
-        red_pixels_list.extend(green_pixels_list)
-        name_list = [crop_name for _ in red_pixels_list]
-        img_name_list = [crop_img_name for _ in red_pixels_list]
+        name_list = [crop_name for _ in red_pixels]
+        img_name_list = [crop_img_name for _ in red_pixels]
         current_dict = {'img_name': img_name_list,
                         'crop_name': name_list,
-                        'channel': red_list,
-                        'pixel_intensity': red_pixels_list}
+                        'pixel': pixel_ids,
+                        'red': red_pixels,
+                        'green': green_pixels}
 
         # assembling current crop pair df
         current_df = DataFrame(current_dict)
@@ -225,7 +225,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running generate_crops_pixels_df function
     generate_crops_pixels_df(red_folder=red_folder,
