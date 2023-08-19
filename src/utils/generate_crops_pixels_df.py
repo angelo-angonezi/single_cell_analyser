@@ -105,12 +105,11 @@ def get_crops_df(crops_file: str) -> DataFrame:
     return crops_df
 
 
-def generate_crops_pixels_df(red_folder: str,
-                             green_folder: str,
-                             images_extension: str,
-                             crops_file: str,
-                             output_path: str,
-                             ) -> None:
+def get_crops_pixels_df(red_folder: str,
+                        green_folder: str,
+                        images_extension: str,
+                        crops_file: str
+                        ) -> DataFrame:
     """
     Given a path to a folder containing crops,
     and a path to a file containing crops info,
@@ -120,8 +119,7 @@ def generate_crops_pixels_df(red_folder: str,
     :param green_folder: String. Represents a path to a folder.
     :param images_extension: String. Represents image extension.
     :param crops_file: String. Represents a path to a file.
-    :param output_path: String. Represents a path to a file.
-    :return: None.
+    :return: DataFrame. Represents a crops pixels data frame.
     """
     # getting crops df
     crops_df = get_crops_df(crops_file=crops_file)
@@ -170,11 +168,13 @@ def generate_crops_pixels_df(red_folder: str,
         pixel_range = range(pixels_num)
         pixel_ids = [i for i in pixel_range]
 
-        # assembling current crop pair dict
-        name_list = [crop_name for _ in red_pixels]
+        # getting names list
+        crop_name_list = [crop_name for _ in red_pixels]
         img_name_list = [crop_img_name for _ in red_pixels]
+
+        # assembling current crop pair dict
         current_dict = {'img_name': img_name_list,
-                        'crop_name': name_list,
+                        'crop_name': crop_name_list,
                         'pixel': pixel_ids,
                         'red': red_pixels,
                         'green': green_pixels}
@@ -189,9 +189,69 @@ def generate_crops_pixels_df(red_folder: str,
     final_df = concat(dfs_list,
                       ignore_index=True)
 
-    # saving final df
-    final_df.to_csv(output_path,
-                    index=False)
+    # returning df
+    return final_df
+
+
+def get_normalized_pixel(pixel_value: int,
+                         arr_min: int,
+                         arr_max: int
+                         ) -> int:
+    """
+    Given a pixel value, and min/max values
+    for pixels in original array, returns
+    pixel normalized value.
+    :param pixel_value: Integer. Represents a pixel value.
+    :param arr_min: Integer. Represents a pixel value.
+    :param arr_max: Integer. Represents a pixel value.
+    :return: Integer. Represents normalized pixel value.
+    """
+    pass
+
+
+def add_normalized_columns(df: DataFrame) -> None:
+    """
+    Given a crops pixels data frame,
+    adds red/green pixels normalized
+    columns, based on min/max pixel
+    values for each image.
+    :param df: DataFrame. Represents a crops pixels data frame.
+    :return: None.
+    """
+    print(df)
+    exit()
+
+
+def generate_crops_pixels_df(red_folder: str,
+                             green_folder: str,
+                             images_extension: str,
+                             crops_file: str,
+                             output_path: str,
+                             ) -> None:
+    """
+    Given a path to a folder containing crops,
+    and a path to a file containing crops info,
+    generates crops pixels data frame, and saves
+    it to given output path.
+    :param red_folder: String. Represents a path to a folder.
+    :param green_folder: String. Represents a path to a folder.
+    :param images_extension: String. Represents image extension.
+    :param crops_file: String. Represents a path to a file.
+    :param output_path: String. Represents a path to a file.
+    :return: None.
+    """
+    # getting crops pixels df
+    crops_pixels_df = get_crops_pixels_df(red_folder=red_folder,
+                                          green_folder=green_folder,
+                                          images_extension=images_extension,
+                                          crops_file=crops_file)
+
+    # normalizing pixels in df
+    add_normalized_columns(df=crops_pixels_df)
+
+    # saving crops pixels df
+    crops_pixels_df.to_csv(output_path,
+                           index=False)
 
     # printing execution message
     print(f'output saved to {output_path}')

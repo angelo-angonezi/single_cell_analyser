@@ -76,8 +76,9 @@ def get_pixels_df(crops_file: str) -> DataFrame:
     # defining col types
     col_types = {'img_name': str,
                  'crop_name': str,
-                 'channel': str,
-                 'pixel_intensity': int}
+                 'pixel': int,
+                 'red': int,
+                 'green': int}
 
     # reading crops file
     crops_df = read_csv(crops_file,
@@ -85,103 +86,6 @@ def get_pixels_df(crops_file: str) -> DataFrame:
 
     # returning crops df
     return crops_df
-
-
-def get_normalized_array(arr: ndarray) -> ndarray:
-    """
-    Given a pixels' array, returns array
-    normalized by min/max pixel values.
-    """
-    # getting array min/max values
-    arr_min = np_min(arr)
-    arr_max = np_max(arr)
-
-    # TODO: check this logic!
-    # subtracting min value from all elements in array (lower normalization)
-    arr = arr - arr_min
-
-    # dividing all elements in array by max value (upper normalization)
-    arr = arr / arr_max
-
-    # returning normalized array
-    return arr
-
-
-def get_normalized_df(df: DataFrame) -> DataFrame:
-    """
-    Given a crops pixels data frame,
-    returns a normalized copy of given
-    df, in which pixels have been adjusted
-    according to image minimum/maximum
-    (for each channel).
-    :param df: DataFrame. Represents a crops pixels data frame.
-    :return: DataFrame. Represents a normalized pixels data frame.
-    """
-    # defining placeholder value for dfs_list
-    dfs_list = []
-
-    # grouping df by images
-    image_groups = df.groupby('img_name')
-
-    # getting images num
-    images_num = len(image_groups)
-
-    # defining start value for current_img_index
-    current_img_index = 1
-
-    # iterating over image groups
-    for image_name, image_group in image_groups:
-
-        # printing execution message
-        f_string = f'normalizing values for image #INDEX# of #TOTAL#'
-        print_progress_message(base_string=f_string,
-                               index=current_img_index,
-                               total=images_num)
-
-        # updating index
-        current_img_index += 1
-
-        # getting current image red/green dfs
-        red_df = image_group[image_group['channel'] == 'red']
-        green_df = image_group[image_group['channel'] == 'green']
-
-        # getting current image red/green pixels (as numpy arrays)
-        red_pixels = red_df['pixel_intensity'].to_numpy()
-        green_pixels = green_df['pixel_intensity'].to_numpy()
-
-        # normalizing arrays
-        red_pixels_normalized = get_normalized_array(arr=red_pixels)
-        green_pixels_normalized = get_normalized_array(arr=green_pixels)
-
-        # getting image names
-        image_names = image_group['img_name']
-
-        # getting crop names
-        crop_names = image_group['crop_name']
-
-        #  assembling current image dict
-        red_list = ['red' for _ in red_pixels]
-        green_list = ['green' for _ in green_pixels]
-        red_list.extend(green_list)
-        red_pixels_list = [pixel for pixel in red_pixels_normalized]
-        green_pixels_list = [pixel for pixel in green_pixels_normalized]
-        red_pixels_list.extend(green_pixels_list)
-        current_dict = {'img_name': image_names,
-                        'crop_name': crop_names,
-                        'channel': red_list,
-                        'pixel_intensity': red_pixels_list}
-
-        # assembling current image df
-        current_df = DataFrame(current_dict)
-
-        # appending current image df to dfs_list
-        dfs_list.append(current_df)
-
-    # concatenating dfs in dfs_list
-    final_df = concat(dfs_list)
-
-    # returning final df
-    return final_df
 
 
 def plot_pixel_histograms(df: DataFrame,
@@ -217,6 +121,7 @@ def plot_pixel_histograms(df: DataFrame,
         current_crop_index += 1
 
         # generating current crop pixel pairs histogram
+        # TODO: adapt next line to new df format
         histplot(data=crop_group,
                  x='pixel_intensity',
                  hue='channel',
@@ -248,12 +153,9 @@ def generate_pixel_intensity_histograms(crops_file: str,
     # reading crops pixels df
     crops_pixels_df = get_pixels_df(crops_file=crops_file)
 
-    # normalizing pixel intensities
-    normalized_pixels_df = get_normalized_df(df=crops_pixels_df)
-
     # generating plots
-    plot_pixel_histograms(df=normalized_pixels_df,
-                          output_folder=output_folder)
+    # plot_pixel_histograms(df=crops_pixels_df,
+    #                       output_folder=output_folder)
 
     # printing execution message
     print(f'files saved to {output_folder}')
