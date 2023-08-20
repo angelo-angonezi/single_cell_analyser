@@ -140,7 +140,7 @@ def get_crops_pixels_df(red_folder: str,
     for row_index, row_data in df_rows:
 
         # printing execution message
-        f_string = f'getting data on crop #INDEX# of #TOTAL#'
+        f_string = f'getting pixels from crop #INDEX# of #TOTAL#'
         print_progress_message(base_string=f_string,
                                index=current_crop_index,
                                total=crops_num)
@@ -218,6 +218,19 @@ def add_normalized_columns(df: DataFrame) -> None:
     :param df: DataFrame. Represents a crops pixels data frame.
     :return: None.
     """
+    # grouping df by images
+    image_groups = df.groupby('img_name')
+
+    # iterating over image groups
+    for image_name, image_group in image_groups:
+
+        # getting current image red/green pixels
+        print(image_group)
+        red_pixels = None
+        exit()
+
+        # getting current image min/max values
+
     print(df)
     exit()
 
@@ -285,7 +298,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running generate_crops_pixels_df function
     generate_crops_pixels_df(red_folder=red_folder,
