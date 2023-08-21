@@ -196,7 +196,7 @@ def get_crops_pixels_df(red_folder: str,
 def get_normalized_pixel(pixel_value: int,
                          arr_min: int,
                          arr_max: int
-                         ) -> int:
+                         ) -> float:
     """
     Given a pixel value, and min/max values
     for pixels in original array, returns
@@ -204,9 +204,17 @@ def get_normalized_pixel(pixel_value: int,
     :param pixel_value: Integer. Represents a pixel value.
     :param arr_min: Integer. Represents a pixel value.
     :param arr_max: Integer. Represents a pixel value.
-    :return: Integer. Represents normalized pixel value.
+    :return: Float. Represents normalized pixel value.
     """
-    pass
+    # TODO: check this normalization logic!
+    # normalizing value by lower threshold
+    pixel_value_normalized = pixel_value - arr_min
+
+    # normalizing value by upper threshold
+    pixel_value_normalized = pixel_value_normalized / arr_max
+
+    # returning normalized value
+    return pixel_value_normalized
 
 
 def add_normalized_columns(df: DataFrame) -> None:
@@ -218,21 +226,66 @@ def add_normalized_columns(df: DataFrame) -> None:
     :param df: DataFrame. Represents a crops pixels data frame.
     :return: None.
     """
+    # defining column names
+    red_normalized_col = 'red_normalized'
+    green_normalized_col = 'green_normalized'
+
+    # defining placeholder value for columns
+    df[red_normalized_col] = None
+    df[green_normalized_col] = None
+
     # grouping df by images
     image_groups = df.groupby('img_name')
+
+    # getting rows num
+    rows_num = len(df)
+
+    # defining starter for current_row_index
+    current_row_index = 1
 
     # iterating over image groups
     for image_name, image_group in image_groups:
 
         # getting current image red/green pixels
-        print(image_group)
-        red_pixels = None
-        exit()
+        red_pixels = image_group['red']
+        green_pixels = image_group['green']
 
         # getting current image min/max values
+        red_min = red_pixels.min()
+        red_max = red_pixels.max()
+        green_min = green_pixels.min()
+        green_max = green_pixels.max()
 
-    print(df)
-    exit()
+        # getting current image rows
+        image_rows = image_group.iterrows()
+
+        # iterating over image rows
+        for row_index, row_data in image_rows:
+
+            # printing execution message
+            base_string = 'normalizing pixel #INDEX# of #TOTAL#'
+            print_progress_message(base_string=base_string,
+                                   index=current_row_index,
+                                   total=rows_num)
+
+            # updating current_row_index
+            current_row_index += 1
+
+            # getting current row red/green pixel values
+            red_value = row_data['red']
+            green_value = row_data['green']
+
+            # getting normalized pixel values
+            red_value_normalized = get_normalized_pixel(pixel_value=red_value,
+                                                        arr_min=red_min,
+                                                        arr_max=red_max)
+            green_value_normalized = get_normalized_pixel(pixel_value=green_value,
+                                                          arr_min=green_min,
+                                                          arr_max=green_max)
+
+            # updating values in respective columns
+            df.at[row_index, red_normalized_col] = red_value_normalized
+            df.at[row_index, green_normalized_col] = green_value_normalized
 
 
 def generate_crops_pixels_df(red_folder: str,
@@ -298,7 +351,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running generate_crops_pixels_df function
     generate_crops_pixels_df(red_folder=red_folder,
