@@ -78,7 +78,9 @@ def get_pixels_df(crops_file: str) -> DataFrame:
                  'crop_name': str,
                  'pixel': int,
                  'red': int,
-                 'green': int}
+                 'green': int,
+                 'red_normalized': float,
+                 'green_normalized': float}
 
     # reading crops file
     crops_df = read_csv(crops_file,
@@ -120,6 +122,10 @@ def plot_pixel_histograms(df: DataFrame,
         # updating index
         current_crop_index += 1
 
+        # getting current crop pixel values
+        print(crop_group)
+        exit()
+
         # generating current crop pixel pairs histogram
         # TODO: adapt next line to new df format
         histplot(data=crop_group,
@@ -154,8 +160,8 @@ def generate_pixel_intensity_histograms(crops_file: str,
     crops_pixels_df = get_pixels_df(crops_file=crops_file)
 
     # generating plots
-    # plot_pixel_histograms(df=crops_pixels_df,
-    #                       output_folder=output_folder)
+    plot_pixel_histograms(df=crops_pixels_df,
+                          output_folder=output_folder)
 
     # printing execution message
     print(f'files saved to {output_folder}')
