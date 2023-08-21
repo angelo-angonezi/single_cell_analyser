@@ -30,7 +30,7 @@ print('all required libraries successfully imported.')  # noqa
 #####################################################################
 # defining global variables
 
-MIN_VALUE = 0.2
+MIN_VALUE = 0.07
 
 #####################################################################
 # argument parsing related functions
@@ -97,7 +97,7 @@ def get_pixels_df(crops_file: str) -> DataFrame:
 
 def get_cell_cycle(red_mean: float,
                    green_mean: float,
-                   min_value: float
+                   min_value: float = MIN_VALUE
                    ) -> str:
     """
     Given red and green channels' means,
@@ -112,27 +112,41 @@ def get_cell_cycle(red_mean: float,
     cell_cycle = None
 
     # getting min values bool
+    just_red = (red_mean > min_value) and (green_mean < min_value)
+    just_green = (red_mean < min_value) and (green_mean > min_value)
+    neither_reach_min = (red_mean < min_value) and (green_mean < min_value)
     both_reach_min = (red_mean > min_value) and (green_mean > min_value)
 
     # checking whether pixels reached min level
-    if not both_reach_min:
+
+    if neither_reach_min:
 
         # then, cell cycle must be 'M'
-        cell_cycle = 'M'
+        cell_cycle = 'M (neither pixels achieved minimum)'
 
-    else:
+    if just_red:
+
+        # then, cell cycle must be 'G1' (red)
+        cell_cycle = 'G1 (predominantly red)'
+
+    if just_green:
+
+        # then, cell cycle must be 'G2' (green)
+        cell_cycle = 'G2 (predominantly green)'
+
+    if both_reach_min:
 
         # calculating pixels' intensity ratio
         pixel_ratio = red_mean / green_mean
 
         # checking ratio
         # TODO: adapt these values for experimental data!
-        if pixel_ratio > 1.1:
+        if pixel_ratio > 1.2:
 
             # then, cell cycle must be 'G1' (red)
             cell_cycle = 'G1 (predominantly red)'
 
-        elif pixel_ratio < 0.9:
+        elif pixel_ratio < 0.8:
 
             # then, cell cycle must be 'G2' (green)
             cell_cycle = 'G2 (predominantly green)'
@@ -231,7 +245,7 @@ def plot_pixel_histograms(df: DataFrame,
                     linestyle='--')
 
         # setting plot title
-        title = f'Cell cycle (inferred by means): {}'
+        title = f'Cell cycle (inferred by means): {current_cell_cycle}'
         plt.title(title)
 
         # saving plot
