@@ -28,6 +28,11 @@ from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
+# defining global variables
+
+MIN_VALUE = 0.2
+
+#####################################################################
 # argument parsing related functions
 
 
@@ -90,6 +95,57 @@ def get_pixels_df(crops_file: str) -> DataFrame:
     return crops_df
 
 
+def get_cell_cycle(red_mean: float,
+                   green_mean: float,
+                   min_value: float
+                   ) -> str:
+    """
+    Given red and green channels' means,
+    returns cell cycle, based on 0-1 scale
+    for pixels intensity and given min value.
+    :param red_mean: Float. Represents a normalized pixel value mean.
+    :param green_mean: Float. Represents a normalized pixel value mean.
+    :param min_value: Float. Represents a normalized pixel value minimum.
+    :return: String. Represents a cell cycle.
+    """
+    # defining placeholder value for cell cycle
+    cell_cycle = None
+
+    # getting min values bool
+    both_reach_min = (red_mean > min_value) and (green_mean > min_value)
+
+    # checking whether pixels reached min level
+    if not both_reach_min:
+
+        # then, cell cycle must be 'M'
+        cell_cycle = 'M'
+
+    else:
+
+        # calculating pixels' intensity ratio
+        pixel_ratio = red_mean / green_mean
+
+        # checking ratio
+        # TODO: adapt these values for experimental data!
+        if pixel_ratio > 1.1:
+
+            # then, cell cycle must be 'G1' (red)
+            cell_cycle = 'G1 (predominantly red)'
+
+        elif pixel_ratio < 0.9:
+
+            # then, cell cycle must be 'G2' (green)
+            cell_cycle = 'G2 (predominantly green)'
+
+        else:
+
+            # then, cell cycle must be 'S' (red AND green)
+            cell_cycle = 'S (red AND green)'
+
+    # returning cell cycle
+    return cell_cycle
+
+
 def plot_pixel_histograms(df: DataFrame,
                           output_folder: str
                           ) -> None:
@@ -134,6 +190,10 @@ def plot_pixel_histograms(df: DataFrame,
         red_mean = red_pixels.mean()
         green_mean = green_pixels.mean()
 
+        # getting current cell cycle
+        current_cell_cycle = get_cell_cycle(red_mean=red_mean,
+                                            green_mean=green_mean)
+
         # getting current crop channels lists
         red_list = ['red' for _ in red_pixels]
         green_list = ['green' for _ in green_pixels]
@@ -169,6 +229,10 @@ def plot_pixel_histograms(df: DataFrame,
         plt.axvline(x=green_mean,
                     color='g',
                     linestyle='--')
+
+        # setting plot title
+        title = f'Cell cycle (inferred by means): {}'
+        plt.title(title)
 
         # saving plot
         save_name = f'{crop_name}_histograms.png'
