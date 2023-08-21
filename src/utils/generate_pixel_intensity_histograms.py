@@ -130,6 +130,10 @@ def plot_pixel_histograms(df: DataFrame,
         red_pixels = crop_group['red_normalized']
         green_pixels = crop_group['green_normalized']
 
+        # getting current pixels mean values
+        red_mean = red_pixels.mean()
+        green_mean = green_pixels.mean()
+
         # getting current crop channels lists
         red_list = ['red' for _ in red_pixels]
         green_list = ['green' for _ in green_pixels]
@@ -154,6 +158,17 @@ def plot_pixel_histograms(df: DataFrame,
                  hue_order=['red', 'green'],
                  palette=['r', 'g'],
                  kde=False)
+
+        # setting plot x-axis limits
+        plt.xlim(0, 1)
+
+        # drawing mean lines
+        plt.axvline(x=red_mean,
+                    color='r',
+                    linestyle='--')
+        plt.axvline(x=green_mean,
+                    color='g',
+                    linestyle='--')
 
         # saving plot
         save_name = f'{crop_name}_histograms.png'
