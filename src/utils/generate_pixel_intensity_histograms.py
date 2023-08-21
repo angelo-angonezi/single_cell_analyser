@@ -122,13 +122,33 @@ def plot_pixel_histograms(df: DataFrame,
         # updating index
         current_crop_index += 1
 
+        # defining placeholder value for pixels/channels
+        pixels = []
+        channels = []
+
         # getting current crop pixel values
-        print(crop_group)
-        exit()
+        red_pixels = crop_group['red_normalized']
+        green_pixels = crop_group['green_normalized']
+
+        # getting current crop channels lists
+        red_list = ['red' for _ in red_pixels]
+        green_list = ['green' for _ in green_pixels]
+
+        # updating pixels/channels lists
+        pixels.extend(red_pixels)
+        pixels.extend(green_pixels)
+        channels.extend(red_list)
+        channels.extend(green_list)
+
+        # getting current crop pixel values dict
+        pixel_values_dict = {'pixel_intensity': pixels,
+                             'channel': channels}
+
+        # getting current crop pixel values df
+        pixel_values_df = DataFrame(pixel_values_dict)
 
         # generating current crop pixel pairs histogram
-        # TODO: adapt next line to new df format
-        histplot(data=crop_group,
+        histplot(data=pixel_values_df,
                  x='pixel_intensity',
                  hue='channel',
                  hue_order=['red', 'green'],
@@ -186,7 +206,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running generate_pixel_intensity_histograms function
     generate_pixel_intensity_histograms(crops_file=crops_file,
