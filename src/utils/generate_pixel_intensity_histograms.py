@@ -11,6 +11,7 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 from os.path import join
+from numpy import arange
 from pandas import concat
 from numpy import ndarray
 from pandas import read_csv
@@ -95,16 +96,16 @@ def get_pixels_df(crops_file: str) -> DataFrame:
     return crops_df
 
 
-def get_cell_cycle(red_mean: float,
-                   green_mean: float,
+def get_cell_cycle(red_value: float,
+                   green_value: float,
                    min_value: float = MIN_VALUE
                    ) -> str:
     """
     Given red and green channels' means,
     returns cell cycle, based on 0-1 scale
     for pixels intensity and given min value.
-    :param red_mean: Float. Represents a normalized pixel value mean.
-    :param green_mean: Float. Represents a normalized pixel value mean.
+    :param red_value: Float. Represents a normalized pixel value.
+    :param green_value: Float. Represents a normalized pixel value.
     :param min_value: Float. Represents a normalized pixel value minimum.
     :return: String. Represents a cell cycle.
     """
@@ -112,10 +113,10 @@ def get_cell_cycle(red_mean: float,
     cell_cycle = None
 
     # getting min values bool
-    just_red = (red_mean > min_value) and (green_mean < min_value)
-    just_green = (red_mean < min_value) and (green_mean > min_value)
-    neither_reach_min = (red_mean < min_value) and (green_mean < min_value)
-    both_reach_min = (red_mean > min_value) and (green_mean > min_value)
+    just_red = (red_value > min_value) and (green_value < min_value)
+    just_green = (red_value < min_value) and (green_value > min_value)
+    neither_reach_min = (red_value < min_value) and (green_value < min_value)
+    both_reach_min = (red_value > min_value) and (green_value > min_value)
 
     # checking whether pixels reached min level
 
@@ -137,7 +138,7 @@ def get_cell_cycle(red_mean: float,
     if both_reach_min:
 
         # calculating pixels' intensity ratio
-        pixel_ratio = red_mean / green_mean
+        pixel_ratio = red_value / green_value
 
         # checking ratio
         # TODO: adapt these values for experimental data!
@@ -200,13 +201,16 @@ def plot_pixel_histograms(df: DataFrame,
         red_pixels = crop_group['red_normalized']
         green_pixels = crop_group['green_normalized']
 
-        # getting current pixels mean values
-        red_mean = red_pixels.mean()
-        green_mean = green_pixels.mean()
+        # getting area (length of pixels array)
+        crop_area = len(red_pixels)
+
+        # getting current pixels median values
+        red_mean = red_pixels.median()
+        green_mean = green_pixels.median()
 
         # getting current cell cycle
-        current_cell_cycle = get_cell_cycle(red_mean=red_mean,
-                                            green_mean=green_mean)
+        current_cell_cycle = get_cell_cycle(red_value=red_mean,
+                                            green_value=green_mean)
 
         # getting current crop channels lists
         red_list = ['red' for _ in red_pixels]
@@ -233,8 +237,13 @@ def plot_pixel_histograms(df: DataFrame,
                  palette=['r', 'g'],
                  kde=False)
 
+        # defining x-axis start/stop/step
+        x_start = 0
+        x_stop = 1
+        x_step = 0.1
+
         # setting plot x-axis limits
-        plt.xlim(0, 1)
+        plt.xlim(x_start, x_stop)
 
         # drawing mean lines
         plt.axvline(x=red_mean,
@@ -244,8 +253,12 @@ def plot_pixel_histograms(df: DataFrame,
                     color='g',
                     linestyle='--')
 
+        # setting x-axis ticks
+        x_ticks = arange(x_start, x_stop + x_step, x_step)
+        plt.xticks(x_ticks)
+
         # setting plot title
-        title = f'Cell cycle (inferred by means): {current_cell_cycle}'
+        title = f'Cell cycle: {current_cell_cycle} | Area: {crop_area}'
         plt.title(title)
 
         # saving plot
