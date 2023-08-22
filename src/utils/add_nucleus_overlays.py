@@ -13,6 +13,7 @@ print('importing required libraries...')  # noqa
 from numpy import intp
 from cv2 import imread
 from cv2 import circle
+from cv2 import ellipse
 from cv2 import imwrite
 from cv2 import putText
 from cv2 import cvtColor
@@ -224,6 +225,27 @@ def add_single_overlay(open_img: ndarray,
                     cy=cy,
                     radius=radius,
                     color=overlay_color)
+
+    elif style == 'ellipse':
+
+        # dividing axes length by two (cv2.ellipse takes the radius)
+        width = width / 2
+        height = height / 2
+
+        # converting axes length to ints (cv2.ellipse doesn't like floats
+        # and in python division products are floats)
+        width = int(width)
+        height = int(height)
+
+        # adding elliptical overlay
+        ellipse(img=open_img,
+                center=(int(cx), int(cy)),
+                axes=(width, height),
+                angle=angle,
+                color=overlay_color,
+                thickness=2,
+                startAngle=0,
+                endAngle=360)
 
     # adding class text
     putText(open_img,
