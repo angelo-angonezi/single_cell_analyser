@@ -173,6 +173,32 @@ def draw_circle(open_img: ndarray,
     return open_img
 
 
+def draw_ellipse(open_img: ndarray,
+                 cx: float,
+                 cy: float,
+                 width: float,
+                 height: float,
+                 angle: float,
+                 color: tuple
+                 ) -> ndarray:
+    """
+    Given an open image, and coordinates for OBB,
+    returns image with OBB elliptical overlay.
+    """
+    # drawing ellipse on image
+    ellipse(img=open_img,
+            center=(int(cx), int(cy)),
+            axes=(width, height),
+            angle=angle,
+            color=color,
+            thickness=2,
+            startAngle=0,
+            endAngle=360)
+
+    # returning modified image
+    return open_img
+
+
 def add_single_overlay(open_img: ndarray,
                        obbs_df_row: Series,
                        color_dict: dict,
@@ -238,14 +264,13 @@ def add_single_overlay(open_img: ndarray,
         height = int(height)
 
         # adding elliptical overlay
-        ellipse(img=open_img,
-                center=(int(cx), int(cy)),
-                axes=(width, height),
-                angle=angle,
-                color=overlay_color,
-                thickness=2,
-                startAngle=0,
-                endAngle=360)
+        draw_ellipse(open_img=open_img,
+                     cx=cx,
+                     cy=cy,
+                     width=width,
+                     height=height,
+                     angle=angle,
+                     color=overlay_color)
 
     # adding class text
     putText(open_img,
