@@ -172,6 +172,26 @@ def plot_pixel_histograms(df: DataFrame,
     :param output_folder: String. Represents a path to a folder.
     :return: None.
     """
+    print(df)
+    # TODO: remove this once test completed!
+    histplot(data=df,
+             x='red',
+             color='r')
+    histplot(data=df,
+             x='green',
+             color='g')
+    plt.show()
+    plt.close()
+    histplot(data=df,
+             x='red_normalized',
+             color='r')
+    histplot(data=df,
+             x='green_normalized',
+             color='g')
+    plt.show()
+    plt.close()
+    exit()
+
     # grouping df by crop
     crop_groups = df.groupby('crop_name')
 
