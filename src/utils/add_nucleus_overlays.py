@@ -10,23 +10,21 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-from numpy import intp
 from cv2 import imread
-from cv2 import circle
-from cv2 import ellipse
 from cv2 import imwrite
 from cv2 import putText
 from cv2 import cvtColor
 from os.path import join
 from numpy import ndarray
 from pandas import Series
-from cv2 import boxPoints
 from pandas import DataFrame
-from cv2 import drawContours
 from cv2 import COLOR_BGR2RGB
 from cv2 import COLOR_RGB2BGR
 from argparse import ArgumentParser
 from cv2 import FONT_HERSHEY_SIMPLEX
+from src.utils.aux_funcs import draw_circle
+from src.utils.aux_funcs import draw_ellipse
+from src.utils.aux_funcs import draw_rectangle
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
@@ -104,7 +102,7 @@ def get_args_dict() -> dict:
                         help=threshold_help)
 
     # overlay style param
-    style_help = 'defines overlay style (rectangle/circle)'
+    style_help = 'defines overlay style (rectangle/circle/ellipse)'
     parser.add_argument('-s', '--overlay-style',
                         dest='overlays_style',
                         required=False,
@@ -121,84 +119,6 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def draw_rectangle(open_img: ndarray,
-                   cx: float,
-                   cy: float,
-                   width: float,
-                   height: float,
-                   angle: float,
-                   color: tuple
-                   ) -> ndarray:
-    """
-    Given an open image, and coordinates for OBB,
-    returns image with OBB rectangular overlay.
-    """
-    # get the corner points
-    box = boxPoints(((cx, cy),
-                     (width, height),
-                     angle))
-
-    # converting corners format
-    box = intp(box)
-
-    # drawing rectangle on image
-    drawContours(open_img,
-                 [box],
-                 -1,
-                 color,
-                 2)
-
-    # returning modified image
-    return open_img
-
-
-def draw_circle(open_img: ndarray,
-                cx: float,
-                cy: float,
-                radius: float,
-                color: tuple
-                ) -> ndarray:
-    """
-    Given an open image, and coordinates for OBB,
-    returns image with OBB circular overlay.
-    """
-    # drawing circle on image
-    circle(open_img,
-           (cx, cy),
-           radius,
-           color,
-           2)
-
-    # returning modified image
-    return open_img
-
-
-def draw_ellipse(open_img: ndarray,
-                 cx: float,
-                 cy: float,
-                 width: float,
-                 height: float,
-                 angle: float,
-                 color: tuple
-                 ) -> ndarray:
-    """
-    Given an open image, and coordinates for OBB,
-    returns image with OBB elliptical overlay.
-    """
-    # drawing ellipse on image
-    ellipse(img=open_img,
-            center=(int(cx), int(cy)),
-            axes=(width, height),
-            angle=angle,
-            color=color,
-            thickness=2,
-            startAngle=0,
-            endAngle=360)
-
-    # returning modified image
-    return open_img
-
-
 def add_single_overlay(open_img: ndarray,
                        obbs_df_row: Series,
                        color_dict: dict,
@@ -211,7 +131,7 @@ def add_single_overlay(open_img: ndarray,
     :param open_img: ndarray. Represents an open image.
     :param obbs_df_row: Series. Represents single obb data.
     :param color_dict: Dictionary. Represents colors to be used in overlays.
-    :param style: String. Represents overlays style (rectangle/circle).
+    :param style: String. Represents overlays style (rectangle/circle/ellipse).
     :return: None.
     """
     # getting current row bounding box info
@@ -254,15 +174,6 @@ def add_single_overlay(open_img: ndarray,
 
     elif style == 'ellipse':
 
-        # dividing axes length by two (cv2.ellipse takes the radius)
-        width = width / 2
-        height = height / 2
-
-        # converting axes length to ints (cv2.ellipse doesn't like floats
-        # and in python division products are floats)
-        width = int(width)
-        height = int(height)
-
         # adding elliptical overlay
         draw_ellipse(open_img=open_img,
                      cx=cx,
@@ -293,7 +204,7 @@ def add_multiple_overlays(open_img: ndarray,
     :param open_img: ndarray. Represents an open image.
     :param current_image_df: DataFrame. Represents current image detection/annotation data.
     :param color_dict: Dictionary. Represents colors to be used in overlays.
-    :param style: String. Represents overlays style (rectangle/circle).
+    :param style: String. Represents overlays style (rectangle/circle/ellipse).
     :return: None.
     """
     # getting df rows
@@ -327,7 +238,7 @@ def add_overlays_to_single_image(image_name: str,
     :param detection_threshold: Float. Represents detection threshold to be applied as filter.
     :param output_path: String. Represents a file path.
     :param color_dict: Dictionary. Represents colors to be used in overlays.
-    :param style: String. Represents overlays style (rectangle/circle).
+    :param style: String. Represents overlays style (rectangle/circle/ellipse).
     :return: None.
     """
     # opening image
@@ -409,7 +320,7 @@ def add_overlays_to_multiple_images(input_folder: str,
     :param output_folder: String. Represents a folder path.
     :param detection_threshold: Float. Represents detection threshold to be applied as filter.
     :param color_dict: Dictionary. Represents colors to be used in overlays.
-    :param style: String. Represents overlays style (rectangle/circle).
+    :param style: String. Represents overlays style (rectangle/circle/ellipse).
     :return: None.
     """
     # getting merged detections df

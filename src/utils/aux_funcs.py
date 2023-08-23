@@ -9,14 +9,19 @@
 # importing required libraries
 import pandas as pd
 from os import mkdir
+from cv2 import circle
+from numpy import intp
 from os import listdir
 from cv2 import imread
 from sys import stdout
+from cv2 import ellipse
 from os.path import join
 from numpy import ndarray
+from cv2 import boxPoints
 from pandas import concat
 from os.path import exists
 from pandas import read_csv
+from cv2 import drawContours
 from pandas import DataFrame
 from cv2 import IMREAD_GRAYSCALE
 from shutil import copy as sh_copy
@@ -709,6 +714,92 @@ def get_crop_pixels(crop_path: str) -> ndarray:
 
     # returning crop's linearized pixels
     return linearized_pixels
+
+
+def draw_rectangle(open_img: ndarray,
+                   cx: float,
+                   cy: float,
+                   width: float,
+                   height: float,
+                   angle: float,
+                   color: tuple
+                   ) -> ndarray:
+    """
+    Given an open image, and coordinates for OBB,
+    returns image with OBB rectangular overlay.
+    """
+    # get the corner points
+    box = boxPoints(((cx, cy),
+                     (width, height),
+                     angle))
+
+    # converting corners format
+    box = intp(box)
+
+    # drawing rectangle on image
+    drawContours(open_img,
+                 [box],
+                 -1,
+                 color,
+                 2)
+
+    # returning modified image
+    return open_img
+
+
+def draw_circle(open_img: ndarray,
+                cx: float,
+                cy: float,
+                radius: float,
+                color: tuple
+                ) -> ndarray:
+    """
+    Given an open image, and coordinates for OBB,
+    returns image with OBB circular overlay.
+    """
+    # drawing circle on image
+    circle(open_img,
+           (cx, cy),
+           radius,
+           color,
+           2)
+
+    # returning modified image
+    return open_img
+
+
+def draw_ellipse(open_img: ndarray,
+                 cx: float,
+                 cy: float,
+                 width: float,
+                 height: float,
+                 angle: float,
+                 color: tuple
+                 ) -> ndarray:
+    """
+    Given an open image, and coordinates for OBB,
+    returns image with OBB elliptical overlay.
+    """
+    # dividing axes length by two (cv2.ellipse takes the radius)
+    width = width / 2
+    height = height / 2
+
+    # defining center/axes
+    center = (int(cx), int(cy))
+    axes = (int(width), int(height))
+
+    # drawing ellipse on image
+    ellipse(img=open_img,
+            center=center,
+            axes=axes,
+            angle=angle,
+            color=color,
+            thickness=2,
+            startAngle=0,
+            endAngle=360)
+
+    # returning modified image
+    return open_img
 
 ######################################################################
 # end of current module
