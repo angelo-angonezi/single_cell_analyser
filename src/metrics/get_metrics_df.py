@@ -1,4 +1,4 @@
-# generate confusion matrix df for nucleus detection module
+# generate metrics df for nucleus detection module
 
 print('initializing...')  # noqa
 
@@ -306,7 +306,6 @@ def get_image_metrics(df: DataFrame,
                                   style=style)
 
     # establishing relations between detections/annotations using hungarian algorithm
-    # TODO: check detection/annotation order influence (this cand be done checking length of output lists)
     detections_indices, annotations_indices = simple_hungarian_algorithm(cost_matrix=cost_matrix)
 
     # getting indices zip
@@ -386,8 +385,6 @@ def create_confusion_matrix_df(df: DataFrame,
                                        detection_threshold=detection_threshold,
                                        iou_threshold=iou_threshold,
                                        style=style)
-
-        # TODO: add f1 score calc here
 
         # getting current image dict
         current_dict = {'img_name': image_name,
