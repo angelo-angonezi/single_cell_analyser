@@ -181,7 +181,8 @@ def add_single_overlay(open_img: ndarray,
                      width=width,
                      height=height,
                      angle=angle,
-                     color=overlay_color)
+                     color=overlay_color,
+                     thickness=2)
 
     # adding class text
     putText(open_img,

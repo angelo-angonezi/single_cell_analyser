@@ -15,6 +15,8 @@ from pandas import concat
 from numpy import ndarray
 from pandas import read_csv
 from pandas import DataFrame
+from numpy import add as np_add
+from numpy import count_nonzero
 from argparse import ArgumentParser
 from numpy import zeros as np_zeroes
 from src.utils.aux_funcs import draw_circle
@@ -56,6 +58,12 @@ def get_args_dict() -> dict:
                         required=True,
                         help='defines path to detections (.csv) file')
 
+    # output folder param
+    parser.add_argument('-o', '--output-folder',
+                        dest='output_folder',
+                        required=True,
+                        help='defines path to output folder (which will contain output .csvs)')
+
     # detection threshold param
     parser.add_argument('-dt', '--detection-threshold',
                         dest='detection_threshold',
@@ -69,12 +77,6 @@ def get_args_dict() -> dict:
                         required=False,
                         default=0.5,
                         help='defines IoU threshold to be applied as filter in model detections')
-
-    # output folder param
-    parser.add_argument('-o', '--output-folder',
-                        dest='output_folder',
-                        required=True,
-                        help='defines path to output folder (which will contain output .csvs)')
 
     # style param
     parser.add_argument('-s', '--mask-style',
@@ -114,6 +116,38 @@ def get_blank_image(width: int = 1408,
     return blank_matrix
 
 
+def get_iou(mask_a: ndarray,
+            mask_b: ndarray
+            ) -> float:
+    """
+    Given two pixel masks, representing
+    detected/annotated OBBs, returns IoU.
+    :param mask_a: ndarray. Represents a pixel mask.
+    :param mask_b: ndarray. Represents a pixel mask.
+    :return: Float. Represents an IoU value.
+    """
+    # adding arrays
+    final_array = np_add(mask_a, mask_b)
+
+    # counting "1" pixels (just one of the masks cover)
+    one_count = count_nonzero(final_array == 1)
+
+    # counting "2" pixels (= intersection -> both masks cover)
+    two_count = count_nonzero(final_array == 2)
+
+    # getting intersection
+    intersection = two_count
+
+    # getting union
+    union = one_count + two_count
+
+    # calculating IoU (Intersection over Union)
+    iou_value = intersection / union
+
+    # returning IoU
+    return iou_value
+
+
 def get_pixel_mask(base_img: ndarray,
                    cx: int,
                    cy: int,
@@ -144,7 +178,8 @@ def get_pixel_mask(base_img: ndarray,
                      width=width,
                      height=height,
                      angle=angle,
-                     color=(1,))
+                     color=(1,),
+                     thickness=-1)
 
     # returning modified image
     return base_img

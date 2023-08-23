@@ -774,7 +774,8 @@ def draw_ellipse(open_img: ndarray,
                  width: float,
                  height: float,
                  angle: float,
-                 color: tuple
+                 color: tuple,
+                 thickness: int
                  ) -> ndarray:
     """
     Given an open image, and coordinates for OBB,
@@ -794,7 +795,7 @@ def draw_ellipse(open_img: ndarray,
             axes=axes,
             angle=angle,
             color=color,
-            thickness=2,
+            thickness=thickness,
             startAngle=0,
             endAngle=360)
 
