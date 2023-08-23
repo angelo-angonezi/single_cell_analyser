@@ -25,6 +25,7 @@ from cv2 import drawContours
 from pandas import DataFrame
 from cv2 import IMREAD_GRAYSCALE
 from shutil import copy as sh_copy
+from scipy.optimize import linear_sum_assignment
 
 # preventing "SettingWithoutCopyWarning" messages
 pd.options.mode.chained_assignment = None  # default='warn'
@@ -801,6 +802,25 @@ def draw_ellipse(open_img: ndarray,
 
     # returning modified image
     return open_img
+
+
+def simple_hungarian_algorithm(cost_matrix: ndarray) -> list:
+    """
+    Given a cost matrix, applies simple hungarian algorithm
+    to establish the best relation between cells.
+    :param cost_matrix: ndarray. Represents a cost matrix.
+    :return: List. Represents association between cells.
+    """
+    # assigning relations between cells
+    lin_sum_assignment = linear_sum_assignment(cost_matrix)
+
+    # getting assigned cells
+    lines = lin_sum_assignment[0].tolist()
+    columns = lin_sum_assignment[1].tolist()
+    assignments = [lines, columns]
+
+    # returning cells assignments
+    return assignments
 
 ######################################################################
 # end of current module
