@@ -10,6 +10,7 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
+from cv2 import imwrite
 from os.path import join
 from pandas import concat
 from numpy import ndarray
@@ -58,11 +59,11 @@ def get_args_dict() -> dict:
                         required=True,
                         help='defines path to detections (.csv) file')
 
-    # output folder param
-    parser.add_argument('-o', '--output-folder',
-                        dest='output_folder',
+    # output path param
+    parser.add_argument('-o', '--output-path',
+                        dest='output_path',
                         required=True,
-                        help='defines path to output folder (which will contain output .csvs)')
+                        help='defines path to output (.csv) file')
 
     # detection threshold param
     parser.add_argument('-dt', '--detection-threshold',
@@ -185,83 +186,26 @@ def get_pixel_mask(base_img: ndarray,
     return base_img
 
 
-def add_pixel_mask_col(df: DataFrame,
-                       style: str
-                       ) -> None:
+def create_confusion_matrix_df(df: DataFrame,
+                               detection_threshold: float,
+                               iou_threshold: float,
+                               style: str
+                               ) -> DataFrame:
     """
-    Given a merged detections/annotations
-    data frame, adds "pixel_mask" column,
-    based on OBBs coordinates.
-    :param df: DataFrame. Represents a merged detections/annotations df.
-    :param style: String. Represents overlays style (rectangle/circle/ellipse).
-    :return: None.
+    Given a merged detections/annotations data frame,
+    returns a data frame containing true positive,
+    false positive and false negative counts,
+    based on given style IoU+Hungarian Algorithm
+    matching of detections.
     """
-    # defining column name
-    pixel_mask_col = 'pixel_mask'
-
-    # getting df rows
-    df_rows = df.iterrows()
-
-    # getting rows num
-    rows_num = len(df)
-
-    # defining starter for current_row_index
-    current_row_index = 1
-
-    # iterating over df rows
-    for row_index, row_data in df_rows:
-
-        # printing execution message
-        base_string = 'adding pixel mask to nucleus #INDEX# of #TOTAL#'
-        print_progress_message(base_string=base_string,
-                               index=current_row_index,
-                               total=rows_num)
-
-        # updating current_row_index
-        current_row_index += 1
-
-        # getting current row info
-        cx = int(row_data['cx'])
-        cy = int(row_data['cy'])
-        width = float(row_data['width'])
-        height = float(row_data['height'])
-        angle = float(row_data['angle'])
-
-        # creating blank array
-        base_img = get_blank_image()
-
-        from numpy import unique
-
-        print(base_img)
-        print(unique(base_img))
-
-        # adding current detection/annotation to array
-        pixel_mask = get_pixel_mask(base_img=base_img,
-                                    cx=cx,
-                                    cy=cy,
-                                    width=width,
-                                    height=height,
-                                    angle=angle,
-                                    style=style)
-
-        print(pixel_mask)
-        print(cx, cy)
-        print(unique(pixel_mask))
-        a = 'Z:\\pycharm_projects\\single_cell_analyser\\data\\ml\\nucleus_detection\\test_results\\confusion_matrix\\a.png'
-        from cv2 import imwrite
-        imwrite(filename=a,
-                img=pixel_mask)
-        exit()
-        # updating current row pixel mask column
-        df.at[row_index, pixel_mask_col] = pixel_mask
-        exit()
+    pass
 
 
 def generate_confusion_matrix_df(fornma_file: str,
                                  detections_file: str,
                                  detection_threshold: float,
                                  iou_threshold: float,
-                                 output_folder: str,
+                                 output_path: str,
                                  style: str
                                  ) -> None:
     """
@@ -274,7 +218,7 @@ def generate_confusion_matrix_df(fornma_file: str,
     :param detections_file: String. Represents a path to a file.
     :param detection_threshold: Float. Represents a detection threshold.
     :param iou_threshold: Float. Represents an IoU threshold.
-    :param output_folder: String. Represents a path to a folder.
+    :param output_path: String. Represents a path to a file.
     :param style: String. Represents overlays style (rectangle/circle/ellipse).
     :return: None.
     """
@@ -282,15 +226,18 @@ def generate_confusion_matrix_df(fornma_file: str,
     merged_df = get_merged_detection_annotation_df(detections_df_path=detections_file,
                                                    annotations_df_path=fornma_file)
     
-    # adding pixels mask column to df
-    add_pixel_mask_col(df=merged_df,
-                       style='ellipse')
-
-    print(merged_df)
-    print(merged_df.columns)
+    # getting confusion matrix df
+    confusion_matrix_df = create_confusion_matrix_df(df=merged_df,
+                                                     detection_threshold=detection_threshold,
+                                                     iou_threshold=iou_threshold,
+                                                     style=style)
+    
+    # saving confusion matrix df
+    confusion_matrix_df.to_csv(output_path,
+                               index=False)
 
     # printing execution message
-    print(f'output saved to {output_folder}')
+    print(f'output saved to {output_path}')
     print('analysis complete!')
 
 ######################################################################
@@ -314,8 +261,8 @@ def main():
     # getting iou threshold
     iou_threshold = args_dict['iou_threshold']
 
-    # getting output folder
-    output_folder = args_dict['output_folder']
+    # getting output path
+    output_path = args_dict['output_path']
 
     # getting mask style
     mask_style = args_dict['mask_style']
@@ -331,7 +278,7 @@ def main():
                                  detections_file=detections_file,
                                  detection_threshold=detection_threshold,
                                  iou_threshold=iou_threshold,
-                                 output_folder=output_folder,
+                                 output_path=output_path,
                                  style=mask_style)
 
 ######################################################################
