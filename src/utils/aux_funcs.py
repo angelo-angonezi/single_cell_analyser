@@ -218,6 +218,45 @@ def get_etc(time_elapsed: int,
     return etc
 
 
+def get_time_str(time_in_seconds: int) -> str:
+    """
+    Given a time in seconds, returns time in
+    adequate format (seconds, minutes or hours).
+    :param time_in_seconds: Integer. Represents a time in seconds.
+    :return: String. Represents a time (in seconds, minutes or hours).
+    """
+    # checking whether seconds > 60
+    if time_in_seconds > 60:
+
+        # converting time to minutes
+        time_in_minutes = time_in_seconds / 60
+
+        # checking whether minutes > 60
+        if time_in_minutes > 60:
+
+            # converting time to hours
+            time_in_hours = time_in_minutes / 60
+
+            # defining time string based on hours
+            defined_time = round(time_in_hours)
+            time_string = f'{defined_time}h'
+
+        else:
+
+            # defining time string based on minutes
+            defined_time = round(time_in_minutes)
+            time_string = f'{defined_time}m'
+
+    else:
+
+        # defining time string based on seconds
+        defined_time = round(time_in_seconds)
+        time_string = f'{defined_time}s'
+
+    # returning time string
+    return time_string
+
+
 def get_obbs_from_df(df: DataFrame) -> list:
     """
     Given a detections data frame, returns

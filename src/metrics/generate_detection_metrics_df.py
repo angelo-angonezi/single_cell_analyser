@@ -22,6 +22,7 @@ from argparse import ArgumentParser
 from numpy import zeros as np_zeroes
 from src.utils.aux_funcs import get_etc
 from src.utils.aux_funcs import draw_circle
+from src.utils.aux_funcs import get_time_str
 from src.utils.aux_funcs import draw_ellipse
 from src.utils.aux_funcs import draw_rectangle
 from src.utils.aux_funcs import flush_or_print
@@ -431,15 +432,16 @@ def create_detection_metrics_df(df: DataFrame,
                               iterations_total=iterations_total)
 
                 # converting times to adequate format
-                # TODO: add function to convert seconds to hours etc...
+                time_elapsed_str = get_time_str(time_in_seconds=time_elapsed)
+                etc_str = get_time_str(time_in_seconds=etc)
 
                 # defining progress string
                 progress_string = f'analysing image {image_index}/{images_num} '
                 progress_string += f'| IoU: {iou:02.1f} '
                 progress_string += f'| DT: {dt:02.1f} '
                 progress_string += f'| progress: {progress_percentage:02.2f}% '
-                progress_string += f'| time elapsed: {time_elapsed}s '
-                progress_string += f'| ETC: {etc}s '
+                progress_string += f'| time elapsed: {time_elapsed_str} '
+                progress_string += f'| ETC: {etc_str}'
 
                 # printing execution message
                 flush_or_print(string=progress_string,
