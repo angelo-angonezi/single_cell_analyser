@@ -1,4 +1,4 @@
-# get metrics df module
+# generate detection metrics df module
 
 print('initializing...')  # noqa
 
@@ -48,7 +48,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'get metrics df'
+    description = 'generate detection metrics df'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
@@ -364,11 +364,11 @@ def get_image_metrics(df: DataFrame,
     return metrics_tuple
 
 
-def create_metrics_df(df: DataFrame,
-                      iou_thresholds: list,
-                      detection_thresholds: list,
-                      style: str
-                      ) -> DataFrame:
+def create_detection_metrics_df(df: DataFrame,
+                                iou_thresholds: list,
+                                detection_thresholds: list,
+                                style: str
+                                ) -> DataFrame:
     """
     Given a merged detections/annotations data frame,
     returns a data frame containing true positive,
@@ -468,13 +468,13 @@ def create_metrics_df(df: DataFrame,
     return final_df
 
 
-def generate_metrics_df(fornma_file: str,
-                        detections_file: str,
-                        output_path: str,
-                        iou_thresholds: list,
-                        detection_thresholds: list,
-                        style: str
-                        ) -> None:
+def generate_detection_metrics_df(fornma_file: str,
+                                  detections_file: str,
+                                  output_path: str,
+                                  iou_thresholds: list,
+                                  detection_thresholds: list,
+                                  style: str
+                                  ) -> None:
     """
     Given a path to detections and annotations files,
     generates a data frame containing info on TP, FP
@@ -493,15 +493,15 @@ def generate_metrics_df(fornma_file: str,
     merged_df = get_merged_detection_annotation_df(detections_df_path=detections_file,
                                                    annotations_df_path=fornma_file)
     
-    # getting confusion matrix df
-    confusion_matrix_df = create_metrics_df(df=merged_df,
-                                            iou_thresholds=iou_thresholds,
-                                            detection_thresholds=detection_thresholds,
-                                            style=style)
+    # getting detection metrics df
+    detection_metrics_df = create_detection_metrics_df(df=merged_df,
+                                                       iou_thresholds=iou_thresholds,
+                                                       detection_thresholds=detection_thresholds,
+                                                       style=style)
     
-    # saving confusion matrix df
-    confusion_matrix_df.to_csv(output_path,
-                               index=False)
+    # saving detection metrics df
+    detection_metrics_df.to_csv(output_path,
+                                index=False)
 
     # printing execution message
     print(f'output saved to {output_path}')
@@ -537,13 +537,13 @@ def main():
     # waiting for user input
     enter_to_continue()
 
-    # running generate_metrics_df function
-    generate_metrics_df(fornma_file=fornma_file,
-                        detections_file=detections_file,
-                        output_path=output_path,
-                        iou_thresholds=IOU_THRESHOLDS,
-                        detection_thresholds=DETECTION_THRESHOLDS,
-                        style=mask_style)
+    # running generate_detection_metrics_df function
+    generate_detection_metrics_df(fornma_file=fornma_file,
+                                  detections_file=detections_file,
+                                  output_path=output_path,
+                                  iou_thresholds=IOU_THRESHOLDS,
+                                  detection_thresholds=DETECTION_THRESHOLDS,
+                                  style=mask_style)
 
 ######################################################################
 # running main function
