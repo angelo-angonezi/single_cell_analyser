@@ -11,6 +11,7 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
+from numpy import arange
 from pandas import concat
 from pandas import Series
 from numpy import ndarray
@@ -28,6 +29,14 @@ from src.utils.aux_funcs import simple_hungarian_algorithm
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_merged_detection_annotation_df
 print('all required libraries successfully imported.')  # noqa
+
+#####################################################################
+# defining global variables
+
+IOU_RANGE = arange(0, 1.1, 0.1)
+DETECTION_RANGE = arange(0, 1.05, 0.05)
+IOU_THRESHOLDS = [round(i, 2) for i in IOU_RANGE]
+DETECTION_THRESHOLDS = [round(i, 2) for i in DETECTION_RANGE]
 
 #####################################################################
 # argument parsing related functions
@@ -242,16 +251,6 @@ def get_cost_matrix(detections_df: DataFrame,
             current_iou = get_iou(mask_a=detection_mask,
                                   mask_b=annotation_mask)
 
-            # TODO: remove this once test completed
-            # img = detections_df['img_file_name'].tolist()[0]
-            # count = 1
-            # if current_iou > 0.5:
-            #
-            #     final_array = np_add(detection_mask, annotation_mask)
-            #     imwrite(f'/mnt/sdb/angelo-dados/pycharm_projects/single_cell_analyser/data/nucleus_detection/NucleusDetectorV1/test_results/confusion_matrix/imgs/{img}_{count}.png',
-            #             final_array)
-            #     count += 1
-
             # getting opposite iou score (needed to apply hungarian algorithm)
             current_cost = 1 - current_iou
 
@@ -315,7 +314,6 @@ def get_image_metrics(df: DataFrame,
                                   style=style)
 
     # establishing relations between detections/annotations using hungarian algorithm
-    # TODO: check detection/annotation order influence (this cand be done checking length of output lists)
     detections_indices, annotations_indices = simple_hungarian_algorithm(cost_matrix=cost_matrix)
 
     # getting indices zip
@@ -347,6 +345,18 @@ def get_image_metrics(df: DataFrame,
             # updating false negatives count
             false_negatives += 1
 
+    # TODO: remove these lines once test completed
+    # print()
+    # f_string = f'Detections count: {detections_num}\n'
+    # f_string += f'Annotations count: {annotations_num}\n'
+    # f_string += f'Established cells (detections): {len(detections_indices)}\n'
+    # f_string += f'Established cells (annotations): {len(annotations_indices)}\n'
+    # f_string += f'True Positives: {true_positives}\n'
+    # f_string += f'False Negatives: {false_negatives}\n'
+    # f_string += f'False Positives: {false_positives}'
+    # print(f_string)
+    # input()
+
     # assembling final tuple
     metrics_tuple = (true_positives, false_positives, false_negatives)
 
@@ -355,6 +365,8 @@ def get_image_metrics(df: DataFrame,
 
 
 def create_metrics_df(df: DataFrame,
+                      iou_thresholds: list,
+                      detection_thresholds: list,
                       style: str
                       ) -> DataFrame:
     """
@@ -370,56 +382,78 @@ def create_metrics_df(df: DataFrame,
     # grouping df by images
     image_groups = df.groupby('img_file_name')
 
-    # getting images num
+    # getting totals
+    iou_thresholds_num = len(iou_thresholds)
+    detection_thresholds_num = len(detection_thresholds)
     images_num = len(image_groups)
+    iterations_total = images_num * iou_thresholds_num * detection_thresholds_num
 
-    # defining starter value for current_image_index
-    current_image_index = 1
+    # defining starter for current iteration
+    current_iteration = 1
 
     # iterating over image groups
-    for image_name, image_group in image_groups:
+    for image_index, (image_name, image_group) in enumerate(image_groups, 1):
 
-        # printing execution message
-        base_string = 'analysing image #INDEX# of #TOTAL#'
-        print_progress_message(base_string=base_string,
-                               index=current_image_index,
-                               total=images_num)
+        # iterating over IoU thresholds
+        for iou in iou_thresholds:
 
-        # updating current_image_index
-        current_image_index += 1
+            # iterating over detection thresholds
+            for dt in detection_thresholds:
 
-        # TODO: add iou and dt loops here
+                # defining base string
+                base_string = f'analysing image {image_index}/{images_num} '
+                base_string += f'| IoU: {iou:02.2f} '
+                base_string += f'| DT: {dt:02.2f} '
 
-        # getting current image metrics
-        tp, fp, fn = get_image_metrics(df=image_group,
-                                       detection_threshold=detection_threshold,
-                                       iou_threshold=iou_threshold,
-                                       style=style)
+                # printing execution message
+                print_progress_message(base_string=base_string,
+                                       index=current_iteration,
+                                       total=iterations_total)
 
-        # calculating precision
-        precision = tp / (tp + fp)
+                # getting current image metrics
+                tp, fp, fn = get_image_metrics(df=image_group,
+                                               detection_threshold=dt,
+                                               iou_threshold=iou,
+                                               style=style)
 
-        # calculating recall
-        recall = tp / (tp + fn)
+                # calculating precision
+                try:
+                    precision = tp / (tp + fp)
+                except ZeroDivisionError:
+                    precision = 0
 
-        # calculating f1_score
-        f1_score = 2 * (precision * recall) / (precision + recall)
+                # calculating recall
+                try:
+                    recall = tp / (tp + fn)
+                except ZeroDivisionError:
+                    recall = 0
 
-        # getting current image dict
-        current_dict = {'img_name': image_name,
-                        'tp': tp,
-                        'fp': fp,
-                        'fn': fn,
-                        'precision': precision,
-                        'recall': recall,
-                        'f1_score': f1_score}
+                # calculating f1_score
+                try:
+                    f1_score = 2 * (precision * recall) / (precision + recall)
+                except ZeroDivisionError:
+                    f1_score = 0
 
-        # getting current image df
-        current_df = DataFrame(current_dict,
-                               index=[0])
+                # getting current image dict
+                current_dict = {'img_name': image_name,
+                                'iou_threshold': iou,
+                                'detection_threshold': dt,
+                                'tp': tp,
+                                'fp': fp,
+                                'fn': fn,
+                                'precision': precision,
+                                'recall': recall,
+                                'f1_score': f1_score}
 
-        # appending current df to dfs_list
-        dfs_list.append(current_df)
+                # getting current image df
+                current_df = DataFrame(current_dict,
+                                       index=[0])
+
+                # appending current df to dfs_list
+                dfs_list.append(current_df)
+
+                # updating current iteration
+                current_iteration += 1
 
     # concatenating dfs in dfs_list
     final_df = concat(dfs_list,
@@ -432,6 +466,8 @@ def create_metrics_df(df: DataFrame,
 def generate_metrics_df(fornma_file: str,
                         detections_file: str,
                         output_path: str,
+                        iou_thresholds: list,
+                        detection_thresholds: list,
                         style: str
                         ) -> None:
     """
@@ -443,6 +479,8 @@ def generate_metrics_df(fornma_file: str,
     :param fornma_file: String. Represents a path to a file.
     :param detections_file: String. Represents a path to a file.
     :param output_path: String. Represents a path to a file.
+    :param iou_thresholds: List. Represents a list of IoU thresholds.
+    :param detection_thresholds: List. Represents a list of detection thresholds.
     :param style: String. Represents overlays style (rectangle/circle/ellipse).
     :return: None.
     """
@@ -452,6 +490,8 @@ def generate_metrics_df(fornma_file: str,
     
     # getting confusion matrix df
     confusion_matrix_df = create_metrics_df(df=merged_df,
+                                            iou_thresholds=iou_thresholds,
+                                            detection_thresholds=detection_thresholds,
                                             style=style)
     
     # saving confusion matrix df
@@ -467,7 +507,10 @@ def generate_metrics_df(fornma_file: str,
 
 
 def main():
-    """Runs main code."""
+    """
+    Gets execution parameters from
+    command line and runs main function.
+    """
     # getting args dict
     args_dict = get_args_dict()
 
@@ -489,10 +532,12 @@ def main():
     # waiting for user input
     enter_to_continue()
 
-    # running generate_confusion_matrix_df function
+    # running generate_metrics_df function
     generate_metrics_df(fornma_file=fornma_file,
                         detections_file=detections_file,
                         output_path=output_path,
+                        iou_thresholds=IOU_THRESHOLDS,
+                        detection_thresholds=DETECTION_THRESHOLDS,
                         style=mask_style)
 
 ######################################################################
