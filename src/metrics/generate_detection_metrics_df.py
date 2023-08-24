@@ -394,6 +394,10 @@ def create_detection_metrics_df(df: DataFrame,
     # iterating over image groups
     for image_index, (image_name, image_group) in enumerate(image_groups, 1):
 
+        if image_index > 1:
+
+            break
+
         # iterating over IoU thresholds
         for iou in iou_thresholds:
 
