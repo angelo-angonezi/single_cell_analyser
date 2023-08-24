@@ -723,7 +723,8 @@ def draw_rectangle(open_img: ndarray,
                    width: float,
                    height: float,
                    angle: float,
-                   color: tuple
+                   color: tuple,
+                   thickness: int
                    ) -> ndarray:
     """
     Given an open image, and coordinates for OBB,
@@ -742,7 +743,7 @@ def draw_rectangle(open_img: ndarray,
                  [box],
                  -1,
                  color,
-                 2)
+                 thickness=thickness)
 
     # returning modified image
     return open_img
@@ -752,7 +753,8 @@ def draw_circle(open_img: ndarray,
                 cx: float,
                 cy: float,
                 radius: float,
-                color: tuple
+                color: tuple,
+                thickness: int
                 ) -> ndarray:
     """
     Given an open image, and coordinates for OBB,
@@ -763,7 +765,7 @@ def draw_circle(open_img: ndarray,
            (cx, cy),
            radius,
            color,
-           2)
+           thickness=thickness)
 
     # returning modified image
     return open_img

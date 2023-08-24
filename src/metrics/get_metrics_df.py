@@ -3,19 +3,17 @@
 print('initializing...')  # noqa
 
 # Code destined to generating data frame containing
-# info on TP, FP, and FN for each image in test set.
+# info on TP, FP, FN, precision, recall and F1-Score
+# for each image in test set.
 
 ######################################################################
 # imports
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-from cv2 import imwrite
-from os.path import join
 from pandas import concat
 from pandas import Series
 from numpy import ndarray
-from pandas import read_csv
 from pandas import DataFrame
 from numpy import add as np_add
 from numpy import count_nonzero
@@ -24,7 +22,6 @@ from numpy import zeros as np_zeroes
 from src.utils.aux_funcs import draw_circle
 from src.utils.aux_funcs import draw_ellipse
 from src.utils.aux_funcs import draw_rectangle
-from src.utils.aux_funcs import get_crop_pixels
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import simple_hungarian_algorithm
@@ -154,6 +151,9 @@ def get_pixel_mask(row_data: Series,
     height = row_data['height']
     angle = row_data['angle']
 
+    # defining color (same for all styles)
+    color = (1,)
+
     # defining base image
     base_img = get_blank_image()
 
@@ -167,10 +167,33 @@ def get_pixel_mask(row_data: Series,
                      width=width,
                      height=height,
                      angle=angle,
-                     color=(1,),
+                     color=color,
                      thickness=-1)
 
-    # TODO: add other options (circle/rectangle)
+    elif style == 'circle':
+
+        # getting radius
+        radius = (width + height) / 2
+
+        # adding circular mask
+        draw_circle(open_img=base_img,
+                    cx=cx,
+                    cy=cy,
+                    radius=radius,
+                    color=color,
+                    thickness=-1)
+
+    elif style == 'rectangle':
+
+        # adding rectangular mask
+        draw_rectangle(open_img=base_img,
+                       cx=cx,
+                       cy=cy,
+                       width=width,
+                       height=height,
+                       angle=angle,
+                       color=color,
+                       thickness=-1)
 
     # returning modified image
     return base_img

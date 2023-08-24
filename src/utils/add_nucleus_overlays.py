@@ -146,6 +146,9 @@ def add_single_overlay(open_img: ndarray,
     # defining color for overlay
     overlay_color = color_dict[evaluator]
 
+    # defining thickness
+    thickness = 2
+
     # checking overlay style
 
     if style == 'rectangle':
@@ -157,7 +160,8 @@ def add_single_overlay(open_img: ndarray,
                        width=width,
                        height=height,
                        angle=angle,
-                       color=overlay_color)
+                       color=overlay_color,
+                       thickness=thickness)
 
     elif style == 'circle':
 
@@ -170,7 +174,8 @@ def add_single_overlay(open_img: ndarray,
                     cx=cx,
                     cy=cy,
                     radius=radius,
-                    color=overlay_color)
+                    color=overlay_color,
+                    thickness=thickness)
 
     elif style == 'ellipse':
 
@@ -182,7 +187,7 @@ def add_single_overlay(open_img: ndarray,
                      height=height,
                      angle=angle,
                      color=overlay_color,
-                     thickness=2)
+                     thickness=thickness)
 
     # adding class text
     putText(open_img,
