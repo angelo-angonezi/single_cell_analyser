@@ -490,21 +490,24 @@ def generate_detection_metrics_df(fornma_file: str,
     :return: None.
     """
     # getting merged detections/annotations df
+    print('getting merged detections/annotations df...')
     merged_df = get_merged_detection_annotation_df(detections_df_path=detections_file,
                                                    annotations_df_path=fornma_file)
     
     # getting detection metrics df
+    print('creating detection metrics df...')
     detection_metrics_df = create_detection_metrics_df(df=merged_df,
                                                        iou_thresholds=iou_thresholds,
                                                        detection_thresholds=detection_thresholds,
                                                        style=style)
-    
+
     # saving detection metrics df
+    print('saving detection metrics df...')
     detection_metrics_df.to_csv(output_path,
                                 index=False)
 
     # printing execution message
-    print(f'output saved to {output_path}')
+    print(f'output saved to "{output_path}"')
     print('analysis complete!')
 
 ######################################################################
