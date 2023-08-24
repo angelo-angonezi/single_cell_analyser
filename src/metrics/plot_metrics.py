@@ -67,17 +67,11 @@ def get_args_dict() -> dict:
 
     # adding arguments to parser
 
-    # fornma file param
-    parser.add_argument('-f', '--fornma-file',
-                        dest='fornma_file',
+    # input path param
+    parser.add_argument('-i', '--input-path',
+                        dest='input_path',
                         required=True,
-                        help='defines path to fornma (.csv) file')
-
-    # detections file param
-    parser.add_argument('-d', '--detections-file',
-                        dest='detections_file',
-                        required=True,
-                        help='defines path to detections (.csv) file')
+                        help='defines path to input (detection_metrics_df.csv) file')
 
     # output path param
     parser.add_argument('-o', '--output-path',
@@ -85,12 +79,12 @@ def get_args_dict() -> dict:
                         required=True,
                         help='defines path to output (.csv) file')
 
-    # style param
-    parser.add_argument('-s', '--mask-style',
-                        dest='mask_style',
+    # metric param
+    parser.add_argument('-m', '--metric',
+                        dest='metric',
                         required=False,
-                        default='ellipse',
-                        help='defines overlay style (rectangle/circle/ellipse)')
+                        default='f1_mean',
+                        help='defines metric to be plotted (precision_mean, recall_mean, f1_mean)')
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -102,10 +96,11 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_f1_means_df(df: DataFrame) -> DataFrame:
+def get_metrics_means_df(df: DataFrame) -> DataFrame:
     """
     Given a metrics data frame, returns
-    F1-Score means for all images.
+    precision/recall/F1-Score means for
+    all images.
     """
     # defining placeholder value for dfs_list
     dfs_list = []
@@ -125,10 +120,18 @@ def get_f1_means_df(df: DataFrame) -> DataFrame:
         iou, dt = group_name
 
         # printing execution message
-        progress_string = f'getting F1-Score mean for image #INDEX# of #TOTAL#'
+        progress_string = f'getting metrics mean for image #INDEX# of #TOTAL#'
         print_progress_message(base_string=progress_string,
                                index=group_index,
                                total=groups_num)
+
+        # getting current group precision mean
+        current_precision_col = group_data['precision']
+        current_precision_mean = current_precision_col.mean()
+
+        # getting current group recall mean
+        current_recall_col = group_data['recall']
+        current_recall_mean = current_recall_col.mean()
 
         # getting current group f1 mean
         current_f1_col = group_data['f1_score']
@@ -137,6 +140,8 @@ def get_f1_means_df(df: DataFrame) -> DataFrame:
         # getting current group dict
         current_dict = {'iou_threshold': iou,
                         'detection_threshold': dt,
+                        'precision_mean': current_precision_mean,
+                        'recall_mean': current_recall_mean,
                         'f1_mean': current_f1_mean}
 
         # getting current group df
@@ -154,22 +159,23 @@ def get_f1_means_df(df: DataFrame) -> DataFrame:
     return final_df
 
 
-def plot_f1_score(input_path: str,
-                  output_path: str,
-                  ) -> None:
+def plot_metric(input_path: str,
+                output_path: str,
+                metric: str
+                ) -> None:
     # getting metrics df
     print('getting metrics df...')
     metrics_df = read_csv(input_path)
 
-    # getting f1 score means df
-    print('getting f1 score means df...')
-    f1_means_df = get_f1_means_df(df=metrics_df)
+    # getting metrics means df
+    print('getting metrics means df...')
+    metrics_means_df = get_metrics_means_df(df=metrics_df)
 
     # plotting data
     print('plotting data...')
-    lineplot(data=f1_means_df,
+    lineplot(data=metrics_means_df,
              x='iou_threshold',
-             y='f1_mean',
+             y=metric,
              hue='detection_threshold')
 
     # showing plot
@@ -195,17 +201,14 @@ def main():
     # getting args dict
     args_dict = get_args_dict()
 
-    # getting fornma file
-    fornma_file = args_dict['fornma_file']
-
-    # getting detections file
-    detections_file = args_dict['detections_file']
+    # getting input path
+    input_path = args_dict['input_path']
 
     # getting output path
     output_path = args_dict['output_path']
 
-    # getting mask style
-    mask_style = args_dict['mask_style']
+    # getting metric
+    metric = args_dict['metric']
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
@@ -213,13 +216,10 @@ def main():
     # waiting for user input
     enter_to_continue()
 
-    # running plot_f1_score function
-    plot_f1_score(fornma_file=fornma_file,
-                                  detections_file=detections_file,
-                                  output_path=output_path,
-                                  iou_thresholds=IOU_THRESHOLDS,
-                                  detection_thresholds=DETECTION_THRESHOLDS,
-                                  style=mask_style)
+    # running plot_metric function
+    plot_metric(input_path=input_path,
+                output_path=output_path,
+                metric=metric)
 
 ######################################################################
 # running main function
