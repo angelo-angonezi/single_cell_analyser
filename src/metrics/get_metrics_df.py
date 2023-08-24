@@ -1,4 +1,4 @@
-# generate metrics df for nucleus detection module
+# get metrics df module
 
 print('initializing...')  # noqa
 
@@ -42,7 +42,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'generate confusion matrix df for nucleus detection'
+    description = 'get metrics df'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
@@ -66,20 +66,6 @@ def get_args_dict() -> dict:
                         dest='output_path',
                         required=True,
                         help='defines path to output (.csv) file')
-
-    # detection threshold param
-    parser.add_argument('-dt', '--detection-threshold',
-                        dest='detection_threshold',
-                        required=False,
-                        default=0.5,
-                        help='defines detection threshold to be applied as filter in model detections')
-
-    # iou threshold param
-    parser.add_argument('-it', '--iou-threshold',
-                        dest='iou_threshold',
-                        required=False,
-                        default=0.5,
-                        help='defines IoU threshold to be applied as filter in model detections')
 
     # style param
     parser.add_argument('-s', '--mask-style',
@@ -306,6 +292,7 @@ def get_image_metrics(df: DataFrame,
                                   style=style)
 
     # establishing relations between detections/annotations using hungarian algorithm
+    # TODO: check detection/annotation order influence (this cand be done checking length of output lists)
     detections_indices, annotations_indices = simple_hungarian_algorithm(cost_matrix=cost_matrix)
 
     # getting indices zip
@@ -344,11 +331,9 @@ def get_image_metrics(df: DataFrame,
     return metrics_tuple
 
 
-def create_confusion_matrix_df(df: DataFrame,
-                               detection_threshold: float,
-                               iou_threshold: float,
-                               style: str
-                               ) -> DataFrame:
+def create_metrics_df(df: DataFrame,
+                      style: str
+                      ) -> DataFrame:
     """
     Given a merged detections/annotations data frame,
     returns a data frame containing true positive,
@@ -380,17 +365,31 @@ def create_confusion_matrix_df(df: DataFrame,
         # updating current_image_index
         current_image_index += 1
 
+        # TODO: add iou and dt loops here
+
         # getting current image metrics
         tp, fp, fn = get_image_metrics(df=image_group,
                                        detection_threshold=detection_threshold,
                                        iou_threshold=iou_threshold,
                                        style=style)
 
+        # calculating precision
+        precision = tp / (tp + fp)
+
+        # calculating recall
+        recall = tp / (tp + fn)
+
+        # calculating f1_score
+        f1_score = 2 * (precision * recall) / (precision + recall)
+
         # getting current image dict
         current_dict = {'img_name': image_name,
                         'tp': tp,
                         'fp': fp,
-                        'fn': fn}
+                        'fn': fn,
+                        'precision': precision,
+                        'recall': recall,
+                        'f1_score': f1_score}
 
         # getting current image df
         current_df = DataFrame(current_dict,
@@ -407,13 +406,11 @@ def create_confusion_matrix_df(df: DataFrame,
     return final_df
 
 
-def generate_confusion_matrix_df(fornma_file: str,
-                                 detections_file: str,
-                                 detection_threshold: float,
-                                 iou_threshold: float,
-                                 output_path: str,
-                                 style: str
-                                 ) -> None:
+def generate_metrics_df(fornma_file: str,
+                        detections_file: str,
+                        output_path: str,
+                        style: str
+                        ) -> None:
     """
     Given a path to detections and annotations files,
     generates a data frame containing info on TP, FP
@@ -422,8 +419,6 @@ def generate_confusion_matrix_df(fornma_file: str,
     saving it to given output path.
     :param fornma_file: String. Represents a path to a file.
     :param detections_file: String. Represents a path to a file.
-    :param detection_threshold: Float. Represents a detection threshold.
-    :param iou_threshold: Float. Represents an IoU threshold.
     :param output_path: String. Represents a path to a file.
     :param style: String. Represents overlays style (rectangle/circle/ellipse).
     :return: None.
@@ -433,10 +428,8 @@ def generate_confusion_matrix_df(fornma_file: str,
                                                    annotations_df_path=fornma_file)
     
     # getting confusion matrix df
-    confusion_matrix_df = create_confusion_matrix_df(df=merged_df,
-                                                     detection_threshold=detection_threshold,
-                                                     iou_threshold=iou_threshold,
-                                                     style=style)
+    confusion_matrix_df = create_metrics_df(df=merged_df,
+                                            style=style)
     
     # saving confusion matrix df
     confusion_matrix_df.to_csv(output_path,
@@ -461,12 +454,6 @@ def main():
     # getting detections file
     detections_file = args_dict['detections_file']
 
-    # getting detection threshold
-    detection_threshold = args_dict['detection_threshold']
-
-    # getting iou threshold
-    iou_threshold = args_dict['iou_threshold']
-
     # getting output path
     output_path = args_dict['output_path']
 
@@ -480,12 +467,10 @@ def main():
     enter_to_continue()
 
     # running generate_confusion_matrix_df function
-    generate_confusion_matrix_df(fornma_file=fornma_file,
-                                 detections_file=detections_file,
-                                 detection_threshold=detection_threshold,
-                                 iou_threshold=iou_threshold,
-                                 output_path=output_path,
-                                 style=mask_style)
+    generate_metrics_df(fornma_file=fornma_file,
+                        detections_file=detections_file,
+                        output_path=output_path,
+                        style=mask_style)
 
 ######################################################################
 # running main function
