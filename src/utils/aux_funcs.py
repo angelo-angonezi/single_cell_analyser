@@ -226,13 +226,13 @@ def get_time_str(time_in_seconds: int) -> str:
     :return: String. Represents a time (in seconds, minutes or hours).
     """
     # checking whether seconds > 60
-    if time_in_seconds > 60:
+    if time_in_seconds >= 60:
 
         # converting time to minutes
         time_in_minutes = time_in_seconds / 60
 
         # checking whether minutes > 60
-        if time_in_minutes > 60:
+        if time_in_minutes >= 60:
 
             # converting time to hours
             time_in_hours = time_in_minutes / 60
