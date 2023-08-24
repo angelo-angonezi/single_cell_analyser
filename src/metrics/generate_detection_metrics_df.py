@@ -166,11 +166,11 @@ def get_pixel_mask(row_data: Series,
     :return: ndarray. Represents base image with mask overlay.
     """
     # extracting coords from row data
-    cx = row_data['cx']
-    cy = row_data['cy']
-    width = row_data['width']
-    height = row_data['height']
-    angle = row_data['angle']
+    cx = int(row_data['cx'])
+    cy = int(row_data['cy'])
+    width = float(row_data['width'])
+    height = float(row_data['height'])
+    angle = float(row_data['angle'])
 
     # defining color (same for all styles)
     color = (1,)
@@ -195,6 +195,7 @@ def get_pixel_mask(row_data: Series,
 
         # getting radius
         radius = (width + height) / 2
+        radius = int(radius)
 
         # adding circular mask
         draw_circle(open_img=base_img,
@@ -442,6 +443,7 @@ def create_detection_metrics_df(df: DataFrame,
                 progress_string += f'| progress: {progress_percentage:02.2f}% '
                 progress_string += f'| time elapsed: {time_elapsed_str} '
                 progress_string += f'| ETC: {etc_str}'
+                progress_string += '   '
 
                 # printing execution message
                 flush_or_print(string=progress_string,
@@ -572,7 +574,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running generate_detection_metrics_df function
     generate_detection_metrics_df(fornma_file=fornma_file,
