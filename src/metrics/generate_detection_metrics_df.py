@@ -20,10 +20,13 @@ from numpy import add as np_add
 from numpy import count_nonzero
 from argparse import ArgumentParser
 from numpy import zeros as np_zeroes
+from src.utils.aux_funcs import get_etc
 from src.utils.aux_funcs import draw_circle
 from src.utils.aux_funcs import draw_ellipse
 from src.utils.aux_funcs import draw_rectangle
 from src.utils.aux_funcs import flush_or_print
+from src.utils.aux_funcs import get_current_time
+from src.utils.aux_funcs import get_time_elapsed
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import simple_hungarian_algorithm
 from src.utils.aux_funcs import print_execution_parameters
@@ -384,6 +387,9 @@ def create_detection_metrics_df(df: DataFrame,
     based on given style IoU+Hungarian Algorithm
     matching of detections.
     """
+    # getting start time
+    start_time = get_current_time()
+
     # defining placeholder value for dfs_list
     dfs_list = []
 
@@ -412,11 +418,28 @@ def create_detection_metrics_df(df: DataFrame,
                 progress_ratio = current_iteration / iterations_total
                 progress_percentage = progress_ratio * 100
 
+                # getting current time
+                current_time = get_current_time()
+
+                # getting time elapsed
+                time_elapsed = get_time_elapsed(start_time=start_time,
+                                                current_time=current_time)
+
+                # getting estimated time of completion
+                etc = get_etc(time_elapsed=time_elapsed,
+                              current_iteration=current_iteration,
+                              iterations_total=iterations_total)
+
+                # converting times to adequate format
+                # TODO: add function to convert seconds to hours etc...
+
                 # defining progress string
                 progress_string = f'analysing image {image_index}/{images_num} '
                 progress_string += f'| IoU: {iou:02.1f} '
                 progress_string += f'| DT: {dt:02.1f} '
-                progress_string += f'| progress: {progress_percentage:02.2f}%'
+                progress_string += f'| progress: {progress_percentage:02.2f}% '
+                progress_string += f'| time elapsed: {time_elapsed}s '
+                progress_string += f'| ETC: {etc}s '
 
                 # printing execution message
                 flush_or_print(string=progress_string,
@@ -546,7 +569,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running generate_detection_metrics_df function
     generate_detection_metrics_df(fornma_file=fornma_file,

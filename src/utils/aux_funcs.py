@@ -9,6 +9,7 @@
 # importing required libraries
 import pandas as pd
 from os import mkdir
+from time import time
 from cv2 import circle
 from numpy import intp
 from os import listdir
@@ -163,6 +164,48 @@ def get_specific_files_in_folder(path_to_folder: str,
 
     # returning list
     return files_in_dir
+
+
+def get_current_time() -> int:
+    """
+    Gets current UTC time, in seconds.
+    """
+    # getting current time
+    current_time = time()
+
+    # getting seconds
+    current_seconds = int(current_time)
+
+    # returning current time in seconds
+    return current_seconds
+
+
+def get_time_elapsed(start_time: int,
+                     current_time: int
+                     ) -> int:
+    """
+    Given two UTC times, returns
+    difference between times, in
+    seconds.
+    """
+    # getting time diff
+    time_diff = current_time - start_time
+
+    # returning time diff
+    return time_diff
+
+
+def get_etc(time_elapsed: int,
+            current_iteration: int,
+            iterations_total: int
+            ) -> int:
+    """
+    Given the time elapse for achieving
+    current iteration and an iterations
+    total, returns estimated time of
+    completion (ETC), in seconds.
+    """
+    return 12
 
 
 def get_obbs_from_df(df: DataFrame) -> list:
