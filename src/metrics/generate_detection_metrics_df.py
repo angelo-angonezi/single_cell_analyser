@@ -33,8 +33,16 @@ print('all required libraries successfully imported.')  # noqa
 #####################################################################
 # defining global variables
 
-IOU_RANGE = arange(0, 1.1, 0.1)
-DETECTION_RANGE = arange(0, 1.05, 0.05)
+START = 0.0
+STOP = 1.0
+IOU_STEP = 0.05
+DETECTION_STEP = 0.1
+IOU_RANGE = arange(START,
+                   STOP + IOU_STEP,
+                   IOU_STEP)
+DETECTION_RANGE = arange(START,
+                         STOP + DETECTION_STEP,
+                         DETECTION_STEP)
 IOU_THRESHOLDS = [round(i, 2) for i in IOU_RANGE]
 DETECTION_THRESHOLDS = [round(i, 2) for i in DETECTION_RANGE]
 
@@ -48,7 +56,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'generate detection metrics df'
+    description = 'generate detection metrics df module'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
@@ -407,7 +415,7 @@ def create_detection_metrics_df(df: DataFrame,
                 # defining progress string
                 progress_string = f'analysing image {image_index}/{images_num} '
                 progress_string += f'| IoU: {iou:02.1f} '
-                progress_string += f'| DT: {dt:02.2f} '
+                progress_string += f'| DT: {dt:02.1f} '
                 progress_string += f'| progress: {progress_percentage:02.2f}%'
 
                 # printing execution message
@@ -493,7 +501,7 @@ def generate_detection_metrics_df(fornma_file: str,
     print('getting merged detections/annotations df...')
     merged_df = get_merged_detection_annotation_df(detections_df_path=detections_file,
                                                    annotations_df_path=fornma_file)
-    
+
     # getting detection metrics df
     print('creating detection metrics df...')
     detection_metrics_df = create_detection_metrics_df(df=merged_df,
