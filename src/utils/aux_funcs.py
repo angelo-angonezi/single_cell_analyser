@@ -205,7 +205,17 @@ def get_etc(time_elapsed: int,
     total, returns estimated time of
     completion (ETC), in seconds.
     """
-    return 12
+    # getting iterations to go
+    iterations_to_go = iterations_total - current_iteration
+
+    # calculating estimated time of completion
+    etc = iterations_to_go * time_elapsed / current_iteration
+
+    # converting estimated time of completion to int
+    etc = int(etc)
+
+    # returning estimated time of completion
+    return etc
 
 
 def get_obbs_from_df(df: DataFrame) -> list:

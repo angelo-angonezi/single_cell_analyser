@@ -472,6 +472,7 @@ def create_detection_metrics_df(df: DataFrame,
 
                 # getting current image dict
                 current_dict = {'img_name': image_name,
+                                'mask_style': style,
                                 'iou_threshold': iou,
                                 'detection_threshold': dt,
                                 'true_positives': tp,
