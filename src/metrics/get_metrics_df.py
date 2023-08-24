@@ -23,8 +23,8 @@ from numpy import zeros as np_zeroes
 from src.utils.aux_funcs import draw_circle
 from src.utils.aux_funcs import draw_ellipse
 from src.utils.aux_funcs import draw_rectangle
+from src.utils.aux_funcs import flush_or_print
 from src.utils.aux_funcs import enter_to_continue
-from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import simple_hungarian_algorithm
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_merged_detection_annotation_df
@@ -400,15 +400,20 @@ def create_metrics_df(df: DataFrame,
             # iterating over detection thresholds
             for dt in detection_thresholds:
 
-                # defining base string
-                base_string = f'analysing image {image_index}/{images_num} '
-                base_string += f'| IoU: {iou:02.2f} '
-                base_string += f'| DT: {dt:02.2f} '
+                # getting current progress
+                progress_ratio = current_iteration / iterations_total
+                progress_percentage = progress_ratio * 100
+
+                # defining progress string
+                progress_string = f'analysing image {image_index}/{images_num} '
+                progress_string += f'| IoU: {iou:02.1f} '
+                progress_string += f'| DT: {dt:02.2f} '
+                progress_string += f'| progress: {progress_percentage:02.2f}%'
 
                 # printing execution message
-                print_progress_message(base_string=base_string,
-                                       index=current_iteration,
-                                       total=iterations_total)
+                flush_or_print(string=progress_string,
+                               index=current_iteration,
+                               total=iterations_total)
 
                 # getting current image metrics
                 tp, fp, fn = get_image_metrics(df=image_group,
