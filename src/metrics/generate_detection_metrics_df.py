@@ -358,7 +358,7 @@ def get_image_metrics(df: DataFrame,
             # updating false negatives count
             false_negatives += 1
 
-    # Lines to test TP, FP, FN obtaining
+    # Lines to check TP, FP, FN obtaining
     # print()
     # f_string = f'Detections count: {detections_num}\n'
     # f_string += f'Annotations count: {annotations_num}\n'
@@ -455,6 +455,9 @@ def create_detection_metrics_df(df: DataFrame,
                                                detection_threshold=dt,
                                                iou_threshold=iou,
                                                style=style)
+
+                # TODO: add confluence obtaining here
+                # model_confluence, fornma_confluence = get_image_confluence()
 
                 # calculating precision
                 try:

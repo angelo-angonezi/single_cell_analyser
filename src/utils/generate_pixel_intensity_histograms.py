@@ -31,7 +31,7 @@ print('all required libraries successfully imported.')  # noqa
 #####################################################################
 # defining global variables
 
-MIN_VALUE = 0.07
+MIN_VALUE = 0.09
 
 #####################################################################
 # argument parsing related functions
@@ -109,6 +109,7 @@ def get_cell_cycle(red_value: float,
     :param min_value: Float. Represents a normalized pixel value minimum.
     :return: String. Represents a cell cycle.
     """
+    # TODO: pass this function to aux_funcs module
     # defining placeholder value for cell cycle
     cell_cycle = None
 
@@ -123,17 +124,17 @@ def get_cell_cycle(red_value: float,
     if neither_reach_min:
 
         # then, cell cycle must be 'M'
-        cell_cycle = 'M (neither pixels achieved minimum)'
+        cell_cycle = 'M'
 
     if just_red:
 
         # then, cell cycle must be 'G1' (red)
-        cell_cycle = 'G1 (predominantly red)'
+        cell_cycle = 'G1'
 
     if just_green:
 
         # then, cell cycle must be 'G2' (green)
-        cell_cycle = 'G2 (predominantly green)'
+        cell_cycle = 'G2'
 
     if both_reach_min:
 
@@ -145,17 +146,17 @@ def get_cell_cycle(red_value: float,
         if pixel_ratio > 1.2:
 
             # then, cell cycle must be 'G1' (red)
-            cell_cycle = 'G1 (predominantly red)'
+            cell_cycle = 'G1'
 
         elif pixel_ratio < 0.8:
 
             # then, cell cycle must be 'G2' (green)
-            cell_cycle = 'G2 (predominantly green)'
+            cell_cycle = 'G2'
 
         else:
 
             # then, cell cycle must be 'S' (red AND green)
-            cell_cycle = 'S (red AND green)'
+            cell_cycle = 'S'
 
     # returning cell cycle
     return cell_cycle
@@ -172,26 +173,6 @@ def plot_pixel_histograms(df: DataFrame,
     :param output_folder: String. Represents a path to a folder.
     :return: None.
     """
-    print(df)
-    # TODO: remove this once test completed!
-    histplot(data=df,
-             x='red',
-             color='r')
-    histplot(data=df,
-             x='green',
-             color='g')
-    plt.show()
-    plt.close()
-    histplot(data=df,
-             x='red_normalized',
-             color='r')
-    histplot(data=df,
-             x='green_normalized',
-             color='g')
-    plt.show()
-    plt.close()
-    exit()
-
     # grouping df by crop
     crop_groups = df.groupby('crop_name')
 
@@ -200,6 +181,9 @@ def plot_pixel_histograms(df: DataFrame,
 
     # defining start value for current_crop_index
     current_crop_index = 1
+
+    # defining placeholder value for dfs_list
+    dfs_list = []
 
     # iterating over crop groups
     for crop_name, crop_group in crop_groups:
@@ -249,6 +233,17 @@ def plot_pixel_histograms(df: DataFrame,
         # getting current crop pixel values df
         pixel_values_df = DataFrame(pixel_values_dict)
 
+        # getting current crop dict
+        current_crop_dict = {'crop_name': crop_name,
+                             'cell_cycle': current_cell_cycle}
+
+        # getting current crop df
+        current_crop_df = DataFrame(current_crop_dict,
+                                    index=[0])
+
+        # appending current crop df to dfs_list
+        dfs_list.append(current_crop_df)
+
         # generating current crop pixel pairs histogram
         histplot(data=pixel_values_df,
                  x='pixel_intensity',
@@ -289,6 +284,17 @@ def plot_pixel_histograms(df: DataFrame,
 
         # closing plot
         plt.close()
+
+    # concatenating dfs in dfs_list
+    final_df = concat(dfs_list,
+                      ignore_index=True)
+
+    # saving df
+    save_name = f'cell_cycle_df.csv'
+    save_path = join(output_folder,
+                     save_name)
+    final_df.to_csv(save_path,
+                    index=False)
 
 
 def generate_pixel_intensity_histograms(crops_file: str,

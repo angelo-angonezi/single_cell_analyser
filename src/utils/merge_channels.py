@@ -345,7 +345,7 @@ def merge_channels(red_images_folder: str,
         # getting normalization values
         print('getting red channel normalization values...')
         # red_normalizer = get_channel_normalization_values(images_paths=red_images_paths)
-        red_normalizer = 4
+        red_normalizer = 1
         print('getting green channel normalization values...')
         # green_normalizer = get_channel_normalization_values(images_paths=green_images_paths)
         # TODO: uncomment previous lines once solved normalization step

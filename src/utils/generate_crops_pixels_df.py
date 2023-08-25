@@ -1,4 +1,4 @@
-# generate table from crops module
+# generate crops pixels df module
 
 print('initializing...')  # noqa
 

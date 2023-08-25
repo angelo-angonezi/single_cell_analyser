@@ -91,7 +91,7 @@ def convert_single_file(input_csv_file_path: str,
                                total=rows_num)
 
         # getting file name
-        file_name = row_data['Image_name_red']
+        file_name = row_data['Image_name_rg_merge']
         file_name = file_name.replace('.tif', '')
 
         # getting center x value
