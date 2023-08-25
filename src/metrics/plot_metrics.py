@@ -14,24 +14,14 @@ print('initializing...')  # noqa
 print('importing required libraries...')  # noqa
 from numpy import arange
 from pandas import concat
-from pandas import Series
-from numpy import ndarray
 from pandas import read_csv
 from pandas import DataFrame
 from seaborn import lineplot
-from numpy import add as np_add
-from numpy import count_nonzero
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
-from numpy import zeros as np_zeroes
-from src.utils.aux_funcs import draw_circle
-from src.utils.aux_funcs import draw_ellipse
-from src.utils.aux_funcs import draw_rectangle
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
-from src.utils.aux_funcs import simple_hungarian_algorithm
 from src.utils.aux_funcs import print_execution_parameters
-from src.utils.aux_funcs import get_merged_detection_annotation_df
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -106,7 +96,7 @@ def get_metrics_means_df(df: DataFrame) -> DataFrame:
     dfs_list = []
 
     # grouping df
-    groups_list = ['iou_threshold', 'detection_threshold']
+    groups_list = ['iou_threshold', 'detection_threshold', 'mask_style']
     df_groups = df.groupby(groups_list)
     groups_num = len(df_groups)
 
@@ -117,7 +107,7 @@ def get_metrics_means_df(df: DataFrame) -> DataFrame:
         group_name, group_data = group_info
 
         # getting current iou/dt
-        iou, dt = group_name
+        iou, dt, mask_style = group_name
 
         # printing execution message
         progress_string = f'getting metrics mean for image #INDEX# of #TOTAL#'
@@ -140,6 +130,7 @@ def get_metrics_means_df(df: DataFrame) -> DataFrame:
         # getting current group dict
         current_dict = {'iou_threshold': iou,
                         'detection_threshold': dt,
+                        'mask_style': mask_style,
                         'precision_mean': current_precision_mean,
                         'recall_mean': current_recall_mean,
                         'f1_mean': current_f1_mean}
@@ -171,19 +162,24 @@ def plot_metric(input_path: str,
     print('getting metrics means df...')
     metrics_means_df = get_metrics_means_df(df=metrics_df)
 
+    # filtering metrics means df by detection threshold
+    # TODO: add detection threshold as execution parameter
+    metrics_means_df = metrics_means_df[metrics_means_df['detection_threshold'] == 0.5]
+
+    # saving metrics df
+    metrics_means_df.to_csv(output_path)
+    print(metrics_means_df)
+
     # plotting data
     print('plotting data...')
     lineplot(data=metrics_means_df,
              x='iou_threshold',
              y=metric,
-             hue='detection_threshold')
+             hue='mask_style'
+             )
 
     # showing plot
     plt.show()
-
-    # saving plot
-    print('saving plot...')
-    # plt.savefig(output_path)
 
     # printing execution message
     print(f'output saved to "{output_path}"')

@@ -153,6 +153,15 @@ def get_iou(mask_a: ndarray,
     # calculating IoU (Intersection over Union)
     iou_value = intersection / union
 
+    # saving example image
+    if iou_value > 0.5:
+
+        from cv2 import imwrite
+        save_path = '/home/angelo/Desktop/circle_ex.png'
+        imwrite(save_path,
+                final_array)
+        exit()
+
     # returning IoU
     return iou_value
 
@@ -508,6 +517,10 @@ def create_detection_metrics_df(df: DataFrame,
                 detections_df = df[df['evaluator'] == 'model']
                 annotations_df = df[df['evaluator'] == 'fornma']
 
+                # getting current image detections/annotations nums
+                detections_num = len(detections_df)
+                annotations_num = len(annotations_df)
+
                 # filtering detections_df by detection_threshold
                 detections_df = detections_df[detections_df['detection_threshold'] > dt]
 
@@ -517,7 +530,6 @@ def create_detection_metrics_df(df: DataFrame,
                                                iou_threshold=iou,
                                                style=style)
 
-                # TODO: add confluence obtaining here
                 model_confluence = get_image_confluence(df=detections_df,
                                                         style=style)
                 fornma_confluence = get_image_confluence(df=annotations_df,
@@ -544,6 +556,8 @@ def create_detection_metrics_df(df: DataFrame,
                 # getting current image dict
                 current_dict = {'img_name': image_name,
                                 'mask_style': style,
+                                'model_count': detections_num,
+                                'fornma_count': annotations_num,
                                 'model_confluence': model_confluence,
                                 'fornma_confluence': fornma_confluence,
                                 'iou_threshold': iou,
