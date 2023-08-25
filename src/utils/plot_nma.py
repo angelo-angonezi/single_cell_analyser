@@ -83,6 +83,8 @@ for treatment, treatment_group in treatment_groups:
     title = f'Fucci-NMA plot (T: {treatment})'
     save_name = f'{treatment}_plot.png'
     plt.title(title)
+    plt.ylim(0, 3800)
+    plt.xlim(2, 10)
     output_path = join(OUTPUT_FOLDER, save_name)
     plt.savefig(output_path)
     plt.close()
