@@ -31,7 +31,7 @@ print('all required libraries successfully imported.')  # noqa
 #####################################################################
 # defining global variables
 
-MIN_VALUE = 0.09
+MIN_VALUE = 0.01
 
 #####################################################################
 # argument parsing related functions
@@ -143,12 +143,12 @@ def get_cell_cycle(red_value: float,
 
         # checking ratio
         # TODO: adapt these values for experimental data!
-        if pixel_ratio > 1.2:
+        if pixel_ratio > 1.4:
 
             # then, cell cycle must be 'G1' (red)
             cell_cycle = 'G1'
 
-        elif pixel_ratio < 0.8:
+        elif pixel_ratio < 0.6:
 
             # then, cell cycle must be 'G2' (green)
             cell_cycle = 'G2'
@@ -245,6 +245,7 @@ def plot_pixel_histograms(df: DataFrame,
         dfs_list.append(current_crop_df)
 
         # generating current crop pixel pairs histogram
+        """
         histplot(data=pixel_values_df,
                  x='pixel_intensity',
                  hue='channel',
@@ -284,6 +285,7 @@ def plot_pixel_histograms(df: DataFrame,
 
         # closing plot
         plt.close()
+        """
 
     # concatenating dfs in dfs_list
     final_df = concat(dfs_list,
