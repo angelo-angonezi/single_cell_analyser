@@ -175,8 +175,7 @@ def plot_metric(input_path: str,
     lineplot(data=metrics_means_df,
              x='iou_threshold',
              y=metric,
-             hue='mask_style'
-             )
+             hue='mask_style')
 
     # showing plot
     plt.show()
