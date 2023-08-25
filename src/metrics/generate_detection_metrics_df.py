@@ -517,12 +517,12 @@ def create_detection_metrics_df(df: DataFrame,
                 detections_df = df[df['evaluator'] == 'model']
                 annotations_df = df[df['evaluator'] == 'fornma']
 
+                # filtering detections_df by detection_threshold
+                detections_df = detections_df[detections_df['detection_threshold'] > dt]
+
                 # getting current image detections/annotations nums
                 detections_num = len(detections_df)
                 annotations_num = len(annotations_df)
-
-                # filtering detections_df by detection_threshold
-                detections_df = detections_df[detections_df['detection_threshold'] > dt]
 
                 # getting current image metrics
                 tp, fp, fn = get_image_metrics(detections_df=detections_df,
@@ -530,6 +530,7 @@ def create_detection_metrics_df(df: DataFrame,
                                                iou_threshold=iou,
                                                style=style)
 
+                # getting current image confluences
                 model_confluence = get_image_confluence(df=detections_df,
                                                         style=style)
                 fornma_confluence = get_image_confluence(df=annotations_df,
