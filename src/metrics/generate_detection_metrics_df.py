@@ -49,6 +49,8 @@ DETECTION_RANGE = arange(START,
                          DETECTION_STEP)
 IOU_THRESHOLDS = [round(i, 2) for i in IOU_RANGE]
 DETECTION_THRESHOLDS = [round(i, 2) for i in DETECTION_RANGE]
+IMAGE_WIDTH = 1408
+IMAGE_HEIGHT = 1040
 
 #####################################################################
 # argument parsing related functions
@@ -102,8 +104,8 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_blank_image(width: int = 1408,
-                    height: int = 1040
+def get_blank_image(width: int,
+                    height: int
                     ) -> ndarray:
     """
     Given an image width/height, returns
@@ -176,7 +178,8 @@ def get_pixel_mask(row_data: Series,
     color = (1,)
 
     # defining base image
-    base_img = get_blank_image()
+    base_img = get_blank_image(width=IMAGE_WIDTH,
+                               height=IMAGE_HEIGHT)
 
     # checking mask style
     if style == 'ellipse':
@@ -274,8 +277,8 @@ def get_cost_matrix(detections_df: DataFrame,
     return cost_matrix
 
 
-def get_image_metrics(df: DataFrame,
-                      detection_threshold: float,
+def get_image_metrics(detections_df: DataFrame,
+                      annotations_df: DataFrame,
                       iou_threshold: float,
                       style: str
                       ) -> tuple:
@@ -292,13 +295,6 @@ def get_image_metrics(df: DataFrame,
 
     # converting iou threshold to cost threshold (same is done for cost matrix)
     iou_threshold_cost = 1 - iou_threshold
-
-    # getting current image detections/annotations dfs
-    detections_df = df[df['evaluator'] == 'model']
-    annotations_df = df[df['evaluator'] == 'fornma']
-
-    # filtering detections_df by detection_threshold
-    detections_df = detections_df[detections_df['detection_threshold'] > detection_threshold]
 
     # getting current image detections/annotations counts
     detections_num = len(detections_df)
@@ -377,6 +373,64 @@ def get_image_metrics(df: DataFrame,
     return metrics_tuple
 
 
+def add_area_col(df: DataFrame,
+                 style: str
+                 ) -> None:
+    """
+    Given an image data frame, adds
+    area column, based on pixel masks
+    created according to given style.
+    """
+    # defining area col
+    area_col = 'area'
+
+    # defining placeholder value for area col values
+    df[area_col] = None
+
+    # getting df rows
+    df_rows = df.iterrows()
+
+    # iterating over df rows
+    for row_index, row_data in df_rows:
+
+        # getting current row pixel mask
+        current_mask = get_pixel_mask(row_data=row_data,
+                                      style=style)
+
+        # counting "1" pixels (== area occupied by mask)
+        one_count = count_nonzero(current_mask == 1)
+
+        # updating current row area
+        df.at[row_index, area_col] = one_count
+
+
+def get_image_confluence(df: DataFrame,
+                         style: str
+                         ) -> int:
+    """
+    Given an image df, returns given image confluence
+    (calculates area for each detection and returns sum).
+    """
+    # adding area column
+    add_area_col(df=df,
+                 style=style)
+
+    # getting area col
+    area_col = df['area_col']
+
+    # getting area sum (area occupied by cells)
+    cells_area = area_col.sum()
+
+    # getting total area (occupied by cells)
+    total_area = IMAGE_WIDTH * IMAGE_HEIGHT
+
+    # getting confluence
+    confluence = cells_area / total_area
+
+    # returning confluence
+    return confluence
+
+
 def create_detection_metrics_df(df: DataFrame,
                                 iou_thresholds: list,
                                 detection_thresholds: list,
@@ -450,14 +504,24 @@ def create_detection_metrics_df(df: DataFrame,
                                index=current_iteration,
                                total=iterations_total)
 
+                # getting current image detections/annotations dfs
+                detections_df = df[df['evaluator'] == 'model']
+                annotations_df = df[df['evaluator'] == 'fornma']
+
+                # filtering detections_df by detection_threshold
+                detections_df = detections_df[detections_df['detection_threshold'] > dt]
+
                 # getting current image metrics
-                tp, fp, fn = get_image_metrics(df=image_group,
-                                               detection_threshold=dt,
+                tp, fp, fn = get_image_metrics(detections_df=detections_df,
+                                               annotations_df=annotations_df,
                                                iou_threshold=iou,
                                                style=style)
 
                 # TODO: add confluence obtaining here
-                # model_confluence, fornma_confluence = get_image_confluence()
+                model_confluence = get_image_confluence(df=detections_df,
+                                                        style=style)
+                fornma_confluence = get_image_confluence(df=annotations_df,
+                                                         style=style)
 
                 # calculating precision
                 try:
@@ -480,6 +544,8 @@ def create_detection_metrics_df(df: DataFrame,
                 # getting current image dict
                 current_dict = {'img_name': image_name,
                                 'mask_style': style,
+                                'model_confluence': model_confluence,
+                                'fornma_confluence': fornma_confluence,
                                 'iou_threshold': iou,
                                 'detection_threshold': dt,
                                 'true_positives': tp,
