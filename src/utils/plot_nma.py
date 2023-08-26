@@ -14,7 +14,7 @@ FORNMA_INPUT = ('Z:'
                 '\\cell_cycle_inference'
                 '\\debs'
                 '\\sic'
-                '\\fornma_output'
+                '\\fornma_output2'
                 '\\Results.csv')
 CELL_CYCLE_INPUT = ('Z:'
                     '\\pycharm_projects'
@@ -24,7 +24,7 @@ CELL_CYCLE_INPUT = ('Z:'
                     '\\debs'
                     '\\sic'
                     '\\plots'
-                    '\\histograms'
+                    '\\histograms2'
                     '\\cell_cycle_df.csv')
 OUTPUT_FOLDER = ('Z:'
                  '\\pycharm_projects'
@@ -55,7 +55,7 @@ fornma_df['CellCycle'] = cell_cycle_col
 print(fornma_df)
 
 # def colunas q tu quer e armazena elas numa lista
-desired_cols = ['Area', 'NII', 'CellCycle', 'Month', 'Treatment', 'Datetime']
+desired_cols = ['Image_name_rg_merge', 'Area', 'NII', 'CellCycle', 'Month', 'Treatment', 'Datetime']
 
 from src.utils.aux_funcs import drop_unrequired_cols
 drop_unrequired_cols(df=fornma_df,
@@ -69,10 +69,25 @@ d = [a, b, c]
 fornma_df = fornma_df[fornma_df['Datetime'].isin(d)]
 print(fornma_df)
 
+f = ['U87_FUCCI_TMZ_debs_23_05_31_B2_5_2023y06m01d_17h30m.tif',
+     'U87_FUCCI_TMZ_debs_23_05_31_B2_5_2023y06m02d_23h30m.tif',
+     'U87_FUCCI_TMZ_debs_23_05_31_B2_5_2023y06m03d_17h30m.tif',
+     'U87_FUCCI_TMZ_debs_23_05_31_B2_6_2023y05m31d_17h30m.tif',
+     'U87_FUCCI_TMZ_debs_23_05_31_B2_6_2023y06m01d_17h30m.tif',
+     'U87_FUCCI_TMZ_debs_23_05_31_B2_6_2023y06m02d_23h30m.tif',
+     'U87_FUCCI_TMZ_debs_23_05_31_B2_9_2023y05m31d_17h30m.tif',
+     'U87_FUCCI_TMZ_debs_23_05_31_B2_9_2023y06m02d_17h30m.tif',
+     'U87_FUCCI_TMZ_debs_23_05_31_B2_11_2023y06m01d_17h30m.tif']
+
 from os.path import join
 # grouping df
 treatment_groups = fornma_df.groupby('Treatment')
 for treatment, treatment_group in treatment_groups:
+
+    if treatment == 'TMZ':
+
+        # filtering data
+        treatment_group = treatment_group[treatment_group['Image_name_rg_merge'].isin(f)]
 
     sns.scatterplot(data=treatment_group,
                     x='NII',
@@ -80,6 +95,19 @@ for treatment, treatment_group in treatment_groups:
                     hue='CellCycle',
                     hue_order=['G1', 'S', 'G2', 'M'],
                     palette=['red', 'yellow', 'green', 'gray'])
+
+    # getting means
+    g1_group = treatment_group[treatment_group['CellCycle'] == 'G1']
+    g2_group = treatment_group[treatment_group['CellCycle'] == 'G2']
+    g1_area_col = g1_group['Area']
+    g2_area_col = g2_group['Area']
+    g1_area_mean = g1_area_col.mean()
+    g2_area_mean = g2_area_col.mean()
+
+    # adding means to plot
+    plt.axhline(y=g1_area_mean, c='red', linestyle='--')
+    plt.axhline(y=g2_area_mean, c='green', linestyle='--')
+
     title = f'Fucci-NMA plot (T: {treatment})'
     save_name = f'{treatment}_plot.png'
     plt.title(title)
@@ -116,7 +144,8 @@ plt.xlabel('NII',
 plt.ylabel('Area',
            fontsize=12)
 
-plt.show()
+# plt.show()
 
+print('done!')
 
 # end of the current module

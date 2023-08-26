@@ -50,7 +50,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'plot F1-Score module'
+    description = 'plot ROC curve module'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
@@ -86,7 +86,7 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_metrics_means_df(df: DataFrame) -> DataFrame:
+def get_roc_df(df: DataFrame) -> DataFrame:
     """
     Given a metrics data frame, returns
     precision/recall/F1-Score means for
@@ -150,29 +150,29 @@ def get_metrics_means_df(df: DataFrame) -> DataFrame:
     return final_df
 
 
-def plot_metric(input_path: str,
-                output_path: str,
-                metric: str
-                ) -> None:
+def plot_roc_curve(input_path: str,
+                   output_path: str,
+                   metric: str
+                   ) -> None:
     # getting metrics df
     print('getting metrics df...')
     metrics_df = read_csv(input_path)
 
     # getting metrics means df
-    print('getting metrics means df...')
-    metrics_means_df = get_metrics_means_df(df=metrics_df)
+    print('getting roc df...')
+    roc_df = get_roc_df(df=metrics_df)
 
     # filtering metrics means df by detection threshold
     # TODO: add detection threshold as execution parameter
-    metrics_means_df = metrics_means_df[metrics_means_df['detection_threshold'] == 0.5]
+    roc_df = roc_df[roc_df['detection_threshold'] == 0.5]
 
     # saving metrics df
-    metrics_means_df.to_csv(output_path)
-    print(metrics_means_df)
+    roc_df.to_csv(output_path)
+    print(roc_df)
 
     # plotting data
     print('plotting data...')
-    lineplot(data=metrics_means_df,
+    lineplot(data=roc_df,
              x='iou_threshold',
              y=metric,
              hue='mask_style')
@@ -202,19 +202,15 @@ def main():
     # getting output path
     output_path = args_dict['output_path']
 
-    # getting metric
-    metric = args_dict['metric']
-
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
     enter_to_continue()
 
-    # running plot_metric function
-    plot_metric(input_path=input_path,
-                output_path=output_path,
-                metric=metric)
+    # running plot_roc_curve function
+    plot_roc_curve(input_path=input_path,
+                   output_path=output_path)
 
 ######################################################################
 # running main function

@@ -50,7 +50,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'plot F1-Score module'
+    description = 'plot metrics means module'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
@@ -74,7 +74,21 @@ def get_args_dict() -> dict:
                         dest='metric',
                         required=False,
                         default='f1_mean',
-                        help='defines metric to be plotted (precision_mean, recall_mean, f1_mean)')
+                        help='defines metric to be plotted (precision_mean, recall_mean or f1_mean)')
+
+    # detection threshold param
+    parser.add_argument('-d', '--detection-threshold',
+                        dest='detection_threshold',
+                        required=False,
+                        default=None,
+                        help='defines detection threshold to be applied as filter in detections df')
+
+    # style param
+    parser.add_argument('-s', '--mask-style',
+                        dest='mask_style',
+                        required=False,
+                        default=None,
+                        help='defines overlay style (rectangle/circle/ellipse). If none is passed, shows all in same plot')  # noqa
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -152,7 +166,9 @@ def get_metrics_means_df(df: DataFrame) -> DataFrame:
 
 def plot_metric(input_path: str,
                 output_path: str,
-                metric: str
+                metric: str,
+                detection_threshold: float,
+                style: str
                 ) -> None:
     # getting metrics df
     print('getting metrics df...')
@@ -162,9 +178,51 @@ def plot_metric(input_path: str,
     print('getting metrics means df...')
     metrics_means_df = get_metrics_means_df(df=metrics_df)
 
-    # filtering metrics means df by detection threshold
-    # TODO: add detection threshold as execution parameter
-    metrics_means_df = metrics_means_df[metrics_means_df['detection_threshold'] == 0.5]
+    # checking style/detection threshold
+    style_is_none = style is None
+    dt_is_none = detection_threshold is None
+    both_none = style_is_none and dt_is_none
+
+    # checking if both are none
+    if both_none:
+
+        # printing error message
+        e_string = 'Both detection threshold and style are none.\n'
+        e_string += 'Please, set at least one of them true in order to proceed analysis.'
+        print(e_string)
+
+        # quitting
+        exit()
+
+    # TODO: check these next IFs:
+    #  if a comparison between masks is desired,
+    #  then apply detection threshold filter,
+    #  if a comparison between DTs is desired,
+    #  then apply a masks filter.
+
+    # checking detection threshold
+    if not dt_is_none:
+
+        # filtering metrics means df by detection threshold
+        metrics_means_df = metrics_means_df[metrics_means_df['detection_threshold'] == detection_threshold]
+
+        # plotting data
+        lineplot(data=metrics_means_df,
+                 x='iou_threshold',
+                 y=metric,
+                 hue='mask_style')
+
+    # checking style
+    if not style_is_none:
+
+        # filtering metrics means df by style
+        metrics_means_df = metrics_means_df[metrics_means_df['style'] == style]
+
+        # plotting data
+        lineplot(data=metrics_means_df,
+                 x='iou_threshold',
+                 y=metric,
+                 hue='detection_threshold')
 
     # saving metrics df
     metrics_means_df.to_csv(output_path)
@@ -205,6 +263,12 @@ def main():
     # getting metric
     metric = args_dict['metric']
 
+    # getting detection threshold
+    detection_threshold = args_dict['detection_threshold']
+
+    # getting style
+    style = args_dict['style']
+
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
@@ -214,7 +278,9 @@ def main():
     # running plot_metric function
     plot_metric(input_path=input_path,
                 output_path=output_path,
-                metric=metric)
+                metric=metric,
+                detection_threshold=detection_threshold,
+                style=style)
 
 ######################################################################
 # running main function
