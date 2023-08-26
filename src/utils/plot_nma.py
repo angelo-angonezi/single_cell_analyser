@@ -33,7 +33,7 @@ OUTPUT_FOLDER = ('Z:'
                  '\\cell_cycle_inference'
                  '\\debs'
                  '\\sic'
-                 '\\output')
+                 '\\output2')
 
 TREATMENT_DICT = {'A2': 'CTR',
                   'B2': 'TMZ'}
@@ -61,33 +61,14 @@ from src.utils.aux_funcs import drop_unrequired_cols
 drop_unrequired_cols(df=fornma_df,
                      cols_to_keep=desired_cols)
 
-print(fornma_df[fornma_df['Treatment'] == 'CTR'])
-a = '2023y05m31d17h30m'
-b = '2023y06m01d17h30m'
-c = '2023y06m02d23h30m'
-d = [a, b, c]
-fornma_df = fornma_df[fornma_df['Datetime'].isin(d)]
-print(fornma_df)
-
-f = ['U87_FUCCI_TMZ_debs_23_05_31_B2_5_2023y06m01d_17h30m.tif',
-     'U87_FUCCI_TMZ_debs_23_05_31_B2_5_2023y06m02d_23h30m.tif',
-     'U87_FUCCI_TMZ_debs_23_05_31_B2_5_2023y06m03d_17h30m.tif',
-     'U87_FUCCI_TMZ_debs_23_05_31_B2_6_2023y05m31d_17h30m.tif',
-     'U87_FUCCI_TMZ_debs_23_05_31_B2_6_2023y06m01d_17h30m.tif',
-     'U87_FUCCI_TMZ_debs_23_05_31_B2_6_2023y06m02d_23h30m.tif',
-     'U87_FUCCI_TMZ_debs_23_05_31_B2_9_2023y05m31d_17h30m.tif',
-     'U87_FUCCI_TMZ_debs_23_05_31_B2_9_2023y06m02d_17h30m.tif',
-     'U87_FUCCI_TMZ_debs_23_05_31_B2_11_2023y06m01d_17h30m.tif']
-
 from os.path import join
 # grouping df
 treatment_groups = fornma_df.groupby('Treatment')
 for treatment, treatment_group in treatment_groups:
 
-    if treatment == 'TMZ':
-
-        # filtering data
-        treatment_group = treatment_group[treatment_group['Image_name_rg_merge'].isin(f)]
+    print(treatment)
+    print(treatment_group['Image_name_rg_merge'].unique())
+    print(len(treatment_group['Image_name_rg_merge'].unique()))
 
     sns.scatterplot(data=treatment_group,
                     x='NII',
