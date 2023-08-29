@@ -179,6 +179,18 @@ def plot_f1_by_iou_ellipse_mask(df: DataFrame,
     plt.close()
 
 
+def print_means_at_05(df: DataFrame,
+                      output_folder: str
+                      ) -> None:
+    """
+    Docstring.
+    """
+    df = df[df['mask_style'] == 'ellipse']
+    df = df[df['detection_threshold'] == 0.5]
+    df = df[df['iou_threshold'] == 0.5]
+    print(df)
+
+
 def plot_metrics(input_path: str,
                  output_folder: str,
                  ) -> None:
@@ -190,11 +202,13 @@ def plot_metrics(input_path: str,
     print('getting metrics means df...')
     metrics_means_df = get_metrics_means_df(df=metrics_df)
 
-    # plotting F1-Score by IoU threshold plot
-    plot_f1_by_iou_compare_masks(df=metrics_means_df,
-                                 output_folder=output_folder)
-    plot_f1_by_iou_ellipse_mask(df=metrics_means_df,
-                                output_folder=output_folder)
+    # generating plots
+    # plot_f1_by_iou_compare_masks(df=metrics_means_df,
+    #                              output_folder=output_folder)
+    # plot_f1_by_iou_ellipse_mask(df=metrics_means_df,
+    #                             output_folder=output_folder)
+    print_means_at_05(df=metrics_means_df,
+                      output_folder=output_folder)
 
     # printing execution message
     print(f'output saved to "{output_folder}"')

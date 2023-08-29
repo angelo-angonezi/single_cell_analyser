@@ -41,16 +41,19 @@ START = 0.0
 STOP = 1.0
 IOU_STEP = 0.05
 DETECTION_STEP = 0.1
-IOU_RANGE = arange(START,
-                   STOP + IOU_STEP,
-                   IOU_STEP)
-DETECTION_RANGE = arange(START,
-                         STOP + DETECTION_STEP,
-                         DETECTION_STEP)
+# IOU_RANGE = arange(START,
+#                    STOP + IOU_STEP,
+#                    IOU_STEP)
+IOU_RANGE = [0.5]
+# DETECTION_RANGE = arange(START,
+#                          STOP + DETECTION_STEP,
+#                          DETECTION_STEP)
+DETECTION_RANGE = [0.5]
 IOU_THRESHOLDS = [round(i, 2) for i in IOU_RANGE]
 DETECTION_THRESHOLDS = [round(i, 2) for i in DETECTION_RANGE]
 IMAGE_WIDTH = 1408
 IMAGE_HEIGHT = 1040
+IMAGE_AREA = IMAGE_WIDTH * IMAGE_HEIGHT
 
 #####################################################################
 # argument parsing related functions
@@ -152,15 +155,6 @@ def get_iou(mask_a: ndarray,
 
     # calculating IoU (Intersection over Union)
     iou_value = intersection / union
-
-    # saving example image
-    if iou_value > 0.5:
-
-        from cv2 import imwrite
-        save_path = '/home/angelo/Desktop/circle_ex.png'
-        imwrite(save_path,
-                final_array)
-        exit()
 
     # returning IoU
     return iou_value
@@ -430,11 +424,8 @@ def get_image_confluence(df: DataFrame,
     # getting area sum (area occupied by cells)
     cells_area = area_col.sum()
 
-    # getting total area (occupied by cells)
-    total_area = IMAGE_WIDTH * IMAGE_HEIGHT
-
     # getting confluence
-    confluence = cells_area / total_area
+    confluence = cells_area / IMAGE_AREA
 
     # returning confluence
     return confluence

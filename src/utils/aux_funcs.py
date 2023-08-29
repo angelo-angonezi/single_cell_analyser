@@ -898,12 +898,12 @@ def draw_ellipse(open_img: ndarray,
     return open_img
 
 
-def simple_hungarian_algorithm(cost_matrix: ndarray) -> list:
+def simple_hungarian_algorithm(cost_matrix: ndarray) -> tuple:
     """
     Given a cost matrix, applies simple hungarian algorithm
     to establish the best relation between cells.
     :param cost_matrix: ndarray. Represents a cost matrix.
-    :return: List. Represents association between cells.
+    :return: Tuple. Represents association between cells.
     """
     # assigning relations between cells
     lin_sum_assignment = linear_sum_assignment(cost_matrix)
@@ -911,7 +911,7 @@ def simple_hungarian_algorithm(cost_matrix: ndarray) -> list:
     # getting assigned cells
     lines = lin_sum_assignment[0].tolist()
     columns = lin_sum_assignment[1].tolist()
-    assignments = [lines, columns]
+    assignments = (lines, columns)
 
     # returning cells assignments
     return assignments
