@@ -63,32 +63,11 @@ def get_args_dict() -> dict:
                         required=True,
                         help='defines path to input (detection_metrics_df.csv) file')
 
-    # output path param
-    parser.add_argument('-o', '--output-path',
-                        dest='output_path',
+    # output folder param
+    parser.add_argument('-o', '--output-folder',
+                        dest='output_folder',
                         required=True,
-                        help='defines path to output (.csv) file')
-
-    # metric param
-    parser.add_argument('-m', '--metric',
-                        dest='metric',
-                        required=False,
-                        default='f1_mean',
-                        help='defines metric to be plotted (precision_mean, recall_mean or f1_mean)')
-
-    # detection threshold param
-    parser.add_argument('-d', '--detection-threshold',
-                        dest='detection_threshold',
-                        required=False,
-                        default=None,
-                        help='defines detection threshold to be applied as filter in detections df')
-
-    # style param
-    parser.add_argument('-s', '--mask-style',
-                        dest='mask_style',
-                        required=False,
-                        default=None,
-                        help='defines overlay style (rectangle/circle/ellipse). If none is passed, shows all in same plot')  # noqa
+                        help='defines path to folder which will contain output files')
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -164,12 +143,45 @@ def get_metrics_means_df(df: DataFrame) -> DataFrame:
     return final_df
 
 
-def plot_metric(input_path: str,
-                output_path: str,
-                metric: str,
-                detection_threshold: float,
-                style: str
-                ) -> None:
+def plot_f1_by_iou_compare_masks(df: DataFrame,
+                                 output_folder: str
+                                 ) -> None:
+    """
+    Docstring.
+    """
+    df = df[df['detection_threshold'] == 0.5]
+    lineplot(data=df,
+             x='iou_threshold',
+             y='f1_mean',
+             hue='mask_style')
+    plt.title('IoU masks comparison', fontsize=14)
+    plt.xlabel('IoU threshold', fontsize=12)
+    plt.ylabel('F1-Score (mean)', fontsize=12)
+    plt.show()
+    plt.close()
+
+
+def plot_f1_by_iou_ellipse_mask(df: DataFrame,
+                                output_folder: str
+                                ) -> None:
+    """
+    Docstring.
+    """
+    df = df[df['mask_style'] == 'ellipse']
+    lineplot(data=df,
+             x='iou_threshold',
+             y='f1_mean',
+             hue='detection_threshold')
+    plt.title('F1-Score by IoU threshold', fontsize=14)
+    plt.xlabel('IoU threshold', fontsize=12)
+    plt.ylabel('F1-Score (mean)', fontsize=12)
+    plt.show()
+    plt.close()
+
+
+def plot_metrics(input_path: str,
+                 output_folder: str,
+                 ) -> None:
     # getting metrics df
     print('getting metrics df...')
     metrics_df = read_csv(input_path)
@@ -178,68 +190,14 @@ def plot_metric(input_path: str,
     print('getting metrics means df...')
     metrics_means_df = get_metrics_means_df(df=metrics_df)
 
-    # checking style/detection threshold
-    style_is_none = style is None
-    dt_is_none = detection_threshold is None
-    both_none = style_is_none and dt_is_none
-
-    # checking if both are none
-    if both_none:
-
-        # printing error message
-        e_string = 'Both detection threshold and style are none.\n'
-        e_string += 'Please, set at least one of them true in order to proceed analysis.'
-        print(e_string)
-
-        # quitting
-        exit()
-
-    # TODO: check these next IFs:
-    #  if a comparison between masks is desired,
-    #  then apply detection threshold filter,
-    #  if a comparison between DTs is desired,
-    #  then apply a masks filter.
-
-    # checking detection threshold
-    if not dt_is_none:
-
-        # filtering metrics means df by detection threshold
-        metrics_means_df = metrics_means_df[metrics_means_df['detection_threshold'] == detection_threshold]
-
-        # plotting data
-        lineplot(data=metrics_means_df,
-                 x='iou_threshold',
-                 y=metric,
-                 hue='mask_style')
-
-    # checking style
-    if not style_is_none:
-
-        # filtering metrics means df by style
-        metrics_means_df = metrics_means_df[metrics_means_df['style'] == style]
-
-        # plotting data
-        lineplot(data=metrics_means_df,
-                 x='iou_threshold',
-                 y=metric,
-                 hue='detection_threshold')
-
-    # saving metrics df
-    metrics_means_df.to_csv(output_path)
-    print(metrics_means_df)
-
-    # plotting data
-    print('plotting data...')
-    lineplot(data=metrics_means_df,
-             x='iou_threshold',
-             y=metric,
-             hue='mask_style')
-
-    # showing plot
-    plt.show()
+    # plotting F1-Score by IoU threshold plot
+    plot_f1_by_iou_compare_masks(df=metrics_means_df,
+                                 output_folder=output_folder)
+    plot_f1_by_iou_ellipse_mask(df=metrics_means_df,
+                                output_folder=output_folder)
 
     # printing execution message
-    print(f'output saved to "{output_path}"')
+    print(f'output saved to "{output_folder}"')
     print('analysis complete!')
 
 ######################################################################
@@ -258,29 +216,17 @@ def main():
     input_path = args_dict['input_path']
 
     # getting output path
-    output_path = args_dict['output_path']
-
-    # getting metric
-    metric = args_dict['metric']
-
-    # getting detection threshold
-    detection_threshold = args_dict['detection_threshold']
-
-    # getting style
-    style = args_dict['style']
+    output_folder = args_dict['output_folder']
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running plot_metric function
-    plot_metric(input_path=input_path,
-                output_path=output_path,
-                metric=metric,
-                detection_threshold=detection_threshold,
-                style=style)
+    plot_metrics(input_path=input_path,
+                 output_folder=output_folder)
 
 ######################################################################
 # running main function
