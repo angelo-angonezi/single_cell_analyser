@@ -191,6 +191,27 @@ def print_means_at_05(df: DataFrame,
     print(df)
 
 
+def plot_prc(df: DataFrame) -> None:
+    """
+    Given a metrics data frame,
+    plots precision-recall curve.
+    """
+    df = df[df['mask_style'] == 'ellipse']
+    df = df[df['iou_threshold'] == 0.5]
+    print(df)
+    lineplot(data=df,
+             x='recall_mean',
+             y='precision_mean')
+    plt.title('Precision-Recall Curve', fontsize=14)
+    plt.xlabel('Recall (mean)', fontsize=12)
+    plt.ylabel('Precision (mean)', fontsize=12)
+    plt.xlim(0.0, 1.0)
+    plt.ylim(0.0, 1.0)
+    plt.show()
+    plt.close()
+    exit()
+
+
 def plot_metrics(input_path: str,
                  output_folder: str,
                  ) -> None:
@@ -207,8 +228,9 @@ def plot_metrics(input_path: str,
     #                              output_folder=output_folder)
     # plot_f1_by_iou_ellipse_mask(df=metrics_means_df,
     #                             output_folder=output_folder)
-    print_means_at_05(df=metrics_means_df,
-                      output_folder=output_folder)
+    # print_means_at_05(df=metrics_means_df,
+    #                   output_folder=output_folder)
+    plot_prc(df=metrics_means_df)
 
     # printing execution message
     print(f'output saved to "{output_folder}"')
