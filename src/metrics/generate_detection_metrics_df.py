@@ -41,14 +41,12 @@ START = 0.0
 STOP = 1.0
 IOU_STEP = 0.05
 DETECTION_STEP = 0.1
-# IOU_RANGE = arange(START,
-#                    STOP + IOU_STEP,
-#                    IOU_STEP)
-IOU_RANGE = [0.5]
-# DETECTION_RANGE = arange(START,
-#                          STOP + DETECTION_STEP,
-#                          DETECTION_STEP)
-DETECTION_RANGE = [0.5]
+IOU_RANGE = arange(START,
+                   STOP + IOU_STEP,
+                   IOU_STEP)
+DETECTION_RANGE = arange(START,
+                         STOP + DETECTION_STEP,
+                         DETECTION_STEP)
 IOU_THRESHOLDS = [round(i, 2) for i in IOU_RANGE]
 DETECTION_THRESHOLDS = [round(i, 2) for i in DETECTION_RANGE]
 IMAGE_WIDTH = 1408
@@ -419,7 +417,7 @@ def get_image_confluence(df: DataFrame,
                  style=style)
 
     # getting area col
-    area_col = df['area_col']
+    area_col = df['area']
 
     # getting area sum (area occupied by cells)
     cells_area = area_col.sum()
@@ -505,8 +503,8 @@ def create_detection_metrics_df(df: DataFrame,
                                total=iterations_total)
 
                 # getting current image detections/annotations dfs
-                detections_df = df[df['evaluator'] == 'model']
-                annotations_df = df[df['evaluator'] == 'fornma']
+                detections_df = image_group[image_group['evaluator'] == 'model']
+                annotations_df = image_group[image_group['evaluator'] == 'fornma']
 
                 # filtering detections_df by detection_threshold
                 detections_df = detections_df[detections_df['detection_threshold'] > dt]
