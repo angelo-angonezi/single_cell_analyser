@@ -17,8 +17,10 @@ from pandas import concat
 from pandas import read_csv
 from pandas import DataFrame
 from seaborn import lineplot
+from seaborn import scatterplot
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
+from sklearn.metrics import mean_squared_error
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
@@ -103,7 +105,7 @@ def get_metrics_means_df(df: DataFrame) -> DataFrame:
         iou, dt, mask_style = group_name
 
         # printing execution message
-        progress_string = f'getting metrics mean for image #INDEX# of #TOTAL#'
+        progress_string = f'getting metrics mean for group #INDEX# of #TOTAL#'
         print_progress_message(base_string=progress_string,
                                index=group_index,
                                total=groups_num)
@@ -209,7 +211,64 @@ def plot_prc(df: DataFrame) -> None:
     plt.ylim(0.0, 1.0)
     plt.show()
     plt.close()
-    exit()
+
+
+def plot_f1_by_confluence(df: DataFrame) -> None:
+    """
+    Docstring.
+    """
+    df = df[df['mask_style'] == 'ellipse']
+    df = df[df['detection_threshold'] == 0.5]
+    df = df[df['iou_threshold'] == 0.5]
+    lineplot(data=df,
+             x='fornma_confluence',
+             y='f1_score')
+    plt.title('F1-Score by confluence', fontsize=14)
+    plt.xlabel('Confluence (fornma)', fontsize=12)
+    plt.ylabel('F1-Score', fontsize=12)
+    plt.xlim(0.0, 1.0)
+    plt.ylim(0.0, 1.0)
+    plt.show()
+    plt.close()
+
+
+def plot_counts_comparison(df: DataFrame) -> None:
+    """
+    Docstring.
+    """
+    # filtering df
+    df = df[df['mask_style'] == 'ellipse']
+    df = df[df['detection_threshold'] == 0.5]
+    df = df[df['iou_threshold'] == 0.5]
+
+    # getting RMSE cols
+    model_counts = df['model_count']
+    fornma_counts = df['fornma_count']
+
+    # calculating RMSE
+    rmse = mean_squared_error(y_true=fornma_counts,
+                              y_pred=model_counts,
+                              squared=False)
+
+    df = df[['img_name', 'model_count', 'fornma_count']]
+    df = df.melt('img_name')
+    df = df.sort_values(by='value')
+    scatterplot(data=df,
+                x='img_name',
+                y='value',
+                hue='variable')
+    plt.title(f'Counts RMSE: {rmse}', fontsize=14)
+    plt.xlabel('Image', fontsize=12)
+    plt.ylabel('Cell Count', fontsize=12)
+    plt.show()
+    plt.close()
+
+
+def plot_confluence_comparison(df: DataFrame) -> None:
+    """
+    Docstring.
+    """
+    pass
 
 
 def plot_metrics(input_path: str,
@@ -223,6 +282,10 @@ def plot_metrics(input_path: str,
     print('getting metrics means df...')
     metrics_means_df = get_metrics_means_df(df=metrics_df)
 
+    print(metrics_df)
+    print(metrics_df.columns)
+    exit()
+
     # generating plots
     # plot_f1_by_iou_compare_masks(df=metrics_means_df,
     #                              output_folder=output_folder)
@@ -230,7 +293,9 @@ def plot_metrics(input_path: str,
     #                             output_folder=output_folder)
     # print_means_at_05(df=metrics_means_df,
     #                   output_folder=output_folder)
-    plot_prc(df=metrics_means_df)
+    # plot_prc(df=metrics_means_df)
+    # plot_f1_by_confluence(df=metrics_df)
+    # plot_counts_comparison(df=metrics_df)
 
     # printing execution message
     print(f'output saved to "{output_folder}"')
