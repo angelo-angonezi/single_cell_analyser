@@ -37,18 +37,29 @@ print('all required libraries successfully imported.')  # noqa
 #####################################################################
 # defining global variables
 
+# defining thresholds params
 START = 0.0
 STOP = 1.0
 IOU_STEP = 0.1
 DETECTION_STEP = 0.1
-IOU_RANGE = arange(START,
-                   STOP + IOU_STEP,
-                   IOU_STEP)
-DETECTION_RANGE = arange(START,
-                         STOP + DETECTION_STEP,
-                         DETECTION_STEP)
+
+# defining iou thresholds range
+# IOU_RANGE = arange(START,
+#                    STOP + IOU_STEP,
+#                    IOU_STEP)
+IOU_RANGE = [0.5]
+
+# defining detection thresholds range
+# DETECTION_RANGE = arange(START,
+#                          STOP + DETECTION_STEP,
+#                          DETECTION_STEP)
+# DETECTION_RANGE = [0.5]
+
+# rounding thresholds
 IOU_THRESHOLDS = [round(i, 2) for i in IOU_RANGE]
 DETECTION_THRESHOLDS = [round(i, 2) for i in DETECTION_RANGE]
+
+# image constants
 IMAGE_WIDTH = 1408
 IMAGE_HEIGHT = 1040
 IMAGE_AREA = IMAGE_WIDTH * IMAGE_HEIGHT
