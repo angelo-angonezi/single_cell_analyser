@@ -39,7 +39,7 @@ print('all required libraries successfully imported.')  # noqa
 
 START = 0.0
 STOP = 1.0
-IOU_STEP = 0.05
+IOU_STEP = 0.1
 DETECTION_STEP = 0.1
 IOU_RANGE = arange(START,
                    STOP + IOU_STEP,
@@ -489,7 +489,7 @@ def create_detection_metrics_df(df: DataFrame,
                 etc_str = get_time_str(time_in_seconds=etc)
 
                 # defining progress string
-                progress_string = f'analysing image {image_index}/{images_num} '
+                progress_string = f'analysing image {image_index}/{images_num}... '
                 progress_string += f'| IoU: {iou:02.1f} '
                 progress_string += f'| DT: {dt:02.1f} '
                 progress_string += f'| progress: {progress_percentage:02.2f}% '
@@ -526,6 +526,8 @@ def create_detection_metrics_df(df: DataFrame,
                                                          style=style)
 
                 # calculating precision
+                # TODO: Check whether setting metrics to zero when
+                #  this error occurs makes sense!
                 try:
                     precision = tp / (tp + fp)
                 except ZeroDivisionError:
