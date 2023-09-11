@@ -40,7 +40,7 @@ print('all required libraries successfully imported.')  # noqa
 # defining thresholds params
 START = 0.0
 STOP = 1.0
-IOU_STEP = 0.1
+IOU_STEP = 0.05
 DETECTION_STEP = 0.1
 
 # defining iou thresholds range
@@ -53,7 +53,7 @@ IOU_RANGE = [0.5]
 # DETECTION_RANGE = arange(START,
 #                          STOP + DETECTION_STEP,
 #                          DETECTION_STEP)
-# DETECTION_RANGE = [0.5]
+DETECTION_RANGE = [0.5]
 
 # rounding thresholds
 IOU_THRESHOLDS = [round(i, 2) for i in IOU_RANGE]
@@ -423,6 +423,7 @@ def get_image_confluence(df: DataFrame,
     Given an image df, returns given image confluence
     (calculates area for each detection and returns sum).
     """
+    # TODO: update this to take into account OBBs overlays!
     # adding area column
     add_area_col(df=df,
                  style=style)

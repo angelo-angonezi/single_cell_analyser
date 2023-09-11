@@ -10,6 +10,7 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
+import sys
 from cv2 import imread
 from cv2 import imwrite
 from cv2 import putText
@@ -106,7 +107,7 @@ def get_args_dict() -> dict:
     parser.add_argument('-s', '--overlay-style',
                         dest='overlays_style',
                         required=False,
-                        default='rectangle',
+                        default='ellipse',
                         help=style_help)
 
     # creating arguments dictionary
@@ -357,7 +358,8 @@ def add_overlays_to_multiple_images(input_folder: str,
         image_path = join(input_folder, image_name_w_extension)
 
         # getting output path
-        output_name = f'{image_name}_overlays.png'
+        detection_origin = detection_file_path.split('/')[-1].replace('.csv', '')
+        output_name = f'{image_name}_overlays_{detection_origin}.png'
         output_path = join(output_folder, output_name)
 
         # adding overlays to current image

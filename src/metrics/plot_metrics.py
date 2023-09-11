@@ -181,9 +181,7 @@ def plot_f1_by_iou_ellipse_mask(df: DataFrame,
     plt.close()
 
 
-def print_means_at_05(df: DataFrame,
-                      output_folder: str
-                      ) -> None:
+def print_means_at_05(df: DataFrame) -> None:
     """
     Docstring.
     """
@@ -278,21 +276,21 @@ def plot_metrics(input_path: str,
     print('getting metrics df...')
     metrics_df = read_csv(input_path)
 
+    # TODO: remove this once test completed!
+    # filtering df by fornma detections
+    # metrics_df = metrics_df[metrics_df['recall'] > 0.2]
+    # metrics_df = metrics_df[metrics_df['fornma_confluence'] > 0.01]
+    # metrics_df = metrics_df[metrics_df['fornma_confluence'] > 0.2]
+
     # getting metrics means df
     print('getting metrics means df...')
     metrics_means_df = get_metrics_means_df(df=metrics_df)
-
-    print(metrics_df)
-    print(metrics_df.columns)
-    exit()
-
     # generating plots
     # plot_f1_by_iou_compare_masks(df=metrics_means_df,
     #                              output_folder=output_folder)
     # plot_f1_by_iou_ellipse_mask(df=metrics_means_df,
     #                             output_folder=output_folder)
-    # print_means_at_05(df=metrics_means_df,
-    #                   output_folder=output_folder)
+    print_means_at_05(df=metrics_means_df)
     # plot_prc(df=metrics_means_df)
     # plot_f1_by_confluence(df=metrics_df)
     # plot_counts_comparison(df=metrics_df)
@@ -323,7 +321,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running plot_metric function
     plot_metrics(input_path=input_path,
