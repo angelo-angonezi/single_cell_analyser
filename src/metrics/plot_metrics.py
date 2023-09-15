@@ -181,7 +181,34 @@ def plot_f1_by_iou_ellipse_mask(df: DataFrame,
     plt.close()
 
 
-def print_means_at_05(df: DataFrame) -> None:
+def print_metrics_at_05(df: DataFrame) -> None:
+    """
+    Docstring.
+    """
+    df = df[df['mask_style'] == 'ellipse']
+    df = df[df['detection_threshold'] == 0.5]
+    df = df[df['iou_threshold'] == 0.5]
+
+    # getting tp total
+    tps = df['true_positives'].sum()
+
+    # getting fp total
+    fps = df['false_positives'].sum()
+
+    # getting fn total
+    fns = df['false_negatives'].sum()
+
+    # calculating metrics
+    precision = tps / (tps + fps)
+    recall = tps / (tps + fns)
+    f1_score = 2 * (precision * recall) / (precision + recall)
+
+    print('precision:', precision)
+    print('recall:', recall)
+    print('f1_score:', f1_score)
+
+
+def print_metrics_means_at_05(df: DataFrame) -> None:
     """
     Docstring.
     """
@@ -290,7 +317,8 @@ def plot_metrics(input_path: str,
     #                              output_folder=output_folder)
     # plot_f1_by_iou_ellipse_mask(df=metrics_means_df,
     #                             output_folder=output_folder)
-    print_means_at_05(df=metrics_means_df)
+    print_metrics_means_at_05(df=metrics_means_df)
+    print_metrics_at_05(df=metrics_df)
     # plot_prc(df=metrics_means_df)
     # plot_f1_by_confluence(df=metrics_df)
     # plot_counts_comparison(df=metrics_df)
@@ -321,7 +349,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running plot_metric function
     plot_metrics(input_path=input_path,
