@@ -20,6 +20,7 @@ from seaborn import lineplot
 from seaborn import scatterplot
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
+from src.utils.aux_funcs import spacer
 from sklearn.metrics import mean_squared_error
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
@@ -203,19 +204,40 @@ def print_metrics_at_05(df: DataFrame) -> None:
     recall = tps / (tps + fns)
     f1_score = 2 * (precision * recall) / (precision + recall)
 
-    print('precision:', precision)
-    print('recall:', recall)
-    print('f1_score:', f1_score)
+    # defining metrics string
+    f_string = f'--Metrics (global)--\n'
+    f_string += f'Precision: {precision}\n'
+    f_string += f'Recall: {recall}\n'
+    f_string += f'F1-Score: {f1_score}'
+
+    # printing metrics string
+    spacer()
+    print(f_string)
 
 
 def print_metrics_means_at_05(df: DataFrame) -> None:
     """
     Docstring.
     """
+    # filtering df
     df = df[df['mask_style'] == 'ellipse']
     df = df[df['detection_threshold'] == 0.5]
     df = df[df['iou_threshold'] == 0.5]
-    print(df)
+
+    # getting metrics
+    precision = df['precision_mean'][0]
+    recall = df['recall_mean'][0]
+    f1_score = df['f1_mean'][0]
+
+    # defining metrics string
+    f_string = f'--Metrics Means--\n'
+    f_string += f'Precision: {precision}\n'
+    f_string += f'Recall: {recall}\n'
+    f_string += f'F1-Score: {f1_score}'
+
+    # printing metrics string
+    spacer()
+    print(f_string)
 
 
 def plot_prc(df: DataFrame) -> None:
@@ -324,6 +346,7 @@ def plot_metrics(input_path: str,
     # plot_counts_comparison(df=metrics_df)
 
     # printing execution message
+    spacer()
     print(f'output saved to "{output_folder}"')
     print('analysis complete!')
 
