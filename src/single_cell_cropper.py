@@ -58,6 +58,12 @@ def get_args_dict() -> dict:
                         help='defines path to folder containing images',
                         required=True)
 
+    # image extension param
+    parser.add_argument('-x', '--images-extension',
+                        dest='images_extension',
+                        required=True,
+                        help='defines extension (.tif, .png, .jpg) of images in input folder')
+
     parser.add_argument('-o', '--output-folder',
                         dest='output_folder',
                         help='defines path to output folder which will contain crops\nand crops info file',
@@ -74,7 +80,7 @@ def get_args_dict() -> dict:
                         required=False,
                         default=0.5)
 
-    parser.add_argument('-x', '--expansion-ratio',
+    parser.add_argument('-er', '--expansion-ratio',
                         dest='expansion_ratio',
                         help='defines ratio of expansion of width/height to generate larger-than-orig-nucleus crops',
                         required=False,
@@ -370,6 +376,7 @@ def get_single_image_crops(image: ndarray,
 
 def get_multiple_image_crops(consolidated_df: DataFrame,
                              input_folder: str,
+                             images_extension: str,
                              output_folder: str,
                              expansion_ratio: float,
                              resize_toggle: bool
@@ -382,6 +389,7 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
     :param consolidated_df: DataFrame. Represents obbs
     detections for images in input folder (in model output format).
     :param input_folder: String. Represents a path to a folder.
+    :param images_extension: String. Represents image extension.
     :param output_folder: String. Represents a path to a folder.
     :param expansion_ratio: Float. Represents a ratio to expand width/height.
     :param resize_toggle: Boolean. Represents a toggle.
@@ -418,7 +426,7 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
         image_name = str(image_name)
 
         # getting current image name with extension
-        image_name_w_extension = f'{image_name}.tif'
+        image_name_w_extension = f'{image_name}{images_extension}'
 
         # getting current image path in input folder
         current_image_path = join(input_folder, image_name_w_extension)
@@ -469,6 +477,7 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
 
 
 def single_cell_cropper(input_folder: str,
+                        images_extension: str,
                         detections_df_path: str,
                         detection_threshold: float,
                         expansion_ratio: float,
@@ -479,6 +488,7 @@ def single_cell_cropper(input_folder: str,
     Given execution parameters, runs
     cropping function on multiple images.
     :param input_folder: String. Represents a path to a folder.
+    :param images_extension: String. Represents image extension.
     :param detections_df_path: String. Represents a path to a file.
     :param detection_threshold: Float. Represents threshold for ml model results.
     :param expansion_ratio: Float. Represents a ratio to expand width/height.
@@ -502,6 +512,7 @@ def single_cell_cropper(input_folder: str,
     print('initializing crops generator...')
     crops_df = get_multiple_image_crops(consolidated_df=sorted_df,
                                         input_folder=input_folder,
+                                        images_extension=images_extension,
                                         output_folder=output_folder,
                                         expansion_ratio=expansion_ratio,
                                         resize_toggle=resize_toggle)
@@ -531,6 +542,9 @@ def main():
     # getting input folder
     input_folder = args_dict['images_input_folder']
 
+    # getting image extension
+    images_extension = args_dict['images_extension']
+
     # getting output folder
     output_folder = args_dict['output_folder']
 
@@ -556,6 +570,7 @@ def main():
 
     # running single cell cropper function
     single_cell_cropper(input_folder=input_folder,
+                        images_extension=images_extension,
                         detections_df_path=detections_df_path,
                         detection_threshold=detection_threshold,
                         expansion_ratio=expansion_ratio,

@@ -313,7 +313,6 @@ def add_overlays_to_multiple_images(input_folder: str,
                                     style: str
                                     ) -> None:
     """
-    # TODO: add ellipse as style option
     Given a path to a folder containing images,
     a path to a file containing detection info from
     mentioned images, and a path to an output folder,
