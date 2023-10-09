@@ -230,7 +230,7 @@ def print_metrics_means_at_05(df: DataFrame) -> None:
     f1_score = df['f1_mean'][0]
 
     # defining metrics string
-    f_string = f'--Metrics Means--\n'
+    f_string = f'--Metrics (means)--\n'
     f_string += f'Precision: {precision}\n'
     f_string += f'Recall: {recall}\n'
     f_string += f'F1-Score: {f1_score}'
