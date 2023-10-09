@@ -630,7 +630,7 @@ def generate_detection_metrics_df(fornma_file: str,
                                 index=False)
 
     # printing execution message
-    print(f'output saved to "{output_path}"')
+    print(f'output saved to "{output_path}".')
     print('analysis complete!')
 
 ######################################################################

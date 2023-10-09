@@ -325,12 +325,6 @@ def plot_metrics(input_path: str,
     print('getting metrics df...')
     metrics_df = read_csv(input_path)
 
-    # TODO: remove this once test completed!
-    # filtering df by fornma detections
-    # metrics_df = metrics_df[metrics_df['recall'] > 0.2]
-    # metrics_df = metrics_df[metrics_df['fornma_confluence'] > 0.01]
-    # metrics_df = metrics_df[metrics_df['fornma_confluence'] > 0.2]
-
     # getting metrics means df
     print('getting metrics means df...')
     metrics_means_df = get_metrics_means_df(df=metrics_df)
