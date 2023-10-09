@@ -9,6 +9,7 @@
 # importing required libraries
 print('importing required libraries...')  # noqa
 from pandas import concat
+from pandas import Series
 from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
@@ -16,6 +17,13 @@ from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
+
+#####################################################################
+# defining global variables
+
+PHENOTYPE = 'dna_damage'
+PHENOTYPE_COL = 'Total_foci_red'
+FOCI_THRESHOLD = 3
 
 #####################################################################
 # argument parsing related functions
@@ -46,12 +54,6 @@ def get_args_dict() -> dict:
                         required=True,
                         help='defines output path[.csv]')
 
-    # foci threshold param
-    parser.add_argument('-t', '--foci-threshold',
-                        dest='foci_threshold',
-                        required=True,
-                        help='defines threshold for "HighDamage" and "LowDamage" class definition')
-
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
 
@@ -62,11 +64,52 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_phenotype()
+def get_phenotype(row_data: Series,
+                  phenotype: str,
+                  phenotype_col: str):
+    """
+    Given a row data, phenotype and a
+    phenotype column, returns respective
+    "phenotype value".
+    """
+    # defining placeholder value for phenotype value
+    phenotype_value = None
+
+    # trying to access column value
+    try:
+
+        # getting phenotype col value
+        row_value = row_data[phenotype_col]
+
+    # if column does not exist
+    except KeyError:
+
+        # printing error message
+        e_string = f'Phenotype column "{phenotype_col}" does not exist.'
+        e_string += 'Please, check and try again.'
+        print(e_string)
+        exit()
+
+    # checking phenotype
+    if phenotype == 'dna_damage':
+
+        # getting phenotype
+        phenotype_value = 'HighDamage' if row_value > FOCI_THRESHOLD else 'LowDamage'
+
+    else:
+
+        # printing error message
+        e_string = f'Invalid phenotype: "{phenotype}"'
+        e_string += 'Please, check available phenotypes and try again.'
+        print(e_string)
+        exit()
+
+    # returning phenotype value
+    return phenotype_value
+
 
 def convert_single_file(input_csv_file_path: str,
-                        output_path: str,
-                        foci_threshold: int
+                        output_path: str
                         ) -> None:
     """
     Given a path to a fornma output file containing cell
@@ -119,17 +162,10 @@ def convert_single_file(input_csv_file_path: str,
         angle_in_degs_text = row_data['FitEllipse_angle']
         angle_in_degs_float = float(angle_in_degs_text)
 
-        # getting current nucleus foci count
-        # foci_count = row_data['Total_foci_53bp1']
-        foci_count = row_data['Total_foci_red']
-        foci_count = int(foci_count)
-
         # defining current class based on foci count
-        # TODO: add phenotype acquisition as a separate function
         current_class = get_phenotype(row_data=row_data,
-                                      phenotype='dna_damage',
-                                      phenotype_col='Total_foci_red')
-        current_class = 'HighDamage' if foci_count > foci_threshold else 'LowDamage'
+                                      phenotype=PHENOTYPE,
+                                      phenotype_col=PHENOTYPE_COL)
 
         # creating current obb dict
         current_obb_dict = {'img_file_name': file_name,
@@ -179,10 +215,6 @@ def main():
     output_path = args_dict['output_path']
     output_path = str(output_path)
 
-    # getting foci threshold
-    foci_threshold = args_dict['foci_threshold']
-    foci_threshold = int(foci_threshold)
-
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
@@ -191,8 +223,7 @@ def main():
 
     # running multiple converter function
     convert_single_file(input_csv_file_path=input_file,
-                        output_path=output_path,
-                        foci_threshold=foci_threshold)
+                        output_path=output_path)
 
 ######################################################################
 # running main function
