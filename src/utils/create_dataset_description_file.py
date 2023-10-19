@@ -17,7 +17,7 @@ from pandas import DataFrame
 from random import seed as set_seed
 from argparse import ArgumentParser
 from src.utils.aux_funcs import enter_to_continue
-from src.utils.aux_funcs import get_confluences_df
+from src.utils.aux_funcs import get_image_confluence
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
@@ -73,20 +73,105 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
+def get_experiment(image_name: str) -> str:
+    """
+    Given an image name (without extension),
+    returns respective experiment.
+    """
+    pass
+
+
+def get_cell_line(experiment: str) -> str:
+    """
+    Given an experiment name, returns
+    respective cell line.
+    """
+    pass
+
+
+def get_treatment(experiment: str) -> str:
+    """
+    Given an experiment name, returns
+    respective treatment.
+    """
+    pass
+
+
 def get_base_dataset_df(input_file: str) -> DataFrame:
     """
     Docstring.
     """
+    # defining placeholder value for dfs list
+    dfs_list = []
+
     # reading annotations file
     annotations_df = read_csv(input_file)
 
-    # adding confluence column
-    confluences_df = get_confluences_df(df=annotations_df,
-                                        style='ellipse')
+    # grouping df by image
+    image_groups = annotations_df.groupby('img_file_name')
 
-    print(annotations_df)
-    print(confluences_df)
-    exit()
+    # getting images number
+    images_num = len(image_groups)
+
+    # defining starter for image index
+    image_index = 1
+
+    # iterating over image groups
+    for image_name, image_group in image_groups:
+
+        # defining progress message
+        progress_string = 'analysing image #INDEX# of #TOTAL#'
+
+        # printing progress message
+        print_progress_message(base_string=progress_string,
+                               index=image_index,
+                               total=images_num)
+
+        # converting image name to string
+        image_name = str(image_name)
+
+        # removing current image extension
+        image_name = image_name.replace('.tif', '')
+
+        # getting current image cell count
+        cell_count = len(image_group)
+
+        # getting current image experiment
+        current_experiment = get_experiment(image_name=image_name)
+
+        # getting current image cell line
+        current_cell_line = get_cell_line(experiment=current_experiment)
+
+        # getting current image treatment
+        current_treatment = get_treatment(experiment=current_experiment)
+
+        # getting current image confluence
+        current_confluence = get_image_confluence(df=image_group,
+                                                  style='ellipse')
+
+        # assembling current image dict
+        current_dict = {'img_name': image_name,
+                        'cell_line': current_cell_line,
+                        'treatment': current_treatment,
+                        'cell_count': cell_count,
+                        'confluence': current_confluence}
+
+        # assembling current image df
+        current_df = DataFrame(current_dict,
+                               index=[0])
+
+        # appending current df to dfs list
+        dfs_list.append(current_df)
+
+        # updating image index
+        image_index += 1
+
+    # concatenating dfs in dfs list
+    final_df = concat(dfs_list,
+                      ignore_index=True)
+
+    # returning final df
+    return final_df
 
 
 def add_dataset_col(df: DataFrame,
