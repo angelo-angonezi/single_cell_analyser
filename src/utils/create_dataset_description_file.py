@@ -16,6 +16,7 @@ from pandas import read_csv
 from pandas import DataFrame
 from random import seed as set_seed
 from argparse import ArgumentParser
+from src.utils.aux_funcs import add_nma_col
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
@@ -78,7 +79,18 @@ def get_base_dataset_df(input_file: str) -> DataFrame:
     """
     # reading annotations file
     annotations_df = read_csv(input_file)
-    print(annotations_df)
+
+    # adding area col
+    add_nma_col(df=annotations_df,
+                col_name='area')
+
+    # defining cols to keep
+    cols_to_keep = ['img_file_name', 'area']
+
+    # dropping unrequired rows
+    annotations_df = annotations_df[cols_to_keep]
+
+    exit()
 
 
 def add_dataset_col(df: DataFrame,
@@ -100,9 +112,13 @@ def create_dataset_description_file(annotations_file_path: str,
     print('reading input file...')
     base_df = get_base_dataset_df(input_file=annotations_file_path)
 
+    exit()
+
     # adding dataset (train/test) col
     add_dataset_col(df=base_df,
                     test_size=TEST_SIZE)
+
+    exit()
 
     # saving dataset description df
     base_df.to_csv(output_path,
@@ -132,7 +148,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running create_dataset_description_file function
     create_dataset_description_file(annotations_file_path=annotations_file_path,

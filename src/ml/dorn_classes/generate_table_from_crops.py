@@ -19,7 +19,6 @@ from numpy import sort as np_sort
 from argparse import ArgumentParser
 from src.utils.aux_funcs import get_crop_pixels
 from src.utils.aux_funcs import enter_to_continue
-from src.utils.aux_funcs import drop_unrequired_cols
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
@@ -105,8 +104,7 @@ def get_crops_df(crops_file: str) -> DataFrame:
     cols_to_keep = ['crop_name', 'class']
 
     # dropping unrequired cols
-    drop_unrequired_cols(df=crops_df,
-                         cols_to_keep=cols_to_keep)
+    crops_df = crops_df[cols_to_keep]
 
     # returning crops df
     return crops_df

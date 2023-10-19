@@ -57,9 +57,7 @@ print(fornma_df)
 # def colunas q tu quer e armazena elas numa lista
 desired_cols = ['Image_name_rg_merge', 'Area', 'NII', 'CellCycle', 'Month', 'Treatment', 'Datetime']
 
-from src.utils.aux_funcs import drop_unrequired_cols
-drop_unrequired_cols(df=fornma_df,
-                     cols_to_keep=desired_cols)
+fornma_df = fornma_df[desired_cols]
 
 from os.path import join
 # grouping df

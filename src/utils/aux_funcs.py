@@ -298,38 +298,6 @@ def get_obbs_from_df(df: DataFrame) -> list:
     return centroids_list
 
 
-def drop_unrequired_cols(df: DataFrame,
-                         cols_to_keep: list
-                         ) -> None:
-    """
-    Given a data frame, and a list of
-    columns to be kept in final df,
-    returns updated df, in which columns
-    which are not in given list have been
-    dropped.
-    :param df: DataFrame. Represents a data frame.
-    :param cols_to_keep: List. Represents column names.
-    :return: None.
-    """
-    # getting current cols
-    cols = df.columns
-
-    # getting cols to drop
-    cols_to_drop = [col
-                    for col
-                    in cols
-                    if col
-                    not in cols_to_keep]
-
-    # iterating over cols_to_drop
-    for col in cols_to_drop:
-
-        # dropping current col
-        df.drop(col,
-                axis=1,
-                inplace=True)
-
-
 def create_folder(folder_path: str) -> None:
     """
     Given a path to a folder, checks folder
