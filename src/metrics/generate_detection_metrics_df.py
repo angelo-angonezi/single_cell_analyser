@@ -13,22 +13,19 @@ print('initializing...')  # noqa
 print('importing required libraries...')  # noqa
 from numpy import arange
 from pandas import concat
-from pandas import Series
 from numpy import ndarray
 from pandas import DataFrame
-from numpy import add as np_add
-from numpy import count_nonzero
 from argparse import ArgumentParser
 from numpy import zeros as np_zeroes
+from src.utils.aux_funcs import get_iou
 from src.utils.aux_funcs import get_etc
-from src.utils.aux_funcs import draw_circle
 from src.utils.aux_funcs import get_time_str
-from src.utils.aux_funcs import draw_ellipse
-from src.utils.aux_funcs import draw_rectangle
+from src.utils.aux_funcs import get_pixel_mask
 from src.utils.aux_funcs import flush_or_print
 from src.utils.aux_funcs import get_current_time
 from src.utils.aux_funcs import get_time_elapsed
 from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import get_image_confluence
 from src.utils.aux_funcs import simple_hungarian_algorithm
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_merged_detection_annotation_df
@@ -58,11 +55,6 @@ DETECTION_RANGE = [0.5]
 # rounding thresholds
 IOU_THRESHOLDS = [round(i, 2) for i in IOU_RANGE]
 DETECTION_THRESHOLDS = [round(i, 2) for i in DETECTION_RANGE]
-
-# image constants
-IMAGE_WIDTH = 1408
-IMAGE_HEIGHT = 1040
-IMAGE_AREA = IMAGE_WIDTH * IMAGE_HEIGHT
 
 #####################################################################
 # argument parsing related functions
@@ -114,126 +106,6 @@ def get_args_dict() -> dict:
 
 ######################################################################
 # defining auxiliary functions
-
-
-def get_blank_image(width: int,
-                    height: int
-                    ) -> ndarray:
-    """
-    Given an image width/height, returns
-    numpy array of given dimension
-    filled with zeroes.
-    :param width: Integer. Represents an image width.
-    :param height: Integer. Represents an image height.
-    :return: ndarray. Represents an image.
-    """
-    # defining matrix shape
-    shape = (height, width)
-
-    # creating blank matrix
-    blank_matrix = np_zeroes(shape=shape)
-
-    # returning blank matrix
-    return blank_matrix
-
-
-def get_iou(mask_a: ndarray,
-            mask_b: ndarray
-            ) -> float:
-    """
-    Given two pixel masks, representing
-    detected/annotated OBBs, returns IoU.
-    :param mask_a: ndarray. Represents a pixel mask.
-    :param mask_b: ndarray. Represents a pixel mask.
-    :return: Float. Represents an IoU value.
-    """
-    # adding arrays
-    final_array = np_add(mask_a, mask_b)
-
-    # counting "1" pixels (just one of the masks cover)
-    one_count = count_nonzero(final_array == 1)
-
-    # counting "2" pixels (= intersection -> both masks cover)
-    two_count = count_nonzero(final_array == 2)
-
-    # getting intersection
-    intersection = two_count
-
-    # getting union
-    union = one_count + two_count
-
-    # calculating IoU (Intersection over Union)
-    iou_value = intersection / union
-
-    # returning IoU
-    return iou_value
-
-
-def get_pixel_mask(row_data: Series,
-                   style: str
-                   ) -> ndarray:
-    """
-    Given an open image, and coordinates for OBB,
-    returns image with respective style overlay.
-    :param row_data: Series. Represents OBB coords data.
-    :param style: String. Represents an overlay style.
-    :return: ndarray. Represents base image with mask overlay.
-    """
-    # extracting coords from row data
-    cx = int(row_data['cx'])
-    cy = int(row_data['cy'])
-    width = float(row_data['width'])
-    height = float(row_data['height'])
-    angle = float(row_data['angle'])
-
-    # defining color (same for all styles)
-    color = (1,)
-
-    # defining base image
-    base_img = get_blank_image(width=IMAGE_WIDTH,
-                               height=IMAGE_HEIGHT)
-
-    # checking mask style
-    if style == 'ellipse':
-
-        # adding elliptical mask
-        draw_ellipse(open_img=base_img,
-                     cx=cx,
-                     cy=cy,
-                     width=width,
-                     height=height,
-                     angle=angle,
-                     color=color,
-                     thickness=-1)
-
-    elif style == 'circle':
-
-        # getting radius
-        radius = (width + height) / 2
-        radius = int(radius)
-
-        # adding circular mask
-        draw_circle(open_img=base_img,
-                    cx=cx,
-                    cy=cy,
-                    radius=radius,
-                    color=color,
-                    thickness=-1)
-
-    elif style == 'rectangle':
-
-        # adding rectangular mask
-        draw_rectangle(open_img=base_img,
-                       cx=cx,
-                       cy=cy,
-                       width=width,
-                       height=height,
-                       angle=angle,
-                       color=color,
-                       thickness=-1)
-
-    # returning modified image
-    return base_img
 
 
 def get_cost_matrix(detections_df: DataFrame,
@@ -383,62 +255,6 @@ def get_image_metrics(detections_df: DataFrame,
 
     # returning final tuple
     return metrics_tuple
-
-
-def add_area_col(df: DataFrame,
-                 style: str
-                 ) -> None:
-    """
-    Given an image data frame, adds
-    area column, based on pixel masks
-    created according to given style.
-    """
-    # defining area col
-    area_col = 'area'
-
-    # defining placeholder value for area col values
-    df[area_col] = None
-
-    # getting df rows
-    df_rows = df.iterrows()
-
-    # iterating over df rows
-    for row_index, row_data in df_rows:
-
-        # getting current row pixel mask
-        current_mask = get_pixel_mask(row_data=row_data,
-                                      style=style)
-
-        # counting "1" pixels (== area occupied by mask)
-        one_count = count_nonzero(current_mask == 1)
-
-        # updating current row area
-        df.at[row_index, area_col] = one_count
-
-
-def get_image_confluence(df: DataFrame,
-                         style: str
-                         ) -> int:
-    """
-    Given an image df, returns given image confluence
-    (calculates area for each detection and returns sum).
-    """
-    # TODO: update this to take into account OBBs overlays!
-    # adding area column
-    add_area_col(df=df,
-                 style=style)
-
-    # getting area col
-    area_col = df['area']
-
-    # getting area sum (area occupied by cells)
-    cells_area = area_col.sum()
-
-    # getting confluence
-    confluence = cells_area / IMAGE_AREA
-
-    # returning confluence
-    return confluence
 
 
 def create_detection_metrics_df(df: DataFrame,

@@ -31,6 +31,11 @@ TEST_SIZE = 0.3
 TREATMENT_DICT = {'A172_BLABLA': {'A1': 'TMZ',
                                   'B1': 'CTR'}}
 
+# image constants
+IMAGE_WIDTH = 1408
+IMAGE_HEIGHT = 1040
+IMAGE_AREA = IMAGE_WIDTH * IMAGE_HEIGHT
+
 # setting seed (so that all executions result in same sample)
 set_seed(SEED)
 
@@ -80,12 +85,10 @@ def get_base_dataset_df(input_file: str) -> DataFrame:
     # reading annotations file
     annotations_df = read_csv(input_file)
 
-    # adding area col
-    add_nma_col(df=annotations_df,
-                col_name='area')
+    # adding confluence column
 
     # defining cols to keep
-    cols_to_keep = ['img_file_name', 'area']
+    cols_to_keep = ['img_file_name', 'confluence']
 
     # dropping unrequired rows
     annotations_df = annotations_df[cols_to_keep]

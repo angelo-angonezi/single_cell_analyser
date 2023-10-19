@@ -20,16 +20,28 @@ from os.path import join
 from numpy import ndarray
 from cv2 import boxPoints
 from pandas import concat
+from pandas import Series
 from os.path import exists
 from pandas import read_csv
-from cv2 import drawContours
 from pandas import DataFrame
+from cv2 import drawContours
+from numpy import add as np_add
+from numpy import count_nonzero
 from cv2 import IMREAD_GRAYSCALE
 from shutil import copy as sh_copy
+from numpy import zeros as np_zeroes
 from scipy.optimize import linear_sum_assignment
 
 # preventing "SettingWithoutCopyWarning" messages
 pd.options.mode.chained_assignment = None  # default='warn'
+
+######################################################################
+# defining global variables
+
+# image constants
+IMAGE_WIDTH = 1408
+IMAGE_HEIGHT = 1040
+IMAGE_AREA = IMAGE_WIDTH * IMAGE_HEIGHT
 
 ######################################################################
 # defining auxiliary functions
@@ -1023,6 +1035,214 @@ def get_analysis_df(fornma_file_path: str,
 
     # returning analysis_df
     return analysis_df
+
+
+def get_blank_image(width: int,
+                    height: int
+                    ) -> ndarray:
+    """
+    Given an image width/height, returns
+    numpy array of given dimension
+    filled with zeroes.
+    :param width: Integer. Represents an image width.
+    :param height: Integer. Represents an image height.
+    :return: ndarray. Represents an image.
+    """
+    # defining matrix shape
+    shape = (height, width)
+
+    # creating blank matrix
+    blank_matrix = np_zeroes(shape=shape)
+
+    # returning blank matrix
+    return blank_matrix
+
+
+def get_iou(mask_a: ndarray,
+            mask_b: ndarray
+            ) -> float:
+    """
+    Given two pixel masks, representing
+    detected/annotated OBBs, returns IoU.
+    :param mask_a: ndarray. Represents a pixel mask.
+    :param mask_b: ndarray. Represents a pixel mask.
+    :return: Float. Represents an IoU value.
+    """
+    # adding arrays
+    final_array = np_add(mask_a, mask_b)
+
+    # counting "1" pixels (just one of the masks cover)
+    one_count = count_nonzero(final_array == 1)
+
+    # counting "2" pixels (= intersection -> both masks cover)
+    two_count = count_nonzero(final_array == 2)
+
+    # getting intersection
+    intersection = two_count
+
+    # getting union
+    union = one_count + two_count
+
+    # calculating IoU (Intersection over Union)
+    iou_value = intersection / union
+
+    # returning IoU
+    return iou_value
+
+
+def get_pixel_mask(row_data: Series,
+                   style: str
+                   ) -> ndarray:
+    """
+    Given an open image, and coordinates for OBB,
+    returns image with respective style overlay.
+    :param row_data: Series. Represents OBB coords data.
+    :param style: String. Represents an overlay style.
+    :return: ndarray. Represents base image with mask overlay.
+    """
+    # extracting coords from row data
+    cx = int(row_data['cx'])
+    cy = int(row_data['cy'])
+    width = float(row_data['width'])
+    height = float(row_data['height'])
+    angle = float(row_data['angle'])
+
+    # defining color (same for all styles)
+    color = (1,)
+
+    # defining base image
+    base_img = get_blank_image(width=IMAGE_WIDTH,
+                               height=IMAGE_HEIGHT)
+
+    # checking mask style
+    if style == 'ellipse':
+
+        # adding elliptical mask
+        draw_ellipse(open_img=base_img,
+                     cx=cx,
+                     cy=cy,
+                     width=width,
+                     height=height,
+                     angle=angle,
+                     color=color,
+                     thickness=-1)
+
+    elif style == 'circle':
+
+        # getting radius
+        radius = (width + height) / 2
+        radius = int(radius)
+
+        # adding circular mask
+        draw_circle(open_img=base_img,
+                    cx=cx,
+                    cy=cy,
+                    radius=radius,
+                    color=color,
+                    thickness=-1)
+
+    elif style == 'rectangle':
+
+        # adding rectangular mask
+        draw_rectangle(open_img=base_img,
+                       cx=cx,
+                       cy=cy,
+                       width=width,
+                       height=height,
+                       angle=angle,
+                       color=color,
+                       thickness=-1)
+
+    # returning modified image
+    return base_img
+
+
+def add_area_col(df: DataFrame,
+                 style: str
+                 ) -> None:
+    """
+    Given an image data frame, adds
+    area column, based on pixel masks
+    created according to given style.
+    """
+    # defining area col
+    area_col = 'area'
+
+    # defining placeholder value for area col values
+    df[area_col] = None
+
+    # getting df rows
+    df_rows = df.iterrows()
+
+    # iterating over df rows
+    for row_index, row_data in df_rows:
+
+        # getting current row pixel mask
+        current_mask = get_pixel_mask(row_data=row_data,
+                                      style=style)
+
+        # counting "1" pixels (== area occupied by mask)
+        one_count = count_nonzero(current_mask == 1)
+
+        # updating current row area
+        df.at[row_index, area_col] = one_count
+
+
+def get_image_confluence(df: DataFrame,
+                         style: str
+                         ) -> int:
+    """
+    Given an image df, returns given image confluence
+    (calculates area for each detection and returns sum).
+    """
+    # TODO: update this to take into account OBBs overlays!
+    # adding area column
+    add_area_col(df=df,
+                 style=style)
+
+    # getting area col
+    area_col = df['area']
+
+    # getting area sum (area occupied by cells)
+    cells_area = area_col.sum()
+
+    # getting confluence
+    confluence = cells_area / IMAGE_AREA
+
+    # returning confluence
+    return confluence
+
+
+def add_confluence_col(df: DataFrame,
+                       style: str
+                       ) -> None:
+    """
+    Given an image data frame, adds
+    confluence column, based on pixel
+    masks overlays created according
+    to given style.
+    """
+    # defining confluence col
+    confluence_col = 'confluence'
+
+    # defining placeholder value for area col values
+    df[confluence_col] = None
+
+    # getting df rows
+    df_rows = df.iterrows()
+
+    # iterating over df rows
+    for row_index, row_data in df_rows:
+
+        # getting current row pixel mask
+        current_mask = get_pixel_mask(row_data=row_data,
+                                      style=style)
+
+        # counting "1" pixels (== area occupied by mask)
+        one_count = count_nonzero(current_mask == 1)
+
+        # updating current row area
+        df.at[row_index, confluence_col] = one_count
 
 ######################################################################
 # end of current module
