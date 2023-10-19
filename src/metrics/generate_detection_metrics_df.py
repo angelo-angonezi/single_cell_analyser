@@ -278,7 +278,7 @@ def create_detection_metrics_df(df: DataFrame,
     # grouping df by images
     image_groups = df.groupby('img_file_name')
 
-    # getting totals
+    # getting progress totals
     iou_thresholds_num = len(iou_thresholds)
     detection_thresholds_num = len(detection_thresholds)
     images_num = len(image_groups)

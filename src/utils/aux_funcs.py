@@ -1165,6 +1165,7 @@ def add_area_col(df: DataFrame,
     area column, based on pixel masks
     created according to given style.
     """
+    # TODO: check whether this function will be used later on
     # defining area col
     area_col = 'area'
 
@@ -1190,43 +1191,15 @@ def add_area_col(df: DataFrame,
 
 def get_image_confluence(df: DataFrame,
                          style: str
-                         ) -> int:
+                         ) -> float:
     """
     Given an image df, returns given image confluence
-    (calculates area for each detection and returns sum).
+    (overlays all detections with given style and counts
+    returns non-zero pixels divided by image area).
     """
-    # TODO: update this to take into account OBBs overlays!
-    # adding area column
-    add_area_col(df=df,
-                 style=style)
-
-    # getting area col
-    area_col = df['area']
-
-    # getting area sum (area occupied by cells)
-    cells_area = area_col.sum()
-
-    # getting confluence
-    confluence = cells_area / IMAGE_AREA
-
-    # returning confluence
-    return confluence
-
-
-def add_confluence_col(df: DataFrame,
-                       style: str
-                       ) -> None:
-    """
-    Given an image data frame, adds
-    confluence column, based on pixel
-    masks overlays created according
-    to given style.
-    """
-    # defining confluence col
-    confluence_col = 'confluence'
-
-    # defining placeholder value for area col values
-    df[confluence_col] = None
+    # defining base image
+    base_img = get_blank_image(width=IMAGE_WIDTH,
+                               height=IMAGE_HEIGHT)
 
     # getting df rows
     df_rows = df.iterrows()
@@ -1238,11 +1211,17 @@ def add_confluence_col(df: DataFrame,
         current_mask = get_pixel_mask(row_data=row_data,
                                       style=style)
 
-        # counting "1" pixels (== area occupied by mask)
-        one_count = count_nonzero(current_mask == 1)
+        # overlaying current mask on base img
+        base_img = np_add(base_img, current_mask)
 
-        # updating current row area
-        df.at[row_index, confluence_col] = one_count
+    # getting non-zero pixel count
+    non_zeroes_count = count_nonzero(base_img != 0)
+
+    # getting confluence
+    confluence = non_zeroes_count / IMAGE_AREA
+
+    # returning confluence
+    return confluence
 
 ######################################################################
 # end of current module

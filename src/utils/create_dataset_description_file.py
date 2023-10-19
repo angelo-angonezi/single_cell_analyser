@@ -16,8 +16,8 @@ from pandas import read_csv
 from pandas import DataFrame
 from random import seed as set_seed
 from argparse import ArgumentParser
-from src.utils.aux_funcs import add_nma_col
 from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import get_confluences_df
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
@@ -30,11 +30,6 @@ SEED = 53
 TEST_SIZE = 0.3
 TREATMENT_DICT = {'A172_BLABLA': {'A1': 'TMZ',
                                   'B1': 'CTR'}}
-
-# image constants
-IMAGE_WIDTH = 1408
-IMAGE_HEIGHT = 1040
-IMAGE_AREA = IMAGE_WIDTH * IMAGE_HEIGHT
 
 # setting seed (so that all executions result in same sample)
 set_seed(SEED)
@@ -86,13 +81,11 @@ def get_base_dataset_df(input_file: str) -> DataFrame:
     annotations_df = read_csv(input_file)
 
     # adding confluence column
+    confluences_df = get_confluences_df(df=annotations_df,
+                                        style='ellipse')
 
-    # defining cols to keep
-    cols_to_keep = ['img_file_name', 'confluence']
-
-    # dropping unrequired rows
-    annotations_df = annotations_df[cols_to_keep]
-
+    print(annotations_df)
+    print(confluences_df)
     exit()
 
 
