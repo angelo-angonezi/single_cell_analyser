@@ -50,11 +50,11 @@ def get_args_dict() -> dict:
 
     # adding arguments to parser
 
-    # fornma file param
-    parser.add_argument('-f', '--fornma-file',
-                        dest='fornma_file',
+    # annotations file param
+    parser.add_argument('-a', '--annotations-file',
+                        dest='annotations_file',
                         required=True,
-                        help='defines path to fornma nucleus output file.')
+                        help='defines path to fornma nucleus output file (model output format).')
 
     # output path param
     parser.add_argument('-o', '--output-path',
@@ -76,9 +76,9 @@ def get_base_dataset_df(input_file: str) -> DataFrame:
     """
     Docstring.
     """
-    # reading fornma file
-    fornma_df = read_csv(input_file)
-    print(fornma_df)
+    # reading annotations file
+    annotations_df = read_csv(input_file)
+    print(annotations_df)
 
 
 def add_dataset_col(df: DataFrame,
@@ -90,7 +90,7 @@ def add_dataset_col(df: DataFrame,
     pass
 
 
-def create_dataset_description_file(fornma_file_path: str,
+def create_dataset_description_file(annotations_file_path: str,
                                     output_path: str
                                     ) -> None:
     """
@@ -98,7 +98,7 @@ def create_dataset_description_file(fornma_file_path: str,
     """
     # getting base df
     print('reading input file...')
-    base_df = get_base_dataset_df(input_file=fornma_file_path)
+    base_df = get_base_dataset_df(input_file=annotations_file_path)
 
     # adding dataset (train/test) col
     add_dataset_col(df=base_df,
@@ -122,8 +122,8 @@ def main():
     # getting args dict
     args_dict = get_args_dict()
 
-    # getting fornma file param
-    fornma_file_path = args_dict['fornma_file']
+    # getting annotations file param
+    annotations_file_path = args_dict['annotations_file']
 
     # getting output path param
     output_path = args_dict['output_path']
@@ -135,7 +135,7 @@ def main():
     enter_to_continue()
 
     # running create_dataset_description_file function
-    create_dataset_description_file(fornma_file_path=fornma_file_path,
+    create_dataset_description_file(annotations_file_path=annotations_file_path,
                                     output_path=output_path)
 
 ######################################################################
