@@ -224,6 +224,10 @@ def add_dataset_col(df: DataFrame,
     """
     Docstring.
     """
+    # TODO: write this function!
+    #  group by cell line, treatment and confluence,
+    #  and add train/test to dataset column according
+    #  to test size.
     pass
 
 
