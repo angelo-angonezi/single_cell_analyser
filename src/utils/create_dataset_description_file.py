@@ -20,7 +20,6 @@ from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import get_image_confluence
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
-from src.utils.aux_funcs import get_specific_files_in_folder
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -28,8 +27,44 @@ print('all required libraries successfully imported.')  # noqa
 
 SEED = 53
 TEST_SIZE = 0.3
-TREATMENT_DICT = {'A172_BLABLA': {'A1': 'TMZ',
-                                  'B1': 'CTR'}}
+TREATMENT_DICT = {'A172_ERK_53BP1_11_08_22_apos_tratamento':
+                      {'A1': 'TMZ',
+                       'A2': 'TMZ',
+                       'A3': 'TMZ',
+                       'B1': 'CTR',
+                       'B2': 'CTR',
+                       'B3': 'CTR'},
+                  'A172_H2B_U251_H2B_ActD_TMZ_daphne':
+                      {'B2': 'TMZ',
+                       'B3': 'TMZ',
+                       'B4': 'TMZ',
+                       'B5': 'TMZ',
+                       'B6': 'TMZ',
+                       'C2': 'CTR',
+                       'C3': 'CTR',
+                       'C4': 'CTR',
+                       'C5': 'CTR',
+                       'C6': 'CTR'}
+                  }
+CELL_LINES_DICT = {'A172_ERK_53BP1_11_08_22_apos_tratamento':
+                       {'A1': 'A172',
+                        'A2': 'A172',
+                        'A3': 'A172',
+                        'B1': 'A172',
+                        'B2': 'A172',
+                        'B3': 'A172'},
+                   'A172_H2B_U251_H2B_ActD_TMZ_daphne':
+                       {'B2': 'A172',
+                        'B3': 'A172',
+                        'B4': 'A172',
+                        'B5': 'A172',
+                        'B6': 'A172',
+                        'C2': 'U251',
+                        'C3': 'U251',
+                        'C4': 'U251',
+                        'C5': 'U251',
+                        'C6': 'U251'}
+                   }
 
 # setting seed (so that all executions result in same sample)
 set_seed(SEED)
@@ -73,28 +108,63 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_experiment(image_name: str) -> str:
+def get_image_df(image_name: str,
+                 image_group: DataFrame
+                 ) -> DataFrame:
     """
-    Given an image name (without extension),
-    returns respective experiment.
+    Given an image name and group,
+    returns given image base data
+    set data frame.
     """
-    pass
+    # removing current image extension
+    image_name = image_name.replace('.tif', '')
 
+    # getting current image cell count
+    cell_count = len(image_group)
 
-def get_cell_line(experiment: str) -> str:
-    """
-    Given an experiment name, returns
-    respective cell line.
-    """
-    pass
+    # getting current image name split
+    image_name_split = image_name.split('_')
 
+    # getting image experiment string list
+    experiment_split = image_name_split[:-4]
 
-def get_treatment(experiment: str) -> str:
-    """
-    Given an experiment name, returns
-    respective treatment.
-    """
-    pass
+    # getting image experiment
+    current_experiment = '_'.join(experiment_split)
+
+    # getting current image well
+    current_well = image_name_split[-4]
+
+    # getting current image field
+    current_field = image_name_split[-3]
+
+    # getting current image cell line
+    current_cell_line_dict = CELL_LINES_DICT[current_experiment]
+    current_cell_line = current_cell_line_dict[current_well]
+
+    # getting current image treatment
+    current_treatment_dict = TREATMENT_DICT[current_experiment]
+    current_treatment = current_treatment_dict[current_well]
+
+    # getting current image confluence
+    current_confluence = get_image_confluence(df=image_group,
+                                              style='ellipse')
+
+    # assembling current image dict
+    current_dict = {'img_name': image_name,
+                    'experiment': current_experiment,
+                    'well': current_well,
+                    'field': current_field,
+                    'cell_line': current_cell_line,
+                    'treatment': current_treatment,
+                    'cell_count': cell_count,
+                    'confluence': current_confluence}
+
+    # assembling current image df
+    current_df = DataFrame(current_dict,
+                           index=[0])
+
+    # returning current image df
+    return current_df
 
 
 def get_base_dataset_df(input_file: str) -> DataFrame:
@@ -130,35 +200,9 @@ def get_base_dataset_df(input_file: str) -> DataFrame:
         # converting image name to string
         image_name = str(image_name)
 
-        # removing current image extension
-        image_name = image_name.replace('.tif', '')
-
-        # getting current image cell count
-        cell_count = len(image_group)
-
-        # getting current image experiment
-        current_experiment = get_experiment(image_name=image_name)
-
-        # getting current image cell line
-        current_cell_line = get_cell_line(experiment=current_experiment)
-
-        # getting current image treatment
-        current_treatment = get_treatment(experiment=current_experiment)
-
-        # getting current image confluence
-        current_confluence = get_image_confluence(df=image_group,
-                                                  style='ellipse')
-
-        # assembling current image dict
-        current_dict = {'img_name': image_name,
-                        'cell_line': current_cell_line,
-                        'treatment': current_treatment,
-                        'cell_count': cell_count,
-                        'confluence': current_confluence}
-
-        # assembling current image df
-        current_df = DataFrame(current_dict,
-                               index=[0])
+        # getting current image df
+        current_df = get_image_df(image_name=image_name,
+                                  image_group=image_group)
 
         # appending current df to dfs list
         dfs_list.append(current_df)
@@ -192,14 +236,12 @@ def create_dataset_description_file(annotations_file_path: str,
     # getting base df
     print('reading input file...')
     base_df = get_base_dataset_df(input_file=annotations_file_path)
-
-    exit()
+    print(base_df)
 
     # adding dataset (train/test) col
     add_dataset_col(df=base_df,
                     test_size=TEST_SIZE)
-
-    exit()
+    print(base_df)
 
     # saving dataset description df
     base_df.to_csv(output_path,
