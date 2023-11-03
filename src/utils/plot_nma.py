@@ -3,6 +3,7 @@
 # import
 import pandas as pd
 import seaborn as sns
+from os.path import join
 from matplotlib import pyplot as plt
 from src.utils.aux_funcs import get_analysis_df
 
@@ -58,11 +59,27 @@ print(fornma_df)
 desired_cols = ['Image_name_rg_merge', 'Area', 'NII', 'CellCycle', 'Month', 'Treatment', 'Datetime']
 
 fornma_df = fornma_df[desired_cols]
+print(fornma_df)
 
-from os.path import join
 # grouping df
 treatment_groups = fornma_df.groupby('Treatment')
 for treatment, treatment_group in treatment_groups:
+
+    percents_dict = {}
+    cells_num = len(treatment_group)
+    print(cells_num)
+    cell_cycle_groups = treatment_group.groupby('CellCycle')
+    for cell_cycle, cell_cycle_group in cell_cycle_groups:
+        cell_cycle_count = len(cell_cycle_group)
+        element = round((cell_cycle_count * 100 / cells_num))
+        element_str = f'{cell_cycle} ({element}%)'
+        new_dict_element = {cell_cycle: element_str}
+        percents_dict.update(new_dict_element)
+    print(percents_dict)
+
+    treatment_group.replace({'CellCycle': percents_dict},
+                            inplace=True)
+    print(treatment_group)
 
     print(treatment)
     print(treatment_group['Image_name_rg_merge'].unique())
@@ -72,12 +89,12 @@ for treatment, treatment_group in treatment_groups:
                     x='NII',
                     y='Area',
                     hue='CellCycle',
-                    hue_order=['G1', 'S', 'G2', 'M'],
+                    hue_order=['G1 (63%)', 'S (3%)', 'G2 (32%)', 'M (2%)'],
                     palette=['red', 'yellow', 'green', 'gray'])
 
     # getting means
-    g1_group = treatment_group[treatment_group['CellCycle'] == 'G1']
-    g2_group = treatment_group[treatment_group['CellCycle'] == 'G2']
+    g1_group = treatment_group[treatment_group['CellCycle'] == 'G1 (63%)']
+    g2_group = treatment_group[treatment_group['CellCycle'] == 'G2 (32%)']
     g1_area_col = g1_group['Area']
     g2_area_col = g2_group['Area']
     g1_area_mean = g1_area_col.mean()
