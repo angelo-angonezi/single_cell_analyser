@@ -17,8 +17,12 @@ from matplotlib import pyplot as plt
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.layers import Conv2D
 from tensorflow.keras.layers import Flatten
+from tensorflow.keras.metrics import Recall
+from tensorflow.keras.metrics import Precision
+from tensorflow.keras.models import load_model
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import MaxPooling2D
+from tensorflow.keras.metrics import BinaryAccuracy
 from tensorflow.keras.utils import image_dataset_from_directory
 print('all required libraries successfully imported.')  # noqa
 
@@ -29,6 +33,7 @@ data_path = 'Z:\\pycharm_projects\\single_cell_analyser\\data\\nucleus_detection
 logdir = 'Z:\\pycharm_projects\\single_cell_analyser\\data\\nucleus_detection\\ImagesFilter\\logs'
 # logdir = 'Z:\\pycharm_projects\\single_cell_analyser\\data\\nucleus_detection\\ImagesFilter\\logs'
 save_path = 'Z:\\pycharm_projects\\single_cell_analyser\\data\\nucleus_detection\\ImagesFilter\\models\\modelV1.h5'
+splits_path = 'Z:\\pycharm_projects\\single_cell_analyser\\data\\nucleus_detection\\ImagesFilter\\splits'
 # save_path = 'Z:\\pycharm_projects\\single_cell_analyser\\data\\nucleus_detection\\ImagesFilter\\models\\modelV1.h5'
 train_ratio = 0.7
 val_ratio = 0.2
@@ -69,6 +74,17 @@ f_string += f'Val: {val_ratio * 100}%\n'
 f_string += f'Test: {test_ratio * 100}%'
 print(f_string)
 
+# defining split save paths
+train_path = join(splits_path, 'train.pickle')
+val_path = join(splits_path, 'val.pickle')
+test_path = join(splits_path, 'test.pickle')
+
+# saving splits
+print('saving splits...')
+train.to_pickle(train_path)
+val.to_pickle(val_path)
+test.to_pickle(test_path)
+
 # defining model
 print('defining model...')
 model = Sequential()
@@ -103,6 +119,7 @@ train_history = model.fit(train,
                           epochs=epochs,
                           validation_data=val,
                           callbacks=[tensorboard_callback])
+print('training complete!')
 
 # saving model
 print('saving model...')
@@ -132,7 +149,43 @@ plt.title(title)
 plt.savefig(fig_path)
 print('all results saved.')
 
+# testing model on test split
+print('testing model on test split...')
+
+# loading the model
+print('loading model...')
+model = load_model(save_path)
+
+# testing the model
+print('testing model performance on test data set...')
+
+# starting precision/recall/accuracy instances
+precision = Precision()
+recall = Recall()
+accuracy = BinaryAccuracy()
+
+# getting test batches
+test_batches = test.as_numpy_iterator()
+
+# iterating over batches in test data set
+for batch in test_batches:
+    X, y = batch
+    yhat = model.predict(X)
+    precision.update_state(y, yhat)
+    recall.update_state(y, yhat)
+    accuracy.update_state(y, yhat)
+
+# getting results
+precision_result = precision.result()
+recall_result = recall.result()
+accuracy_result = accuracy.result()
+
+# printing results
+print('Precision: ', precision_result)
+print('Recall: ', recall_result)
+print('Accuracy: ', accuracy_result)
+
 # printing execution message
-print('training complete!')
+print('done!')
 
 # end of current module
