@@ -1,4 +1,4 @@
-# generate base imgs info file module
+# create data set description file module
 
 print('initializing...')  # noqa
 
