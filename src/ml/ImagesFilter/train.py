@@ -1,5 +1,7 @@
 # ImagesFilter train module
 
+print('initializing...')  # noqa
+
 # Code destined to training neural network
 # to classify images as "included" or "excluded"
 # from analyses.
@@ -9,6 +11,8 @@
 
 # importing required libraries
 print('importing required libraries...')  # noqa
+import numpy
+from PIL import Image
 import tensorflow as tf
 from os.path import join
 from seaborn import lineplot
@@ -18,6 +22,8 @@ from tensorflow.keras.layers import Dense
 from tensorflow.keras.layers import Conv2D
 from tensorflow.keras.layers import Flatten
 from tensorflow.keras.metrics import Recall
+from src.utils.aux_funcs import IMAGE_WIDTH
+from src.utils.aux_funcs import IMAGE_HEIGHT
 from tensorflow.keras.metrics import Precision
 from tensorflow.keras.models import load_model
 from tensorflow.keras.models import Sequential
@@ -33,36 +39,35 @@ data_path = 'Z:\\pycharm_projects\\single_cell_analyser\\data\\nucleus_detection
 logdir = 'Z:\\pycharm_projects\\single_cell_analyser\\data\\nucleus_detection\\ImagesFilter\\logs'
 # logdir = 'Z:\\pycharm_projects\\single_cell_analyser\\data\\nucleus_detection\\ImagesFilter\\logs'
 save_path = 'Z:\\pycharm_projects\\single_cell_analyser\\data\\nucleus_detection\\ImagesFilter\\models\\modelV1.h5'
-splits_path = 'Z:\\pycharm_projects\\single_cell_analyser\\data\\nucleus_detection\\ImagesFilter\\splits'
 # save_path = 'Z:\\pycharm_projects\\single_cell_analyser\\data\\nucleus_detection\\ImagesFilter\\models\\modelV1.h5'
 train_ratio = 0.7
 val_ratio = 0.2
 test_ratio = 0.1
-epochs = 3
+epochs = 5
 
 ######################################################################
 # running training
 
 # loading data
 print(f'loading data from folder "{data_path}"...')
-data = image_dataset_from_directory(data_path)
+data = image_dataset_from_directory(directory=data_path,
+                                    labels='inferred',
+                                    label_mode='binary',
+                                    class_names=['excluded', 'included'],
+                                    color_mode='rgb',
+                                    batch_size=8,
+                                    image_size=(IMAGE_HEIGHT, IMAGE_WIDTH),
+                                    shuffle=True)
 
 # normalizing data to 0-1 scale
 print('normalizing data...')
-data = data.map(lambda x, y: (x/255, y))
-
-# creating data iterator
-print('creating data iterator...')
-data_iterator = data.as_numpy_iterator()
-
-# getting batches
-print('getting data batch...')
-batch = data_iterator.next()
+# data = data.map(lambda x, y: (x/255, y))
+data_len = len(data)
 
 # getting split sizes
-train_size = int(len(data) * train_ratio)
-val_size = int(len(data) * val_ratio)
-test_size = int(len(data) * test_ratio)
+train_size = int(data_len * train_ratio)
+val_size = int(data_len * val_ratio)
+test_size = int(data_len * test_ratio)
 
 # getting data splits
 print('getting data splits...')
@@ -73,17 +78,19 @@ f_string = f'Train: {train_ratio * 100}%\n'
 f_string += f'Val: {val_ratio * 100}%\n'
 f_string += f'Test: {test_ratio * 100}%'
 print(f_string)
-
-# defining split save paths
-train_path = join(splits_path, 'train.pickle')
-val_path = join(splits_path, 'val.pickle')
-test_path = join(splits_path, 'test.pickle')
-
-# saving splits
-print('saving splits...')
-train.to_pickle(train_path)
-val.to_pickle(val_path)
-test.to_pickle(test_path)
+i = 0
+for images, labels in test.take(test_size):  # only take first element of dataset
+    numpy_images = images.numpy()
+    numpy_labels = labels.numpy()
+    img = numpy_images[0]
+    label = numpy_labels[0]
+    img = img.astype(numpy.uint8)
+    im = Image.fromarray(img)
+    im.save(join(logdir.replace('logs', 'ex'), f'img{i}_{label}.jpg'))
+    print(img, label)
+    i += 1
+    exit()
+exit()
 
 # defining model
 print('defining model...')
