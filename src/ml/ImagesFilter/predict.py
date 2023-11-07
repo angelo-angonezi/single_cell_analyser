@@ -49,15 +49,17 @@ model = load_model(model_path)
 data_batches = data.as_numpy_iterator()
 
 # defining placeholder value for predictions
-predictions = []
+predictions_list = []
 
 # iterating over batches in data set
 for batch in data_batches:
     X, y = batch
-    prediction = model.predict(X)
-    print(prediction)
-    exit()
-    predictions.extend(prediction)
+    current_predictions = model.predict(X)
+    current_predictions_list = current_predictions.tolist()
+    predictions_list.extend(current_predictions_list)
 
-print(predictions)
+# removing elements from list in list
+predictions_list = [f[0] for f in predictions_list]
+
+print(predictions_list)
 # end of current module
