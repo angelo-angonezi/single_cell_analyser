@@ -11,8 +11,6 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-import numpy
-from PIL import Image
 import tensorflow as tf
 from os.path import join
 from seaborn import lineplot
@@ -25,7 +23,6 @@ from tensorflow.keras.metrics import Recall
 from src.utils.aux_funcs import IMAGE_WIDTH
 from src.utils.aux_funcs import IMAGE_HEIGHT
 from tensorflow.keras.metrics import Precision
-from tensorflow.keras.models import load_model
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import MaxPooling2D
 from tensorflow.keras.metrics import BinaryAccuracy
@@ -61,7 +58,7 @@ data = image_dataset_from_directory(directory=data_path,
 
 # normalizing data to 0-1 scale
 print('normalizing data...')
-# data = data.map(lambda x, y: (x/255, y))
+data = data.map(lambda x, y: (x / 255, y))
 data_len = len(data)
 
 # getting split sizes
@@ -78,19 +75,22 @@ f_string = f'Train: {train_ratio * 100}%\n'
 f_string += f'Val: {val_ratio * 100}%\n'
 f_string += f'Test: {test_ratio * 100}%'
 print(f_string)
-i = 0
-for images, labels in test.take(test_size):  # only take first element of dataset
-    numpy_images = images.numpy()
-    numpy_labels = labels.numpy()
-    img = numpy_images[0]
-    label = numpy_labels[0]
-    img = img.astype(numpy.uint8)
-    im = Image.fromarray(img)
-    im.save(join(logdir.replace('logs', 'ex'), f'img{i}_{label}.jpg'))
-    print(img, label)
-    i += 1
-    exit()
-exit()
+
+# saving example images
+# i = 0
+# for images, labels in test.take(test_size):  # only take first element of dataset
+#     numpy_images = images.numpy()
+#     numpy_labels = labels.numpy()
+#     img = numpy_images[0]
+#     label = numpy_labels[0]
+#     label = label[0]
+#     label = 'excluded' if label == 0.0 else 'included'
+#     img = img.astype(numpy.uint8)
+#     im = Image.fromarray(img)
+#     im.save(join(logdir.replace('logs', 'ex'), f'img{i}_{label}.jpg'))
+#     print(img, label)
+#     i += 1
+# exit()
 
 # defining model
 print('defining model...')
@@ -158,13 +158,6 @@ print('all results saved.')
 
 # testing model on test split
 print('testing model on test split...')
-
-# loading the model
-print('loading model...')
-model = load_model(save_path)
-
-# testing the model
-print('testing model performance on test data set...')
 
 # starting precision/recall/accuracy instances
 precision = Precision()
