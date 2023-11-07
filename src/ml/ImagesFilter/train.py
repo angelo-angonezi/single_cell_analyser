@@ -40,7 +40,7 @@ save_path = 'Z:\\pycharm_projects\\single_cell_analyser\\data\\nucleus_detection
 train_ratio = 0.7
 val_ratio = 0.2
 test_ratio = 0.1
-epochs = 5
+epochs = 1
 
 ######################################################################
 # running training
@@ -68,6 +68,7 @@ test_size = int(data_len * test_ratio)
 
 # getting data splits
 print('getting data splits...')
+# TODO: change this to structure in folder and grab them by the same data taker function
 train = data.take(train_size)
 val = data.skip(train_size).take(val_size)
 test = data.skip(train_size+val_size).take(test_size)
@@ -98,7 +99,7 @@ model = Sequential()
 
 # adding layers
 print('adding layers...')
-model.add(Conv2D(16, (3, 3), 1, activation='relu', input_shape=(256, 256, 3)))
+model.add(Conv2D(16, (3, 3), 1, activation='relu', input_shape=(IMAGE_HEIGHT, IMAGE_WIDTH, 3)))
 model.add(MaxPooling2D())
 model.add(Conv2D(32, (3, 3), 1, activation='relu'))
 model.add(MaxPooling2D())

@@ -13,7 +13,11 @@ print('initializing...')  # noqa
 print('importing required libraries...')  # noqa
 from os import listdir
 from cv2 import imread
+from os.path import join
+from src.utils.aux_funcs import IMAGE_WIDTH
+from src.utils.aux_funcs import IMAGE_HEIGHT
 from tensorflow.keras.models import load_model
+from tensorflow.keras.utils import image_dataset_from_directory
 print('all required libraries successfully imported.')  # noqa
 
 ######################################################################
@@ -30,18 +34,30 @@ data_path = 'Z:\\pycharm_projects\\single_cell_analyser\\data\\nucleus_detection
 # getting data
 files = listdir(data_path)
 
-# loading the model
-print('loading model...')
+# loading data
+print(f'loading data from folder "{data_path}"...')
+data = image_dataset_from_directory(directory=data_path,
+                                    color_mode='rgb',
+                                    batch_size=8,
+                                    image_size=(IMAGE_HEIGHT, IMAGE_WIDTH),
+                                    shuffle=False)
+
+# loading model
 model = load_model(model_path)
 
-# iterating over images
-for file in files:
+# getting data batches
+data_batches = data.as_numpy_iterator()
 
-    # opening current image
-    image = imread(file)
+# defining placeholder value for predictions
+predictions = []
 
-    # getting predictions for current image
-    predictions_raw = model.predict(image)
-    print(file, predictions_raw)
+# iterating over batches in data set
+for batch in data_batches:
+    X, y = batch
+    prediction = model.predict(X)
+    print(prediction)
+    exit()
+    predictions.extend(prediction)
 
+print(predictions)
 # end of current module
