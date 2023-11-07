@@ -23,6 +23,7 @@ print('all required libraries successfully imported.')  # noqa
 ######################################################################
 # defining global variables
 
+# TODO: add argsparser and main
 model_path = 'Z:\\pycharm_projects\\single_cell_analyser\\data\\nucleus_detection\\ImagesFilter\\models\\modelV1.h5'
 # model_path = 'Z:\\pycharm_projects\\single_cell_analyser\\data\\nucleus_detection\\ImagesFilter\\models\\modelV1.h5'
 data_path = 'Z:\\pycharm_projects\\single_cell_analyser\\data\\nucleus_detection\\ImagesFilter\\ex'

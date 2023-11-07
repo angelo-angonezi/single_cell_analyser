@@ -31,6 +31,9 @@ print('all required libraries successfully imported.')  # noqa
 
 ######################################################################
 # defining global variables
+
+# TODO: add argsparser and main
+
 data_path = 'Z:\\pycharm_projects\\single_cell_analyser\\data\\nucleus_detection\\ImagesFilter\\imgs\\dataset'
 # data_path = 'Z:\\pycharm_projects\\single_cell_analyser\\data\\nucleus_detection\\ImagesFilter\\imgs\\dataset'
 logdir = 'Z:\\pycharm_projects\\single_cell_analyser\\data\\nucleus_detection\\ImagesFilter\\logs'
