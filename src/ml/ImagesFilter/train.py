@@ -45,8 +45,43 @@ val_ratio = 0.2
 test_ratio = 0.1
 epochs = 1
 
+#####################################################################
+# argument parsing related functions
+
+
+def get_args_dict() -> dict:
+    """
+    Parses the arguments and returns a dictionary of the arguments.
+    :return: Dictionary. Represents the parsed arguments.
+    """
+    # defining program description
+    description = 'create data set description file module'
+
+    # creating a parser instance
+    parser = ArgumentParser(description=description)
+
+    # adding arguments to parser
+
+    # annotations file param
+    parser.add_argument('-a', '--annotations-file',
+                        dest='annotations_file',
+                        required=True,
+                        help='defines path to fornma nucleus output file (model output format).')
+
+    # output path param
+    parser.add_argument('-o', '--output-path',
+                        dest='output_path',
+                        required=True,
+                        help='defines path to output csv.')
+
+    # creating arguments dictionary
+    args_dict = vars(parser.parse_args())
+
+    # returning the arguments dictionary
+    return args_dict
+
 ######################################################################
-# running training
+# defining auxiliary functions
 
 # loading data
 print(f'loading data from folder "{data_path}"...')
@@ -192,4 +227,38 @@ print('Accuracy: ', accuracy_result)
 # printing execution message
 print('done!')
 
+######################################################################
+# defining main function
+
+
+def main():
+    """Runs main code."""
+    # getting args dict
+    args_dict = get_args_dict()
+
+    # getting annotations file param
+    annotations_file_path = args_dict['annotations_file']
+
+    # getting output path param
+    output_path = args_dict['output_path']
+
+    # printing execution parameters
+    print_execution_parameters(params_dict=args_dict)
+
+    # waiting for user input
+    # enter_to_continue()
+
+    # running create_dataset_description_file function
+    create_dataset_description_file(annotations_file_path=annotations_file_path,
+                                    output_path=output_path)
+
+######################################################################
+# running main function
+
+
+if __name__ == '__main__':
+    main()
+
+
+######################################################################
 # end of current module
