@@ -30,7 +30,9 @@ from numpy import count_nonzero
 from cv2 import IMREAD_GRAYSCALE
 from shutil import copy as sh_copy
 from numpy import zeros as np_zeroes
+from tensorflow import test as tf_test
 from scipy.optimize import linear_sum_assignment
+from tensorflow.keras.utils import image_dataset_from_directory
 
 # preventing "SettingWithoutCopyWarning" messages
 pd.options.mode.chained_assignment = None  # default='warn'
@@ -1222,6 +1224,43 @@ def get_image_confluence(df: DataFrame,
 
     # returning confluence
     return confluence
+
+
+def get_data_split(splits_folder: str,
+                   split: str,
+                   batch_size: int
+                   ):
+    # getting train/val/test paths
+    data_path = join(splits_folder,
+                     split)
+
+    # loading data
+    print(f'loading data from folder "{data_path}"...')
+    split_data = image_dataset_from_directory(directory=data_path,
+                                              labels='inferred',
+                                              label_mode='binary',
+                                              class_names=['excluded', 'included'],
+                                              color_mode='rgb',
+                                              batch_size=batch_size,
+                                              image_size=(IMAGE_HEIGHT, IMAGE_WIDTH),
+                                              shuffle=False)
+
+    # returning data
+    return split_data
+
+
+def normalize_data(data):
+    # normalizing data
+    normalized_data = data.map(lambda x, y: (x / 255, y))
+
+    # returning normalized data
+    return normalized_data
+
+
+def is_using_gpu() -> bool:
+    if tf_test.gpu_device_name():
+        return True
+    return False
 
 ######################################################################
 # end of current module

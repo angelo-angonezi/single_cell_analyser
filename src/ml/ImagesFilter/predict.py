@@ -14,6 +14,7 @@ print('importing required libraries...')  # noqa
 from os import listdir
 from cv2 import imread
 from os.path import join
+from argparse import ArgumentParser
 from src.utils.aux_funcs import IMAGE_WIDTH
 from src.utils.aux_funcs import IMAGE_HEIGHT
 from tensorflow.keras.models import load_model
