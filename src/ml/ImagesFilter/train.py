@@ -277,6 +277,11 @@ def main():
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
+    # checking gpu usage
+    using_gpu = is_using_gpu()
+    using_gpu_str = f'Using GPU: {using_gpu}'
+    print(using_gpu_str)
+
     # waiting for user input
     enter_to_continue()
 

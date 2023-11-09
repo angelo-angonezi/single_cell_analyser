@@ -11,14 +11,9 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-import tensorflow as tf
 from os.path import join
-from seaborn import lineplot
 from argparse import ArgumentParser
-from matplotlib import pyplot as plt
 from tensorflow.keras.metrics import Recall
-from src.utils.aux_funcs import IMAGE_WIDTH
-from src.utils.aux_funcs import IMAGE_HEIGHT
 from src.utils.aux_funcs import is_using_gpu
 from src.utils.aux_funcs import get_data_split
 from tensorflow.keras.metrics import Precision
@@ -27,8 +22,6 @@ from tensorflow.keras.models import load_model
 from src.utils.aux_funcs import enter_to_continue
 from tensorflow.keras.metrics import BinaryAccuracy
 from src.utils.aux_funcs import print_execution_parameters
-from tensorflow.keras.utils import image_dataset_from_directory
-from tensorflow.keras.utils import
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -154,6 +147,11 @@ def main():
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
+
+    # checking gpu usage
+    using_gpu = is_using_gpu()
+    using_gpu_str = f'Using GPU: {using_gpu}'
+    print(using_gpu_str)
 
     # waiting for user input
     enter_to_continue()
