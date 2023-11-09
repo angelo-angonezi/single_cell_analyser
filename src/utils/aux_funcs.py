@@ -1258,9 +1258,11 @@ def normalize_data(data):
 
 
 def is_using_gpu() -> bool:
-    if tf_test.gpu_device_name():
-        return True
-    return False
+    # getting gpu usage bool
+    using_gpu = tf_test.gpu_device_name()
+
+    # returning gpu usage bool
+    return using_gpu
 
 ######################################################################
 # end of current module
