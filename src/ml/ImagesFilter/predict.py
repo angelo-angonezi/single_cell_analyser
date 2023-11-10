@@ -11,23 +11,20 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-from os import listdir
-from os.path import join
 from argparse import ArgumentParser
-from src.utils.aux_funcs import IMAGE_WIDTH
-from src.utils.aux_funcs import IMAGE_HEIGHT
+from tensorflow.keras.metrics import Recall
+from src.utils.aux_funcs import is_using_gpu
+from src.utils.aux_funcs import get_data_split
+from tensorflow.keras.metrics import Precision
+from src.utils.aux_funcs import normalize_data
 from tensorflow.keras.models import load_model
+from src.utils.aux_funcs import enter_to_continue
+from tensorflow.keras.metrics import BinaryAccuracy
+from src.utils.aux_funcs import print_execution_parameters
+from src.utils.aux_funcs import get_specific_files_in_folder
 from tensorflow.keras.utils import image_dataset_from_directory
 print('all required libraries successfully imported.')  # noqa
 
-######################################################################
-# defining global variables
-
-# TODO: add argsparser and main
-model_path = 'Z:\\pycharm_projects\\single_cell_analyser\\data\\nucleus_detection\\ImagesFilter\\models\\modelV1.h5'
-# model_path = 'Z:\\pycharm_projects\\single_cell_analyser\\data\\nucleus_detection\\ImagesFilter\\models\\modelV1.h5'
-data_path = 'Z:\\pycharm_projects\\single_cell_analyser\\data\\nucleus_detection\\ImagesFilter\\ex'
-# data_path = 'Z:\\pycharm_projects\\single_cell_analyser\\data\\nucleus_detection\\ImagesFilter\\ex'
 #####################################################################
 # argument parsing related functions
 
@@ -38,24 +35,36 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'create data set description file module'
+    description = 'ImagesFilter predict module'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
 
     # adding arguments to parser
 
-    # annotations file param
-    parser.add_argument('-a', '--annotations-file',
-                        dest='annotations_file',
+    # images folder param
+    parser.add_argument('-i', '--images-folder',
+                        dest='images_path',
                         required=True,
-                        help='defines path to fornma nucleus output file (model output format).')
+                        help='defines path to folder containing images to be predicted.')
 
-    # output path param
-    parser.add_argument('-o', '--output-path',
-                        dest='output_path',
+    # images extension param
+    parser.add_argument('-e', '--extension',
+                        dest='extension',
                         required=True,
-                        help='defines path to output csv.')
+                        help='defines images extension (.png, .jpg, .tif).')
+
+    # batch size param
+    parser.add_argument('-b', '--batch-size',
+                        dest='batch_size',
+                        required=True,
+                        help='defines batch size.')
+
+    # model path param
+    parser.add_argument('-m', '--model-path',
+                        dest='model_path',
+                        required=True,
+                        help='defines path to trained model (.h5 file)')
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -67,37 +76,62 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-# getting data
-files = listdir(data_path)
+def run_model(model,
+              data,
+              ):
+    # defining starter for current_index
+    current_index = 0
 
-# loading data
-print(f'loading data from folder "{data_path}"...')
-data = image_dataset_from_directory(directory=data_path,
-                                    color_mode='rgb',
-                                    batch_size=8,
-                                    image_size=(IMAGE_HEIGHT, IMAGE_WIDTH),
-                                    shuffle=False)
+    # getting test batches
+    test_batches = data.as_numpy_iterator()
 
-# loading model
-model = load_model(model_path)
+    # iterating over batches in test data set
+    for batch in test_batches:
+        current_input, y = batch
+        yhat = model.predict(current_input)
+        precision.update_state(y, yhat)
+        recall.update_state(y, yhat)
+        accuracy.update_state(y, yhat)
 
-# getting data batches
-data_batches = data.as_numpy_iterator()
+    # getting results
+    precision_result = precision.result()
+    recall_result = recall.result()
+    accuracy_result = accuracy.result()
 
-# defining placeholder value for predictions
-predictions_list = []
+    # printing results
+    print('Precision: ', precision_result)
+    print('Recall: ', recall_result)
+    print('Accuracy: ', accuracy_result)
 
-# iterating over batches in data set
-for batch in data_batches:
-    X, y = batch
-    current_predictions = model.predict(X)
-    current_predictions_list = current_predictions.tolist()
-    predictions_list.extend(current_predictions_list)
 
-# removing elements from list in list
-predictions_list = [f[0] for f in predictions_list]
+def image_filter_predict(images_folder: str,
+                         extension: str,
+                         batch_size: int,
+                         model_path: str
+                         ) -> None:
+    # loading data
+    print(f'loading data from folder "{images_folder}"...')
+    predict_data = image_dataset_from_directory(directory=images_folder,
+                                                batch_size=batch_size,
+                                                image_size=(IMAGE_HEIGHT, IMAGE_WIDTH),
+                                                shuffle=False)
 
-print(predictions_list)
+    # getting images in folder
+    images_list = get_specific_files_in_folder(path_to_folder=images_folder,
+                                               extension=extension)
+
+    # normalizing data to 0-1 scale
+    print('normalizing data...')
+    predict_data = normalize_data(data=predict_data)
+
+    # loading model
+    print('loading model...')
+    model = load_model(model_path)
+
+    # running model on test split
+    print('testing model...')
+    run_model(model=model,
+              data=predict_data)
 
 ######################################################################
 # defining main function
@@ -108,21 +142,34 @@ def main():
     # getting args dict
     args_dict = get_args_dict()
 
-    # getting annotations file param
-    annotations_file_path = str(args_dict['annotations_file'])
+    # getting images folder param
+    images_folder = str(args_dict['images_folder'])
+
+    # getting images extension param
+    extension = str(args_dict['extension'])
+
+    # getting batch size param
+    batch_size = int(args_dict['batch_size'])
 
     # getting output path param
-    output_path = str(args_dict['output_path'])
+    model_path = str(args_dict['model_path'])
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
-    # waiting for user input
-    # enter_to_continue()
+    # checking gpu usage
+    using_gpu = is_using_gpu()
+    using_gpu_str = f'Using GPU: {using_gpu}'
+    print(using_gpu_str)
 
-    # running create_dataset_description_file function
-    create_dataset_description_file(annotations_file_path=annotations_file_path,
-                                    output_path=output_path)
+    # waiting for user input
+    enter_to_continue()
+
+    # running image_filter_test function
+    image_filter_predict(images_folder=images_folder,
+                         extension=extension,
+                         batch_size=batch_size,
+                         model_path=model_path)
 
 ######################################################################
 # running main function

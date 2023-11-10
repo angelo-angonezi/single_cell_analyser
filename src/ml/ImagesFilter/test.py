@@ -136,11 +136,11 @@ def main():
     # getting args dict
     args_dict = get_args_dict()
 
-    # getting output path param
+    # getting dataset path param
     dataset_path = str(args_dict['dataset_path'])
 
     # getting batch size param
-    batch_size = str(args_dict['batch_size'])
+    batch_size = int(args_dict['batch_size'])
 
     # getting output path param
     model_path = str(args_dict['model_path'])

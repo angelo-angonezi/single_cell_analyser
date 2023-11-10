@@ -259,7 +259,7 @@ def main():
     # getting args dict
     args_dict = get_args_dict()
 
-    # getting output path param
+    # getting dataset path param
     dataset_path = str(args_dict['dataset_path'])
 
     # getting output path param
