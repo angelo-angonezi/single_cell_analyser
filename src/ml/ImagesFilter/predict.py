@@ -12,7 +12,6 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 from os import listdir
-from cv2 import imread
 from os.path import join
 from argparse import ArgumentParser
 from src.utils.aux_funcs import IMAGE_WIDTH
@@ -110,10 +109,10 @@ def main():
     args_dict = get_args_dict()
 
     # getting annotations file param
-    annotations_file_path = args_dict['annotations_file']
+    annotations_file_path = str(args_dict['annotations_file'])
 
     # getting output path param
-    output_path = args_dict['output_path']
+    output_path = str(args_dict['output_path'])
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)

@@ -260,19 +260,19 @@ def main():
     args_dict = get_args_dict()
 
     # getting output path param
-    dataset_path = args_dict['dataset_path']
+    dataset_path = str(args_dict['dataset_path'])
 
     # getting output path param
-    learning_rate = args_dict['learning_rate']
+    learning_rate = float(args_dict['learning_rate'])
 
     # getting output path param
-    epochs = args_dict['epochs']
+    epochs = int(args_dict['epochs'])
 
     # getting batch size param
-    batch_size = args_dict['batch_size']
+    batch_size = int(args_dict['batch_size'])
 
     # getting output path param
-    model_path = args_dict['model_path']
+    model_path = str(args_dict['model_path'])
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)

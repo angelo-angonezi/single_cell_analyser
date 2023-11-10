@@ -137,13 +137,13 @@ def main():
     args_dict = get_args_dict()
 
     # getting output path param
-    dataset_path = args_dict['dataset_path']
+    dataset_path = str(args_dict['dataset_path'])
 
     # getting batch size param
-    batch_size = args_dict['batch_size']
+    batch_size = str(args_dict['batch_size'])
 
     # getting output path param
-    model_path = args_dict['model_path']
+    model_path = str(args_dict['model_path'])
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
