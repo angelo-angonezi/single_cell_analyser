@@ -142,7 +142,7 @@ def main():
     # getting batch size param
     batch_size = int(args_dict['batch_size'])
 
-    # getting output path param
+    # getting model path param
     model_path = str(args_dict['model_path'])
 
     # printing execution parameters

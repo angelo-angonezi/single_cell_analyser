@@ -11,18 +11,17 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
+from cv2 import imread
+from os.path import join
+from pandas import concat
+from pandas import DataFrame
 from argparse import ArgumentParser
-from tensorflow.keras.metrics import Recall
 from src.utils.aux_funcs import is_using_gpu
-from src.utils.aux_funcs import get_data_split
-from tensorflow.keras.metrics import Precision
-from src.utils.aux_funcs import normalize_data
 from tensorflow.keras.models import load_model
 from src.utils.aux_funcs import enter_to_continue
-from tensorflow.keras.metrics import BinaryAccuracy
+from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
-from tensorflow.keras.utils import image_dataset_from_directory
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -54,17 +53,17 @@ def get_args_dict() -> dict:
                         required=True,
                         help='defines images extension (.png, .jpg, .tif).')
 
-    # batch size param
-    parser.add_argument('-b', '--batch-size',
-                        dest='batch_size',
-                        required=True,
-                        help='defines batch size.')
-
     # model path param
     parser.add_argument('-m', '--model-path',
                         dest='model_path',
                         required=True,
                         help='defines path to trained model (.h5 file)')
+
+    # output path param
+    parser.add_argument('-o', '--output-path',
+                        dest='output_path',
+                        required=True,
+                        help='defines path to .csv file which will contain predictions.')
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -76,62 +75,103 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def run_model(model,
-              data,
-              ):
-    # defining starter for current_index
-    current_index = 0
-
-    # getting test batches
-    test_batches = data.as_numpy_iterator()
-
-    # iterating over batches in test data set
-    for batch in test_batches:
-        current_input, y = batch
-        yhat = model.predict(current_input)
-        precision.update_state(y, yhat)
-        recall.update_state(y, yhat)
-        accuracy.update_state(y, yhat)
-
-    # getting results
-    precision_result = precision.result()
-    recall_result = recall.result()
-    accuracy_result = accuracy.result()
-
-    # printing results
-    print('Precision: ', precision_result)
-    print('Recall: ', recall_result)
-    print('Accuracy: ', accuracy_result)
-
-
-def image_filter_predict(images_folder: str,
-                         extension: str,
-                         batch_size: int,
-                         model_path: str
-                         ) -> None:
-    # loading data
-    print(f'loading data from folder "{images_folder}"...')
-    predict_data = image_dataset_from_directory(directory=images_folder,
-                                                batch_size=batch_size,
-                                                image_size=(IMAGE_HEIGHT, IMAGE_WIDTH),
-                                                shuffle=False)
-
-    # getting images in folder
-    images_list = get_specific_files_in_folder(path_to_folder=images_folder,
-                                               extension=extension)
-
-    # normalizing data to 0-1 scale
-    print('normalizing data...')
-    predict_data = normalize_data(data=predict_data)
-
+def get_predictions_df(model_path: str,
+                       images_folder: str,
+                       extension: str,
+                       output_path: str
+                       ) -> DataFrame:
+    """
+    Given a path to a trained model, and a path
+    to a folder containing images, runs model
+    and returns a predictions data frame of
+    following structure:
+    |   image    | prediction |
+    | img01.jpg  |  included  |
+    | img02.jpg  |  excluded  |
+    ...
+    """
     # loading model
     print('loading model...')
     model = load_model(model_path)
 
-    # running model on test split
-    print('testing model...')
-    run_model(model=model,
-              data=predict_data)
+    # getting images in folder
+    print(f'getting images in folder "{images_folder}"...')
+    images_list = get_specific_files_in_folder(path_to_folder=images_folder,
+                                               extension=extension)
+
+    # defining placeholder value for dfs list
+    dfs_list = []
+
+    # getting images num
+    images_num = len(images_list)
+
+    # defining starter for current index
+    current_index = 1
+
+    # iterating over images in images list
+    for image in images_list:
+
+        # printing progress message
+        base_string = 'analysing image #INDEX# of #TOTAL#'
+        print_progress_message(base_string=base_string,
+                               index=current_index,
+                               total=images_num)
+
+        # getting current image path
+        current_path = join(images_folder,
+                            image)
+
+        # opening current image
+        current_image = imread(current_path)
+
+        # normalizing current image
+        current_image = current_image / 255
+
+        # getting current image prediction
+        current_prediction = model.predict(current_image)
+
+        # assembling current image dict
+        current_dict = {'image': image,
+                        'prediction': current_prediction}
+
+        # assembling current image df
+        current_df = DataFrame(current_dict,
+                               index=[0])
+
+        # appending current df to dfs list
+        dfs_list.append(current_df)
+
+        # updating current index
+        current_index += 1
+
+    # concatenating dfs in dfs list
+    final_df = concat(dfs_list,
+                      ignore_index=True)
+
+    # returning final df
+    return final_df
+
+
+def image_filter_predict(images_folder: str,
+                         extension: str,
+                         model_path: str,
+                         output_path: str
+                         ) -> None:
+    # getting predictions df
+    print('getting predictions df...')
+    predictions_df = get_predictions_df(model_path=model_path,
+                                        images_folder=images_folder,
+                                        extension=extension,
+                                        output_path=output_path)
+
+    # saving predictions df
+    print('saving predictions df...')
+    predictions_df.to_csv(output_path,
+                          index=False)
+
+    # printing execution message
+    print('analysis complete!')
+    print(f'results saved to "{output_path}".')
 
 ######################################################################
 # defining main function
@@ -148,11 +188,11 @@ def main():
     # getting images extension param
     extension = str(args_dict['extension'])
 
-    # getting batch size param
-    batch_size = int(args_dict['batch_size'])
+    # getting model path param
+    model_path = str(args_dict['model_path'])
 
     # getting output path param
-    model_path = str(args_dict['model_path'])
+    output_path = str(args_dict['output_path'])
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
@@ -168,8 +208,8 @@ def main():
     # running image_filter_test function
     image_filter_predict(images_folder=images_folder,
                          extension=extension,
-                         batch_size=batch_size,
-                         model_path=model_path)
+                         model_path=model_path,
+                         output_path=output_path)
 
 ######################################################################
 # running main function
