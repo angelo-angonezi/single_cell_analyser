@@ -15,18 +15,18 @@ import tensorflow as tf
 from os.path import join
 from seaborn import lineplot
 from pandas import DataFrame
+from keras.layers import Dense
+from keras.layers import Conv2D
+from keras.layers import Flatten
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
-from tensorflow.keras.layers import Dense
-from tensorflow.keras.layers import Conv2D
-from tensorflow.keras.layers import Flatten
+from keras.layers import MaxPooling2D
 from src.utils.aux_funcs import IMAGE_WIDTH
 from src.utils.aux_funcs import IMAGE_HEIGHT
 from src.utils.aux_funcs import is_using_gpu
+from keras.engine.sequential import Sequential
 from src.utils.aux_funcs import normalize_data
-from tensorflow.keras.models import Sequential
 from src.utils.aux_funcs import get_data_split
-from tensorflow.keras.layers import MaxPooling2D
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
@@ -107,7 +107,7 @@ def get_base_model(learning_rate: float):
 
     # compiling model
     print('compiling model...')
-    model.compile(tf.keras.optimizers.Adam(learning_rate=1e-3),
+    model.compile(tf.keras.optimizers.Adam(learning_rate=learning_rate),
                   loss=tf.losses.BinaryCrossentropy(),
                   metrics=['accuracy'])
 
@@ -191,13 +191,14 @@ def image_filter_train(dataset_path: str,
                        ) -> None:
     # getting subfolder paths
     splits_path = join(dataset_path,
-                       'splits')
+                       'splits_bak')
 
     # getting logdir path
     logdir = join(dataset_path,
                   'logs')
 
     # getting data splits
+    # TODO: add data augmentation
     train_data = get_data_split(splits_folder=splits_path,
                                 split='train',
                                 batch_size=batch_size)

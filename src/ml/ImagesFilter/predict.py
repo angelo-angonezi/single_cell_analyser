@@ -15,6 +15,7 @@ from cv2 import imread
 from os.path import join
 from pandas import concat
 from pandas import DataFrame
+from numpy import expand_dims
 from argparse import ArgumentParser
 from src.utils.aux_funcs import is_using_gpu
 from tensorflow.keras.models import load_model
@@ -43,7 +44,7 @@ def get_args_dict() -> dict:
 
     # images folder param
     parser.add_argument('-i', '--images-folder',
-                        dest='images_path',
+                        dest='images_folder',
                         required=True,
                         help='defines path to folder containing images to be predicted.')
 
@@ -78,7 +79,6 @@ def get_args_dict() -> dict:
 def get_predictions_df(model_path: str,
                        images_folder: str,
                        extension: str,
-                       output_path: str
                        ) -> DataFrame:
     """
     Given a path to a trained model, and a path
@@ -125,14 +125,23 @@ def get_predictions_df(model_path: str,
         current_image = imread(current_path)
 
         # normalizing current image
-        current_image = current_image / 255
+        normalized_image = current_image / 255
+
+        # expending dims (required to enter Sequential model)
+        expanded_image = expand_dims(normalized_image, 0)
 
         # getting current image prediction
-        current_prediction = model.predict(current_image)
+        current_prediction_list = model.predict(expanded_image)
+
+        # extracting current prediction from list
+        current_prediction = current_prediction_list[0]
+
+        # converting prediction to string
+        current_prediction_str = 'included' if current_prediction == 1.0 else 'excluded'
 
         # assembling current image dict
         current_dict = {'image': image,
-                        'prediction': current_prediction}
+                        'prediction': current_prediction_str}
 
         # assembling current image df
         current_df = DataFrame(current_dict,
@@ -161,8 +170,7 @@ def image_filter_predict(images_folder: str,
     print('getting predictions df...')
     predictions_df = get_predictions_df(model_path=model_path,
                                         images_folder=images_folder,
-                                        extension=extension,
-                                        output_path=output_path)
+                                        extension=extension)
 
     # saving predictions df
     print('saving predictions df...')
