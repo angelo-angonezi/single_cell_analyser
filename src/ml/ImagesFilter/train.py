@@ -99,7 +99,7 @@ def get_base_model(learning_rate: float):
     # getting resnet base model
     from keras.applications import ResNet50
     pretrained_model = ResNet50(include_top=False,
-                                input_shape=(IMAGE_HEIGHT, IMAGE_WIDTH, 1),
+                                input_shape=input_shape,
                                 pooling='avg',
                                 classes=2,
                                 weights='imagenet')
@@ -119,6 +119,10 @@ def get_base_model(learning_rate: float):
     #model.add(Flatten())
     #model.add(Dense(256, activation='relu'))
     #model.add(Dense(1, activation='sigmoid'))
+    model.add(pretrained_model)
+    model.add(Flatten())
+    model.add(Dense(512, activation='relu'))
+    model.add(Dense(1, activation='softmax'))
 
     # defining optimizer
     #from keras.optimizers import SGD
@@ -222,6 +226,8 @@ def image_filter_train(dataset_path: str,
     train_data = get_data_split(splits_folder=splits_path,
                                 split='train',
                                 batch_size=batch_size)
+    #print(train_data.class_names)
+    #exit()
     val_data = get_data_split(splits_folder=splits_path,
                               split='val',
                               batch_size=batch_size)
