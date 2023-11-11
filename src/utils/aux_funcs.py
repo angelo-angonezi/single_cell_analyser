@@ -1240,7 +1240,7 @@ def get_data_split(splits_folder: str,
                                               labels='inferred',
                                               label_mode='binary',
                                               class_names=['excluded', 'included'],
-                                              color_mode='rgb',
+                                              color_mode='grayscale',
                                               batch_size=batch_size,
                                               image_size=(IMAGE_HEIGHT, IMAGE_WIDTH),
                                               shuffle=False)

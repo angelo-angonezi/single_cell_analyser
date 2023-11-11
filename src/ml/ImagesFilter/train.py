@@ -95,7 +95,7 @@ def get_base_model(learning_rate: float):
 
     # adding layers
     print('adding layers...')
-    model.add(Conv2D(16, (3, 3), 1, activation='relu', input_shape=(IMAGE_HEIGHT, IMAGE_WIDTH, 3)))
+    model.add(Conv2D(16, (3, 3), 1, activation='relu', input_shape=(IMAGE_HEIGHT, IMAGE_WIDTH, 1)))
     model.add(MaxPooling2D())
     model.add(Conv2D(32, (3, 3), 1, activation='relu'))
     model.add(MaxPooling2D())
@@ -105,9 +105,14 @@ def get_base_model(learning_rate: float):
     model.add(Dense(256, activation='relu'))
     model.add(Dense(1, activation='sigmoid'))
 
+    # defining optimizer
+    #from keras.optimizers import SGD
+    #optimizer = SGD(lr=learning_rate)
+    optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
+
     # compiling model
     print('compiling model...')
-    model.compile(tf.keras.optimizers.Adam(learning_rate=learning_rate),
+    model.compile(optimizer=optimizer,
                   loss=tf.losses.BinaryCrossentropy(),
                   metrics=['accuracy'])
 
@@ -191,7 +196,7 @@ def image_filter_train(dataset_path: str,
                        ) -> None:
     # getting subfolder paths
     splits_path = join(dataset_path,
-                       'splits_bak')
+                       'splits')
 
     # getting logdir path
     logdir = join(dataset_path,
