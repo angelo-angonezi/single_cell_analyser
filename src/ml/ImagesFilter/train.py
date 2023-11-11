@@ -89,21 +89,36 @@ def get_args_dict() -> dict:
 
 
 def get_base_model(learning_rate: float):
+    # defining model input
+    input_shape = (IMAGE_HEIGHT, IMAGE_WIDTH, 3)
+
     # defining model
     print('defining model...')
     model = Sequential()
 
+    # getting resnet base model
+    from keras.applications import ResNet50
+    pretrained_model = ResNet50(include_top=False,
+                                input_shape=(IMAGE_HEIGHT, IMAGE_WIDTH, 1),
+                                pooling='avg',
+                                classes=2,
+                                weights='imagenet')
+
+    # setting resnet layers as untrainable
+    for layer in pretrained_model.layers:
+        layer.trainable=False
+
     # adding layers
     print('adding layers...')
-    model.add(Conv2D(16, (3, 3), 1, activation='relu', input_shape=(IMAGE_HEIGHT, IMAGE_WIDTH, 1)))
-    model.add(MaxPooling2D())
-    model.add(Conv2D(32, (3, 3), 1, activation='relu'))
-    model.add(MaxPooling2D())
-    model.add(Conv2D(16, (3, 3), 1, activation='relu'))
-    model.add(MaxPooling2D())
-    model.add(Flatten())
-    model.add(Dense(256, activation='relu'))
-    model.add(Dense(1, activation='sigmoid'))
+    #model.add(Conv2D(16, (3, 3), 1, activation='relu', input_shape=input_shape))
+    #model.add(MaxPooling2D())
+    #model.add(Conv2D(32, (3, 3), 1, activation='relu'))
+    #model.add(MaxPooling2D())
+    #model.add(Conv2D(16, (3, 3), 1, activation='relu'))
+    #model.add(MaxPooling2D())
+    #model.add(Flatten())
+    #model.add(Dense(256, activation='relu'))
+    #model.add(Dense(1, activation='sigmoid'))
 
     # defining optimizer
     #from keras.optimizers import SGD
