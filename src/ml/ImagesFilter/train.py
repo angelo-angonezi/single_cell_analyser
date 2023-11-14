@@ -106,7 +106,7 @@ def get_base_model(learning_rate: float):
 
     # setting resnet layers as untrainable
     for layer in pretrained_model.layers:
-        layer.trainable=False
+        layer.trainable = False
 
     # adding layers
     print('adding layers...')
@@ -122,7 +122,7 @@ def get_base_model(learning_rate: float):
     model.add(pretrained_model)
     model.add(Flatten())
     model.add(Dense(512, activation='relu'))
-    model.add(Dense(1, activation='softmax'))
+    model.add(Dense(1, activation='sigmoid'))
 
     # defining optimizer
     #from keras.optimizers import SGD
