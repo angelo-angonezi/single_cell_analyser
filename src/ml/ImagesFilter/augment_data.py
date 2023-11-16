@@ -15,13 +15,19 @@ from cv2 import imread
 from cv2 import rotate
 from cv2 import imwrite
 from os.path import join
+from cv2 import INTER_AREA
 from cv2 import ROTATE_180
+from cv2 import resize as cv_resize
 from argparse import ArgumentParser
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
 print('all required libraries successfully imported.')  # noqa
+
+#####################################################################
+# defining global variables
+INPUT_SHAPE = (512, 512)
 
 #####################################################################
 # argument parsing related functions
@@ -58,6 +64,14 @@ def get_args_dict() -> dict:
                         required=True,
                         help='defines path to folder which will contain augmented images.')
 
+    # resize param
+    parser.add_argument('-r', '--resize',
+                        dest='resize',
+                        action='store_true',
+                        required=False,
+                        default=False,
+                        help='defines whether or not to resize images.')
+
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
 
@@ -70,7 +84,8 @@ def get_args_dict() -> dict:
 
 def augment_image(image_name: str,
                   images_folder: str,
-                  output_folder: str
+                  output_folder: str,
+                  resize: bool
                   ) -> None:
     # getting current image path
     image_path = join(images_folder,
@@ -79,12 +94,13 @@ def augment_image(image_name: str,
     # opening current image
     open_image = imread(image_path)
 
-    # resizing image
-    from cv2 import resize
-    from cv2 import INTER_AREA
-    open_image = resize(open_image,
-                        (512, 512),
-                        interpolation=INTER_AREA)
+    # checking resize toggle
+    if resize:
+
+        # resizing image
+        open_image = cv_resize(open_image,
+                               (512, 512),
+                               interpolation=INTER_AREA)
 
     # rotating image
     rotated_image = rotate(open_image,
@@ -111,7 +127,8 @@ def augment_image(image_name: str,
 
 def augment_data(images_folder: str,
                  extension: str,
-                 output_folder: str
+                 output_folder: str,
+                 resize: bool
                  ) -> None:
     # getting images in input folder
     images = get_specific_files_in_folder(path_to_folder=images_folder,
@@ -143,7 +160,8 @@ def augment_data(images_folder: str,
         # augmenting current image
         augment_image(image_name=image,
                       images_folder=images_folder,
-                      output_folder=output_folder)
+                      output_folder=output_folder,
+                      resize=resize)
 
         # updating current_image_index
         current_image_index += 1
@@ -171,16 +189,20 @@ def main():
     # getting output folder param
     output_folder = str(args_dict['output_folder'])
 
+    # getting resize param
+    resize = args_dict['resize']
+
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running image_filter_test function
     augment_data(images_folder=images_folder,
                  extension=extension,
-                 output_folder=output_folder)
+                 output_folder=output_folder,
+                 resize=resize)
 
 ######################################################################
 # running main function
