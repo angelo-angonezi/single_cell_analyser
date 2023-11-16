@@ -17,8 +17,8 @@ from pandas import concat
 from pandas import DataFrame
 from numpy import expand_dims
 from argparse import ArgumentParser
+from keras.models import load_model
 from src.utils.aux_funcs import is_using_gpu
-from tensorflow.keras.models import load_model
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters

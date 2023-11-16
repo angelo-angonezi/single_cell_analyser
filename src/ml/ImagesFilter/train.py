@@ -16,13 +16,9 @@ from os.path import join
 from seaborn import lineplot
 from pandas import DataFrame
 from keras.layers import Dense
-from keras.layers import Conv2D
 from keras.layers import Flatten
-from keras.optimizers import SGD
-from keras.layers import Resizing
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
-from keras.layers import MaxPooling2D
 from keras.losses import BinaryCrossentropy
 from src.utils.aux_funcs import IMAGE_WIDTH
 from src.utils.aux_funcs import IMAGE_HEIGHT
@@ -55,7 +51,13 @@ def get_args_dict() -> dict:
     parser.add_argument('-d', '--dataset-folder',
                         dest='dataset_path',
                         required=True,
-                        help='defines path to folder containing annotated data.')
+                        help='defines path to dataset folder (containing logs and splits dirs).')
+
+    # splits folder param
+    parser.add_argument('-s', '--splits-folder',
+                        dest='splits_folder',
+                        required=True,
+                        help='defines splits folder name ("splits_unbalanced", "splits_balanced"...).')
 
     # learning rate param
     parser.add_argument('-l', '--learning-rate',
@@ -209,6 +211,7 @@ def generate_history_plot(dataset_folder: str,
 
 
 def image_filter_train(dataset_path: str,
+                       splits_folder: str,
                        learning_rate: float,
                        epochs: int,
                        batch_size: int,
@@ -216,22 +219,23 @@ def image_filter_train(dataset_path: str,
                        ) -> None:
     # getting subfolder paths
     splits_path = join(dataset_path,
-                       'splits')
+                       splits_folder)
 
     # getting logdir path
     logdir = join(dataset_path,
                   'logs')
 
     # getting data splits
-    # TODO: add data augmentation
     train_data = get_data_split(splits_folder=splits_path,
                                 split='train',
                                 batch_size=batch_size)
-    #print(train_data.class_names)
-    #exit()
     val_data = get_data_split(splits_folder=splits_path,
                               split='val',
                               batch_size=batch_size)
+
+    # printing found classes
+    classes_str = f'Classes: {train_data.class_names}'
+    print(classes_str)
 
     # normalizing data to 0-1 scale
     print('normalizing data...')
@@ -290,6 +294,9 @@ def main():
     # getting dataset path param
     dataset_path = str(args_dict['dataset_path'])
 
+    # getting splits folder param
+    splits_folder = str(args_dict['splits_folder'])
+
     # getting output path param
     learning_rate = float(args_dict['learning_rate'])
 
@@ -315,6 +322,7 @@ def main():
 
     # running image_filter_train function
     image_filter_train(dataset_path=dataset_path,
+                       splits_folder=splits_folder,
                        learning_rate=learning_rate,
                        epochs=epochs,
                        batch_size=batch_size,
