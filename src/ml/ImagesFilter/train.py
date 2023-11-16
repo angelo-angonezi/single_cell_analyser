@@ -17,8 +17,10 @@ from seaborn import lineplot
 from pandas import DataFrame
 from keras.layers import Dense
 from keras.layers import Flatten
+from keras.optimizers import Adam
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
+from keras.callbacks import TensorBoard
 from keras.losses import BinaryCrossentropy
 from src.utils.aux_funcs import IMAGE_WIDTH
 from src.utils.aux_funcs import IMAGE_HEIGHT
@@ -95,7 +97,7 @@ def get_args_dict() -> dict:
 
 def get_base_model(learning_rate: float):
     # defining model input
-    input_shape = (IMAGE_HEIGHT, IMAGE_WIDTH, 3)
+    input_shape = (512, 512, 3)
 
     # defining model
     print('defining model...')
@@ -117,13 +119,12 @@ def get_base_model(learning_rate: float):
     print('adding layers...')
     model.add(pretrained_model)
     model.add(Flatten())
-    model.add(Dense(1024, activation='relu'))
-    model.add(Dense(512, activation='relu'))
+    model.add(Dense(256, activation='relu'))
+    model.add(Dense(64, activation='relu'))
     model.add(Dense(1, activation='sigmoid'))
 
     # defining optimizer
-    #optimizer = SGD(lr=learning_rate)
-    optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
+    optimizer = Adam(learning_rate=learning_rate)
 
     # defining loss function
     loss = BinaryCrossentropy()
@@ -208,6 +209,7 @@ def generate_history_plot(dataset_folder: str,
     title = 'Train History'
     plt.title(title)
     plt.savefig(fig_path)
+    print(f'plot/logs saved to {dataset_folder}.')
 
 
 def image_filter_train(dataset_path: str,
@@ -242,27 +244,11 @@ def image_filter_train(dataset_path: str,
     train_data = normalize_data(data=train_data)
     val_data = normalize_data(data=val_data)
 
-    # saving example images
-    # i = 0
-    # for images, labels in test.take(test_size):  # only take first element of dataset
-    #     numpy_images = images.numpy()
-    #     numpy_labels = labels.numpy()
-    #     img = numpy_images[0]
-    #     label = numpy_labels[0]
-    #     label = label[0]
-    #     label = 'excluded' if label == 0.0 else 'included'
-    #     img = img.astype(numpy.uint8)
-    #     im = Image.fromarray(img)
-    #     im.save(join(logdir.replace('logs', 'ex'), f'img{i}_{label}.jpg'))
-    #     print(img, label)
-    #     i += 1
-    # exit()
-
     # getting model
     model = get_base_model(learning_rate=learning_rate)
 
     # defining callback
-    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
+    tensorboard_callback = TensorBoard(log_dir=logdir)
 
     # training model (and saving history)
     train_history = train_model(model=model,

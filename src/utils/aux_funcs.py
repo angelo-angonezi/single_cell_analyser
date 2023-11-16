@@ -1242,7 +1242,7 @@ def get_data_split(splits_folder: str,
                                               class_names=['excluded', 'included'],
                                               color_mode='rgb',
                                               batch_size=batch_size,
-                                              image_size=(IMAGE_HEIGHT, IMAGE_WIDTH),
+                                              image_size=(512, 512),
                                               shuffle=False)
 
     # returning data

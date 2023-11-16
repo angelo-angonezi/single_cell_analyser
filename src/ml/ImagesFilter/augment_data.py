@@ -79,6 +79,13 @@ def augment_image(image_name: str,
     # opening current image
     open_image = imread(image_path)
 
+    # resizing image
+    from cv2 import resize
+    from cv2 import INTER_AREA
+    open_image = resize(open_image,
+                        (512, 512),
+                        interpolation=INTER_AREA)
+
     # rotating image
     rotated_image = rotate(open_image,
                            ROTATE_180)
@@ -168,7 +175,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running image_filter_test function
     augment_data(images_folder=images_folder,
