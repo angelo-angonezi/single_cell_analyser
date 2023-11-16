@@ -18,9 +18,12 @@ from pandas import DataFrame
 from keras.layers import Dense
 from keras.layers import Conv2D
 from keras.layers import Flatten
+from keras.optimizers import SGD
+from keras.layers import Resizing
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 from keras.layers import MaxPooling2D
+from keras.losses import BinaryCrossentropy
 from src.utils.aux_funcs import IMAGE_WIDTH
 from src.utils.aux_funcs import IMAGE_HEIGHT
 from src.utils.aux_funcs import is_using_gpu
@@ -110,30 +113,27 @@ def get_base_model(learning_rate: float):
 
     # adding layers
     print('adding layers...')
-    #model.add(Conv2D(16, (3, 3), 1, activation='relu', input_shape=input_shape))
-    #model.add(MaxPooling2D())
-    #model.add(Conv2D(32, (3, 3), 1, activation='relu'))
-    #model.add(MaxPooling2D())
-    #model.add(Conv2D(16, (3, 3), 1, activation='relu'))
-    #model.add(MaxPooling2D())
-    #model.add(Flatten())
-    #model.add(Dense(256, activation='relu'))
-    #model.add(Dense(1, activation='sigmoid'))
     model.add(pretrained_model)
     model.add(Flatten())
+    model.add(Dense(1024, activation='relu'))
     model.add(Dense(512, activation='relu'))
     model.add(Dense(1, activation='sigmoid'))
 
     # defining optimizer
-    #from keras.optimizers import SGD
     #optimizer = SGD(lr=learning_rate)
     optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
+
+    # defining loss function
+    loss = BinaryCrossentropy()
+
+    # defining metrics
+    metrics = ['accuracy']
 
     # compiling model
     print('compiling model...')
     model.compile(optimizer=optimizer,
-                  loss=tf.losses.BinaryCrossentropy(),
-                  metrics=['accuracy'])
+                  loss=loss,
+                  metrics=metrics)
 
     # printing model summary
     print('printing model summary...')
@@ -149,6 +149,7 @@ def train_model(model,
                 epochs,
                 callback
                 ):
+    # training model (and storing history)
     print('training model...')
     train_history = model.fit(train_data,
                               epochs=epochs,
