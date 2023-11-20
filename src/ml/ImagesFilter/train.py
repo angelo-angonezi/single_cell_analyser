@@ -18,6 +18,7 @@ from seaborn import lineplot
 from pandas import DataFrame
 from keras.layers import Dense
 from keras.layers import Flatten
+from keras.optimizers import SGD
 from keras.optimizers import Adam
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
@@ -122,6 +123,7 @@ def get_base_model(learning_rate: float):
 
     # defining optimizer
     optimizer = Adam(learning_rate=learning_rate)
+    # optimizer = SGD(learning_rate=learning_rate)
 
     # defining loss function
     loss = BinaryCrossentropy()
@@ -201,12 +203,19 @@ def generate_history_plot(dataset_folder: str,
              y='value',
              hue='variable')
 
-    # saving figure
-    fig_path = join(save_path)
+    # setting x ticks
+    epochs = df['epoch'].unique()
+    x_ticks = [e + 1 for e in epochs]
+    plt.xticks(x_ticks)
+
+    # setting plot title
     title = 'Train History'
     plt.title(title)
+
+    # saving figure
+    fig_path = join(save_path)
     plt.savefig(fig_path)
-    print(f'plot/logs saved to {dataset_folder}.')
+    print(f'plot/logs saved to "{dataset_folder}".')
 
 
 def image_filter_train(dataset_path: str,

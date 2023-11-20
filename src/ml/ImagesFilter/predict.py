@@ -124,6 +124,8 @@ def get_predictions_df(model_path: str,
         # opening current image
         current_image = imread(current_path)
 
+        # TODO: add resize here, if required
+
         # normalizing current image
         normalized_image = current_image / 255
 
