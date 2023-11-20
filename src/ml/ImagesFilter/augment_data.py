@@ -186,7 +186,7 @@ def augment_data(images_folder: str,
     images_num = len(images)
 
     # setting number of modifications
-    mods_num = 8  # imwrite calls count inside augment_image
+    mods_num = 12  # imwrite calls count inside augment_image
     final_imgs_num = images_num * mods_num
 
     # printing execution message
@@ -214,11 +214,9 @@ def augment_data(images_folder: str,
         # updating current_image_index
         current_image_index += 1
 
-        exit()
-
     # printing execution message
     print('augmentation complete!')
-    print(f'final data set now contains {final_imgs_num} images.')
+    print(f'augmented data set now contains {final_imgs_num} images.')
     print(f'results saved to "{output_folder}".')
 
 ######################################################################
