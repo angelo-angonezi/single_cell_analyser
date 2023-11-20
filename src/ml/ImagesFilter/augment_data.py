@@ -120,35 +120,57 @@ def augment_image(image_name: str,
                            1)
 
     # defining alpha and beta
-    alpha = 1.1  # Contrast control
-    beta = 5  # Brightness control
+    alpha_d = 0.9  # Contrast control
+    beta_d = -2  # Brightness control
+    alpha_u = 1.1  # Contrast control
+    beta_u = 5  # Brightness control
 
     # getting contrast/brightness changed image
-    o_contrast_image = convertScaleAbs(open_image,
-                                       alpha=alpha,
-                                       beta=beta)
+    od_contrast_image = convertScaleAbs(open_image,
+                                        alpha=alpha_d,
+                                        beta=beta_d)
 
-    r_contrast_image = convertScaleAbs(rotated_image,
-                                       alpha=alpha,
-                                       beta=beta)
+    rd_contrast_image = convertScaleAbs(rotated_image,
+                                        alpha=alpha_d,
+                                        beta=beta_d)
 
-    v_contrast_image = convertScaleAbs(v_flipped_image,
-                                       alpha=alpha,
-                                       beta=beta)
+    vd_contrast_image = convertScaleAbs(v_flipped_image,
+                                        alpha=alpha_d,
+                                        beta=beta_d)
 
-    h_contrast_image = convertScaleAbs(h_flipped_image,
-                                       alpha=alpha,
-                                       beta=beta)
+    hd_contrast_image = convertScaleAbs(h_flipped_image,
+                                        alpha=alpha_d,
+                                        beta=beta_d)
+
+    ou_contrast_image = convertScaleAbs(open_image,
+                                        alpha=alpha_u,
+                                        beta=beta_u)
+
+    ru_contrast_image = convertScaleAbs(rotated_image,
+                                        alpha=alpha_u,
+                                        beta=beta_u)
+
+    vu_contrast_image = convertScaleAbs(v_flipped_image,
+                                        alpha=alpha_u,
+                                        beta=beta_u)
+
+    hu_contrast_image = convertScaleAbs(h_flipped_image,
+                                        alpha=alpha_u,
+                                        beta=beta_u)
 
     # saving images
     imwrite(save_path.replace('.jpg', '_o.jpg'), open_image)
     imwrite(save_path.replace('.jpg', '_r.jpg'), rotated_image)
     imwrite(save_path.replace('.jpg', '_v.jpg'), v_flipped_image)
     imwrite(save_path.replace('.jpg', '_h.jpg'), h_flipped_image)
-    imwrite(save_path.replace('.jpg', '_oc.jpg'), o_contrast_image)
-    imwrite(save_path.replace('.jpg', '_rc.jpg'), r_contrast_image)
-    imwrite(save_path.replace('.jpg', '_vc.jpg'), v_contrast_image)
-    imwrite(save_path.replace('.jpg', '_hc.jpg'), h_contrast_image)
+    imwrite(save_path.replace('.jpg', '_od.jpg'), od_contrast_image)
+    imwrite(save_path.replace('.jpg', '_rd.jpg'), rd_contrast_image)
+    imwrite(save_path.replace('.jpg', '_vd.jpg'), vd_contrast_image)
+    imwrite(save_path.replace('.jpg', '_hd.jpg'), hd_contrast_image)
+    imwrite(save_path.replace('.jpg', '_ou.jpg'), ou_contrast_image)
+    imwrite(save_path.replace('.jpg', '_ru.jpg'), ru_contrast_image)
+    imwrite(save_path.replace('.jpg', '_vu.jpg'), vu_contrast_image)
+    imwrite(save_path.replace('.jpg', '_hu.jpg'), hu_contrast_image)
 
 
 def augment_data(images_folder: str,
