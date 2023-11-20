@@ -1,4 +1,5 @@
 # ImagesFilter train module
+import random
 
 print('initializing...')  # noqa
 
@@ -11,8 +12,8 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-import tensorflow as tf
 from os.path import join
+from random import randint
 from seaborn import lineplot
 from pandas import DataFrame
 from keras.layers import Dense
@@ -22,8 +23,6 @@ from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 from keras.callbacks import TensorBoard
 from keras.losses import BinaryCrossentropy
-from src.utils.aux_funcs import IMAGE_WIDTH
-from src.utils.aux_funcs import IMAGE_HEIGHT
 from src.utils.aux_funcs import is_using_gpu
 from keras.engine.sequential import Sequential
 from src.utils.aux_funcs import normalize_data
@@ -119,8 +118,6 @@ def get_base_model(learning_rate: float):
     print('adding layers...')
     model.add(pretrained_model)
     model.add(Flatten())
-    model.add(Dense(256, activation='relu'))
-    model.add(Dense(64, activation='relu'))
     model.add(Dense(1, activation='sigmoid'))
 
     # defining optimizer

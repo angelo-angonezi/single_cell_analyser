@@ -20,15 +20,12 @@ from cv2 import ROTATE_180
 from cv2 import convertScaleAbs
 from cv2 import resize as cv_resize
 from argparse import ArgumentParser
+from src.utils.aux_funcs import IMAGE_SIZE
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
 print('all required libraries successfully imported.')  # noqa
-
-#####################################################################
-# defining global variables
-INPUT_SHAPE = (512, 512)
 
 #####################################################################
 # argument parsing related functions
@@ -104,7 +101,7 @@ def augment_image(image_name: str,
 
         # resizing image
         open_image = cv_resize(open_image,
-                               (512, 512),
+                               IMAGE_SIZE,
                                interpolation=INTER_AREA)
 
     # getting rotated image

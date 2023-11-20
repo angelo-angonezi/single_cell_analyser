@@ -44,6 +44,7 @@ pd.options.mode.chained_assignment = None  # default='warn'
 IMAGE_WIDTH = 1408
 IMAGE_HEIGHT = 1040
 IMAGE_AREA = IMAGE_WIDTH * IMAGE_HEIGHT
+IMAGE_SIZE = (512, 512)
 
 ######################################################################
 # defining auxiliary functions
@@ -1235,6 +1236,7 @@ def get_data_split(splits_folder: str,
                      split)
 
     # loading data
+    print(f'getting {split} data...')
     print(f'loading data from folder "{data_path}"...')
     split_data = image_dataset_from_directory(directory=data_path,
                                               labels='inferred',
@@ -1242,8 +1244,8 @@ def get_data_split(splits_folder: str,
                                               class_names=['excluded', 'included'],
                                               color_mode='rgb',
                                               batch_size=batch_size,
-                                              image_size=(512, 512),
-                                              shuffle=False)
+                                              image_size=IMAGE_SIZE,
+                                              shuffle=True)
 
     # returning data
     return split_data
