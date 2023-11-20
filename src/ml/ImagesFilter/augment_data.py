@@ -17,6 +17,7 @@ from cv2 import imwrite
 from os.path import join
 from cv2 import INTER_AREA
 from cv2 import ROTATE_180
+from cv2 import convertScaleAbs
 from cv2 import resize as cv_resize
 from argparse import ArgumentParser
 from src.utils.aux_funcs import enter_to_continue
@@ -94,6 +95,10 @@ def augment_image(image_name: str,
     # opening current image
     open_image = imread(image_path)
 
+    # defining save path
+    save_path = join(output_folder,
+                     image_name)
+
     # checking resize toggle
     if resize:
 
@@ -102,27 +107,48 @@ def augment_image(image_name: str,
                                (512, 512),
                                interpolation=INTER_AREA)
 
-    # rotating image
+    # getting rotated image
     rotated_image = rotate(open_image,
                            ROTATE_180)
 
-    # flipping image vertically
+    # getting vertically flipped image
     v_flipped_image = flip(open_image,
                            0)
 
-    # flipping image horizontally
+    # getting horizontally flipped image
     h_flipped_image = flip(open_image,
                            1)
 
-    # defining save path
-    save_path = join(output_folder,
-                     image_name)
+    # defining alpha and beta
+    alpha = 1.1  # Contrast control
+    beta = 5  # Brightness control
+
+    # getting contrast/brightness changed image
+    o_contrast_image = convertScaleAbs(open_image,
+                                       alpha=alpha,
+                                       beta=beta)
+
+    r_contrast_image = convertScaleAbs(rotated_image,
+                                       alpha=alpha,
+                                       beta=beta)
+
+    v_contrast_image = convertScaleAbs(v_flipped_image,
+                                       alpha=alpha,
+                                       beta=beta)
+
+    h_contrast_image = convertScaleAbs(h_flipped_image,
+                                       alpha=alpha,
+                                       beta=beta)
 
     # saving images
     imwrite(save_path.replace('.jpg', '_o.jpg'), open_image)
     imwrite(save_path.replace('.jpg', '_r.jpg'), rotated_image)
-    imwrite(save_path.replace('.jpg', '_vf.jpg'), v_flipped_image)
-    imwrite(save_path.replace('.jpg', '_hf.jpg'), h_flipped_image)
+    imwrite(save_path.replace('.jpg', '_v.jpg'), v_flipped_image)
+    imwrite(save_path.replace('.jpg', '_h.jpg'), h_flipped_image)
+    imwrite(save_path.replace('.jpg', '_oc.jpg'), o_contrast_image)
+    imwrite(save_path.replace('.jpg', '_rc.jpg'), r_contrast_image)
+    imwrite(save_path.replace('.jpg', '_vc.jpg'), v_contrast_image)
+    imwrite(save_path.replace('.jpg', '_hc.jpg'), h_contrast_image)
 
 
 def augment_data(images_folder: str,
@@ -138,7 +164,7 @@ def augment_data(images_folder: str,
     images_num = len(images)
 
     # setting number of modifications
-    mods_num = 4
+    mods_num = 8  # imwrite calls count inside augment_image
     final_imgs_num = images_num * mods_num
 
     # printing execution message
@@ -165,6 +191,8 @@ def augment_data(images_folder: str,
 
         # updating current_image_index
         current_image_index += 1
+
+        exit()
 
     # printing execution message
     print('augmentation complete!')
