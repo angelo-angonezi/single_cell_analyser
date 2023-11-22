@@ -22,6 +22,7 @@ from cv2 import boxPoints
 from pandas import concat
 from pandas import Series
 from os.path import exists
+from cv2 import INTER_AREA
 from pandas import read_csv
 from pandas import DataFrame
 from cv2 import drawContours
@@ -29,10 +30,11 @@ from numpy import add as np_add
 from numpy import count_nonzero
 from cv2 import IMREAD_GRAYSCALE
 from shutil import copy as sh_copy
+from cv2 import resize as cv_resize
 from numpy import zeros as np_zeroes
 from tensorflow import test as tf_test
 from scipy.optimize import linear_sum_assignment
-from tensorflow.keras.utils import image_dataset_from_directory
+from keras.utils import image_dataset_from_directory
 
 # preventing "SettingWithoutCopyWarning" messages
 pd.options.mode.chained_assignment = None  # default='warn'
@@ -1231,6 +1233,11 @@ def get_data_split(splits_folder: str,
                    split: str,
                    batch_size: int
                    ):
+    """
+    Given a path to a folder and a split name,
+    returns given data split as tensorflow
+    data set.
+    """
     # getting train/val/test paths
     data_path = join(splits_folder,
                      split)
@@ -1255,6 +1262,12 @@ def get_data_split(splits_folder: str,
 
 
 def normalize_data(data):
+    """
+    Given a tensorflow image data set,
+    returns normalized data set so that
+    image pixel values range 0-1, instead
+    of 0-255.
+    """
     # normalizing data
     normalized_data = data.map(lambda x, y: (x / 255, y))
 
@@ -1263,9 +1276,41 @@ def normalize_data(data):
 
 
 def is_using_gpu() -> bool:
-    if tf_test.gpu_device_name():
+    """
+    Checks available GPUs and returns
+    True if GPU exists and is being used,
+    and False otherwise.
+    """
+    # getting available GPUs
+    available_gpus = tf_test.gpu_device_name()
+    print(available_gpus)
+    exit()
+
+    # checking available GPUs
+    if available_gpus:
+
+        # returning True if at least one available
         return True
+
+    # returning False, if None available
     return False
+
+
+def resize_image(open_image: ndarray,
+                 image_size: tuple
+                 ) -> ndarray:
+    """
+    Given an open image, returns resized
+    image, based on given image size tuple
+    (height, width).
+    """
+    # getting resized image
+    resized_image = cv_resize(open_image,
+                              image_size,
+                              interpolation=INTER_AREA)
+
+    # returning resized image
+    return resized_image
 
 ######################################################################
 # end of current module

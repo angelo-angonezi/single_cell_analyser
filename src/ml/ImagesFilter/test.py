@@ -12,15 +12,15 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 from os.path import join
+from keras.metrics import Recall
+from keras.models import load_model
+from keras.metrics import Precision
 from argparse import ArgumentParser
-from tensorflow.keras.metrics import Recall
+from keras.metrics import BinaryAccuracy
 from src.utils.aux_funcs import is_using_gpu
 from src.utils.aux_funcs import get_data_split
-from tensorflow.keras.metrics import Precision
 from src.utils.aux_funcs import normalize_data
-from tensorflow.keras.models import load_model
 from src.utils.aux_funcs import enter_to_continue
-from tensorflow.keras.metrics import BinaryAccuracy
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
 
@@ -75,12 +75,15 @@ def test_model(model,
     # starting precision/recall/accuracy instances
     precision = Precision()
     recall = Recall()
+    # TODO: change for other multi-class classifiers
     accuracy = BinaryAccuracy()
+    # f1_score =
 
     # getting test batches
     test_batches = test_data.as_numpy_iterator()
 
     # iterating over batches in test data set
+    # TODO: adapt code to find FP, TP, TN FN
     for batch in test_batches:
         current_input, y = batch
         yhat = model.predict(current_input)

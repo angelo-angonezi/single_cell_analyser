@@ -66,6 +66,14 @@ def get_args_dict() -> dict:
                         required=True,
                         help='defines path to .csv file which will contain predictions.')
 
+    # resize param
+    parser.add_argument('-r', '--resize',
+                        dest='resize',
+                        action='store_true',
+                        required=False,
+                        default=False,
+                        help='defines whether or not to resize images.')
+
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
 
@@ -79,6 +87,7 @@ def get_args_dict() -> dict:
 def get_predictions_df(model_path: str,
                        images_folder: str,
                        extension: str,
+                       resize: bool
                        ) -> DataFrame:
     """
     Given a path to a trained model, and a path
@@ -124,7 +133,11 @@ def get_predictions_df(model_path: str,
         # opening current image
         current_image = imread(current_path)
 
-        # TODO: add resize here, if required
+        # checking resize toggle
+        if resize:
+
+            # resizing image
+
 
         # normalizing current image
         normalized_image = current_image / 255
@@ -165,6 +178,7 @@ def get_predictions_df(model_path: str,
 
 def image_filter_predict(images_folder: str,
                          extension: str,
+                         resize: bool,
                          model_path: str,
                          output_path: str
                          ) -> None:
@@ -172,7 +186,8 @@ def image_filter_predict(images_folder: str,
     print('getting predictions df...')
     predictions_df = get_predictions_df(model_path=model_path,
                                         images_folder=images_folder,
-                                        extension=extension)
+                                        extension=extension,
+                                        resize=resize)
 
     # saving predictions df
     print('saving predictions df...')
@@ -204,6 +219,9 @@ def main():
     # getting output path param
     output_path = str(args_dict['output_path'])
 
+    # getting resize param
+    resize = bool(args_dict['resize'])
+
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
@@ -218,6 +236,7 @@ def main():
     # running image_filter_test function
     image_filter_predict(images_folder=images_folder,
                          extension=extension,
+                         resize=resize,
                          model_path=model_path,
                          output_path=output_path)
 

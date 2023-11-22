@@ -15,12 +15,11 @@ from cv2 import imread
 from cv2 import rotate
 from cv2 import imwrite
 from os.path import join
-from cv2 import INTER_AREA
 from cv2 import ROTATE_180
 from cv2 import convertScaleAbs
-from cv2 import resize as cv_resize
 from argparse import ArgumentParser
 from src.utils.aux_funcs import IMAGE_SIZE
+from src.utils.aux_funcs import resize_image
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
@@ -100,9 +99,8 @@ def augment_image(image_name: str,
     if resize:
 
         # resizing image
-        open_image = cv_resize(open_image,
-                               IMAGE_SIZE,
-                               interpolation=INTER_AREA)
+        open_image = resize_image(open_image=open_image,
+                                  image_size=IMAGE_SIZE)
 
     # getting rotated image
     rotated_image = rotate(open_image,
@@ -235,7 +233,7 @@ def main():
     output_folder = str(args_dict['output_folder'])
 
     # getting resize param
-    resize = args_dict['resize']
+    resize = bool(args_dict['resize'])
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
