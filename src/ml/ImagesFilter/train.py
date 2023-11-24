@@ -13,16 +13,18 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 from os.path import join
-from random import randint
 from seaborn import lineplot
 from pandas import DataFrame
 from keras.layers import Dense
+from keras.layers import Conv2D
 from keras.layers import Flatten
 from keras.optimizers import SGD
 from keras.optimizers import Adam
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 from keras.callbacks import TensorBoard
+from keras.applications import ResNet50
+from src.utils.aux_funcs import IMAGE_SIZE
 from keras.losses import BinaryCrossentropy
 from src.utils.aux_funcs import is_using_gpu
 from keras.engine.sequential import Sequential
@@ -95,29 +97,44 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_base_model(learning_rate: float):
+def get_resnet_layers(input_shape: tuple,
+                      learning_rate: float
+                      ) -> Sequential:
+    """
+    Given an input shape, and a learning
+    rate, returns resnet base layers.
+    """
+    # getting resnet base layers
+    base_layers = ResNet50(include_top=False,
+                           input_shape=input_shape,
+                           pooling='avg',
+                           classes=2,
+                           weights='imagenet')
+
+    # setting resnet layers as untrainable
+    for layer in base_layers.layers:
+        layer.trainable = False
+
+    # returning layers
+    return model
+
+
+def get_new_layers(learning_rate: float) -> Sequential:
+    """
+    Given a learning rate,
+    returns self made layers.
+    """
     # defining model input
-    input_shape = (512, 512, 3)
+    image_height, image_width = IMAGE_SIZE
+    input_shape = (image_height, image_width, 3)  # 3 because it is an RGB image
 
     # defining model
     print('defining model...')
     model = Sequential()
 
-    # getting resnet base model
-    from keras.applications import ResNet50
-    pretrained_model = ResNet50(include_top=False,
-                                input_shape=input_shape,
-                                pooling='avg',
-                                classes=2,
-                                weights='imagenet')
-
-    # setting resnet layers as untrainable
-    for layer in pretrained_model.layers:
-        layer.trainable = False
-
     # adding layers
     print('adding layers...')
-    model.add(pretrained_model)
+
     model.add(Flatten())
     model.add(Dense(1, activation='sigmoid'))
 
@@ -140,6 +157,70 @@ def get_base_model(learning_rate: float):
     # printing model summary
     print('printing model summary...')
     model.summary()
+
+    # returning model
+    return model
+
+
+def get_sequential_model(learning_rate: float,
+                         base_layers: str
+                         ) -> Sequential:
+    """
+    Given a model base and a learning rate,
+    returns compiled model.
+    """
+    # defining model input
+    image_height, image_width = IMAGE_SIZE
+    input_shape = (image_height, image_width, 3)  # 3 because it is an RGB image
+
+    # defining model
+    print('defining model...')
+    model = Sequential()
+
+    # adding layers
+    print('adding layers...')
+    if base_layers == 'resnet':
+        layers = get_resnet_layers(input_shape=input_shape,
+                                   learning_rate=learning_rate)
+
+    model.add(Flatten())
+    model.add(Dense(1, activation='sigmoid'))
+
+    # defining optimizer
+    optimizer = Adam(learning_rate=learning_rate)
+
+    # defining loss function
+    loss = BinaryCrossentropy()
+
+    # defining metrics
+    metrics = ['accuracy']
+
+    # compiling model
+    print('compiling model...')
+    model.compile(optimizer=optimizer,
+                  loss=loss,
+                  metrics=metrics)
+
+    # printing model summary
+    print('printing model summary...')
+    model.summary()
+
+    # returning model
+    return model
+
+    # defining placeholder value for model
+    model = None
+
+    # checking base
+    if base_layers == 'resnet':
+
+        # getting resnet model
+        model = get_resnet_layers()
+
+    elif base_layers == 'new':
+
+        # getting new model
+        model = get_new_layers()
 
     # returning model
     return model
@@ -251,7 +332,8 @@ def image_filter_train(dataset_path: str,
     val_data = normalize_data(data=val_data)
 
     # getting model
-    model = get_base_model(learning_rate=learning_rate)
+    model = get_sequential_model(learning_rate=learning_rate,
+                                 base_layers='resnet')
 
     # defining callback
     tensorboard_callback = TensorBoard(log_dir=logdir)

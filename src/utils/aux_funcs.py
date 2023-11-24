@@ -1283,8 +1283,6 @@ def is_using_gpu() -> bool:
     """
     # getting available GPUs
     available_gpus = tf_test.gpu_device_name()
-    print(available_gpus)
-    exit()
 
     # checking available GPUs
     if available_gpus:
@@ -1292,7 +1290,7 @@ def is_using_gpu() -> bool:
         # returning True if at least one available
         return True
 
-    # returning False, if None available
+    # returning False, if none available
     return False
 
 

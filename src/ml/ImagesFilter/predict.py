@@ -18,7 +18,9 @@ from pandas import DataFrame
 from numpy import expand_dims
 from argparse import ArgumentParser
 from keras.models import load_model
+from src.utils.aux_funcs import IMAGE_SIZE
 from src.utils.aux_funcs import is_using_gpu
+from src.utils.aux_funcs import resize_image
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
@@ -137,7 +139,8 @@ def get_predictions_df(model_path: str,
         if resize:
 
             # resizing image
-
+            current_image = resize_image(open_image=current_image,
+                                         image_size=IMAGE_SIZE)
 
         # normalizing current image
         normalized_image = current_image / 255

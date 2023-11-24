@@ -1,0 +1,6 @@
+# train
+python3 -m src.ml.ImagesFilter.augment_data -i ./data/nucleus_detection/ImagesFilter/splits/splits_balanced/train/included/ -e .jpg -o ./data/nucleus_detection/ImagesFilter/splits/splits_balanced_augmented/train/included/ -r
+python3 -m src.ml.ImagesFilter.augment_data -i ./data/nucleus_detection/ImagesFilter/splits/splits_balanced/train/excluded/ -e .jpg -o ./data/nucleus_detection/ImagesFilter/splits/splits_balanced_augmented/train/excluded/ -r
+# val
+python3 -m src.ml.ImagesFilter.augment_data -i ./data/nucleus_detection/ImagesFilter/splits/splits_balanced/val/included/ -e .jpg -o ./data/nucleus_detection/ImagesFilter/splits/splits_balanced_augmented/val/included/ -r
+python3 -m src.ml.ImagesFilter.augment_data -i ./data/nucleus_detection/ImagesFilter/splits/splits_balanced/val/excluded/ -e .jpg -o ./data/nucleus_detection/ImagesFilter/splits/splits_balanced_augmented/val/excluded/ -r
