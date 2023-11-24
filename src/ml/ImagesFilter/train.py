@@ -22,6 +22,7 @@ from keras.optimizers import SGD
 from keras.optimizers import Adam
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
+from keras.layers import MaxPooling2D
 from keras.callbacks import TensorBoard
 from keras.applications import ResNet50
 from src.utils.aux_funcs import IMAGE_SIZE
@@ -97,9 +98,7 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_resnet_layers(input_shape: tuple,
-                      learning_rate: float
-                      ) -> Sequential:
+def get_resnet_layers(input_shape: tuple) -> Sequential:
     """
     Given an input shape, and a learning
     rate, returns resnet base layers.
@@ -116,50 +115,43 @@ def get_resnet_layers(input_shape: tuple,
         layer.trainable = False
 
     # returning layers
-    return model
+    return base_layers
 
 
-def get_new_layers(learning_rate: float) -> Sequential:
+def get_new_layers(input_shape: tuple) -> Sequential:
     """
     Given a learning rate,
-    returns self made layers.
+    returns new made layers.
     """
-    # defining model input
-    image_height, image_width = IMAGE_SIZE
-    input_shape = (image_height, image_width, 3)  # 3 because it is an RGB image
+    # defining layers type
+    base_layers = Sequential()
 
-    # defining model
-    print('defining model...')
-    model = Sequential()
+    # defining CNN layers
 
-    # adding layers
-    print('adding layers...')
+    # first convolution + pooling (input layer)
+    base_layers.add(Conv2D(filters=16,
+                           kernel_size=(3, 3),
+                           strides=1,
+                           activation='relu',
+                           input_shape=input_shape))
+    base_layers.add(MaxPooling2D())
 
-    model.add(Flatten())
-    model.add(Dense(1, activation='sigmoid'))
+    # second convolution + pooling
+    base_layers.add(Conv2D(filters=32,
+                           kernel_size=(3, 3),
+                           strides=1,
+                           activation='relu'))
+    base_layers.add(MaxPooling2D())
 
-    # defining optimizer
-    optimizer = Adam(learning_rate=learning_rate)
-    # optimizer = SGD(learning_rate=learning_rate)
+    # second convolution + pooling
+    base_layers.add(Conv2D(filters=16,
+                           kernel_size=(3, 3),
+                           strides=1,
+                           activation='relu'))
+    base_layers.add(MaxPooling2D())
 
-    # defining loss function
-    loss = BinaryCrossentropy()
-
-    # defining metrics
-    metrics = ['accuracy']
-
-    # compiling model
-    print('compiling model...')
-    model.compile(optimizer=optimizer,
-                  loss=loss,
-                  metrics=metrics)
-
-    # printing model summary
-    print('printing model summary...')
-    model.summary()
-
-    # returning model
-    return model
+    # returning layers
+    return base_layers
 
 
 def get_sequential_model(learning_rate: float,
@@ -177,12 +169,20 @@ def get_sequential_model(learning_rate: float,
     print('defining model...')
     model = Sequential()
 
+    # getting base layers
+    if base_layers == 'resnet':
+
+        # getting resnet layers
+        layers = get_resnet_layers(input_shape=input_shape)
+
+    else:
+
+        # getting new layers
+        layers = get_new_layers(input_shape=input_shape)
+
     # adding layers
     print('adding layers...')
-    if base_layers == 'resnet':
-        layers = get_resnet_layers(input_shape=input_shape,
-                                   learning_rate=learning_rate)
-
+    model.add(layers)
     model.add(Flatten())
     model.add(Dense(1, activation='sigmoid'))
 
@@ -204,23 +204,6 @@ def get_sequential_model(learning_rate: float,
     # printing model summary
     print('printing model summary...')
     model.summary()
-
-    # returning model
-    return model
-
-    # defining placeholder value for model
-    model = None
-
-    # checking base
-    if base_layers == 'resnet':
-
-        # getting resnet model
-        model = get_resnet_layers()
-
-    elif base_layers == 'new':
-
-        # getting new model
-        model = get_new_layers()
 
     # returning model
     return model
