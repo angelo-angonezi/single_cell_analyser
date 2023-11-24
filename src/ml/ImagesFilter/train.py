@@ -1,5 +1,4 @@
 # ImagesFilter train module
-import random
 
 print('initializing...')  # noqa
 
@@ -18,7 +17,6 @@ from pandas import DataFrame
 from keras.layers import Dense
 from keras.layers import Conv2D
 from keras.layers import Flatten
-from keras.optimizers import SGD
 from keras.optimizers import Adam
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
@@ -98,11 +96,14 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_resnet_layers(input_shape: tuple) -> Sequential:
+def get_resnet_model(input_shape: tuple) -> Sequential:
     """
-    Given an input shape, and a learning
-    rate, returns resnet base layers.
+    Given an input shape, returns
+    resnet-based model.
     """
+    # defining base model
+    model = Sequential()
+
     # getting resnet base layers
     base_layers = ResNet50(include_top=False,
                            input_shape=input_shape,
@@ -114,44 +115,52 @@ def get_resnet_layers(input_shape: tuple) -> Sequential:
     for layer in base_layers.layers:
         layer.trainable = False
 
-    # returning layers
-    return base_layers
+    # flattening layer
+    model.add(Flatten())
+
+    # final dense layer
+    model.add(Dense(1, activation='sigmoid'))
+
+    # returning model
+    return model
 
 
-def get_new_layers(input_shape: tuple) -> Sequential:
+def get_new_model(input_shape: tuple) -> Sequential:
     """
-    Given a learning rate,
-    returns new made layers.
+    Given an input shape, returns
+    new self-made model.
     """
-    # defining layers type
-    base_layers = Sequential()
+    # defining base model
+    model = Sequential()
 
     # defining CNN layers
 
     # first convolution + pooling (input layer)
-    base_layers.add(Conv2D(filters=16,
-                           kernel_size=(3, 3),
-                           strides=1,
-                           activation='relu',
-                           input_shape=input_shape))
-    base_layers.add(MaxPooling2D())
+    model.add(Conv2D(filters=16,
+                     kernel_size=(3, 3),
+                     strides=1,
+                     activation='relu',
+                     input_shape=input_shape))
+    model.add(MaxPooling2D())
 
     # second convolution + pooling
-    base_layers.add(Conv2D(filters=32,
-                           kernel_size=(3, 3),
-                           strides=1,
-                           activation='relu'))
-    base_layers.add(MaxPooling2D())
+    model.add(Conv2D(filters=32,
+                     kernel_size=(3, 3),
+                     strides=1,
+                     activation='relu'))
+    model.add(MaxPooling2D())
 
-    # second convolution + pooling
-    base_layers.add(Conv2D(filters=16,
-                           kernel_size=(3, 3),
-                           strides=1,
-                           activation='relu'))
-    base_layers.add(MaxPooling2D())
+    # flattening layer
+    model.add(Flatten())
 
-    # returning layers
-    return base_layers
+    # mid-dense layers
+    # model.add(Dense(32, activation='relu'))
+
+    # final dense layer
+    model.add(Dense(1, activation='sigmoid'))
+
+    # returning model
+    return model
 
 
 def get_sequential_model(learning_rate: float,
@@ -165,26 +174,22 @@ def get_sequential_model(learning_rate: float,
     image_height, image_width = IMAGE_SIZE
     input_shape = (image_height, image_width, 3)  # 3 because it is an RGB image
 
-    # defining model
-    print('defining model...')
-    model = Sequential()
+    # getting model
+    print('getting model...')
+
+    # defining placeholder value for model
+    model = None
 
     # getting base layers
     if base_layers == 'resnet':
 
         # getting resnet layers
-        layers = get_resnet_layers(input_shape=input_shape)
+        model = get_resnet_model(input_shape=input_shape)
 
     else:
 
         # getting new layers
-        layers = get_new_layers(input_shape=input_shape)
-
-    # adding layers
-    print('adding layers...')
-    model.add(layers)
-    model.add(Flatten())
-    model.add(Dense(1, activation='sigmoid'))
+        model = get_new_model(input_shape=input_shape)
 
     # defining optimizer
     optimizer = Adam(learning_rate=learning_rate)
@@ -316,7 +321,7 @@ def image_filter_train(dataset_path: str,
 
     # getting model
     model = get_sequential_model(learning_rate=learning_rate,
-                                 base_layers='resnet')
+                                 base_layers='new')
 
     # defining callback
     tensorboard_callback = TensorBoard(log_dir=logdir)
