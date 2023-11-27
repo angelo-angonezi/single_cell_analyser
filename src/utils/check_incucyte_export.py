@@ -10,6 +10,7 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
+from os.path import join
 from argparse import ArgumentParser
 from src.utils.aux_funcs import spacer
 from src.utils.aux_funcs import enter_to_continue
@@ -34,18 +35,11 @@ def get_args_dict() -> dict:
 
     # adding arguments to parser
 
-    # phase images folder path param
-    parser.add_argument('-p', '--phase-folder-path',
-                        dest='phase_folder_path',
+    # input folder param
+    parser.add_argument('-i', '--input-folder',
+                        dest='input_folder',
                         type=str,
-                        help='defines path to folder containing phase images (.jpg)',
-                        required=True)
-
-    # red images folder path param
-    parser.add_argument('-r', '--red-folder-path',
-                        dest='red_folder_path',
-                        type=str,
-                        help='defines path to folder containing red images (.tif)',
+                        help='defines path to folder containing phase/red subfolders',
                         required=True)
 
     # creating arguments dictionary
@@ -95,14 +89,16 @@ def phase_matches_red(phase_images_folder: str,
     return match_bool
 
 
-def check_incucyte_export(phase_images_folder: str,
-                          red_images_folder: str
-                          ) -> None:
+def check_incucyte_export(input_folder: str) -> None:
     """
-    Given a path to phase/red folders, checks whether
-    all images have respective equivalents in each folder,
-    printing execution message as output.
+    Given a path to a folder containing phase/red subfolders,
+    checks whether all images have respective equivalents in
+    each folder, printing execution message as output.
     """
+    # getting phase/red subfolder
+    phase_images_folder = join(input_folder, 'phase')
+    red_images_folder = join(input_folder, 'red')
+
     # getting match bool
     images_match = phase_matches_red(phase_images_folder=phase_images_folder,
                                      red_images_folder=red_images_folder)
@@ -133,21 +129,17 @@ def main():
     # getting data from Argument Parser
     args_dict = get_args_dict()
 
-    # getting phase images folder param
-    phase_folder_path = args_dict['phase_folder_path']
-
-    # getting red images folder param
-    red_folder_path = args_dict['red_folder_path']
+    # getting input folder param
+    input_folder = args_dict['input_folder']
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running check_incucyte_export function
-    check_incucyte_export(phase_images_folder=phase_folder_path,
-                          red_images_folder=red_folder_path)
+    check_incucyte_export(input_folder=input_folder)
 
 ######################################################################
 # running main function
