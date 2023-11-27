@@ -16,9 +16,9 @@ from pandas import concat
 from pandas import Series
 from os.path import exists
 from pandas import read_csv
-from seaborn import barplot
-from seaborn import lineplot
 from pandas import DataFrame
+from seaborn import scatterplot
+from scipy.stats import pearsonr
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 from src.utils.aux_funcs import get_mask_area
@@ -256,13 +256,58 @@ def get_analysis_df(fornma_df: DataFrame,
     return analysis_df
 
 
+def plot_correlation(df: DataFrame,
+                     fornma_col: str,
+                     ebb_col: str
+                     ) -> None:
+    """
+    Given an analysis df, plots
+    given correlations (with R value).
+    """
+    # getting fornma/ebb values
+    fornma_values = df[fornma_col]
+    ebb_values = df[ebb_col]
+
+    # getting area (Pearson) correlation value
+    pearson_result = pearsonr(x=fornma_values,
+                              y=ebb_values)
+
+    # getting correlation and p values
+    corr_value, p_value = pearson_result
+
+    # plotting results
+    scatterplot(data=df,
+                x=fornma_col,
+                y=ebb_col)
+
+    # setting plot title
+    title = f'forNMAxEBB correlation plot (Pearson R: {corr_value} | p-value: {p_value})'
+    plt.title(title)
+
+    # showing plot
+    plt.show()
+
+
 def plot_area_correlation(df: DataFrame) -> None:
-    print(df)
-    exit()
+    """
+    Given an analysis df, plots
+    area correlations (with R value).
+    """
+    # plotting correlation
+    plot_correlation(df=df,
+                     fornma_col='fornma_area',
+                     ebb_col='ebb_area')
 
 
 def plot_nii_correlation(df: DataFrame) -> None:
-    pass
+    """
+    Given an analysis df, plots
+    NII correlations (with R value).
+    """
+    # plotting correlation
+    plot_correlation(df=df,
+                     fornma_col='fornma_nii',
+                     ebb_col='ebb_axis_ratio')
 
 
 def plot_fornma_correlations(input_path: str,
@@ -274,16 +319,20 @@ def plot_fornma_correlations(input_path: str,
     saving results in given output folder.
     """
     # getting fornma df
+    print('getting fornma df...')
     fornma_df = get_fornma_df(input_path=input_path)
 
     # getting analysis df
+    print('getting analysis df...')
     analysis_df = get_analysis_df(fornma_df=fornma_df,
                                   output_folder=output_folder)
 
     # plotting area correlation
+    print('plotting area correlation...')
     plot_area_correlation(df=analysis_df)
 
-    # plotting nii correlation
+    # plotting NII/axis_ratio correlation
+    print('plotting NII/axis_ratio correlation...')
     plot_nii_correlation(df=analysis_df)
 
     # printing execution message
@@ -308,7 +357,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running plot_fornma_correlations function
     plot_fornma_correlations(input_path=input_path,
