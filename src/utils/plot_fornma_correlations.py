@@ -357,7 +357,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running plot_fornma_correlations function
     plot_fornma_correlations(input_path=input_path,

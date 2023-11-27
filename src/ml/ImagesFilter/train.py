@@ -17,6 +17,7 @@ from pandas import DataFrame
 from keras.layers import Dense
 from keras.layers import Conv2D
 from keras.layers import Flatten
+from keras.optimizers import SGD
 from keras.optimizers import Adam
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
@@ -31,6 +32,7 @@ from src.utils.aux_funcs import normalize_data
 from src.utils.aux_funcs import get_data_split
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_execution_parameters
+from tensorflow.keras.optimizers.schedules import ExponentialDecay
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -50,20 +52,26 @@ def get_args_dict() -> dict:
 
     # adding arguments to parser
 
-    # dataset folder param
-    parser.add_argument('-d', '--dataset-folder',
-                        dest='dataset_path',
-                        required=True,
-                        help='defines path to dataset folder (containing logs and splits dirs).')
-
     # splits folder param
     parser.add_argument('-s', '--splits-folder',
                         dest='splits_folder',
                         required=True,
-                        help='defines splits folder name ("splits_unbalanced", "splits_balanced"...).')
+                        help='defines splits folder name (contains "train", "val" and "test" subfolders).')
+
+    # logs folder param
+    parser.add_argument('-l', '--logs-folder',
+                        dest='logs_folder',
+                        required=True,
+                        help='defines path to logs folder (will contain train logs and train history plot).')
+
+    # model path param
+    parser.add_argument('-m', '--model-path',
+                        dest='model_path',
+                        required=True,
+                        help='defines path to save model (.h5 file)')
 
     # learning rate param
-    parser.add_argument('-l', '--learning-rate',
+    parser.add_argument('-lr', '--learning-rate',
                         dest='learning_rate',
                         required=True,
                         help='defines learning rate.')
@@ -79,12 +87,6 @@ def get_args_dict() -> dict:
                         dest='batch_size',
                         required=True,
                         help='defines batch size.')
-
-    # model path param
-    parser.add_argument('-m', '--model-path',
-                        dest='model_path',
-                        required=True,
-                        help='defines path to save model (.h5 file)')
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -257,13 +259,13 @@ def get_history_df(history_dict):
     return history_df
 
 
-def generate_history_plot(dataset_folder: str,
+def generate_history_plot(logs_folder: str,
                           df: DataFrame
                           ) -> None:
     # getting save path
-    save_path = join(dataset_folder,
-                     'plots',
-                     'train_history.png')
+    save_name = 'train_history.png'
+    save_path = join(logs_folder,
+                     save_name)
 
     # plotting history
     print('plotting history...')
@@ -281,32 +283,26 @@ def generate_history_plot(dataset_folder: str,
     title = 'Train History'
     plt.title(title)
 
+    # setting y lim
+    plt.ylim(0.0, 1.0)
+
     # saving figure
     fig_path = join(save_path)
     plt.savefig(fig_path)
-    print(f'plot/logs saved to "{dataset_folder}".')
 
 
-def image_filter_train(dataset_path: str,
-                       splits_folder: str,
+def image_filter_train(splits_folder: str,
+                       logs_folder: str,
+                       model_path: str,
                        learning_rate: float,
                        epochs: int,
-                       batch_size: int,
-                       model_path: str
+                       batch_size: int
                        ) -> None:
-    # getting subfolder paths
-    splits_path = join(dataset_path,
-                       splits_folder)
-
-    # getting logdir path
-    logdir = join(dataset_path,
-                  'logs')
-
     # getting data splits
-    train_data = get_data_split(splits_folder=splits_path,
+    train_data = get_data_split(splits_folder=splits_folder,
                                 split='train',
                                 batch_size=batch_size)
-    val_data = get_data_split(splits_folder=splits_path,
+    val_data = get_data_split(splits_folder=splits_folder,
                               split='val',
                               batch_size=batch_size)
 
@@ -324,7 +320,7 @@ def image_filter_train(dataset_path: str,
                                  base_layers='new')
 
     # defining callback
-    tensorboard_callback = TensorBoard(log_dir=logdir)
+    tensorboard_callback = TensorBoard(log_dir=logs_folder)
 
     # training model (and saving history)
     train_history = train_model(model=model,
@@ -341,8 +337,11 @@ def image_filter_train(dataset_path: str,
     history_df = get_history_df(history_dict=train_history)
 
     # generating history plot
-    generate_history_plot(dataset_folder=dataset_path,
+    generate_history_plot(logs_folder=logs_folder,
                           df=history_df)
+
+    # printing execution message
+    print(f'plot/logs saved to "{logs_folder}".')
 
 ######################################################################
 # defining main function
@@ -353,11 +352,14 @@ def main():
     # getting args dict
     args_dict = get_args_dict()
 
-    # getting dataset path param
-    dataset_path = str(args_dict['dataset_path'])
-
     # getting splits folder param
     splits_folder = str(args_dict['splits_folder'])
+
+    # getting logs folder param
+    logs_folder = str(args_dict['logs_folder'])
+
+    # getting model path param
+    model_path = str(args_dict['model_path'])
 
     # getting output path param
     learning_rate = float(args_dict['learning_rate'])
@@ -367,9 +369,6 @@ def main():
 
     # getting batch size param
     batch_size = int(args_dict['batch_size'])
-
-    # getting model path param
-    model_path = str(args_dict['model_path'])
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
@@ -383,12 +382,12 @@ def main():
     enter_to_continue()
 
     # running image_filter_train function
-    image_filter_train(dataset_path=dataset_path,
-                       splits_folder=splits_folder,
+    image_filter_train(splits_folder=splits_folder,
+                       logs_folder=logs_folder,
+                       model_path=model_path,
                        learning_rate=learning_rate,
                        epochs=epochs,
-                       batch_size=batch_size,
-                       model_path=model_path)
+                       batch_size=batch_size)
 
 ######################################################################
 # running main function
