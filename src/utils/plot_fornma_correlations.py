@@ -239,14 +239,16 @@ def get_analysis_df(fornma_df: DataFrame,
     if exists(save_path):
 
         # reading analysis df
+        print('reading already existing analysis df...')
         analysis_df = read_csv(save_path)
-
     else:
 
         # creating analysis df
+        print('creating analysis df...')
         analysis_df = create_analysis_df(df=fornma_df)
 
         # saving analysis df
+        print('saving analysis df...')
         analysis_df.to_csv(save_path,
                            index=False)
 
