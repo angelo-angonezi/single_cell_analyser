@@ -1162,6 +1162,27 @@ def get_pixel_mask(row_data: Series,
     return base_img
 
 
+def get_mask_area(row_data: Series,
+                  style: str
+                  ) -> int:
+    """
+    Given an open image, and coordinates for OBB,
+    returns image with respective style overlay.
+    :param row_data: Series. Represents OBB coords data.
+    :param style: String. Represents an overlay style.
+    :return: Integer. Represents mask area.
+    """
+    # getting current pixel mask
+    current_mask = get_pixel_mask(row_data=row_data,
+                                  style=style)
+
+    # counting "1" pixels (== area occupied by mask)
+    mask_area = count_nonzero(current_mask == 1)
+
+    # returning mask area
+    return mask_area
+
+
 def add_area_col(df: DataFrame,
                  style: str
                  ) -> None:
@@ -1183,15 +1204,12 @@ def add_area_col(df: DataFrame,
     # iterating over df rows
     for row_index, row_data in df_rows:
 
-        # getting current row pixel mask
-        current_mask = get_pixel_mask(row_data=row_data,
-                                      style=style)
-
-        # counting "1" pixels (== area occupied by mask)
-        one_count = count_nonzero(current_mask == 1)
+        # getting current row mask area
+        current_mask_area = get_mask_area(row_data=row_data,
+                                          style=style)
 
         # updating current row area
-        df.at[row_index, area_col] = one_count
+        df.at[row_index, area_col] = current_mask_area
 
 
 def get_image_confluence(df: DataFrame,
