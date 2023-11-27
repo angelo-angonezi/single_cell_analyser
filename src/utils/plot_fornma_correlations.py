@@ -14,6 +14,7 @@ print('importing required libraries...')  # noqa
 from os.path import join
 from pandas import concat
 from pandas import Series
+from os.path import exists
 from pandas import read_csv
 from seaborn import barplot
 from seaborn import lineplot
@@ -49,6 +50,12 @@ def get_args_dict() -> dict:
                         dest='input_path',
                         required=True,
                         help='defines path to input file (fornma nucleus output .csv)')
+
+    # output folder param
+    parser.add_argument('-o', '--output-folder',
+                        dest='output_folder',
+                        required=True,
+                        help='defines path to folder which will contain output files.')
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -153,7 +160,7 @@ def get_fornma_df(input_path: str) -> DataFrame:
     return filtered_df
 
 
-def get_analysis_df(df: DataFrame) -> DataFrame:
+def create_analysis_df(df: DataFrame) -> DataFrame:
     """
     Given a fornma data frame,
     returns analysis data frame.
@@ -209,26 +216,67 @@ def get_analysis_df(df: DataFrame) -> DataFrame:
     return final_df
 
 
+def get_analysis_df(fornma_df: DataFrame,
+                    output_folder: str
+                    ) -> DataFrame:
+    """
+    Given a fornma data frame, and a path
+    to an output folder, checks whether analysis
+    df already exists in given output folder,
+    returning it if already existent, or creating
+    it based on fornma df and saving it to output
+    folder, otherwise.
+    """
+    # defining save path
+    save_name = 'analysis_df.csv'
+    save_path = join(output_folder,
+                     save_name)
+
+    # defining placeholder value for analysis df
+    analysis_df = None
+
+    # attempting to read analysis df
+    if exists(save_path):
+
+        # reading analysis df
+        analysis_df = read_csv(save_path)
+
+    else:
+
+        # creating analysis df
+        analysis_df = create_analysis_df(df=fornma_df)
+
+        # saving analysis df
+        analysis_df.to_csv(save_path,
+                           index=False)
+
+    # returning analysis df
+    return analysis_df
+
+
 def plot_area_correlation(df: DataFrame) -> None:
-    pass
+    print(df)
+    exit()
 
 
 def plot_nii_correlation(df: DataFrame) -> None:
     pass
 
 
-def plot_fornma_correlations(input_path: str) -> None:
+def plot_fornma_correlations(input_path: str,
+                             output_folder: str
+                             ) -> None:
     """
     Given a path to a fornma output file,
-    runs analysis and plots data on screen.
-    :param input_path: String. Represents a path to a file.
-    :return: None.
+    runs analysis and plots data on screen,
+    saving results in given output folder.
     """
     # getting fornma df
     fornma_df = get_fornma_df(input_path=input_path)
 
     # getting analysis df
-    analysis_df = get_analysis_df(df=fornma_df)
+    analysis_df = get_analysis_df(fornma_df=fornma_df,
+                                  output_folder=output_folder)
 
     # plotting area correlation
     plot_area_correlation(df=analysis_df)
@@ -249,16 +297,20 @@ def main():
     args_dict = get_args_dict()
 
     # getting input path
-    input_path = str(args_dict['input_path'])
+    input_path = args_dict['input_path']
+
+    # getting output folder
+    output_folder = args_dict['output_folder']
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running plot_fornma_correlations function
-    plot_fornma_correlations(input_path=input_path)
+    plot_fornma_correlations(input_path=input_path,
+                             output_folder=output_folder)
 
 ######################################################################
 # running main function
