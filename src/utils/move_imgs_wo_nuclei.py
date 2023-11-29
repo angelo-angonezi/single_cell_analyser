@@ -4,18 +4,19 @@ from os.path import join
 from shutil import copy as sh_copy
 
 # defining global variables
-BASE_FOLDER = '/home/angelo/dados/pycharm_projects/single_cell_analyser/data/ml/nucleus_detection/NucleusDetectorMerge'
+BASE_FOLDER = '/home/angelo/dados/pycharm_projects/single_cell_analyser/data/nucleus_detection/NucleusDetectorV2'
 
 FORNMA_OUTPUT_FOLDER = join(BASE_FOLDER,
+                            'annotations',
                             'fornma_output')
 
-RED = join(BASE_FOLDER, 'imgs', 'red')
-RED_FORNMA_FOUND = join(BASE_FOLDER, 'imgs', 'red_fornma_found')
-RED_FORNMA_MISSED = join(BASE_FOLDER, 'imgs', 'red_fornma_missed')
+RED = join(BASE_FOLDER, 'imgs', 'all_imgs', 'red')
+RED_FORNMA_FOUND = join(BASE_FOLDER, 'imgs', 'all_imgs', 'red_fornma_found')
+RED_FORNMA_MISSED = join(BASE_FOLDER, 'imgs', 'all_imgs', 'red_fornma_missed')
 
-PHASE = join(BASE_FOLDER, 'imgs', 'phase')
-PHASE_FORNMA_FOUND = join(BASE_FOLDER, 'imgs', 'phase_fornma_found')
-PHASE_FORNMA_MISSED = join(BASE_FOLDER, 'imgs', 'phase_fornma_missed')
+PHASE = join(BASE_FOLDER, 'imgs', 'all_imgs', 'phase')
+PHASE_FORNMA_FOUND = join(BASE_FOLDER, 'imgs', 'all_imgs', 'phase_fornma_found')
+PHASE_FORNMA_MISSED = join(BASE_FOLDER, 'imgs', 'all_imgs', 'phase_fornma_missed')
 
 # getting images found by forNMA
 FORNMA_FOUND_FILES = listdir(FORNMA_OUTPUT_FOLDER)

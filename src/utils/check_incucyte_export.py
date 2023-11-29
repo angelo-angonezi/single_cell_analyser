@@ -136,7 +136,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running check_incucyte_export function
     check_incucyte_export(input_folder=input_folder)

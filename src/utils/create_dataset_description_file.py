@@ -27,14 +27,160 @@ print('all required libraries successfully imported.')  # noqa
 
 SEED = 53
 TEST_SIZE = 0.3
-TREATMENT_DICT = {'A172_ERK_53BP1_11_08_22_apos_tratamento':
+AUTHOR_DICT = {'20_Karine_WB_curva_EGF_SALVO': 'Karine',
+               '6_Karine_populacional_1_EXP_SALVO': 'Karine',
+               'A172_ERK_53BP1_11_08_22_apos_tratamento': 'Karine',
+               'A172_ERK_53BP1_durante_tratamento': 'Karine',
+               'A172_ERK_53BP1_durante_tratamento_ultimas_leituras': 'Karine',
+               'A172_ERK_53BP1_varredura': 'Karine',
+               'A172_ERK_53bp1_Julieti_01_04_experimento_salvo': 'Julieti',
+               'A172_H2B_U251_H2B_ActD_TMZ_daphne_25_05_22': 'Daphne',
+               'A172_H2B_U251_H2B_ActD_TMZ_daphne': 'Daphne',
+               'ActD_TMZ_21_07_22_daphne_6h_6h': 'Daphne',
+               'MRC5_ERK_53BP1': 'Karine',
+               'PD_U87_ATF6_Fernanda_2': 'Fernanda',
+               'U87zeb1_53bp1_Thamiris_Pos_TMZ': 'Thamiris',
+               'inibid_autofagia_Solon_Henrique_u87_5_dias': 'Solon'}
+TREATMENT_DICT = {'20_Karine_WB_curva_EGF_SALVO':
                       {'A1': 'TMZ',
                        'A2': 'TMZ',
                        'A3': 'TMZ',
                        'B1': 'CTR',
                        'B2': 'CTR',
                        'B3': 'CTR'},
+                  '6_Karine_populacional_1_EXP_SALVO':
+                      {'B2': 'TMZ',
+                       'B3': 'TMZ',
+                       'B4': 'TMZ',
+                       'B5': 'TMZ',
+                       'B6': 'TMZ',
+                       'C2': 'CTR',
+                       'C3': 'CTR',
+                       'C4': 'CTR',
+                       'C5': 'CTR',
+                       'C6': 'CTR'},
+                  'A172_ERK_53BP1_11_08_22_apos_tratamento':
+                      {'B2': 'TMZ',
+                       'B3': 'TMZ',
+                       'B4': 'TMZ',
+                       'B5': 'TMZ',
+                       'B6': 'TMZ',
+                       'C2': 'CTR',
+                       'C3': 'CTR',
+                       'C4': 'CTR',
+                       'C5': 'CTR',
+                       'C6': 'CTR'},
+                  'A172_ERK_53BP1_durante_tratamento':
+                      {'B2': 'TMZ',
+                       'B3': 'TMZ',
+                       'B4': 'TMZ',
+                       'B5': 'TMZ',
+                       'B6': 'TMZ',
+                       'C2': 'CTR',
+                       'C3': 'CTR',
+                       'C4': 'CTR',
+                       'C5': 'CTR',
+                       'C6': 'CTR'},
+                  'A172_ERK_53BP1_durante_tratamento_ultimas_leituras':
+                      {'B2': 'TMZ',
+                       'B3': 'TMZ',
+                       'B4': 'TMZ',
+                       'B5': 'TMZ',
+                       'B6': 'TMZ',
+                       'C2': 'CTR',
+                       'C3': 'CTR',
+                       'C4': 'CTR',
+                       'C5': 'CTR',
+                       'C6': 'CTR'},
+                  'A172_ERK_53BP1_varredura':
+                      {'B2': 'TMZ',
+                       'B3': 'TMZ',
+                       'B4': 'TMZ',
+                       'B5': 'TMZ',
+                       'B6': 'TMZ',
+                       'C2': 'CTR',
+                       'C3': 'CTR',
+                       'C4': 'CTR',
+                       'C5': 'CTR',
+                       'C6': 'CTR'},
+                  'A172_ERK_53bp1_Julieti_01_04_experimento_salvo':
+                      {'B2': 'TMZ',
+                       'B3': 'TMZ',
+                       'B4': 'TMZ',
+                       'B5': 'TMZ',
+                       'B6': 'TMZ',
+                       'C2': 'CTR',
+                       'C3': 'CTR',
+                       'C4': 'CTR',
+                       'C5': 'CTR',
+                       'C6': 'CTR'},
+                  'A172_H2B_U251_H2B_ActD_TMZ_daphne_25_05_22':
+                      {'B2': 'TMZ',
+                       'B3': 'TMZ',
+                       'B4': 'TMZ',
+                       'B5': 'TMZ',
+                       'B6': 'TMZ',
+                       'C2': 'CTR',
+                       'C3': 'CTR',
+                       'C4': 'CTR',
+                       'C5': 'CTR',
+                       'C6': 'CTR'},
                   'A172_H2B_U251_H2B_ActD_TMZ_daphne':
+                      {'B2': 'TMZ',
+                       'B3': 'TMZ',
+                       'B4': 'TMZ',
+                       'B5': 'TMZ',
+                       'B6': 'TMZ',
+                       'C2': 'CTR',
+                       'C3': 'CTR',
+                       'C4': 'CTR',
+                       'C5': 'CTR',
+                       'C6': 'CTR'},
+                  'ActD_TMZ_21_07_22_daphne_6h_6h':
+                      {'B2': 'TMZ',
+                       'B3': 'TMZ',
+                       'B4': 'TMZ',
+                       'B5': 'TMZ',
+                       'B6': 'TMZ',
+                       'C2': 'CTR',
+                       'C3': 'CTR',
+                       'C4': 'CTR',
+                       'C5': 'CTR',
+                       'C6': 'CTR'},
+                  'MRC5_ERK_53BP1':
+                      {'B2': 'TMZ',
+                       'B3': 'TMZ',
+                       'B4': 'TMZ',
+                       'B5': 'TMZ',
+                       'B6': 'TMZ',
+                       'C2': 'CTR',
+                       'C3': 'CTR',
+                       'C4': 'CTR',
+                       'C5': 'CTR',
+                       'C6': 'CTR'},
+                  'PD_U87_ATF6_Fernanda_2':
+                      {'B2': 'TMZ',
+                       'B3': 'TMZ',
+                       'B4': 'TMZ',
+                       'B5': 'TMZ',
+                       'B6': 'TMZ',
+                       'C2': 'CTR',
+                       'C3': 'CTR',
+                       'C4': 'CTR',
+                       'C5': 'CTR',
+                       'C6': 'CTR'},
+                  'U87zeb1_53bp1_Thamiris_Pos_TMZ':
+                      {'B2': 'TMZ',
+                       'B3': 'TMZ',
+                       'B4': 'TMZ',
+                       'B5': 'TMZ',
+                       'B6': 'TMZ',
+                       'C2': 'CTR',
+                       'C3': 'CTR',
+                       'C4': 'CTR',
+                       'C5': 'CTR',
+                       'C6': 'CTR'},
+                  'inibid_autofagia_Solon_Henrique_u87_5_dias':
                       {'B2': 'TMZ',
                        'B3': 'TMZ',
                        'B4': 'TMZ',
@@ -137,13 +283,18 @@ def get_image_df(image_name: str,
     # getting current image field
     current_field = image_name_split[-3]
 
+    # getting current author
+    current_author = AUTHOR_DICT[current_experiment]
+
     # getting current image cell line
-    current_cell_line_dict = CELL_LINES_DICT[current_experiment]
-    current_cell_line = current_cell_line_dict[current_well]
+    # current_cell_line_dict = CELL_LINES_DICT[current_experiment]
+    # current_cell_line = current_cell_line_dict[current_well]
+    current_cell_line = 'aaa'
 
     # getting current image treatment
-    current_treatment_dict = TREATMENT_DICT[current_experiment]
-    current_treatment = current_treatment_dict[current_well]
+    # current_treatment_dict = TREATMENT_DICT[current_experiment]
+    # current_treatment = current_treatment_dict[current_well]
+    current_treatment = 'bbb'
 
     # getting current image confluence
     current_confluence = get_image_confluence(df=image_group,
@@ -152,6 +303,7 @@ def get_image_df(image_name: str,
     # assembling current image dict
     current_dict = {'img_name': image_name,
                     'experiment': current_experiment,
+                    'author': current_author,
                     'well': current_well,
                     'field': current_field,
                     'cell_line': current_cell_line,
@@ -167,15 +319,12 @@ def get_image_df(image_name: str,
     return current_df
 
 
-def get_base_dataset_df(input_file: str) -> DataFrame:
+def get_base_dataset_df(annotations_df: DataFrame) -> DataFrame:
     """
     Docstring.
     """
     # defining placeholder value for dfs list
     dfs_list = []
-
-    # reading annotations file
-    annotations_df = read_csv(input_file)
 
     # grouping df by image
     image_groups = annotations_df.groupby('img_file_name')
@@ -237,9 +386,13 @@ def create_dataset_description_file(annotations_file_path: str,
     """
     Docstring.
     """
-    # getting base df
     print('reading input file...')
-    base_df = get_base_dataset_df(input_file=annotations_file_path)
+    # reading annotations file
+    annotations_df = read_csv(annotations_file_path)
+    print(annotations_df)
+
+    # getting base df
+    base_df = get_base_dataset_df(annotations_df=annotations_df)
     print(base_df)
 
     # adding dataset (train/test) col
