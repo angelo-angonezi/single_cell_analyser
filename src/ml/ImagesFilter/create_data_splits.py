@@ -19,11 +19,11 @@ from cv2 import ROTATE_180
 from random import shuffle
 from cv2 import convertScaleAbs
 from argparse import ArgumentParser
+from random import seed as set_seed
 from src.utils.aux_funcs import IMAGE_SIZE
 from src.utils.aux_funcs import resize_image
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import copy_multiple_files
-from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
 print('all required libraries successfully imported.')  # noqa
@@ -34,6 +34,10 @@ print('all required libraries successfully imported.')  # noqa
 TRAIN_SPLIT = 0.6
 VAL_SPLIT = 0.1
 TEST_SPLIT = 0.3
+SEED = 53
+
+# setting seed (so that all executions result in same sample)
+set_seed(SEED)
 
 #####################################################################
 # argument parsing related functions
@@ -80,95 +84,6 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def augment_image(image_name: str,
-                  images_folder: str,
-                  output_folder: str,
-                  resize: bool
-                  ) -> None:
-    # getting current image path
-    image_path = join(images_folder,
-                      image_name)
-
-    # opening current image
-    open_image = imread(image_path)
-
-    # defining save path
-    save_path = join(output_folder,
-                     image_name)
-
-    # checking resize toggle
-    if resize:
-
-        # resizing image
-        open_image = resize_image(open_image=open_image,
-                                  image_size=IMAGE_SIZE)
-
-    # getting rotated image
-    rotated_image = rotate(open_image,
-                           ROTATE_180)
-
-    # getting vertically flipped image
-    v_flipped_image = flip(open_image,
-                           0)
-
-    # getting horizontally flipped image
-    h_flipped_image = flip(open_image,
-                           1)
-
-    # defining alpha and beta
-    alpha_d = 0.9  # Contrast control
-    beta_d = -2  # Brightness control
-    alpha_u = 1.1  # Contrast control
-    beta_u = 5  # Brightness control
-
-    # getting contrast/brightness changed image
-    od_contrast_image = convertScaleAbs(open_image,
-                                        alpha=alpha_d,
-                                        beta=beta_d)
-
-    rd_contrast_image = convertScaleAbs(rotated_image,
-                                        alpha=alpha_d,
-                                        beta=beta_d)
-
-    vd_contrast_image = convertScaleAbs(v_flipped_image,
-                                        alpha=alpha_d,
-                                        beta=beta_d)
-
-    hd_contrast_image = convertScaleAbs(h_flipped_image,
-                                        alpha=alpha_d,
-                                        beta=beta_d)
-
-    ou_contrast_image = convertScaleAbs(open_image,
-                                        alpha=alpha_u,
-                                        beta=beta_u)
-
-    ru_contrast_image = convertScaleAbs(rotated_image,
-                                        alpha=alpha_u,
-                                        beta=beta_u)
-
-    vu_contrast_image = convertScaleAbs(v_flipped_image,
-                                        alpha=alpha_u,
-                                        beta=beta_u)
-
-    hu_contrast_image = convertScaleAbs(h_flipped_image,
-                                        alpha=alpha_u,
-                                        beta=beta_u)
-
-    # saving images
-    imwrite(save_path.replace('.jpg', '_o.jpg'), open_image)
-    imwrite(save_path.replace('.jpg', '_r.jpg'), rotated_image)
-    imwrite(save_path.replace('.jpg', '_v.jpg'), v_flipped_image)
-    imwrite(save_path.replace('.jpg', '_h.jpg'), h_flipped_image)
-    imwrite(save_path.replace('.jpg', '_od.jpg'), od_contrast_image)
-    imwrite(save_path.replace('.jpg', '_rd.jpg'), rd_contrast_image)
-    imwrite(save_path.replace('.jpg', '_vd.jpg'), vd_contrast_image)
-    imwrite(save_path.replace('.jpg', '_hd.jpg'), hd_contrast_image)
-    imwrite(save_path.replace('.jpg', '_ou.jpg'), ou_contrast_image)
-    imwrite(save_path.replace('.jpg', '_ru.jpg'), ru_contrast_image)
-    imwrite(save_path.replace('.jpg', '_vu.jpg'), vu_contrast_image)
-    imwrite(save_path.replace('.jpg', '_hu.jpg'), hu_contrast_image)
-
-
 def create_data_splits(images_folder: str,
                        extension: str,
                        output_folder: str,
@@ -181,6 +96,11 @@ def create_data_splits(images_folder: str,
     print('getting images in input folder...')
     images = get_specific_files_in_folder(path_to_folder=input_folder,
                                           extension=extension)
+
+    # removing extension (already add later on code) <- required to work with already existent aux_func
+    images = [image.replace(extension, '')
+              for image
+              in images]
 
     # getting images num
     images_num = len(images)
@@ -196,10 +116,10 @@ def create_data_splits(images_folder: str,
     test_folder = join(output_folder, 'test', data_class)
 
     # printing execution message
-    f_string = f'found {images_num} images in input folder.'
-    f_string += f'{train_size} will be copied to TRAIN folder.'
-    f_string += f'{val_size} will be copied to VAL folder.'
-    f_string += f'{test_size} will be copied to TEST folder.'
+    f_string = f'found {images_num} images in {data_class} input folder.\n'
+    f_string += f'{train_size} will be copied to "train" folder.\n'
+    f_string += f'{val_size} will be copied to "val" folder.\n'
+    f_string += f'{test_size} will be copied to "test" folder.'
     print(f_string)
 
     # shuffling data (randomizes order)
@@ -213,19 +133,22 @@ def create_data_splits(images_folder: str,
     test_files = images[train_size + val_size: -1]
 
     # copying train images
-    copy_multiple_files(src_folder_path=images_folder,
+    print('copying train images...')
+    copy_multiple_files(src_folder_path=input_folder,
                         dst_folder_path=train_folder,
                         files_list=train_files,
                         file_extension=extension)
 
     # copying val images
-    copy_multiple_files(src_folder_path=images_folder,
+    print('copying val images...')
+    copy_multiple_files(src_folder_path=input_folder,
                         dst_folder_path=val_folder,
                         files_list=val_files,
                         file_extension=extension)
 
     # copying test images
-    copy_multiple_files(src_folder_path=images_folder,
+    print('copying test images...')
+    copy_multiple_files(src_folder_path=input_folder,
                         dst_folder_path=test_folder,
                         files_list=test_files,
                         file_extension=extension)
