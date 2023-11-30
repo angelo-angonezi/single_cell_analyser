@@ -17,7 +17,6 @@ from pandas import DataFrame
 from keras.layers import Dense
 from keras.layers import Conv2D
 from keras.layers import Flatten
-from keras.optimizers import SGD
 from keras.optimizers import Adam
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
@@ -32,7 +31,6 @@ from src.utils.aux_funcs import normalize_data
 from src.utils.aux_funcs import get_data_split
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_execution_parameters
-from tensorflow.keras.optimizers.schedules import ExponentialDecay
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -163,7 +161,7 @@ def get_new_model(input_shape: tuple) -> Sequential:
     model.add(Flatten())
 
     # mid-dense layers
-    # model.add(Dense(32, activation='relu'))
+    model.add(Dense(32, activation='relu'))
 
     # final dense layer
     model.add(Dense(1, activation='sigmoid'))

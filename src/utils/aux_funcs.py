@@ -1262,9 +1262,6 @@ def get_data_split(splits_folder: str,
 
     # loading data
     print(f'getting {split} data...')
-    # TODO: remove later
-    if split == 'test':
-        data_path = './/data//nucleus_detection//ImagesFilter//splits//splits_balanced//test'
     print(f'loading data from folder "{data_path}"...')
     split_data = image_dataset_from_directory(directory=data_path,
                                               labels='inferred',

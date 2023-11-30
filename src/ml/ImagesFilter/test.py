@@ -41,11 +41,11 @@ def get_args_dict() -> dict:
 
     # adding arguments to parser
 
-    # dataset folder param
-    parser.add_argument('-d', '--dataset-folder',
-                        dest='dataset_path',
+    # splits folder param
+    parser.add_argument('-s', '--splits-folder',
+                        dest='splits_folder',
                         required=True,
-                        help='defines path to folder containing annotated data.')
+                        help='defines splits folder name (contains "train", "val" and "test" subfolders).')
 
     # batch size param
     parser.add_argument('-b', '--batch-size',
@@ -82,14 +82,68 @@ def test_model(model,
     # getting test batches
     test_batches = test_data.as_numpy_iterator()
 
+    # defining placeholder values for gts/predictions list
+    gts_list = []
+    predictions_list = []
+
     # iterating over batches in test data set
     # TODO: adapt code to find FP, TP, TN FN
     for batch in test_batches:
-        current_input, y = batch
-        yhat = model.predict(current_input)
-        precision.update_state(y, yhat)
-        recall.update_state(y, yhat)
-        accuracy.update_state(y, yhat)
+        current_inputs, current_gts = batch
+        current_predictions = model.predict(current_inputs)
+
+        # unpacking values
+        gts = [round(f[0], 1) for f in current_gts]
+        predictions = [round(f[0], 1) for f in current_predictions]
+
+        # appending gts/predictions to respective lists
+        for gt in gts:
+            gts_list.append(gt)
+        for prediction in predictions:
+            predictions_list.append(prediction)
+
+        # updating prec/rec/acc
+        precision.update_state(current_gts, current_predictions)
+        recall.update_state(current_gts, current_predictions)
+        accuracy.update_state(current_gts, current_predictions)
+
+    # defining placeholder values for tps, tns, fps, fns
+    tps = 0
+    tns = 0
+    fps = 0
+    fns = 0
+
+    # converting values to respective classes (string format)
+    gts_list_str = ['excluded' if gt > 0.5 else 'included' for gt in gts_list]
+    predictions_list_str = ['excluded' if prediction > 0.5 else 'included' for prediction in predictions_list]
+
+    # zipping lists
+    a = zip(gts_list_str, predictions_list_str)
+    for i in a:
+        gt, prediction = i
+        if gt == 'included':
+            if prediction == 'included':
+                tps += 1
+            else:
+                fns += 1
+        elif gt == 'excluded':
+            if prediction == 'excluded':
+                tns += 1
+            else:
+                fps += 1
+
+    # calculating accuracy/precision/recall/f1-score
+    # TODO: check if this is correct and delete Precision class from above
+    #  (I prefer to have it calculated via tps, fns... directly
+    # accuracy = (tps + tns) / (tps + tns + fps + fns)
+    # precision = tps / (tps + fns)
+    # recall = tps / (tps + fps)
+    # f1_score = 2 * ((precision * recall) / (precision + recall))
+    # print(accuracy)
+    # print(precision)
+    # print(recall)
+    # print(f1_score)
+    # exit()
 
     # getting results
     precision_result = precision.result()
@@ -102,18 +156,13 @@ def test_model(model,
     print('Accuracy: ', accuracy_result)
 
 
-def image_filter_test(dataset_path: str,
+def image_filter_test(splits_folder: str,
                       batch_size: int,
                       model_path: str
                       ) -> None:
-    # getting subfolder paths
-    print('getting data path...')
-    splits_path = join(dataset_path,
-                       'splits')
-
     # getting data splits
     print('getting test data...')
-    test_data = get_data_split(splits_folder=splits_path,
+    test_data = get_data_split(splits_folder=splits_folder,
                                split='test',
                                batch_size=batch_size)
 
@@ -139,8 +188,8 @@ def main():
     # getting args dict
     args_dict = get_args_dict()
 
-    # getting dataset path param
-    dataset_path = str(args_dict['dataset_path'])
+    # getting splits folder param
+    splits_folder = str(args_dict['splits_folder'])
 
     # getting batch size param
     batch_size = int(args_dict['batch_size'])
@@ -160,7 +209,7 @@ def main():
     enter_to_continue()
 
     # running image_filter_test function
-    image_filter_test(dataset_path=dataset_path,
+    image_filter_test(splits_folder=splits_folder,
                       batch_size=batch_size,
                       model_path=model_path)
 
