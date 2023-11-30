@@ -1,14 +1,6 @@
-# BALANCED FOLDER
 # train
-python3 -m src.ml.ImagesFilter.augment_data -i ./data/ImagesFilter/datasets/dataset01/splits/splits_balanced_augmented/train/included/ -e .jpg -o ./data/nucleus_detection/ImagesFilter/splits/splits_balanced_augmented/train/included/ -r
-python3 -m src.ml.ImagesFilter.augment_data -i ./data/ImagesFilter/datasets/dataset01/splits/splits_balanced_augmented/train/excluded/ -e .jpg -o ./data/nucleus_detection/ImagesFilter/splits/splits_balanced_augmented/train/excluded/ -r
+python3 -m src.ml.ImagesFilter.augment_data -i ./data/ImagesFilter/datasets/dataset02/splits/train/included/ -e .jpg -o ./data/ImagesFilter/datasets/dataset02/splits_augmented/train/included/ -r
+python3 -m src.ml.ImagesFilter.augment_data -i ./data/ImagesFilter/datasets/dataset02/splits/train/excluded/ -e .jpg -o ./data/ImagesFilter/datasets/dataset02/splits_augmented/train/excluded/ -r
 # val
-python3 -m src.ml.ImagesFilter.augment_data -i ./data/ImagesFilter/datasets/dataset01/splits/splits_balanced_augmented/val/included/ -e .jpg -o ./data/nucleus_detection/ImagesFilter/splits/splits_balanced_augmented/val/included/ -r
-python3 -m src.ml.ImagesFilter.augment_data -i ./data/ImagesFilter/datasets/dataset01/splits/splits_balanced_augmented/val/excluded/ -e .jpg -o ./data/nucleus_detection/ImagesFilter/splits/splits_balanced_augmented/val/excluded/ -r
-# UNBALANCED FOLDER
-# train
-python3 -m src.ml.ImagesFilter.augment_data -i ./data/nucleus_detection/ImagesFilter/splits/splits_unbalanced/train/included/ -e .jpg -o ./data/nucleus_detection/ImagesFilter/splits/splits_unbalanced_augmented/train/included/ -r
-python3 -m src.ml.ImagesFilter.augment_data -i ./data/nucleus_detection/ImagesFilter/splits/splits_unbalanced/train/excluded/ -e .jpg -o ./data/nucleus_detection/ImagesFilter/splits/splits_unbalanced_augmented/train/excluded/ -r
-# val
-python3 -m src.ml.ImagesFilter.augment_data -i ./data/nucleus_detection/ImagesFilter/splits/splits_unbalanced/val/included/ -e .jpg -o ./data/nucleus_detection/ImagesFilter/splits/splits_unbalanced_augmented/val/included/ -r
-python3 -m src.ml.ImagesFilter.augment_data -i ./data/nucleus_detection/ImagesFilter/splits/splits_unbalanced/val/excluded/ -e .jpg -o ./data/nucleus_detection/ImagesFilter/splits/splits_unbalanced_augmented/val/excluded/ -r
+python3 -m src.ml.ImagesFilter.augment_data -i ./data/ImagesFilter/datasets/dataset02/splits/val/included/ -e .jpg -o ./data/ImagesFilter/datasets/dataset02/splits_augmented/val/included/ -r
+python3 -m src.ml.ImagesFilter.augment_data -i ./data/ImagesFilter/datasets/dataset02/splits/val/excluded/ -e .jpg -o ./data/ImagesFilter/datasets/dataset02/splits_augmented/val/excluded/ -r

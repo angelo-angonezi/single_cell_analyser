@@ -116,7 +116,7 @@ def create_data_splits(images_folder: str,
     test_folder = join(output_folder, 'test', data_class)
 
     # printing execution message
-    f_string = f'found {images_num} images in {data_class} input folder.\n'
+    f_string = f'found {images_num} images in "{data_class}" input folder.\n'
     f_string += f'{train_size} will be copied to "train" folder.\n'
     f_string += f'{val_size} will be copied to "val" folder.\n'
     f_string += f'{test_size} will be copied to "test" folder.'

@@ -194,8 +194,11 @@ def augment_data(images_folder: str,
     # iterating over images
     for image in images:
 
+        # getting current augmented images
+        current_augmented_images = current_image_index * mods_num
+
         # printing execution message
-        base_string = 'augmenting image #INDEX# of #TOTAL#'
+        base_string = f'augmenting image #INDEX# of #TOTAL# (total imgs: {current_augmented_images})'
         print_progress_message(base_string=base_string,
                                index=current_image_index,
                                total=images_num)
