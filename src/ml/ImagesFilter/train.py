@@ -107,7 +107,7 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
     # getting resnet base layers
     base_layers = ResNet50(include_top=False,
                            input_shape=input_shape,
-                           pooling='avg',
+                           pooling='max',
                            classes=2,
                            weights='imagenet')
 
@@ -115,8 +115,14 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
     for layer in base_layers.layers:
         layer.trainable = False
 
+    # adding resnet layers
+    model.add(base_layers)
+
     # flattening layer
     model.add(Flatten())
+
+    # mid-dense layers
+    model.add(Dense(16, activation='relu'))
 
     # final dense layer
     model.add(Dense(1, activation='sigmoid'))
@@ -144,7 +150,7 @@ def get_new_model(input_shape: tuple) -> Sequential:
     model.add(MaxPooling2D())
 
     # second convolution + pooling
-    model.add(Conv2D(filters=32,
+    model.add(Conv2D(filters=16,
                      kernel_size=(3, 3),
                      strides=1,
                      activation='relu'))
@@ -315,7 +321,7 @@ def image_filter_train(splits_folder: str,
 
     # getting model
     model = get_sequential_model(learning_rate=learning_rate,
-                                 base_layers='new')
+                                 base_layers='resnet')
 
     # defining callback
     tensorboard_callback = TensorBoard(log_dir=logs_folder)

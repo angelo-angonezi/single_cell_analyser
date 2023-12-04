@@ -41,176 +41,7 @@ AUTHOR_DICT = {'20_Karine_WB_curva_EGF_SALVO': 'Karine',
                'PD_U87_ATF6_Fernanda_2': 'Fernanda',
                'U87zeb1_53bp1_Thamiris_Pos_TMZ': 'Thamiris',
                'inibid_autofagia_Solon_Henrique_u87_5_dias': 'Solon'}
-TREATMENT_DICT = {'20_Karine_WB_curva_EGF_SALVO':
-                      {'A1': 'TMZ',
-                       'A2': 'TMZ',
-                       'A3': 'TMZ',
-                       'B1': 'CTR',
-                       'B2': 'CTR',
-                       'B3': 'CTR'},
-                  '6_Karine_populacional_1_EXP_SALVO':
-                      {'B2': 'TMZ',
-                       'B3': 'TMZ',
-                       'B4': 'TMZ',
-                       'B5': 'TMZ',
-                       'B6': 'TMZ',
-                       'C2': 'CTR',
-                       'C3': 'CTR',
-                       'C4': 'CTR',
-                       'C5': 'CTR',
-                       'C6': 'CTR'},
-                  'A172_ERK_53BP1_11_08_22_apos_tratamento':
-                      {'B2': 'TMZ',
-                       'B3': 'TMZ',
-                       'B4': 'TMZ',
-                       'B5': 'TMZ',
-                       'B6': 'TMZ',
-                       'C2': 'CTR',
-                       'C3': 'CTR',
-                       'C4': 'CTR',
-                       'C5': 'CTR',
-                       'C6': 'CTR'},
-                  'A172_ERK_53BP1_durante_tratamento':
-                      {'B2': 'TMZ',
-                       'B3': 'TMZ',
-                       'B4': 'TMZ',
-                       'B5': 'TMZ',
-                       'B6': 'TMZ',
-                       'C2': 'CTR',
-                       'C3': 'CTR',
-                       'C4': 'CTR',
-                       'C5': 'CTR',
-                       'C6': 'CTR'},
-                  'A172_ERK_53BP1_durante_tratamento_ultimas_leituras':
-                      {'B2': 'TMZ',
-                       'B3': 'TMZ',
-                       'B4': 'TMZ',
-                       'B5': 'TMZ',
-                       'B6': 'TMZ',
-                       'C2': 'CTR',
-                       'C3': 'CTR',
-                       'C4': 'CTR',
-                       'C5': 'CTR',
-                       'C6': 'CTR'},
-                  'A172_ERK_53BP1_varredura':
-                      {'B2': 'TMZ',
-                       'B3': 'TMZ',
-                       'B4': 'TMZ',
-                       'B5': 'TMZ',
-                       'B6': 'TMZ',
-                       'C2': 'CTR',
-                       'C3': 'CTR',
-                       'C4': 'CTR',
-                       'C5': 'CTR',
-                       'C6': 'CTR'},
-                  'A172_ERK_53bp1_Julieti_01_04_experimento_salvo':
-                      {'B2': 'TMZ',
-                       'B3': 'TMZ',
-                       'B4': 'TMZ',
-                       'B5': 'TMZ',
-                       'B6': 'TMZ',
-                       'C2': 'CTR',
-                       'C3': 'CTR',
-                       'C4': 'CTR',
-                       'C5': 'CTR',
-                       'C6': 'CTR'},
-                  'A172_H2B_U251_H2B_ActD_TMZ_daphne_25_05_22':
-                      {'B2': 'TMZ',
-                       'B3': 'TMZ',
-                       'B4': 'TMZ',
-                       'B5': 'TMZ',
-                       'B6': 'TMZ',
-                       'C2': 'CTR',
-                       'C3': 'CTR',
-                       'C4': 'CTR',
-                       'C5': 'CTR',
-                       'C6': 'CTR'},
-                  'A172_H2B_U251_H2B_ActD_TMZ_daphne':
-                      {'B2': 'TMZ',
-                       'B3': 'TMZ',
-                       'B4': 'TMZ',
-                       'B5': 'TMZ',
-                       'B6': 'TMZ',
-                       'C2': 'CTR',
-                       'C3': 'CTR',
-                       'C4': 'CTR',
-                       'C5': 'CTR',
-                       'C6': 'CTR'},
-                  'ActD_TMZ_21_07_22_daphne_6h_6h':
-                      {'B2': 'TMZ',
-                       'B3': 'TMZ',
-                       'B4': 'TMZ',
-                       'B5': 'TMZ',
-                       'B6': 'TMZ',
-                       'C2': 'CTR',
-                       'C3': 'CTR',
-                       'C4': 'CTR',
-                       'C5': 'CTR',
-                       'C6': 'CTR'},
-                  'MRC5_ERK_53BP1':
-                      {'B2': 'TMZ',
-                       'B3': 'TMZ',
-                       'B4': 'TMZ',
-                       'B5': 'TMZ',
-                       'B6': 'TMZ',
-                       'C2': 'CTR',
-                       'C3': 'CTR',
-                       'C4': 'CTR',
-                       'C5': 'CTR',
-                       'C6': 'CTR'},
-                  'PD_U87_ATF6_Fernanda_2':
-                      {'B2': 'TMZ',
-                       'B3': 'TMZ',
-                       'B4': 'TMZ',
-                       'B5': 'TMZ',
-                       'B6': 'TMZ',
-                       'C2': 'CTR',
-                       'C3': 'CTR',
-                       'C4': 'CTR',
-                       'C5': 'CTR',
-                       'C6': 'CTR'},
-                  'U87zeb1_53bp1_Thamiris_Pos_TMZ':
-                      {'B2': 'TMZ',
-                       'B3': 'TMZ',
-                       'B4': 'TMZ',
-                       'B5': 'TMZ',
-                       'B6': 'TMZ',
-                       'C2': 'CTR',
-                       'C3': 'CTR',
-                       'C4': 'CTR',
-                       'C5': 'CTR',
-                       'C6': 'CTR'},
-                  'inibid_autofagia_Solon_Henrique_u87_5_dias':
-                      {'B2': 'TMZ',
-                       'B3': 'TMZ',
-                       'B4': 'TMZ',
-                       'B5': 'TMZ',
-                       'B6': 'TMZ',
-                       'C2': 'CTR',
-                       'C3': 'CTR',
-                       'C4': 'CTR',
-                       'C5': 'CTR',
-                       'C6': 'CTR'}
-                  }
-CELL_LINES_DICT = {'A172_ERK_53BP1_11_08_22_apos_tratamento':
-                       {'A1': 'A172',
-                        'A2': 'A172',
-                        'A3': 'A172',
-                        'B1': 'A172',
-                        'B2': 'A172',
-                        'B3': 'A172'},
-                   'A172_H2B_U251_H2B_ActD_TMZ_daphne':
-                       {'B2': 'A172',
-                        'B3': 'A172',
-                        'B4': 'A172',
-                        'B5': 'A172',
-                        'B6': 'A172',
-                        'C2': 'U251',
-                        'C3': 'U251',
-                        'C4': 'U251',
-                        'C5': 'U251',
-                        'C6': 'U251'}
-                   }
+# TODO: convert dicts to table
 
 # setting seed (so that all executions result in same sample)
 set_seed(SEED)
@@ -238,6 +69,13 @@ def get_args_dict() -> dict:
                         required=True,
                         help='defines path to fornma nucleus output file (model output format).')
 
+    # annotations file param
+    # TODO: add imgs info file here
+    parser.add_argument('-a', '--annotations-file',
+                        dest='annotations_file',
+                        required=True,
+                        help='defines path to fornma nucleus output file (model output format).')
+
     # output path param
     parser.add_argument('-o', '--output-path',
                         dest='output_path',
@@ -252,6 +90,10 @@ def get_args_dict() -> dict:
 
 ######################################################################
 # defining auxiliary functions
+
+
+def get_cell_line():
+    pass
 
 
 def get_image_df(image_name: str,
@@ -339,7 +181,7 @@ def get_base_dataset_df(annotations_df: DataFrame) -> DataFrame:
     for image_name, image_group in image_groups:
 
         # defining progress message
-        progress_string = 'analysing image #INDEX# of #TOTAL#'
+        progress_string = 'getting info on image #INDEX# of #TOTAL#'
 
         # printing progress message
         print_progress_message(base_string=progress_string,
@@ -428,7 +270,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running create_dataset_description_file function
     create_dataset_description_file(annotations_file_path=annotations_file_path,
