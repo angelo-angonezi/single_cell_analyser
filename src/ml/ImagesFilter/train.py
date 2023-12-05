@@ -17,6 +17,9 @@ from pandas import DataFrame
 from keras.layers import Dense
 from keras.layers import Conv2D
 from keras.layers import Flatten
+from keras.layers import Dropout
+from keras.layers import Activation
+from keras.layers import Convolution2D
 from keras.optimizers import Adam
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
@@ -142,8 +145,8 @@ def get_new_model(input_shape: tuple) -> Sequential:
     # defining CNN layers
 
     # first convolution + pooling (input layer)
-    model.add(Conv2D(filters=16,
-                     kernel_size=(3, 3),
+    model.add(Conv2D(filters=32,
+                     kernel_size=(5, 5),
                      strides=1,
                      activation='relu',
                      input_shape=input_shape))
@@ -160,7 +163,7 @@ def get_new_model(input_shape: tuple) -> Sequential:
     model.add(Flatten())
 
     # mid-dense layers
-    model.add(Dense(16, activation='relu'))
+    model.add(Dense(32, activation='relu'))
 
     # final dense layer
     model.add(Dense(1, activation='sigmoid'))
@@ -321,7 +324,7 @@ def image_filter_train(splits_folder: str,
 
     # getting model
     model = get_sequential_model(learning_rate=learning_rate,
-                                 base_layers='resnet')
+                                 base_layers='new')
 
     # defining callback
     tensorboard_callback = TensorBoard(log_dir=logs_folder)
@@ -383,7 +386,7 @@ def main():
     print(using_gpu_str)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running image_filter_train function
     image_filter_train(splits_folder=splits_folder,

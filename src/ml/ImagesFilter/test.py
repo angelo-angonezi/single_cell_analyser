@@ -72,19 +72,12 @@ def get_args_dict() -> dict:
 def test_model(model,
                test_data,
                ):
-    # starting precision/recall/accuracy instances
-    precision = Precision()
-    recall = Recall()
-    # TODO: change for other multi-class classifiers
-    accuracy = BinaryAccuracy()
-    # f1_score =
-
-    # getting test batches
-    test_batches = test_data.as_numpy_iterator()
-
     # defining placeholder values for gts/predictions list
     gts_list = []
     predictions_list = []
+
+    # getting test batches
+    test_batches = test_data.as_numpy_iterator()
 
     # iterating over batches in test data set
     # TODO: adapt code to find FP, TP, TN FN
@@ -93,19 +86,14 @@ def test_model(model,
         current_predictions = model.predict(current_inputs)
 
         # unpacking values
-        gts = [round(f[0], 1) for f in current_gts]
-        predictions = [round(f[0], 1) for f in current_predictions]
+        gts = [f[0] for f in current_gts]
+        predictions = [f[0] for f in current_predictions]
 
         # appending gts/predictions to respective lists
         for gt in gts:
             gts_list.append(gt)
         for prediction in predictions:
             predictions_list.append(prediction)
-
-        # updating prec/rec/acc
-        precision.update_state(current_gts, current_predictions)
-        recall.update_state(current_gts, current_predictions)
-        accuracy.update_state(current_gts, current_predictions)
 
     # defining placeholder values for tps, tns, fps, fns
     tps = 0
@@ -132,28 +120,19 @@ def test_model(model,
             else:
                 fps += 1
 
-    # calculating accuracy/precision/recall/f1-score
-    # TODO: check if this is correct and delete Precision class from above
-    #  (I prefer to have it calculated via tps, fns... directly
-    # accuracy = (tps + tns) / (tps + tns + fps + fns)
-    # precision = tps / (tps + fns)
-    # recall = tps / (tps + fps)
-    # f1_score = 2 * ((precision * recall) / (precision + recall))
-    # print(accuracy)
-    # print(precision)
-    # print(recall)
-    # print(f1_score)
-    # exit()
-
-    # getting results
-    precision_result = precision.result()
-    recall_result = recall.result()
-    accuracy_result = accuracy.result()
+    # calculating metrics
+    accuracy = (tps + tns) / (tps + tns + fps + fns)
+    precision = tps / (tps + fps)
+    recall = tps / (tps + fns)
+    f1_score = 2 * ((precision * recall) / (precision + recall))
 
     # printing results
-    print('Precision: ', precision_result)
-    print('Recall: ', recall_result)
-    print('Accuracy: ', accuracy_result)
+    f_string = '--Metrics results--\n'
+    f_string += f'Accuracy:  {accuracy}\n'
+    f_string += f'Precision: {precision}\n'
+    f_string += f'Recall:    {recall}\n'
+    f_string += f'F1-Score:  {f1_score}'
+    print(f_string)
 
 
 def image_filter_test(splits_folder: str,
@@ -206,7 +185,7 @@ def main():
     print(using_gpu_str)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running image_filter_test function
     image_filter_test(splits_folder=splits_folder,

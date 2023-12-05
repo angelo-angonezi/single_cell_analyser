@@ -1,0 +1,10 @@
+python3 -m src.ml.ImagesFilter.train -s ./data/ImagesFilter/datasets/dataset02/splits_augmented/ -l ./data/ImagesFilter/logs/ -m ./data/ImagesFilter/models/modelV4.h5 -lr 0.001 -e 20 -b 24
+mv ./data/ImagesFilter/logs/train_history.png ./data/ImagesFilter/logs/train_history_v4.png
+python3 -m src.ml.ImagesFilter.train -s ./data/ImagesFilter/datasets/dataset02/splits_augmented/ -l ./data/ImagesFilter/logs/ -m ./data/ImagesFilter/models/modelV5.h5 -lr 0.01 -e 20 -b 24
+mv ./data/ImagesFilter/logs/train_history.png ./data/ImagesFilter/logs/train_history_v5.png
+python3 -m src.ml.ImagesFilter.train -s ./data/ImagesFilter/datasets/dataset02/splits/ -l ./data/ImagesFilter/logs/ -m ./data/ImagesFilter/models/modelV6.h5 -lr 0.001 -e 20 -b 24
+mv ./data/ImagesFilter/logs/train_history.png ./data/ImagesFilter/logs/train_history_v6.png
+python3 -m src.ml.ImagesFilter.train -s ./data/ImagesFilter/datasets/dataset02/splits/ -l ./data/ImagesFilter/logs/ -m ./data/ImagesFilter/models/modelV7.h5 -lr 0.01 -e 20 -b 24
+mv ./data/ImagesFilter/logs/train_history.png ./data/ImagesFilter/logs/train_history_v7.png
+python3 -m src.ml.ImagesFilter.train -s ./data/ImagesFilter/datasets/dataset02/splits/ -l ./data/ImagesFilter/logs/ -m ./data/ImagesFilter/models/modelV8.h5 -lr 0.01 -e 20 -b 32
+mv ./data/ImagesFilter/logs/train_history.png ./data/ImagesFilter/logs/train_history_v8.png
