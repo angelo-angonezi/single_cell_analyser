@@ -16,6 +16,7 @@ from pandas import read_csv
 from pandas import DataFrame
 from random import seed as set_seed
 from argparse import ArgumentParser
+from src.utils.aux_funcs import spacer
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import get_image_confluence
 from src.utils.aux_funcs import print_progress_message
@@ -27,21 +28,6 @@ print('all required libraries successfully imported.')  # noqa
 
 SEED = 53
 TEST_SIZE = 0.3
-AUTHOR_DICT = {'20_Karine_WB_curva_EGF_SALVO': 'Karine',
-               '6_Karine_populacional_1_EXP_SALVO': 'Karine',
-               'A172_ERK_53BP1_11_08_22_apos_tratamento': 'Karine',
-               'A172_ERK_53BP1_durante_tratamento': 'Karine',
-               'A172_ERK_53BP1_durante_tratamento_ultimas_leituras': 'Karine',
-               'A172_ERK_53BP1_varredura': 'Karine',
-               'A172_ERK_53bp1_Julieti_01_04_experimento_salvo': 'Julieti',
-               'A172_H2B_U251_H2B_ActD_TMZ_daphne_25_05_22': 'Daphne',
-               'A172_H2B_U251_H2B_ActD_TMZ_daphne': 'Daphne',
-               'ActD_TMZ_21_07_22_daphne_6h_6h': 'Daphne',
-               'MRC5_ERK_53BP1': 'Karine',
-               'PD_U87_ATF6_Fernanda_2': 'Fernanda',
-               'U87zeb1_53bp1_Thamiris_Pos_TMZ': 'Thamiris',
-               'inibid_autofagia_Solon_Henrique_u87_5_dias': 'Solon'}
-# TODO: convert dicts to table
 
 # setting seed (so that all executions result in same sample)
 set_seed(SEED)
@@ -69,12 +55,11 @@ def get_args_dict() -> dict:
                         required=True,
                         help='defines path to fornma nucleus output file (model output format).')
 
-    # annotations file param
-    # TODO: add imgs info file here
-    parser.add_argument('-a', '--annotations-file',
-                        dest='annotations_file',
+    # lines and treatment file param
+    parser.add_argument('-lt', '--lines-treatment-file',
+                        dest='lines_treatment_file',
                         required=True,
-                        help='defines path to fornma nucleus output file (model output format).')
+                        help='defines path to csv file containing info on cell lines and treatments.')
 
     # output path param
     parser.add_argument('-o', '--output-path',
@@ -92,12 +77,31 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_cell_line():
-    pass
+def get_experiment_well_df(df: DataFrame,
+                           experiment: str,
+                           well: str
+                           ) -> DataFrame:
+    """
+    Given a data frame, an experiment name
+    and a well, returns df filtered by given
+    experiment and well.
+    """
+    # filtering df by experiment name
+    experiment_df = df[df['experiment'] == experiment]
+
+    # filtering df by well
+    wells_df = experiment_df[experiment_df['well'] == well]
+
+    # getting row
+    row = wells_df.iloc[0]
+
+    # returning filtered df row
+    return row
 
 
 def get_image_df(image_name: str,
-                 image_group: DataFrame
+                 image_group: DataFrame,
+                 lines_treatment_df: DataFrame
                  ) -> DataFrame:
     """
     Given an image name and group,
@@ -125,18 +129,19 @@ def get_image_df(image_name: str,
     # getting current image field
     current_field = image_name_split[-3]
 
+    # getting current lines and treatments df row
+    current_lines_treatments_df_row = get_experiment_well_df(df=lines_treatment_df,
+                                                             experiment=current_experiment,
+                                                             well=current_well)
+
     # getting current author
-    current_author = AUTHOR_DICT[current_experiment]
+    current_author = current_lines_treatments_df_row['author']
 
     # getting current image cell line
-    # current_cell_line_dict = CELL_LINES_DICT[current_experiment]
-    # current_cell_line = current_cell_line_dict[current_well]
-    current_cell_line = 'aaa'
+    current_cell_line = current_lines_treatments_df_row['cell_line']
 
     # getting current image treatment
-    # current_treatment_dict = TREATMENT_DICT[current_experiment]
-    # current_treatment = current_treatment_dict[current_well]
-    current_treatment = 'bbb'
+    current_treatment = current_lines_treatments_df_row['treatment']
 
     # getting current image confluence
     current_confluence = get_image_confluence(df=image_group,
@@ -161,7 +166,9 @@ def get_image_df(image_name: str,
     return current_df
 
 
-def get_base_dataset_df(annotations_df: DataFrame) -> DataFrame:
+def get_base_dataset_df(annotations_df: DataFrame,
+                        lines_treatment_df: DataFrame
+                        ) -> DataFrame:
     """
     Docstring.
     """
@@ -193,7 +200,8 @@ def get_base_dataset_df(annotations_df: DataFrame) -> DataFrame:
 
         # getting current image df
         current_df = get_image_df(image_name=image_name,
-                                  image_group=image_group)
+                                  image_group=image_group,
+                                  lines_treatment_df=lines_treatment_df)
 
         # appending current df to dfs list
         dfs_list.append(current_df)
@@ -223,24 +231,30 @@ def add_dataset_col(df: DataFrame,
 
 
 def create_dataset_description_file(annotations_file_path: str,
+                                    lines_treatment_file: str,
                                     output_path: str
                                     ) -> None:
     """
     Docstring.
     """
-    print('reading input file...')
+    # printing execution message
+    print('reading input files...')
+
     # reading annotations file
     annotations_df = read_csv(annotations_file_path)
-    print(annotations_df)
+
+    # reading lines treatment file
+    lines_treatment_df = read_csv(lines_treatment_file)
 
     # getting base df
-    base_df = get_base_dataset_df(annotations_df=annotations_df)
-    print(base_df)
+    print('getting base df...')
+    base_df = get_base_dataset_df(annotations_df=annotations_df,
+                                  lines_treatment_df=lines_treatment_df)
 
     # adding dataset (train/test) col
+    print('adding data split col...')
     add_dataset_col(df=base_df,
                     test_size=TEST_SIZE)
-    print(base_df)
 
     # saving dataset description df
     base_df.to_csv(output_path,
@@ -263,6 +277,9 @@ def main():
     # getting annotations file param
     annotations_file_path = args_dict['annotations_file']
 
+    # getting lines and treatment file param
+    lines_treatment_file = args_dict['lines_treatment_file']
+
     # getting output path param
     output_path = args_dict['output_path']
 
@@ -274,6 +291,7 @@ def main():
 
     # running create_dataset_description_file function
     create_dataset_description_file(annotations_file_path=annotations_file_path,
+                                    lines_treatment_file=lines_treatment_file,
                                     output_path=output_path)
 
 ######################################################################

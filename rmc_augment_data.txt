@@ -1,6 +1,6 @@
 # train
-python3 -m src.ml.ImagesFilter.augment_data -i ./data/ImagesFilter/datasets/dataset02/splits/train/included/ -e .jpg -o ./data/ImagesFilter/datasets/dataset02/splits_augmented/train/included/ -r
-python3 -m src.ml.ImagesFilter.augment_data -i ./data/ImagesFilter/datasets/dataset02/splits/train/excluded/ -e .jpg -o ./data/ImagesFilter/datasets/dataset02/splits_augmented/train/excluded/ -r
+python3 -m src.ml.ImagesFilter.augment_data -i ./data/image_filtering/ImagesFilter/datasets/dataset02/splits/train/included/ -e .jpg -o ./data/image_filtering/ImagesFilter/datasets/dataset02/splits_augmented/train/included/
+python3 -m src.ml.ImagesFilter.augment_data -i ./data/image_filtering/ImagesFilter/datasets/dataset02/splits/train/excluded/ -e .jpg -o ./data/image_filtering/ImagesFilter/datasets/dataset02/splits_augmented/train/excluded/
 # val
-python3 -m src.ml.ImagesFilter.augment_data -i ./data/ImagesFilter/datasets/dataset02/splits/val/included/ -e .jpg -o ./data/ImagesFilter/datasets/dataset02/splits_augmented/val/included/ -r
-python3 -m src.ml.ImagesFilter.augment_data -i ./data/ImagesFilter/datasets/dataset02/splits/val/excluded/ -e .jpg -o ./data/ImagesFilter/datasets/dataset02/splits_augmented/val/excluded/ -r
+python3 -m src.ml.ImagesFilter.augment_data -i ./data/image_filtering/ImagesFilter/datasets/dataset02/splits/val/included/ -e .jpg -o ./data/image_filtering/ImagesFilter/datasets/dataset02/splits_augmented/val/included/
+python3 -m src.ml.ImagesFilter.augment_data -i ./data/image_filtering/ImagesFilter/datasets/dataset02/splits/val/excluded/ -e .jpg -o ./data/image_filtering/ImagesFilter/datasets/dataset02/splits_augmented/val/excluded/
