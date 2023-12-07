@@ -129,13 +129,16 @@ def convert_single_file(input_csv_file_path: str,
     # getting fornma df rows
     rows = fornma_df.iterrows()
 
+    # defining starter for current_row_index
+    current_row_index = 1
+
     # iterating over fornma df rows
     for row_index, row_data in rows:
 
         # flushing/printing execution message
         f_string = f'getting info on OBB #INDEX# of #TOTAL#'
         print_progress_message(base_string=f_string,
-                               index=row_index,
+                               index=current_row_index,
                                total=rows_num)
 
         # getting file name
@@ -183,6 +186,9 @@ def convert_single_file(input_csv_file_path: str,
 
         # appending current obb df to dfs list
         dfs_list.append(current_obb_df)
+
+        # updating current_row_index
+        current_row_index += 1
 
     # concatenating dfs in dfs list
     print('assembling final df...')
