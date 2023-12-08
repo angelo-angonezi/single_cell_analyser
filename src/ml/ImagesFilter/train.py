@@ -17,9 +17,6 @@ from pandas import DataFrame
 from keras.layers import Dense
 from keras.layers import Conv2D
 from keras.layers import Flatten
-from keras.layers import Dropout
-from keras.layers import Activation
-from keras.layers import Convolution2D
 from keras.optimizers import Adam
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
@@ -118,7 +115,6 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
     base_layers = ResNet50(include_top=False,
                            input_shape=input_shape,
                            pooling='max',
-                           classes=2,
                            weights='imagenet')
 
     # setting resnet layers as untrainable
@@ -128,8 +124,34 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
     # adding resnet layers
     model.add(base_layers)
 
-    # flattening layer
-    # model.add(Flatten())  <-- remover essa layer melhorou muito o desempenho!!
+    # final dense layer
+    model.add(Dense(1, activation='sigmoid'))
+
+    # returning model
+    return model
+
+
+def get_inception_model(input_shape: tuple) -> Sequential:
+    """
+    Given an input shape, returns
+    inception-based model.
+    """
+    # defining base model
+    model = Sequential()
+
+    # getting resnet base layers
+    base_layers = InceptionResNetV2(include_top=False,
+                                    input_shape=input_shape,
+                                    pooling='max',
+                                    classes=2,
+                                    weights='imagenet')
+
+    # setting resnet layers as untrainable
+    for layer in base_layers.layers:
+        layer.trainable = False
+
+    # adding resnet layers
+    model.add(base_layers)
 
     # final dense layer
     model.add(Dense(1, activation='sigmoid'))

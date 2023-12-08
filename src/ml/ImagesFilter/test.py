@@ -80,8 +80,9 @@ def test_model(model,
     test_batches = test_data.as_numpy_iterator()
 
     # iterating over batches in test data set
-    # TODO: adapt code to find FP, TP, TN FN
     for batch in test_batches:
+
+        # getting current gts and predictions
         current_inputs, current_gts = batch
         current_predictions = model.predict(current_inputs)
 
@@ -185,7 +186,7 @@ def main():
     print(using_gpu_str)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running image_filter_test function
     image_filter_test(splits_folder=splits_folder,
