@@ -32,6 +32,7 @@ from src.utils.aux_funcs import is_using_gpu
 from keras.engine.sequential import Sequential
 from src.utils.aux_funcs import normalize_data
 from src.utils.aux_funcs import get_data_split
+from keras.applications import InceptionResNetV2
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
@@ -89,6 +90,12 @@ def get_args_dict() -> dict:
                         required=True,
                         help='defines batch size.')
 
+    # model type param
+    parser.add_argument('-t', '--model-type',
+                        dest='model_type',
+                        required=True,
+                        help='defines whether to create new (new) or to use ResNet50 transfer learning model (resnet).')
+
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
 
@@ -122,10 +129,7 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
     model.add(base_layers)
 
     # flattening layer
-    model.add(Flatten())
-
-    # mid-dense layers
-    model.add(Dense(16, activation='relu'))
+    # model.add(Flatten())  <-- remover essa layer melhorou muito o desempenho!!
 
     # final dense layer
     model.add(Dense(1, activation='sigmoid'))
@@ -303,7 +307,8 @@ def image_filter_train(splits_folder: str,
                        model_path: str,
                        learning_rate: float,
                        epochs: int,
-                       batch_size: int
+                       batch_size: int,
+                       model_type: str
                        ) -> None:
     # getting data splits
     train_data = get_data_split(splits_folder=splits_folder,
@@ -324,7 +329,7 @@ def image_filter_train(splits_folder: str,
 
     # getting model
     model = get_sequential_model(learning_rate=learning_rate,
-                                 base_layers='new')
+                                 base_layers=model_type)
 
     # defining callback
     tensorboard_callback = TensorBoard(log_dir=logs_folder)
@@ -377,6 +382,9 @@ def main():
     # getting batch size param
     batch_size = int(args_dict['batch_size'])
 
+    # getting model type param
+    model_type = str(args_dict['model_type'])
+
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
@@ -394,7 +402,8 @@ def main():
                        model_path=model_path,
                        learning_rate=learning_rate,
                        epochs=epochs,
-                       batch_size=batch_size)
+                       batch_size=batch_size,
+                       model_type=model_type)
 
 ######################################################################
 # running main function
