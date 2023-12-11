@@ -260,7 +260,7 @@ def crop_multiple_obbs(image: ndarray,
         current_crop_str = f'{obb_index:0{obbs_total_str_len}d}'
 
         # printing execution message
-        current_progress_string = f'{progress_string} (crop: #INDEX# of #TOTAL#)'
+        current_progress_string = f'{progress_string} (crop: {obb_index} of {obbs_total})'
         print_progress_message(base_string=current_progress_string,
                                index=CURRENT_ITERATION,
                                total=ITERATIONS_TOTAL)
