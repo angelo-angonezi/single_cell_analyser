@@ -103,8 +103,8 @@ def test_model(model,
     fns = 0
 
     # converting values to respective classes (string format)
-    gts_list_str = ['excluded' if gt > 0.5 else 'included' for gt in gts_list]
-    predictions_list_str = ['excluded' if prediction > 0.5 else 'included' for prediction in predictions_list]
+    gts_list_str = ['excluded' if gt < 0.5 else 'included' for gt in gts_list]
+    predictions_list_str = ['excluded' if prediction < 0.5 else 'included' for prediction in predictions_list]
 
     # zipping lists
     a = zip(gts_list_str, predictions_list_str)

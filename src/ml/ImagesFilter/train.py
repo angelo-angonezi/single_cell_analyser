@@ -11,6 +11,7 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
+import tensorflow as tf
 from os.path import join
 from seaborn import lineplot
 from pandas import DataFrame
@@ -22,6 +23,7 @@ from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 from keras.layers import MaxPooling2D
 from keras.callbacks import TensorBoard
+from keras.callbacks import LearningRateScheduler
 from keras.applications import ResNet50
 from src.utils.aux_funcs import IMAGE_SIZE
 from keras.losses import BinaryCrossentropy
@@ -143,7 +145,6 @@ def get_inception_model(input_shape: tuple) -> Sequential:
     base_layers = InceptionResNetV2(include_top=False,
                                     input_shape=input_shape,
                                     pooling='max',
-                                    classes=2,
                                     weights='imagenet')
 
     # setting resnet layers as untrainable
@@ -221,6 +222,11 @@ def get_sequential_model(learning_rate: float,
         # getting resnet layers
         model = get_resnet_model(input_shape=input_shape)
 
+    elif base_layers == 'inception':
+
+        # getting inception layers
+        models = get_inception_model(input_shape=input_shape)
+
     else:
 
         # getting new layers
@@ -230,7 +236,7 @@ def get_sequential_model(learning_rate: float,
     optimizer = Adam(learning_rate=learning_rate)
 
     # defining loss function
-    loss = BinaryCrossentropy()
+    loss = 'binary_crossentropy'
 
     # defining metrics
     metrics = ['accuracy']
@@ -324,6 +330,13 @@ def generate_history_plot(logs_folder: str,
     plt.savefig(fig_path)
 
 
+def scheduler(epoch, lr):
+    if epoch < 20:
+        return lr
+    else:
+        return lr * tf.math.exp(-0.1)
+
+
 def image_filter_train(splits_folder: str,
                        logs_folder: str,
                        model_path: str,
@@ -355,13 +368,14 @@ def image_filter_train(splits_folder: str,
 
     # defining callback
     tensorboard_callback = TensorBoard(log_dir=logs_folder)
+    lr_callback = LearningRateScheduler(scheduler)
 
     # training model (and saving history)
     train_history = train_model(model=model,
                                 train_data=train_data,
                                 val_data=val_data,
                                 epochs=epochs,
-                                callback=tensorboard_callback)
+                                callback=lr_callback)
 
     # saving model
     save_model(model=model,

@@ -155,7 +155,7 @@ def get_predictions_df(model_path: str,
         current_prediction = current_prediction_list[0]
 
         # converting prediction to string
-        current_prediction_str = 'excluded' if current_prediction > 0.5 else 'included'
+        current_prediction_str = 'excluded' if current_prediction < 0.5 else 'included'
 
         # assembling current image dict
         current_dict = {'image': image,
