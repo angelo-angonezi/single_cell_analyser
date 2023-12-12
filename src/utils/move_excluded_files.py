@@ -48,17 +48,17 @@ def get_args_dict() -> dict:
                         required=True,
                         help='defines path to table (.csv) containing included/excluded info')
 
-    # annotations file param
-    parser.add_argument('-a', '--all-folder',
-                        dest='all_folder',
+    # input folder param
+    parser.add_argument('-i', '--input-folder',
+                        dest='input_folder',
                         required=True,
-                        help='defines path to folder containing all images')
+                        help='defines path to folder containing input images')
 
-    # output path param
-    parser.add_argument('-o', '--output-path',
-                        dest='output_path',
+    # output folder param
+    parser.add_argument('-o', '--output-folder',
+                        dest='output_folder',
                         required=True,
-                        help='defines path to output csv.')
+                        help='defines path to folder containing "included" and "excluded" subfolder')
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -70,6 +70,21 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
+def move_excluded_files(table_path: str,
+                        input_folder: str,
+                        output_folder: str
+                        ) -> None:
+    """
+    Given a path to a table containing included/excluded
+    info, copies files from input folder to respective
+    subfolders in output folder.
+    """
+    # reading table
+    files_df = read_csv(table_path)
+
+    print(files_df)
+    exit()
+
 
 ######################################################################
 # defining main function
@@ -80,21 +95,25 @@ def main():
     # getting args dict
     args_dict = get_args_dict()
 
-    # getting annotations file param
-    annotations_file_path = args_dict['annotations_file']
+    # getting input table param
+    table_path = args_dict['table_path']
 
-    # getting output path param
-    output_path = args_dict['output_path']
+    # getting input folder param
+    input_folder = args_dict['input_folder']
+
+    # getting output folder param
+    output_folder = args_dict['output_folder']
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
-    # running create_dataset_description_file function
-    create_dataset_description_file(annotations_file_path=annotations_file_path,
-                                    output_path=output_path)
+    # running move_excluded_files function
+    move_excluded_files(table_path=table_path,
+                        input_folder=input_folder,
+                        output_folder=output_folder)
 
 ######################################################################
 # running main function

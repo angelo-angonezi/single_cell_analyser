@@ -10,7 +10,6 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-import sys
 from cv2 import imread
 from cv2 import imwrite
 from cv2 import putText
