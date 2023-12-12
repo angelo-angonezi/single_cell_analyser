@@ -356,7 +356,10 @@ def add_overlays_to_multiple_images(input_folder: str,
         image_path = join(input_folder, image_name_w_extension)
 
         # getting output path
-        detection_origin = detection_file_path.split('/')[-1].replace('.csv', '')
+        try:
+            detection_origin = detection_file_path.split('/')[-1].replace('.csv', '')
+        except AttributeError:
+            detection_origin = ground_truth_file_path.split('/')[-1].replace('.csv', '')
         output_name = f'{image_name}_overlays_{detection_origin}.png'
         output_path = join(output_folder, output_name)
 

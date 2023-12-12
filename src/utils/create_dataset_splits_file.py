@@ -217,6 +217,19 @@ def get_base_dataset_df(annotations_df: DataFrame,
     return final_df
 
 
+def add_dataset_col(df: DataFrame,
+                    test_size: float
+                    ) -> None:
+    """
+    Docstring.
+    """
+    # TODO: write this function!
+    #  group by cell line, treatment and confluence,
+    #  and add train/test to dataset column according
+    #  to test size.
+    pass
+
+
 def create_dataset_description_file(annotations_file_path: str,
                                     lines_treatment_file: str,
                                     output_path: str
@@ -237,6 +250,11 @@ def create_dataset_description_file(annotations_file_path: str,
     print('getting base df...')
     base_df = get_base_dataset_df(annotations_df=annotations_df,
                                   lines_treatment_df=lines_treatment_df)
+
+    # adding dataset (train/test) col
+    print('adding data split col...')
+    add_dataset_col(df=base_df,
+                    test_size=TEST_SIZE)
 
     # saving dataset description df
     base_df.to_csv(output_path,
