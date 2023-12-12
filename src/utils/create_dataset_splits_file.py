@@ -71,76 +71,24 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_confluence_group(confluence: float,
-                         confluence_mean: float,
-                         confluence_std: float
-                         ) -> str:
-    """
-    Given a confluence (PERCENTAGE) value,
-    returns a confluence group.
-    """
-    # TODO: update this function
-    # checking whether confluence surpasses minimum value
-    if confluence > 0.5:
-
-        # setting confluence group as High
-        confluence_group = 'High'
-
-    # setting confluence group as Low
-    confluence_group = 'Low'
-
-    # returning confluence_group
-    return confluence_group
-
-
 def add_confluence_group_col(df: DataFrame) -> None:
     """
     Docstring.
     """
-    # defining new col name
-    col_name = 'confluence_group'
-
-    # adding placeholder "confluence_group" col
-    df[col_name] = None
-
     # adding confluence percentage col
     df['confluence_percentage'] = df['confluence'] * 100
 
-    # getting confluence mean/std
-    confluence_mean = df['confluence_percentage'].mean()
-    confluence_std = df['confluence_percentage'].std()
+    # getting confluence percentage round values
+    df['confluence_percentage_round'] = df['confluence_percentage'].round()
 
-    # getting df rows
-    df_rows = df.iterrows()
+    # getting confluence percentage int values
+    df['confluence_percentage_int'] = df['confluence_percentage_round'].astype(int)
 
-    # getting rows num
-    rows_num = len(df)
+    # getting confluence percentage str values
+    df['confluence_percentage_str'] = df['confluence_percentage_int'].astype(str)
 
-    # defining starter for current_row_index
-    current_row_index = 1
-
-    # iterating over rows
-    for row_index, row_data in df_rows:
-
-        # printing execution message
-        base_string = f'adding confluence group to row #INDEX# of #TOTAL#'
-        print_progress_message(base_string=base_string,
-                               index=current_row_index,
-                               total=rows_num)
-
-        # getting current row confluence percentage
-        current_confluence_percentage = row_data['confluence_percentage']
-
-        # getting current row confluence group
-        current_confluence_group = get_confluence_group(confluence=current_confluence_percentage)
-
-        # updating confluence group col
-        df.at[row_index, col_name] = current_confluence_group
-
-        # updating current row index
-        current_row_index += 1
-
-    exit()
+    # getting confluence group values
+    df['confluence_group'] = df['confluence_percentage_str'].replace('0', '<1')
 
 
 def add_dataset_col(df: DataFrame,
@@ -149,26 +97,41 @@ def add_dataset_col(df: DataFrame,
     """
     Docstring.
     """
+    # defining split col name
+    split_col_name = 'split'
+
     # adding placeholder "split" col
-    df['split'] = None
+    df[split_col_name] = None
 
     # defining groups
-    groups_list = ['cell_line', 'treatment', 'confluence']
+    groups_list = ['cell_line', 'treatment', 'confluence_group']
 
     # grouping df
     df_groups = df.groupby(groups_list)
 
+    # getting groups num
+    groups_num = len(df_groups)
+
+    # printing execution message
+    f_string = f'{groups_num} were found based on: {groups_list}'
+    print(f_string)
+
     # iterating over groups
     for df_name, df_group in df_groups:
 
-        # getting df data
-        cell_line, treatment, confluence = df_name
-
         # randomly splitting current group rows
-        print(df_name)
-        print(df_group)
-        exit()
+        current_test_split = df_group.sample(frac=test_size)
+        current_train_split = df_group.drop(current_test_split.index)
 
+        # getting train/test indices
+        train_indices = current_train_split.index
+        test_indices = current_test_split.index
+
+        # adding split column based on current samples
+        for train_index in train_indices:
+            df.at[train_index, split_col_name] = 'train'
+        for test_index in test_indices:
+            df.at[test_index, split_col_name] = 'test'
 
 
 def create_dataset_splits_file(dataset_description_file: str,
@@ -184,7 +147,7 @@ def create_dataset_splits_file(dataset_description_file: str,
     base_df = read_csv(dataset_description_file)
 
     # adding confluence group col
-    print('adding confluence class col...')
+    print('adding confluence group col...')
     add_confluence_group_col(df=base_df)
 
     # adding dataset (train/test) col
@@ -193,9 +156,9 @@ def create_dataset_splits_file(dataset_description_file: str,
                     test_size=TEST_SIZE)
 
     # saving dataset description df
+    print('saving dataset description df...')
     base_df.to_csv(output_path,
                    index=False)
-    print('saving dataset description df...')
 
     # printing execution message
     f_string = f'dataset description file saved to: {output_path}'
