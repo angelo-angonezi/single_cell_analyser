@@ -1,9 +1,9 @@
-# create data set description file module
+# create data set splits file module
 
 print('initializing...')  # noqa
 
-# Code destined to generating project's data set description
-# as well as splitting train/test images with stratification
+# Code destined to generating project's data set split
+# file, in train/test images with stratification
 # between cell lines, treatments and confluences.
 
 ######################################################################
@@ -16,7 +16,6 @@ from pandas import read_csv
 from pandas import DataFrame
 from random import seed as set_seed
 from argparse import ArgumentParser
-from src.utils.aux_funcs import spacer
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import get_image_confluence
 from src.utils.aux_funcs import print_progress_message
@@ -28,6 +27,7 @@ print('all required libraries successfully imported.')  # noqa
 
 SEED = 53
 TEST_SIZE = 0.3
+CONFLUENCE_THRESHOLDS = 0.05
 
 # setting seed (so that all executions result in same sample)
 set_seed(SEED)
@@ -42,7 +42,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'create data set description file module'
+    description = 'create data set splits file module'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
@@ -50,16 +50,10 @@ def get_args_dict() -> dict:
     # adding arguments to parser
 
     # annotations file param
-    parser.add_argument('-a', '--annotations-file',
-                        dest='annotations_file',
+    parser.add_argument('-d', '--dataset-description-file',
+                        dest='dataset_description_file',
                         required=True,
-                        help='defines path to fornma nucleus output file (model output format).')
-
-    # lines and treatment file param
-    parser.add_argument('-lt', '--lines-treatment-file',
-                        dest='lines_treatment_file',
-                        required=True,
-                        help='defines path to csv file containing info on cell lines and treatments.')
+                        help='defines path to data set description file (.csv)')
 
     # output path param
     parser.add_argument('-o', '--output-path',
@@ -77,144 +71,76 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_experiment_well_df(df: DataFrame,
-                           experiment: str,
-                           well: str
-                           ) -> DataFrame:
+def get_confluence_group(confluence: float,
+                         confluence_mean: float,
+                         confluence_std: float
+                         ) -> str:
     """
-    Given a data frame, an experiment name
-    and a well, returns df filtered by given
-    experiment and well.
+    Given a confluence (PERCENTAGE) value,
+    returns a confluence group.
     """
-    # filtering df by experiment name
-    experiment_df = df[df['experiment'] == experiment]
+    # TODO: update this function
+    # checking whether confluence surpasses minimum value
+    if confluence > 0.5:
 
-    # filtering df by well
-    wells_df = experiment_df[experiment_df['well'] == well]
+        # setting confluence group as High
+        confluence_group = 'High'
 
-    # getting row
-    row = wells_df.iloc[0]
+    # setting confluence group as Low
+    confluence_group = 'Low'
 
-    # returning filtered df row
-    return row
-
-
-def get_image_df(image_name: str,
-                 image_group: DataFrame,
-                 lines_treatment_df: DataFrame
-                 ) -> DataFrame:
-    """
-    Given an image name and group,
-    returns given image base data
-    set data frame.
-    """
-    # removing current image extension
-    image_name = image_name.replace('.tif', '')
-
-    # getting current image cell count
-    cell_count = len(image_group)
-
-    # getting current image name split
-    image_name_split = image_name.split('_')
-
-    # getting image experiment string list
-    experiment_split = image_name_split[:-4]
-
-    # getting image experiment
-    current_experiment = '_'.join(experiment_split)
-
-    # getting current image well
-    current_well = image_name_split[-4]
-
-    # getting current image field
-    current_field = image_name_split[-3]
-
-    # getting current lines and treatments df row
-    current_lines_treatments_df_row = get_experiment_well_df(df=lines_treatment_df,
-                                                             experiment=current_experiment,
-                                                             well=current_well)
-
-    # getting current author
-    current_author = current_lines_treatments_df_row['author']
-
-    # getting current image cell line
-    current_cell_line = current_lines_treatments_df_row['cell_line']
-
-    # getting current image treatment
-    current_treatment = current_lines_treatments_df_row['treatment']
-
-    # getting current image confluence
-    current_confluence = get_image_confluence(df=image_group,
-                                              style='ellipse')
-
-    # assembling current image dict
-    current_dict = {'img_name': image_name,
-                    'experiment': current_experiment,
-                    'author': current_author,
-                    'well': current_well,
-                    'field': current_field,
-                    'cell_line': current_cell_line,
-                    'treatment': current_treatment,
-                    'cell_count': cell_count,
-                    'confluence': current_confluence}
-
-    # assembling current image df
-    current_df = DataFrame(current_dict,
-                           index=[0])
-
-    # returning current image df
-    return current_df
+    # returning confluence_group
+    return confluence_group
 
 
-def get_base_dataset_df(annotations_df: DataFrame,
-                        lines_treatment_df: DataFrame
-                        ) -> DataFrame:
+def add_confluence_group_col(df: DataFrame) -> None:
     """
     Docstring.
     """
-    # defining placeholder value for dfs list
-    dfs_list = []
+    # defining new col name
+    col_name = 'confluence_group'
 
-    # grouping df by image
-    image_groups = annotations_df.groupby('img_file_name')
+    # adding placeholder "confluence_group" col
+    df[col_name] = None
 
-    # getting images number
-    images_num = len(image_groups)
+    # adding confluence percentage col
+    df['confluence_percentage'] = df['confluence'] * 100
 
-    # defining starter for image index
-    image_index = 1
+    # getting confluence mean/std
+    confluence_mean = df['confluence_percentage'].mean()
+    confluence_std = df['confluence_percentage'].std()
 
-    # iterating over image groups
-    for image_name, image_group in image_groups:
+    # getting df rows
+    df_rows = df.iterrows()
 
-        # defining progress message
-        progress_string = 'getting info on image #INDEX# of #TOTAL#'
+    # getting rows num
+    rows_num = len(df)
 
-        # printing progress message
-        print_progress_message(base_string=progress_string,
-                               index=image_index,
-                               total=images_num)
+    # defining starter for current_row_index
+    current_row_index = 1
 
-        # converting image name to string
-        image_name = str(image_name)
+    # iterating over rows
+    for row_index, row_data in df_rows:
 
-        # getting current image df
-        current_df = get_image_df(image_name=image_name,
-                                  image_group=image_group,
-                                  lines_treatment_df=lines_treatment_df)
+        # printing execution message
+        base_string = f'adding confluence group to row #INDEX# of #TOTAL#'
+        print_progress_message(base_string=base_string,
+                               index=current_row_index,
+                               total=rows_num)
 
-        # appending current df to dfs list
-        dfs_list.append(current_df)
+        # getting current row confluence percentage
+        current_confluence_percentage = row_data['confluence_percentage']
 
-        # updating image index
-        image_index += 1
+        # getting current row confluence group
+        current_confluence_group = get_confluence_group(confluence=current_confluence_percentage)
 
-    # concatenating dfs in dfs list
-    final_df = concat(dfs_list,
-                      ignore_index=True)
+        # updating confluence group col
+        df.at[row_index, col_name] = current_confluence_group
 
-    # returning final df
-    return final_df
+        # updating current row index
+        current_row_index += 1
+
+    exit()
 
 
 def add_dataset_col(df: DataFrame,
@@ -223,33 +149,43 @@ def add_dataset_col(df: DataFrame,
     """
     Docstring.
     """
-    # TODO: write this function!
-    #  group by cell line, treatment and confluence,
-    #  and add train/test to dataset column according
-    #  to test size.
-    pass
+    # adding placeholder "split" col
+    df['split'] = None
+
+    # defining groups
+    groups_list = ['cell_line', 'treatment', 'confluence']
+
+    # grouping df
+    df_groups = df.groupby(groups_list)
+
+    # iterating over groups
+    for df_name, df_group in df_groups:
+
+        # getting df data
+        cell_line, treatment, confluence = df_name
+
+        # randomly splitting current group rows
+        print(df_name)
+        print(df_group)
+        exit()
 
 
-def create_dataset_description_file(annotations_file_path: str,
-                                    lines_treatment_file: str,
-                                    output_path: str
-                                    ) -> None:
+
+def create_dataset_splits_file(dataset_description_file: str,
+                               output_path: str
+                               ) -> None:
     """
     Docstring.
     """
     # printing execution message
     print('reading input files...')
 
-    # reading annotations file
-    annotations_df = read_csv(annotations_file_path)
+    # reading dataset description file
+    base_df = read_csv(dataset_description_file)
 
-    # reading lines treatment file
-    lines_treatment_df = read_csv(lines_treatment_file)
-
-    # getting base df
-    print('getting base df...')
-    base_df = get_base_dataset_df(annotations_df=annotations_df,
-                                  lines_treatment_df=lines_treatment_df)
+    # adding confluence group col
+    print('adding confluence class col...')
+    add_confluence_group_col(df=base_df)
 
     # adding dataset (train/test) col
     print('adding data split col...')
@@ -274,11 +210,8 @@ def main():
     # getting args dict
     args_dict = get_args_dict()
 
-    # getting annotations file param
-    annotations_file_path = args_dict['annotations_file']
-
-    # getting lines and treatment file param
-    lines_treatment_file = args_dict['lines_treatment_file']
+    # getting dataset description file param
+    dataset_description_file = args_dict['dataset_description_file']
 
     # getting output path param
     output_path = args_dict['output_path']
@@ -287,12 +220,11 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running create_dataset_description_file function
-    create_dataset_description_file(annotations_file_path=annotations_file_path,
-                                    lines_treatment_file=lines_treatment_file,
-                                    output_path=output_path)
+    create_dataset_splits_file(dataset_description_file=dataset_description_file,
+                               output_path=output_path)
 
 ######################################################################
 # running main function

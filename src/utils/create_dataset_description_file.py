@@ -3,8 +3,7 @@
 print('initializing...')  # noqa
 
 # Code destined to generating project's data set description
-# as well as splitting train/test images with stratification
-# between cell lines, treatments and confluences.
+# files, based on cell lines, treatments and confluences.
 
 ######################################################################
 # imports
@@ -14,23 +13,12 @@ print('importing required libraries...')  # noqa
 from pandas import concat
 from pandas import read_csv
 from pandas import DataFrame
-from random import seed as set_seed
 from argparse import ArgumentParser
-from src.utils.aux_funcs import spacer
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import get_image_confluence
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
-
-#####################################################################
-# defining global variables
-
-SEED = 53
-TEST_SIZE = 0.3
-
-# setting seed (so that all executions result in same sample)
-set_seed(SEED)
 
 #####################################################################
 # argument parsing related functions
