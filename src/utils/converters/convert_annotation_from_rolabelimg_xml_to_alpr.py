@@ -238,7 +238,7 @@ def convert_multiple_files(input_xml_folder: str,
         output_path = join(output_txt_folder, output_name)
 
         # running single converter function
-        f_string = f'converting annotations for file #INDEX of #TOTAL#'
+        f_string = f'converting annotations for file #INDEX# of #TOTAL#'
         print_progress_message(base_string=f_string,
                                index=index,
                                total=num_of_files)

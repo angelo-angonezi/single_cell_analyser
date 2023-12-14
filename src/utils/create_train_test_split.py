@@ -139,8 +139,8 @@ def get_train_test_split_lists(images_info_df: DataFrame) -> tuple:
     images_num = len(images_info_df)
 
     # getting train/test dfs
-    train_df = images_info_df[images_info_df['dataset'] == 'train']
-    test_df = images_info_df[images_info_df['dataset'] == 'test']
+    train_df = images_info_df[images_info_df['split'] == 'train']
+    test_df = images_info_df[images_info_df['split'] == 'test']
 
     # getting train/test image nums
     train_num = len(train_df)
@@ -301,6 +301,9 @@ def main():
     # getting output folder path
     output_folder_path = args_dict['output_folder_path']
 
+    # getting output folder path
+    images_info_file_path = args_dict['images_info_file_path']
+
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
@@ -310,6 +313,7 @@ def main():
     # running create_train_test_split function
     create_train_test_split(images_folder_path=images_folder_path,
                             annotations_folder_path=annotations_folder_path,
+                            images_info_file_path=images_info_file_path,
                             output_folder_path=output_folder_path)
 
 ######################################################################

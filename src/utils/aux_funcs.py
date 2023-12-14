@@ -501,6 +501,46 @@ def get_merged_detection_annotation_df(detections_df_path: str or None,
     return merged_df
 
 
+def get_test_images_df(df: DataFrame) -> DataFrame:
+    """
+    Given a merged detections/annotations data frame,
+    returns a data frame containing only rows which
+    contain at least two annotators (fornma+model).
+    """
+    # defining placeholder value for dfs list
+    dfs_list = []
+
+    # defining group col
+    groups = 'img_file_name'
+
+    # grouping df
+    df_groups = df.groupby(groups)
+
+    # iterating over df groups
+    for img_name, img_group in df_groups:
+
+        # getting current image evaluators num
+        evaluators_col = img_group['evaluator']
+        evaluators = evaluators_col.unique()
+        evaluators_num = len(evaluators)
+
+        # checking whether current image group contains just fornma annotations
+        if evaluators_num == 1:
+
+            # skipping current image
+            continue
+
+        # appending current image group to dfs list
+        dfs_list.append(img_group)
+
+    # concatenating dfs in dfs list
+    final_df = concat(dfs_list,
+                      ignore_index=True)
+
+    # returning final df
+    return final_df
+
+
 def get_area(width: float,
              height: float
              ) -> float:

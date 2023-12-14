@@ -366,7 +366,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running plot_metric function
     plot_metrics(input_path=input_path,

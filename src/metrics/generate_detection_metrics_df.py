@@ -25,6 +25,7 @@ from src.utils.aux_funcs import flush_or_print
 from src.utils.aux_funcs import get_current_time
 from src.utils.aux_funcs import get_time_elapsed
 from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import get_test_images_df
 from src.utils.aux_funcs import get_image_confluence
 from src.utils.aux_funcs import simple_hungarian_algorithm
 from src.utils.aux_funcs import print_execution_parameters
@@ -34,27 +35,8 @@ print('all required libraries successfully imported.')  # noqa
 #####################################################################
 # defining global variables
 
-# defining thresholds params
-START = 0.0
-STOP = 1.0
-IOU_STEP = 0.05
-DETECTION_STEP = 0.1
-
-# defining iou thresholds range
-# IOU_RANGE = arange(START,
-#                    STOP + IOU_STEP,
-#                    IOU_STEP)
-IOU_RANGE = [0.5]
-
-# defining detection thresholds range
-# DETECTION_RANGE = arange(START,
-#                          STOP + DETECTION_STEP,
-#                          DETECTION_STEP)
-DETECTION_RANGE = [0.5]
-
-# rounding thresholds
-IOU_THRESHOLDS = [round(i, 2) for i in IOU_RANGE]
-DETECTION_THRESHOLDS = [round(i, 2) for i in DETECTION_RANGE]
+IOU_THRESHOLDS = [0.3, 0.5, 0.7]
+DETECTION_THRESHOLDS = [0.2, 0.5, 0.8]
 
 #####################################################################
 # argument parsing related functions
@@ -433,9 +415,13 @@ def generate_detection_metrics_df(fornma_file: str,
     merged_df = get_merged_detection_annotation_df(detections_df_path=detections_file,
                                                    annotations_df_path=fornma_file)
 
+    # dropping train images (contain only fornma as evaluator)
+    print('getting test images only...')
+    filtered_df = get_test_images_df(df=merged_df)
+
     # getting detection metrics df
     print('creating detection metrics df...')
-    detection_metrics_df = create_detection_metrics_df(df=merged_df,
+    detection_metrics_df = create_detection_metrics_df(df=filtered_df,
                                                        iou_thresholds=iou_thresholds,
                                                        detection_thresholds=detection_thresholds,
                                                        style=style)
