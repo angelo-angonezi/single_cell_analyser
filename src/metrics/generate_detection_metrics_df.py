@@ -42,8 +42,20 @@ print('all required libraries successfully imported.')  # noqa
 #####################################################################
 # defining global variables
 
+# thresholds lists
 IOU_THRESHOLDS = [0.5]
 DETECTION_THRESHOLDS = [0.5]
+
+# progress bar related
+CURRENT_IOU = 0
+IOUS_TOTAL = len(IOU_THRESHOLDS)
+CURRENT_DT = 0
+DTS_TOTAL = len(DETECTION_THRESHOLDS)
+CURRENT_ITERATION = 1
+ITERATIONS_TOTAL = 0
+CURRENT_IMAGE = 1
+IMAGES_TOTAL = 0
+START_TIME = 0
 
 #####################################################################
 # argument parsing related functions
@@ -117,6 +129,101 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
+def get_iterations_total(df: DataFrame,
+                         iou_thresholds: list,
+                         detection_thresholds: list,
+                         ) -> int:
+    """
+    Returns total iterations number,
+    based on given parameters.
+    """
+    # defining placeholder value for iterations total
+    iterations_total = 0
+
+    # grouping df by images
+    image_groups = df.groupby('img_file_name')
+
+    # iterating over image groups
+    for image_index, (image_name, image_group) in enumerate(image_groups, 1):
+
+        # iterating over IoU thresholds
+        for iou in iou_thresholds:
+
+            # iterating over detection thresholds
+            for dt in detection_thresholds:
+
+                # getting current image detections/annotations dfs
+                detections_df = image_group[image_group['evaluator'] == 'model']
+                annotations_df = image_group[image_group['evaluator'] == 'fornma']
+
+                # filtering detections_df by detection_threshold
+                detections_df = detections_df[detections_df['detection_threshold'] > dt]
+
+                # getting current image detections/annotations nums
+                detections_num = len(detections_df)
+                annotations_num = len(annotations_df)
+
+                # getting current combinations number
+                combinations_num = detections_num * annotations_num
+
+                # updating iterations total
+                iterations_total += combinations_num
+
+    # returning iterations total
+    return iterations_total
+
+
+def print_global_progress():
+    """
+    Takes global parameters and prints
+    progress message on console.
+    """
+    # getting global variables
+    global CURRENT_IOU
+    global IOUS_TOTAL
+    global CURRENT_DT
+    global DTS_TOTAL
+    global CURRENT_ITERATION
+    global ITERATIONS_TOTAL
+    global CURRENT_IMAGE
+    global IMAGES_TOTAL
+    global START_TIME
+
+    # getting current progress
+    progress_ratio = CURRENT_ITERATION / ITERATIONS_TOTAL
+    progress_percentage = progress_ratio * 100
+
+    # getting current time
+    current_time = get_current_time()
+
+    # getting time elapsed
+    time_elapsed = get_time_elapsed(start_time=START_TIME,
+                                    current_time=current_time)
+
+    # getting estimated time of completion
+    etc = get_etc(time_elapsed=time_elapsed,
+                  current_iteration=CURRENT_ITERATION,
+                  iterations_total=ITERATIONS_TOTAL)
+
+    # converting times to adequate format
+    time_elapsed_str = get_time_str(time_in_seconds=time_elapsed)
+    etc_str = get_time_str(time_in_seconds=etc)
+
+    # defining progress string
+    progress_string = f'analysing image {CURRENT_IMAGE}/{IMAGES_TOTAL}... '
+    progress_string += f'| IoU: {CURRENT_IOU:02.1f} '
+    progress_string += f'| DT: {CURRENT_DT:02.1f} '
+    progress_string += f'| progress: {progress_percentage:02.2f}% '
+    progress_string += f'| time elapsed: {time_elapsed_str} '
+    progress_string += f'| ETC: {etc_str}'
+    progress_string += '   '
+
+    # printing execution message
+    flush_or_print(string=progress_string,
+                   index=CURRENT_ITERATION,
+                   total=ITERATIONS_TOTAL)
+
+
 def get_cost_matrix(detections_df: DataFrame,
                     annotations_df: DataFrame,
                     style: str
@@ -153,6 +260,9 @@ def get_cost_matrix(detections_df: DataFrame,
         # iterating over columns (annotations)
         for column_index in range(annotations_num):
 
+            # printing execution message
+            print_global_progress()
+
             # getting annotation row data
             annotation_row_data = annotations_df.iloc[column_index]
 
@@ -169,6 +279,10 @@ def get_cost_matrix(detections_df: DataFrame,
 
             # updating cost matrix
             cost_matrix[line_index][column_index] = current_cost
+
+            # updating global variables
+            global CURRENT_ITERATION
+            CURRENT_ITERATION += 1
 
     # returning cost matrix
     return cost_matrix
@@ -311,7 +425,7 @@ def get_image_metrics(images_folder: str,
     imwrite(save_path, open_img)
 
     # assembling final tuple
-    metrics_tuple = (true_positives, false_positives, false_negatives)
+    metrics_tuple = (true_positives, false_positives, false_negatives, area_errors)
 
     # returning final tuple
     return metrics_tuple
@@ -332,23 +446,20 @@ def create_detection_metrics_df(images_folder: str,
     based on given style IoU+Hungarian Algorithm
     matching of detections.
     """
-    # getting start time
-    start_time = get_current_time()
-
     # defining placeholder value for dfs_list
     dfs_list = []
 
     # grouping df by images
     image_groups = df.groupby('img_file_name')
 
-    # getting progress totals
-    iou_thresholds_num = len(iou_thresholds)
-    detection_thresholds_num = len(detection_thresholds)
-    images_num = len(image_groups)
-    iterations_total = images_num * iou_thresholds_num * detection_thresholds_num
+    # getting images total
+    images_total = len(image_groups)
 
-    # defining starter for current iteration
-    current_iteration = 1
+    # updating global variables
+    global IMAGES_TOTAL
+    global START_TIME
+    IMAGES_TOTAL = images_total
+    START_TIME = get_current_time()
 
     # iterating over image groups
     for image_index, (image_name, image_group) in enumerate(image_groups, 1):
@@ -356,42 +467,16 @@ def create_detection_metrics_df(images_folder: str,
         # iterating over IoU thresholds
         for iou in iou_thresholds:
 
+            # updating global variables
+            global CURRENT_IOU
+            CURRENT_IOU = iou
+
             # iterating over detection thresholds
             for dt in detection_thresholds:
 
-                # getting current progress
-                progress_ratio = current_iteration / iterations_total
-                progress_percentage = progress_ratio * 100
-
-                # getting current time
-                current_time = get_current_time()
-
-                # getting time elapsed
-                time_elapsed = get_time_elapsed(start_time=start_time,
-                                                current_time=current_time)
-
-                # getting estimated time of completion
-                etc = get_etc(time_elapsed=time_elapsed,
-                              current_iteration=current_iteration,
-                              iterations_total=iterations_total)
-
-                # converting times to adequate format
-                time_elapsed_str = get_time_str(time_in_seconds=time_elapsed)
-                etc_str = get_time_str(time_in_seconds=etc)
-
-                # defining progress string
-                progress_string = f'analysing image {image_index}/{images_num}... '
-                progress_string += f'| IoU: {iou:02.1f} '
-                progress_string += f'| DT: {dt:02.1f} '
-                progress_string += f'| progress: {progress_percentage:02.2f}% '
-                progress_string += f'| time elapsed: {time_elapsed_str} '
-                progress_string += f'| ETC: {etc_str}'
-                progress_string += '   '
-
-                # printing execution message
-                flush_or_print(string=progress_string,
-                               index=current_iteration,
-                               total=iterations_total)
+                # updating global variables
+                global CURRENT_DT
+                CURRENT_DT = dt
 
                 # getting current image name split
                 image_name_split = image_name.split('_')
@@ -434,14 +519,14 @@ def create_detection_metrics_df(images_folder: str,
                 annotations_num = len(annotations_df)
 
                 # getting current image metrics
-                tp, fp, fn = get_image_metrics(images_folder=images_folder,
-                                               images_extension=images_extension,
-                                               image_name=image_name,
-                                               output_folder=output_folder,
-                                               detections_df=detections_df,
-                                               annotations_df=annotations_df,
-                                               iou_threshold=iou,
-                                               style=style)
+                tp, fp, fn, area_errors = get_image_metrics(images_folder=images_folder,
+                                                            images_extension=images_extension,
+                                                            image_name=image_name,
+                                                            output_folder=output_folder,
+                                                            detections_df=detections_df,
+                                                            annotations_df=annotations_df,
+                                                            iou_threshold=iou,
+                                                            style=style)
 
                 # getting current image confluences
                 model_confluence = get_image_confluence(df=detections_df,
@@ -483,6 +568,7 @@ def create_detection_metrics_df(images_folder: str,
                                 'fornma_confluence': fornma_confluence,
                                 'iou_threshold': iou,
                                 'detection_threshold': dt,
+                                'area_errors': area_errors,
                                 'true_positives': tp,
                                 'false_positives': fp,
                                 'false_negatives': fn,
@@ -494,14 +580,8 @@ def create_detection_metrics_df(images_folder: str,
                 current_df = DataFrame(current_dict,
                                        index=[0])
 
-                print(current_df.iloc[0]['img_name'])
-                exit()
-
                 # appending current df to dfs_list
                 dfs_list.append(current_df)
-
-                # updating current iteration
-                current_iteration += 1
 
     # concatenating dfs in dfs_list
     final_df = concat(dfs_list,
@@ -533,6 +613,13 @@ def generate_detection_metrics_df(images_folder: str,
     merged_df = get_merged_detection_annotation_df(detections_df_path=detections_file,
                                                    annotations_df_path=fornma_file)
 
+    # updating global variables
+    global ITERATIONS_TOTAL
+    print('getting iterations total...')
+    ITERATIONS_TOTAL = get_iterations_total(df=merged_df,
+                                            iou_thresholds=iou_thresholds,
+                                            detection_thresholds=detection_thresholds)
+
     # reading lines treatment file
     print('getting lines/treatments df...')
     lines_treatment_df = read_csv(lines_treatment_file)
@@ -555,9 +642,9 @@ def generate_detection_metrics_df(images_folder: str,
     # saving detection metrics df
     print('saving detection metrics df...')
     save_path = join(output_folder,
-                     'metrics_df.csv')
-    detection_metrics_df.to_csv(save_path,
-                                index=False)
+                     'metrics_df.pickle')
+    detection_metrics_df.to_pickle(save_path,
+                                   index=False)
 
     # printing execution message
     print(f'output saved to "{output_folder}".')
