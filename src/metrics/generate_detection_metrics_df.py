@@ -44,7 +44,7 @@ print('all required libraries successfully imported.')  # noqa
 # defining global variables
 
 # thresholds lists
-IOU_THRESHOLDS = [0.3, 0.5, 0.8]
+IOU_THRESHOLDS = [0.3]
 DETECTION_THRESHOLDS = [0.5]
 
 # progress bar related
