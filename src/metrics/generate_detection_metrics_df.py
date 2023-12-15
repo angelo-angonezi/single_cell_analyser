@@ -419,13 +419,22 @@ def get_image_metrics(images_folder: str,
     # print(f_string)
     # input()
 
+    # getting global variables
+    global CURRENT_IOU
+    global CURRENT_DT
+
     # saving associations overlays image
+    save_name = image_name_w_extension.replace('.png', f'_iou{CURRENT_IOU}_dt{CURRENT_DT}.png')
     save_path = join(output_folder,
-                     image_name_w_extension)
-    imwrite(save_path, open_img)
+                     save_name)
+    imwrite(save_path,
+            open_img)
 
     # assembling final tuple
-    metrics_tuple = (true_positives, false_positives, false_negatives, area_errors)
+    metrics_tuple = (true_positives,
+                     false_positives,
+                     false_negatives,
+                     area_errors)
 
     # returning final tuple
     return metrics_tuple
@@ -463,6 +472,9 @@ def create_detection_metrics_df(images_folder: str,
 
     # iterating over image groups
     for image_index, (image_name, image_group) in enumerate(image_groups, 1):
+
+        if image_index == 3:
+            break
 
         # iterating over IoU thresholds
         for iou in iou_thresholds:
