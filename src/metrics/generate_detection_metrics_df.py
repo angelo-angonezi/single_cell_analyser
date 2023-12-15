@@ -483,9 +483,6 @@ def create_detection_metrics_df(images_folder: str,
         global CURRENT_IMAGE
         CURRENT_IMAGE = image_index
 
-        if image_index == 3:
-            break
-
         # iterating over IoU thresholds
         for iou in iou_thresholds:
 
