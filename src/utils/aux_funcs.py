@@ -1365,5 +1365,27 @@ def resize_image(open_image: ndarray,
     # returning resized image
     return resized_image
 
+
+def get_experiment_well_df(df: DataFrame,
+                           experiment: str,
+                           well: str
+                           ) -> DataFrame:
+    """
+    Given a data frame, an experiment name
+    and a well, returns df filtered by given
+    experiment and well.
+    """
+    # filtering df by experiment name
+    experiment_df = df[df['experiment'] == experiment]
+
+    # filtering df by well
+    wells_df = experiment_df[experiment_df['well'] == well]
+
+    # getting row
+    row = wells_df.iloc[0]
+
+    # returning filtered df row
+    return row
+
 ######################################################################
 # end of current module

@@ -16,6 +16,7 @@ from pandas import DataFrame
 from argparse import ArgumentParser
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import get_image_confluence
+from src.utils.aux_funcs import get_experiment_well_df
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
@@ -63,28 +64,6 @@ def get_args_dict() -> dict:
 
 ######################################################################
 # defining auxiliary functions
-
-
-def get_experiment_well_df(df: DataFrame,
-                           experiment: str,
-                           well: str
-                           ) -> DataFrame:
-    """
-    Given a data frame, an experiment name
-    and a well, returns df filtered by given
-    experiment and well.
-    """
-    # filtering df by experiment name
-    experiment_df = df[df['experiment'] == experiment]
-
-    # filtering df by well
-    wells_df = experiment_df[experiment_df['well'] == well]
-
-    # getting row
-    row = wells_df.iloc[0]
-
-    # returning filtered df row
-    return row
 
 
 def get_image_df(image_name: str,
