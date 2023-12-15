@@ -25,6 +25,7 @@ from src.utils.aux_funcs import spacer
 from src.utils.aux_funcs import get_iou
 from src.utils.aux_funcs import get_etc
 from src.utils.aux_funcs import get_time_str
+from src.utils.aux_funcs import flush_string
 from src.utils.aux_funcs import get_mask_area
 from src.utils.aux_funcs import get_pixel_mask
 from src.utils.aux_funcs import flush_or_print
@@ -43,8 +44,8 @@ print('all required libraries successfully imported.')  # noqa
 # defining global variables
 
 # thresholds lists
-IOU_THRESHOLDS = [0.5]
-DETECTION_THRESHOLDS = [0.5]
+IOU_THRESHOLDS = [0.3, 0.5, 0.8]
+DETECTION_THRESHOLDS = [0.2, 0.5, 0.7]
 
 # progress bar related
 CURRENT_IOU = 0
@@ -169,6 +170,10 @@ def get_iterations_total(df: DataFrame,
                 # updating iterations total
                 iterations_total += combinations_num
 
+                # printing progress message
+                f_string = f'iterations: {iterations_total}'
+                flush_string(f_string)
+
     # returning iterations total
     return iterations_total
 
@@ -213,6 +218,7 @@ def print_global_progress():
     progress_string = f'analysing image {CURRENT_IMAGE}/{IMAGES_TOTAL}... '
     progress_string += f'| IoU: {CURRENT_IOU:02.1f} '
     progress_string += f'| DT: {CURRENT_DT:02.1f} '
+    progress_string += f'| iteration: {CURRENT_ITERATION} '
     progress_string += f'| progress: {progress_percentage:02.2f}% '
     progress_string += f'| time elapsed: {time_elapsed_str} '
     progress_string += f'| ETC: {etc_str}'
@@ -473,7 +479,7 @@ def create_detection_metrics_df(images_folder: str,
     # iterating over image groups
     for image_index, (image_name, image_group) in enumerate(image_groups, 1):
 
-        if image_index == 3:
+        if image_index == 2:
             break
 
         # iterating over IoU thresholds
@@ -580,7 +586,7 @@ def create_detection_metrics_df(images_folder: str,
                                 'fornma_confluence': fornma_confluence,
                                 'iou_threshold': iou,
                                 'detection_threshold': dt,
-                                'area_errors': area_errors,
+                                'area_errors': [area_errors],
                                 'true_positives': tp,
                                 'false_positives': fp,
                                 'false_negatives': fn,
@@ -631,6 +637,8 @@ def generate_detection_metrics_df(images_folder: str,
     ITERATIONS_TOTAL = get_iterations_total(df=merged_df,
                                             iou_thresholds=iou_thresholds,
                                             detection_thresholds=detection_thresholds)
+    f_string = f'Iterations total: {ITERATIONS_TOTAL}'
+    print(f_string)
 
     # reading lines treatment file
     print('getting lines/treatments df...')
@@ -655,8 +663,7 @@ def generate_detection_metrics_df(images_folder: str,
     print('saving detection metrics df...')
     save_path = join(output_folder,
                      'metrics_df.pickle')
-    detection_metrics_df.to_pickle(save_path,
-                                   index=False)
+    detection_metrics_df.to_pickle(save_path)
 
     # printing execution message
     print(f'output saved to "{output_folder}".')
