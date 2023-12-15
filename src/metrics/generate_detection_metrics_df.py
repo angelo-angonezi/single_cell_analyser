@@ -45,7 +45,7 @@ print('all required libraries successfully imported.')  # noqa
 
 # thresholds lists
 IOU_THRESHOLDS = [0.3, 0.5, 0.8]
-DETECTION_THRESHOLDS = [0.2, 0.5, 0.7]
+DETECTION_THRESHOLDS = [0.5]
 
 # progress bar related
 CURRENT_IOU = 0
@@ -148,7 +148,7 @@ def get_iterations_total(df: DataFrame,
     for image_index, (image_name, image_group) in enumerate(image_groups, 1):
 
         # iterating over IoU thresholds
-        for iou in iou_thresholds:
+        for _ in iou_thresholds:
 
             # iterating over detection thresholds
             for dt in detection_thresholds:
@@ -479,7 +479,11 @@ def create_detection_metrics_df(images_folder: str,
     # iterating over image groups
     for image_index, (image_name, image_group) in enumerate(image_groups, 1):
 
-        if image_index == 2:
+        # updating global variables
+        global CURRENT_IMAGE
+        CURRENT_IMAGE = image_index
+
+        if image_index == 3:
             break
 
         # iterating over IoU thresholds
