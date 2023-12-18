@@ -1387,5 +1387,28 @@ def get_experiment_well_df(df: DataFrame,
     # returning filtered df row
     return row
 
+
+def add_confluence_group_col(df: DataFrame) -> None:
+    """
+    Docstring.
+    """
+    # adding confluence percentage col
+    try:
+        df['confluence_percentage'] = df['confluence'] * 100
+    except KeyError:
+        df['confluence_percentage'] = df['fornma_confluence'] * 100
+
+    # getting confluence percentage round values
+    df['confluence_percentage_round'] = df['confluence_percentage'].round()
+
+    # getting confluence percentage int values
+    df['confluence_percentage_int'] = df['confluence_percentage_round'].astype(int)
+
+    # getting confluence percentage str values
+    df['confluence_percentage_str'] = df['confluence_percentage_int'].astype(str)
+
+    # getting confluence group values
+    df['confluence_group'] = df['confluence_percentage_str'].replace('0', '<1')
+
 ######################################################################
 # end of current module

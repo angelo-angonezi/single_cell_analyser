@@ -19,6 +19,7 @@ from argparse import ArgumentParser
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import get_image_confluence
 from src.utils.aux_funcs import print_progress_message
+from src.utils.aux_funcs import add_confluence_group_col
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
 
@@ -69,26 +70,6 @@ def get_args_dict() -> dict:
 
 ######################################################################
 # defining auxiliary functions
-
-
-def add_confluence_group_col(df: DataFrame) -> None:
-    """
-    Docstring.
-    """
-    # adding confluence percentage col
-    df['confluence_percentage'] = df['confluence'] * 100
-
-    # getting confluence percentage round values
-    df['confluence_percentage_round'] = df['confluence_percentage'].round()
-
-    # getting confluence percentage int values
-    df['confluence_percentage_int'] = df['confluence_percentage_round'].astype(int)
-
-    # getting confluence percentage str values
-    df['confluence_percentage_str'] = df['confluence_percentage_int'].astype(str)
-
-    # getting confluence group values
-    df['confluence_group'] = df['confluence_percentage_str'].replace('0', '<1')
 
 
 def add_dataset_col(df: DataFrame,
