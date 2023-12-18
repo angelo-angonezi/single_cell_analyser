@@ -1,5 +1,4 @@
 # plot metrics module
-import matplotlib.pyplot as plt
 
 print('initializing...')  # noqa
 
