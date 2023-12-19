@@ -575,6 +575,7 @@ def create_detection_metrics_df(images_folder: str,
 
                 # getting current image dict
                 current_dict = {'img_name': image_name,
+                                'experiment': current_experiment,
                                 'author': current_author,
                                 'cell_line': current_cell_line,
                                 'treatment': current_treatment,

@@ -22,7 +22,8 @@ print('all required libraries successfully imported.')  # noqa
 # defining global variables
 
 PHENOTYPE = 'dna_damage'
-PHENOTYPE_COL = 'Total_foci_red'
+PHENOTYPE_COL = 'Total_foci_rg_merge'
+IMAGE_NAME_COL = 'Image_name_rg_merge'
 FOCI_THRESHOLD = 3
 
 #####################################################################
@@ -142,7 +143,7 @@ def convert_single_file(input_csv_file_path: str,
                                total=rows_num)
 
         # getting file name
-        file_name = row_data['Image_name_red']
+        file_name = row_data[IMAGE_NAME_COL]
         file_name = file_name.replace('.tif', '')
 
         # getting center x value
