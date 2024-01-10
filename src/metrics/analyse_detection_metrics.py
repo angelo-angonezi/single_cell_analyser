@@ -252,7 +252,7 @@ def analyse_metrics(input_path: str,
     metrics_df = metrics_df[metrics_df['mask_style'] == MASK_TYPE]
 
     # removing bad images
-    good_images_path = '/home/angelo/dados/pycharm_projects/single_cell_analyser/data/nucleus_detection/NucleusDetectorV2/metrics/V2/associations_overlays_filtered'
+    good_images_path = '/home/angelo/dados/pycharm_projects/single_cell_analyser/data/nucleus_detection/NucleusDetectorV2/metrics/V2/associations_overlays/included'
     good_images = listdir(good_images_path)
     good_images = [f.replace('_iou0.3_dt0.5.png', '') for f in good_images]
     metrics_df = metrics_df[metrics_df['img_name'].isin(good_images)]
@@ -274,10 +274,10 @@ def analyse_metrics(input_path: str,
     print_metrics_by_group(df=metrics_df)
 
     # plotting F1-Scores line plot
-    # plot_f1_scores_lineplot(df=metrics_df)
+    plot_f1_scores_lineplot(df=metrics_df)
 
     # plotting F1-Scores box plot
-    # plot_f1_scores_boxplot(df=metrics_df)
+    plot_f1_scores_boxplot(df=metrics_df)
 
     # printing execution message
     print(f'output saved to "{output_folder}".')
