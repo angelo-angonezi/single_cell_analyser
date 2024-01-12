@@ -79,6 +79,8 @@ filenames = np.array(list(data.keys()))
 
 # get a list of just the features
 feat = np.array(list(data.values()))
+print(feat)
+exit()
 
 # reshape so that there are 210 samples of 4096 vectors
 feat = feat.reshape(-1, 4096)
