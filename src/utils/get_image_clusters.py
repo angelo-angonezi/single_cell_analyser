@@ -179,7 +179,8 @@ def get_clusters_labels(principal_components: ndarray,
     labels = kmeans.labels_
 
     # converting cluster labels to list
-    labels_list = [f for f in labels]
+    # labels_list = [f'C{label}' for label in labels]
+    labels_list = [label for label in labels]
 
     # returning cluster labels
     return labels_list
@@ -586,6 +587,7 @@ def plot_umap(df: DataFrame) -> None:
                   x='umap_x',
                   y='umap_y',
                   color='label',
+                  size='cluster',
                   hover_data='file_name')
 
     # showing plot
@@ -614,33 +616,34 @@ def get_image_clusters(input_folder: str,
     print('adding UMAP cols...')
     add_umap_cols(df=features_df)
 
-    # plotting UMAP
-    print('plotting UMAP...')
-    plot_umap(df=features_df)
-
-    exit()
     # TODO: check if code below remains
-
     # getting clusters based on principal components
     print(f'getting clusters based on principal components (running K-Means with {N_CLUSTERS} clusters)...')
-    clusters_labels = get_clusters_labels(principal_components=principal_components,
+    features_array = get_features_array(df=features_df)
+    clusters_labels = get_clusters_labels(principal_components=features_array,
                                           n_clusters=N_CLUSTERS)
 
     # adding clusters col
     print('adding clusters col...')
-    add_cluster_col(df=df,
+    add_cluster_col(df=features_df,
                     clusters=clusters_labels)
+    print(features_df)
+
+    # plotting UMAP
+    print('plotting UMAP...')
+    plot_umap(df=features_df)
 
     # saving clusters df
     print('saving clusters df...')
     save_name = f'clusters_df.pickle'
     save_path = join(output_folder,
                      save_name)
-    df.to_pickle(save_path)
+    features_df.to_pickle(save_path)
+    exit()
 
     # generating cluster example images
     print('generating cluster example images...')
-    generate_cluster_examples(df=df,
+    generate_cluster_examples(df=features_df,
                               output_folder=output_folder,
                               n_sample=N_SAMPLE)
 
