@@ -18,8 +18,10 @@ from pandas import read_csv
 from pandas import DataFrame
 from pandas import read_pickle
 from keras.models import Model
+from seaborn import scatterplot
 from keras.utils import load_img
 from sklearn.cluster import KMeans
+from plotly.express import scatter
 from numpy import array as np_array
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
@@ -266,6 +268,9 @@ def get_label(file_name: str,
 
     # getting current label
     current_label = file_row[label_col]
+
+    # converting label to string
+    current_label = f'L{current_label}'
 
     # returning current label
     return current_label
@@ -569,6 +574,24 @@ def add_umap_cols(df: DataFrame) -> None:
     df['umap_y'] = umap_y
 
 
+def plot_umap(df: DataFrame) -> None:
+    """
+    Given a features data frame containing
+    added umap cols, plots UMAP, coloring
+    the plot based on label column.
+    !!!INTERACTIVE PLOT!!!
+    """
+    # plotting UMAP (coloring by known labels)
+    fig = scatter(data_frame=df,
+                  x='umap_x',
+                  y='umap_y',
+                  color='label',
+                  hover_data='file_name')
+
+    # showing plot
+    fig.show()
+
+
 def get_image_clusters(input_folder: str,
                        images_extension: str,
                        labels_path: str,
@@ -591,13 +614,12 @@ def get_image_clusters(input_folder: str,
     print('adding UMAP cols...')
     add_umap_cols(df=features_df)
 
-    from seaborn import scatterplot
-    scatterplot(data=features_df,
-                x='umap_x',
-                y='umap_y')
-    plt.show()
-    print(features_df)
+    # plotting UMAP
+    print('plotting UMAP...')
+    plot_umap(df=features_df)
+
     exit()
+    # TODO: check if code below remains
 
     # getting clusters based on principal components
     print(f'getting clusters based on principal components (running K-Means with {N_CLUSTERS} clusters)...')
