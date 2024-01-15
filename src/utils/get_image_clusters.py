@@ -10,10 +10,13 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
+from umap import UMAP
 from os.path import join
-from random import sample
 from numpy import ndarray
+from os.path import exists
+from pandas import read_csv
 from pandas import DataFrame
+from pandas import read_pickle
 from keras.models import Model
 from keras.utils import load_img
 from sklearn.cluster import KMeans
@@ -25,6 +28,7 @@ from sklearn.decomposition import PCA
 from keras.applications.vgg16 import VGG16
 from src.utils.aux_funcs import is_using_gpu
 from src.utils.aux_funcs import get_axis_ratio
+from sklearn.preprocessing import StandardScaler
 from src.utils.aux_funcs import enter_to_continue
 from keras.applications.vgg16 import preprocess_input
 from src.utils.aux_funcs import print_progress_message
@@ -38,8 +42,10 @@ print('all required libraries successfully imported.')  # noqa
 IMG_WIDTH = 224
 IMG_HEIGHT = 224
 SEED = 53
-N_COMPONENTS = 2
-N_CLUSTERS = 10
+N_COMPONENTS = 10  # defines number of principal components in PCA
+N_CLUSTERS = 10  # if set to zero, plots k-means elbow plot and asks user input
+N_SAMPLE = 10  # defines number of images per cluster plot
+LABEL_COL = 'label'
 
 #####################################################################
 # argument parsing related functions
@@ -71,6 +77,13 @@ def get_args_dict() -> dict:
                         dest='images_extension',
                         required=True,
                         help=extension_help)
+
+    # labels path param
+    labels_help = 'defines path to labels file'
+    parser.add_argument('-l', '--labels-path',
+                        dest='labels_path',
+                        required=True,
+                        help=labels_help)
 
     # output folder param
     output_help = 'defines output folder'
@@ -127,55 +140,6 @@ def get_vgg_features(file_path: str,
     return features
 
 
-def get_features_dict(files: list,
-                      folder: str
-                      ) -> dict:
-    """
-    Given a list of file paths, returns a
-    dictionary in which keys are file names,
-    and values are feature vectors.
-    """
-    # defining placeholder value for features dict
-    features_dict = {}
-
-    # getting files total
-    files_total = len(files)
-
-    # defining starter for current image index
-    current_file = 1
-
-    # defining base model
-    base_model = get_base_model()
-
-    # iterating over files
-    for file in files:
-
-        # printing execution message
-        base_string = f'getting feature vector for image #INDEX# of #TOTAL#'
-        print_progress_message(base_string=base_string,
-                               index=current_file,
-                               total=files_total)
-
-        # getting current file path
-        file_path = join(folder, file)
-
-        # getting current image feature vector
-        current_feature_vector = get_vgg_features(file_path=file_path,
-                                                  model=base_model)
-
-        # assembling current dict element
-        current_dict = {file: current_feature_vector}
-
-        # updating features dict
-        features_dict.update(current_dict)
-
-        # updating current image index
-        current_file += 1
-
-    # returning features dict
-    return features_dict
-
-
 def get_principal_components(features: ndarray,
                              n_components: int
                              ) -> ndarray:
@@ -217,30 +181,6 @@ def get_clusters_labels(principal_components: ndarray,
 
     # returning cluster labels
     return labels_list
-
-
-def get_clusters_dict(files: list,) -> dict:
-    # defining placeholder value for clusters dict
-    clusters_dict = {}
-    pass
-
-    # getting files/labels zip
-    clusters_zip = zip(files, labels)
-
-    # iterating over clusters zip
-    for file, cluster in clusters_zip:
-
-        # checking if current cluster key already exists
-        if cluster not in clusters_dict.keys():
-
-            # adding current cluster id as key
-            clusters_dict[cluster] = []
-
-        # updating clusters dict (adding current file to existing files list)
-        clusters_dict[cluster].append(file)
-
-    # returning clusters dict
-    return clusters_dict
 
 
 def get_base_df(files: list) -> DataFrame:
@@ -310,6 +250,80 @@ def add_file_path_col(df: DataFrame,
         current_row_index += 1
 
 
+def get_label(file_name: str,
+              labels_df: DataFrame,
+              label_col: str
+              ) -> str:
+    """
+    Given a file name and a labels df,
+    returns label in respective col.
+    """
+    # filtering df for line matching current file
+    file_df = labels_df[labels_df['file'] == file_name]
+
+    # getting current file df row
+    file_row = file_df.iloc[0]
+
+    # getting current label
+    current_label = file_row[label_col]
+
+    # returning current label
+    return current_label
+
+
+def add_labels_col(df: DataFrame,
+                   labels_path: str
+                   ) -> None:
+    """
+    Given a base image names data frame,
+    adds labels col, based on given
+    labels path.
+    """
+    # defining col name
+    col_name = 'label'
+
+    # adding placeholder values to col
+    df[col_name] = None
+
+    # getting df rows
+    df_rows = df.iterrows()
+
+    # getting rows num
+    rows_num = len(df)
+
+    # defining starter for current row index
+    current_row_index = 1
+
+    # reading labels file
+    labels_df = read_csv(labels_path)
+
+    # iterating over rows
+    for row in df_rows:
+
+        # printing progress message
+        base_string = f'adding label col (row #INDEX# of #TOTAL#)'
+        print_progress_message(base_string=base_string,
+                               index=current_row_index,
+                               total=rows_num)
+
+        # getting current row index/data
+        row_index, row_data = row
+
+        # getting current row image name
+        file_name = row_data['file_name']
+
+        # getting current row label
+        current_label = get_label(file_name=file_name,
+                                  labels_df=labels_df,
+                                  label_col=LABEL_COL)
+
+        # updating current row col
+        df.at[row_index, col_name] = current_label
+
+        # updating current row index
+        current_row_index += 1
+
+
 def add_features_col(df: DataFrame) -> None:
     """
     Given a base image names data frame,
@@ -353,11 +367,88 @@ def add_features_col(df: DataFrame) -> None:
         current_features = get_vgg_features(file_path=file_path,
                                             model=base_model)
 
+        # TODO: ADD AREA AND AXIS RATIO HERE
+
         # updating current row col
         df.at[row_index, col_name] = current_features
 
         # updating current row index
         current_row_index += 1
+
+
+def create_features_df(input_folder: str,
+                       images_extension: str,
+                       labels_path: str
+                       ) -> DataFrame:
+    """
+    Creates features data frame, based
+    on images in given input folder.
+    """
+    # getting files in input folder
+    files = get_specific_files_in_folder(path_to_folder=input_folder,
+                                         extension=images_extension)
+
+    # creating df
+    features_df = get_base_df(files=files)
+
+    # adding file path col
+    add_file_path_col(df=features_df,
+                      input_folder=input_folder)
+
+    # adding labels col
+    add_labels_col(df=features_df,
+                   labels_path=labels_path)
+
+    # adding features col
+    add_features_col(df=features_df)
+
+    # returning features df
+    return features_df
+
+
+def get_features_df(input_folder: str,
+                    images_extension: str,
+                    labels_path: str,
+                    output_folder: str
+                    ) -> DataFrame:
+    """
+    Checks whether features data frame
+    exists in given output folder, and
+    returns loaded df. Creates it from
+    base df otherwise.
+    """
+    # defining placeholder value for features df
+    features_df = None
+
+    # defining file name
+    file_name = 'features_df.pickle'
+
+    # getting file path
+    file_path = join(output_folder,
+                     file_name)
+
+    # checking whether file exists
+    if exists(file_path):
+
+        # loading features df from existing file
+        print('loading features df from existing file...')
+        features_df = read_pickle(file_path)
+
+    # if it does not exist
+    else:
+
+        # creating features df
+        print('creating features df from scratch...')
+        features_df = create_features_df(input_folder=input_folder,
+                                         images_extension=images_extension,
+                                         labels_path=labels_path)
+
+        # saving features df
+        print('saving features df...')
+        features_df.to_pickle(file_path)
+
+    # returning features df
+    return features_df
 
 
 def add_cluster_col(df: DataFrame,
@@ -373,6 +464,25 @@ def add_cluster_col(df: DataFrame,
 
     # adding values to col
     df[col_name] = clusters
+
+
+def get_features_array(df: DataFrame) -> ndarray:
+    """
+    Given a features data frame, returns
+    features array to be used as input for
+    further analysis.
+    """
+    # retrieving features col
+    features_col = df['vgg_features'].to_numpy()
+
+    # unpacking features arrays
+    features_list = [feature_array[0] for feature_array in features_col]
+
+    # converting list to array
+    features_array = np_array(features_list)
+
+    # returning features array
+    return features_array
 
 
 def generate_cluster_examples(df: DataFrame,
@@ -411,8 +521,57 @@ def generate_cluster_examples(df: DataFrame,
         current_group_index += 1
 
 
+def get_umap_cols(input_array: ndarray) -> tuple:
+    """
+    Given a features array, returns
+    a tuple with (x, y) values to
+    plot UMAP.
+    """
+    # defining UMAP reducer
+    reducer = UMAP()
+
+    # scaling data (converting values to z-scores)
+    scaled_data = StandardScaler().fit_transform(input_array)
+
+    # reducing data (fitting UMAP)
+    umap_results = reducer.fit_transform(scaled_data)
+
+    # getting x, y values
+    x = umap_results[:, 0]
+    y = umap_results[:, 1]
+
+    # assembling x, y tuple
+    xy_tuple = (x, y)
+
+    # returning x, y tuple
+    return xy_tuple
+
+
+def add_umap_cols(df: DataFrame) -> None:
+    """
+    Given a features data frame,
+    runs UMAP dimensionality reduction
+    and adds respective columns to df.
+    """
+    # getting features array
+    features_array = get_features_array(df=df)
+
+    # getting principal components
+    # print(f'getting principal components (running PCA with {N_COMPONENTS} components)...')
+    # principal_components = get_principal_components(features=features_array,
+    #                                                 n_components=N_COMPONENTS)
+
+    # getting umap coords
+    umap_x, umap_y = get_umap_cols(input_array=features_array)
+
+    # adding cols to df
+    df['umap_x'] = umap_x
+    df['umap_y'] = umap_y
+
+
 def get_image_clusters(input_folder: str,
                        images_extension: str,
+                       labels_path: str,
                        output_folder: str
                        ) -> None:
     """
@@ -421,47 +580,24 @@ def get_image_clusters(input_folder: str,
     saving features and clusters data frames in
     given output folder.
     """
-    # getting images in input folder
-    print('getting images in input folder...')
-    files = get_specific_files_in_folder(path_to_folder=input_folder,
-                                         extension=images_extension)
+    # getting features df
+    print('getting features df...')
+    features_df = get_features_df(input_folder=input_folder,
+                                  images_extension=images_extension,
+                                  labels_path=labels_path,
+                                  output_folder=output_folder)
 
-    # getting images num
-    images_num = len(files)
+    # adding UMAP cols
+    print('adding UMAP cols...')
+    add_umap_cols(df=features_df)
 
-    # printing execution message
-    f_string = f'found {images_num} images in input folder.'
-    print(f_string)
-
-    # getting initial data frame based on image names
-    print('getting base df...')
-    df = get_base_df(files=files)
-
-    # adding file path col
-    print('adding file path col...')
-    add_file_path_col(df=df,
-                      input_folder=input_folder)
-
-    # adding features col
-    print('adding features col...')
-    add_features_col(df=df)
-
-    # retrieving features col
-    features_col = df['vgg_features'].to_numpy()
-
-    # unpacking features arrays
-    features_list = [feature_array[0] for feature_array in features_col]
-
-    # converting list to array
-    features_arr = np_array(features_list)
-
-    # reshaping features  so that there are N samples of 4096 vectors
-    features = features_arr.reshape(-1, 4096)
-
-    # getting principal components
-    print(f'getting principal components (running PCA with {N_COMPONENTS} components)...')
-    principal_components = get_principal_components(features=features,
-                                                    n_components=N_COMPONENTS)
+    from seaborn import scatterplot
+    scatterplot(data=features_df,
+                x='umap_x',
+                y='umap_y')
+    plt.show()
+    print(features_df)
+    exit()
 
     # getting clusters based on principal components
     print(f'getting clusters based on principal components (running K-Means with {N_CLUSTERS} clusters)...')
@@ -483,7 +619,8 @@ def get_image_clusters(input_folder: str,
     # generating cluster example images
     print('generating cluster example images...')
     generate_cluster_examples(df=df,
-                              output_folder=output_folder)
+                              output_folder=output_folder,
+                              n_sample=N_SAMPLE)
 
     # printing execution message
     print('clustering complete!')
@@ -503,6 +640,9 @@ def main():
     # getting image extension
     images_extension = args_dict['images_extension']
 
+    # getting labels path
+    labels_path = args_dict['labels_path']
+
     # getting output folder
     output_folder = args_dict['output_folder']
 
@@ -515,6 +655,7 @@ def main():
     # running get_image_clusters function
     get_image_clusters(input_folder=input_folder,
                        images_extension=images_extension,
+                       labels_path=labels_path,
                        output_folder=output_folder)
 
 ######################################################################
