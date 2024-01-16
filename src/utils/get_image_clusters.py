@@ -27,6 +27,7 @@ from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 from keras.utils import img_to_array
 from sklearn.decomposition import PCA
+from src.utils.aux_funcs import spacer
 from keras.applications.vgg16 import VGG16
 from src.utils.aux_funcs import is_using_gpu
 from src.utils.aux_funcs import get_axis_ratio
@@ -46,7 +47,7 @@ IMG_HEIGHT = 224
 SEED = 53
 N_COMPONENTS = 10  # defines number of principal components in PCA
 N_CLUSTERS = 10  # if set to zero, plots k-means elbow plot and asks user input
-N_SAMPLE = 10  # defines number of images per cluster plot
+N_SAMPLE = 30  # defines number of images per cluster plot
 LABEL_COL = 'label'
 
 #####################################################################
@@ -491,6 +492,42 @@ def get_features_array(df: DataFrame) -> ndarray:
     return features_array
 
 
+def save_cluster_image(df: DataFrame,
+                       output_path: str
+                       ) -> None:
+    """
+    Given a cluster data frame,
+    saves given images in a single
+    figure in given output path.
+    """
+    # defining figure object
+    fig = plt.figure(figsize=(25, 25))
+
+    # getting current cluster sample file paths
+    file_paths = df['file_path'].to_list()
+
+    # iterating over images
+    for index, file_path in enumerate(file_paths):
+
+        # adding current image in the cluster to plot
+        plt.subplot(10, 10, index + 1)
+
+        # loading image
+        img = load_img(file_path)
+
+        # converting image to array
+        img = np_array(img)
+
+        # adding image to plot
+        plt.imshow(img)
+
+        # removing axis
+        plt.axis('off')
+
+    # saving current cluster figure
+    fig.savefig(output_path)
+
+
 def generate_cluster_examples(df: DataFrame,
                               output_folder: str,
                               n_sample: int
@@ -518,10 +555,32 @@ def generate_cluster_examples(df: DataFrame,
                                index=current_group_index,
                                total=groups_num)
 
+        # getting cluster size (current group rows num)
+        cluster_size = len(df_group)
+
+        # defining placeholder value for n_sample to be used
+        n_sample_used = n_sample
+
+        # checking whether n_sample is larger than cluster size
+        if n_sample > cluster_size:
+
+            # updating n_sample_used value to max possible value (equal to cluster size)
+            n_sample_used = cluster_size
+
         # getting current group sample
-        # TODO: finish this function
+        df_sample = df_group.sample(n=n_sample_used)
+
+        # defining save name/path
+        save_name = f'cluster_{cluster_id}.png'
+        save_path = join(output_folder,
+                         save_name)
 
         # saving current image
+        spacer()
+        print(cluster_id)
+        print(df_sample)
+        save_cluster_image(df=df_sample,
+                           output_path=save_path)
 
         # updating current group index
         current_group_index += 1
@@ -627,11 +686,10 @@ def get_image_clusters(input_folder: str,
     print('adding clusters col...')
     add_cluster_col(df=features_df,
                     clusters=clusters_labels)
-    print(features_df)
 
     # plotting UMAP
     print('plotting UMAP...')
-    plot_umap(df=features_df)
+    # plot_umap(df=features_df)
 
     # saving clusters df
     print('saving clusters df...')
@@ -639,7 +697,6 @@ def get_image_clusters(input_folder: str,
     save_path = join(output_folder,
                      save_name)
     features_df.to_pickle(save_path)
-    exit()
 
     # generating cluster example images
     print('generating cluster example images...')
