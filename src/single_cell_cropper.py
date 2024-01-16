@@ -13,11 +13,13 @@ from time import sleep
 from cv2 import imread
 from cv2 import imwrite
 from os.path import join
+from cv2 import cvtColor
 from numpy import ndarray
 from pandas import concat
 from os.path import exists
 from pandas import read_csv
 from pandas import DataFrame
+from cv2 import COLOR_GRAY2RGB
 from numpy import pad as np_pad
 from argparse import ArgumentParser
 from cv2 import resize as cv_resize
@@ -454,11 +456,7 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
                                      -1)  # reads image as is (independent on input format)
 
         # converting image to grayscale
-        import cv2
-        print(current_image_array)
-        current_image_array = cv2.cvtColor(current_image_array, cv2.COLOR_GRAY2RGB)
-        print(current_image_array)
-        # exit()
+        current_image_array = cvtColor(current_image_array, COLOR_GRAY2RGB)
 
         # assembling current progress string
         progress_string = f'generating crops for image {image_index:0{image_total_str_len}d}'
