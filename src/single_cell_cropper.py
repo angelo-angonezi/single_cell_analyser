@@ -155,7 +155,11 @@ def rotate_image(image: ndarray,
     pad_y = [image.shape[0] - pivot[1], pivot[1]]
 
     # padding image
-    padded_image = np_pad(image, [pad_y, pad_x, [0, 0]], 'constant')
+    padded_image = np_pad(array=image,
+                          pad_width=[pad_y,  # tuple defining above-below padding
+                                     pad_x,  # tuple defining left-right padding
+                                     [0, 0]],  # tuple defining z-dim padding
+                          mode='constant')
 
     # rotating image
     rotated_image = scp_rotate(padded_image, angle, reshape=False)
@@ -446,7 +450,15 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
             continue
 
         # reading current image with cv2
-        current_image_array = imread(current_image_path)
+        current_image_array = imread(current_image_path,
+                                     -1)  # reads image as is (independent on input format)
+
+        # converting image to grayscale
+        import cv2
+        print(current_image_array)
+        current_image_array = cv2.cvtColor(current_image_array, cv2.COLOR_GRAY2RGB)
+        print(current_image_array)
+        # exit()
 
         # assembling current progress string
         progress_string = f'generating crops for image {image_index:0{image_total_str_len}d}'
@@ -566,7 +578,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running single cell cropper function
     single_cell_cropper(input_folder=input_folder,
