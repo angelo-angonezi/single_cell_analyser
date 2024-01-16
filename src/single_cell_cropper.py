@@ -308,7 +308,22 @@ def crop_multiple_obbs(image: ndarray,
         current_crop_output_path = join(output_folder,
                                         current_crop_output_name_w_extension)
 
+        # def convert(img, target_type_min, target_type_max, target_type):
+        #     imin = img.min()
+        #     imax = img.max()
+        #
+        #     a = (target_type_max - target_type_min) / (imax - imin)
+        #     b = target_type_max - a * imax
+        #     new_img = (a * img + b).astype(target_type)
+        #     return new_img
+
         # saving current crop
+        # print(current_obb_crop)
+        # print(type(current_obb_crop))
+        # current_obb_crop = convert(img=current_obb_crop,
+        #                            target_type_min=0,
+        #                            target_type_max=255,
+        #                            target_type=int)
         imwrite(filename=current_crop_output_path,
                 img=current_obb_crop)
 
@@ -576,7 +591,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running single cell cropper function
     single_cell_cropper(input_folder=input_folder,
