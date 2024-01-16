@@ -528,17 +528,19 @@ def save_cluster_image(df: DataFrame,
     fig.savefig(output_path)
 
 
-def generate_cluster_examples(df: DataFrame,
-                              output_folder: str,
-                              n_sample: int
-                              ) -> None:
+def generate_image_examples(df: DataFrame,
+                            output_folder: str,
+                            n_sample: int,
+                            group_col: str
+                            ) -> None:
     """
     Given a clusters data frame, saves
-    clusters example images in given
-    output folder.
+    clusters/labels example images in
+    given output folder (depending on
+    given group_col).
     """
     # grouping df by cluster
-    df_groups = df.groupby('cluster')
+    df_groups = df.groupby(group_col)
 
     # getting groups num
     groups_num = len(df_groups)
@@ -550,7 +552,7 @@ def generate_cluster_examples(df: DataFrame,
     for cluster_id, df_group in df_groups:
 
         # printing execution message
-        base_string = 'generating image for cluster #INDEX# of #TOTAL#'
+        base_string = f'generating image for {group_col} #INDEX# of #TOTAL#'
         print_progress_message(base_string=base_string,
                                index=current_group_index,
                                total=groups_num)
@@ -698,11 +700,19 @@ def get_image_clusters(input_folder: str,
                      save_name)
     features_df.to_pickle(save_path)
 
+    # generating label example images
+    print('generating label example images...')
+    generate_image_examples(df=features_df,
+                            output_folder=output_folder,
+                            n_sample=N_SAMPLE,
+                            group_col='label')
+
     # generating cluster example images
     print('generating cluster example images...')
-    generate_cluster_examples(df=features_df,
-                              output_folder=output_folder,
-                              n_sample=N_SAMPLE)
+    generate_image_examples(df=features_df,
+                            output_folder=output_folder,
+                            n_sample=N_SAMPLE,
+                            group_col='cluster')
 
     # printing execution message
     print('clustering complete!')
