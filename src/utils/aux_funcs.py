@@ -1349,6 +1349,21 @@ def is_using_gpu() -> bool:
     return False
 
 
+def print_gpu_usage() -> None:
+    """
+    Checks GPU usage and prints
+    pretty string on console.
+    """
+    # getting gpu usage bool
+    using_gpu = is_using_gpu()
+
+    # defining base string
+    base_string = f'Using GPU: {using_gpu}'
+
+    # printing string
+    print(base_string)
+
+
 def resize_image(open_image: ndarray,
                  image_size: tuple
                  ) -> ndarray:

@@ -10,6 +10,7 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
+from os import mkdir
 from umap import UMAP
 from os.path import join
 from numpy import ndarray
@@ -18,19 +19,16 @@ from pandas import read_csv
 from pandas import DataFrame
 from pandas import read_pickle
 from keras.models import Model
-from seaborn import scatterplot
 from keras.utils import load_img
 from sklearn.cluster import KMeans
 from plotly.express import scatter
 from numpy import array as np_array
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
-from keras.utils import img_to_array
 from sklearn.decomposition import PCA
 from src.utils.aux_funcs import spacer
 from keras.applications.vgg16 import VGG16
-from src.utils.aux_funcs import is_using_gpu
-from src.utils.aux_funcs import get_axis_ratio
+from src.utils.aux_funcs import print_gpu_usage
 from sklearn.preprocessing import StandardScaler
 from src.utils.aux_funcs import enter_to_continue
 from keras.applications.vgg16 import preprocess_input
@@ -548,6 +546,11 @@ def generate_image_examples(df: DataFrame,
     # defining starter for current group index
     current_group_index = 1
 
+    # creating subfolder for current group col
+    save_folder = join(output_folder,
+                       group_col)
+    mkdir(save_folder)
+
     # iterating over df groups
     for cluster_id, df_group in df_groups:
 
@@ -573,14 +576,11 @@ def generate_image_examples(df: DataFrame,
         df_sample = df_group.sample(n=n_sample_used)
 
         # defining save name/path
-        save_name = f'cluster_{cluster_id}.png'
-        save_path = join(output_folder,
+        save_name = f'{group_col}_{cluster_id}.png'
+        save_path = join(save_folder,
                          save_name)
 
         # saving current image
-        spacer()
-        print(cluster_id)
-        print(df_sample)
         save_cluster_image(df=df_sample,
                            output_path=save_path)
 
@@ -691,7 +691,7 @@ def get_image_clusters(input_folder: str,
 
     # plotting UMAP
     print('plotting UMAP...')
-    # plot_umap(df=features_df)
+    plot_umap(df=features_df)
 
     # saving clusters df
     print('saving clusters df...')
@@ -741,8 +741,11 @@ def main():
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
+    # checking gpu usage
+    print_gpu_usage()
+
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running get_image_clusters function
     get_image_clusters(input_folder=input_folder,
