@@ -10,7 +10,6 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-from os import mkdir
 from umap import UMAP
 from os.path import join
 from numpy import ndarray
@@ -26,7 +25,7 @@ from numpy import array as np_array
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 from sklearn.decomposition import PCA
-from src.utils.aux_funcs import spacer
+from os import makedirs as os_makedirs
 from keras.applications.vgg16 import VGG16
 from src.utils.aux_funcs import print_gpu_usage
 from sklearn.preprocessing import StandardScaler
@@ -467,8 +466,11 @@ def add_cluster_col(df: DataFrame,
     # defining col name
     col_name = 'cluster'
 
+    # updating cluster values
+    clusters_updated = [(cluster + 1) for cluster in clusters]
+
     # adding values to col
-    df[col_name] = clusters
+    df[col_name] = clusters_updated
 
 
 def get_features_array(df: DataFrame) -> ndarray:
@@ -549,7 +551,8 @@ def generate_image_examples(df: DataFrame,
     # creating subfolder for current group col
     save_folder = join(output_folder,
                        group_col)
-    mkdir(save_folder)
+    os_makedirs(name=save_folder,
+                exist_ok=True)
 
     # iterating over df groups
     for cluster_id, df_group in df_groups:
@@ -649,7 +652,8 @@ def plot_umap(df: DataFrame) -> None:
                   y='umap_y',
                   color='label',
                   size='cluster',
-                  hover_data='file_name')
+                  hover_data='file_name',
+                  text='cluster')
 
     # showing plot
     fig.show()
