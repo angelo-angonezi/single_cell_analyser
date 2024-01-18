@@ -38,7 +38,7 @@ print('all required libraries successfully imported.')  # noqa
 COLOR_DICT = {'model': (0, 102, 204),
               'fornma': (0, 204, 102),
               'DT': (255, 153, 102),
-              'text': (0, 0, 0)}
+              'text': (238, 65, 65)}
 
 #####################################################################
 # argument parsing related functions
@@ -152,7 +152,8 @@ def add_single_overlay(open_img: ndarray,
     text_color = color_dict['text']
 
     # defining thickness
-    thickness = 2
+    overlays_thickness = 2
+    text_thickness = 2
 
     # checking overlay style
 
@@ -166,7 +167,7 @@ def add_single_overlay(open_img: ndarray,
                        height=height,
                        angle=angle,
                        color=overlay_color,
-                       thickness=thickness)
+                       thickness=overlays_thickness)
 
     elif style == 'circle':
 
@@ -180,7 +181,7 @@ def add_single_overlay(open_img: ndarray,
                     cy=cy,
                     radius=radius,
                     color=overlay_color,
-                    thickness=thickness)
+                    thickness=overlays_thickness)
 
     elif style == 'ellipse':
 
@@ -192,7 +193,7 @@ def add_single_overlay(open_img: ndarray,
                      height=height,
                      angle=angle,
                      color=overlay_color,
-                     thickness=thickness)
+                     thickness=overlays_thickness)
 
     # adding class text
     putText(open_img,
@@ -201,7 +202,7 @@ def add_single_overlay(open_img: ndarray,
             FONT_HERSHEY_SIMPLEX,
             0.5,
             text_color,
-            2)
+            text_thickness)
 
 
 def add_multiple_overlays(open_img: ndarray,

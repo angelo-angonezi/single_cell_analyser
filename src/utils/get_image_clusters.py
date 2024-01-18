@@ -46,7 +46,7 @@ SEED = 53
 N_COMPONENTS = 10  # defines number of principal components in PCA
 N_CLUSTERS = 3  # if set to zero, plots k-means elbow plot and asks user input
 N_SAMPLE = 30  # defines number of images per cluster plot
-PIXEL_CALC = 'max'  # defines pixel intensity calculation (mean/min/max)
+PIXEL_CALC = 'mean'  # defines pixel intensity calculation (mean/min/max)
 LABEL_COL = 'label'
 
 #####################################################################
@@ -173,6 +173,13 @@ def get_pixel_intensity(file_path: str,
 
     else:
         pixel_intensity = img.mean()
+
+    pixel_intensity = 0
+
+    pixel_min = img.min()
+    pixel_max = img.max()
+    pixel_mean = img.mean()
+    pixel_intensity = pixel_max / pixel_mean
 
     # converting pixel intensity to float
     pixel_intensity = float(pixel_intensity)
