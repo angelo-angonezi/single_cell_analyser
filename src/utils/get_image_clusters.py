@@ -18,6 +18,7 @@ from pandas import read_csv
 from pandas import DataFrame
 from pandas import read_pickle
 from keras.models import Model
+from seaborn import scatterplot
 from keras.utils import load_img
 from sklearn.cluster import KMeans
 from plotly.express import scatter
@@ -43,8 +44,9 @@ IMG_WIDTH = 224
 IMG_HEIGHT = 224
 SEED = 53
 N_COMPONENTS = 10  # defines number of principal components in PCA
-N_CLUSTERS = 10  # if set to zero, plots k-means elbow plot and asks user input
+N_CLUSTERS = 3  # if set to zero, plots k-means elbow plot and asks user input
 N_SAMPLE = 30  # defines number of images per cluster plot
+PIXEL_CALC = 'max'  # defines pixel intensity calculation (mean/min/max)
 LABEL_COL = 'label'
 
 #####################################################################
@@ -120,6 +122,11 @@ def get_base_model() -> Model:
 def get_vgg_features(file_path: str,
                      model: Model
                      ) -> Model:
+    """
+    Given a file path, loads image
+    and returns extracted features
+    based on given model.
+    """
     # loading image
     img = load_img(file_path, target_size=(IMG_WIDTH, IMG_HEIGHT))
 
@@ -138,6 +145,40 @@ def get_vgg_features(file_path: str,
 
     # returning features
     return features
+
+
+def get_pixel_intensity(file_path: str,
+                        calc: str
+                        ) -> float:
+    """
+    Given a file path, loads image
+    and returns pixel intensity value,
+    based on given calc method (mean, min, max).
+    """
+    # loading image
+    img = load_img(file_path, target_size=(IMG_WIDTH, IMG_HEIGHT))
+
+    # converting image to numpy array
+    img = np_array(img)
+
+    # defining placeholder value for current intensity value
+    pixel_intensity = None
+
+    # getting current intensity value based on given calc str
+    if calc == 'min':
+        pixel_intensity = img.min()
+
+    elif calc == 'max':
+        pixel_intensity = img.max()
+
+    else:
+        pixel_intensity = img.mean()
+
+    # converting pixel intensity to float
+    pixel_intensity = float(pixel_intensity)
+
+    # returning pixel intensity value
+    return pixel_intensity
 
 
 def get_principal_components(features: ndarray,
@@ -380,9 +421,59 @@ def add_features_col(df: DataFrame) -> None:
         current_row_index += 1
 
 
+def add_pixel_intensity_col(df: DataFrame,
+                            calc: str
+                            ) -> None:
+    """
+    Given a base image names data frame,
+    adds 'calc' pixel intensity column,
+    based on given calc method (mean, min, max).
+    """
+    # defining col name
+    col_name = 'pixel_intensity'
+
+    # adding placeholder values to col
+    df[col_name] = None
+
+    # getting df rows
+    df_rows = df.iterrows()
+
+    # getting rows num
+    rows_num = len(df)
+
+    # defining starter for current row index
+    current_row_index = 1
+
+    # iterating over rows
+    for row in df_rows:
+
+        # printing progress message
+        base_string = f'adding {calc} pixel intensity col (row #INDEX# of #TOTAL#)'
+        print_progress_message(base_string=base_string,
+                               index=current_row_index,
+                               total=rows_num)
+
+        # getting current row index/data
+        row_index, row_data = row
+
+        # getting current row image path
+        file_path = row_data['file_path']
+
+        # getting current pixel intensity
+        current_pixel_intensity = get_pixel_intensity(file_path=file_path,
+                                                      calc=calc)
+
+        # updating current row col
+        df.at[row_index, col_name] = current_pixel_intensity
+
+        # updating current row index
+        current_row_index += 1
+
+
 def create_features_df(input_folder: str,
                        images_extension: str,
-                       labels_path: str
+                       labels_path: str,
+                       calc: str
                        ) -> DataFrame:
     """
     Creates features data frame, based
@@ -406,6 +497,10 @@ def create_features_df(input_folder: str,
     # adding features col
     add_features_col(df=features_df)
 
+    # adding mean intensity col
+    add_pixel_intensity_col(df=features_df,
+                            calc=calc)
+
     # returning features df
     return features_df
 
@@ -413,6 +508,7 @@ def create_features_df(input_folder: str,
 def get_features_df(input_folder: str,
                     images_extension: str,
                     labels_path: str,
+                    calc: str,
                     output_folder: str
                     ) -> DataFrame:
     """
@@ -445,7 +541,8 @@ def get_features_df(input_folder: str,
         print('creating features df from scratch...')
         features_df = create_features_df(input_folder=input_folder,
                                          images_extension=images_extension,
-                                         labels_path=labels_path)
+                                         labels_path=labels_path,
+                                         calc=calc)
 
         # saving features df
         print('saving features df...')
@@ -646,11 +743,13 @@ def plot_umap(df: DataFrame) -> None:
     the plot based on label column.
     !!!INTERACTIVE PLOT!!!
     """
-    # plotting UMAP (coloring by known labels)
+    # converting pixel intensity col to
+    df['pixel_intensity'] = df['pixel_intensity'].astype(float)
+    # plotting UMAP
     fig = scatter(data_frame=df,
                   x='umap_x',
                   y='umap_y',
-                  color='label',
+                  color='pixel_intensity',
                   size='cluster',
                   hover_data='file_name',
                   text='cluster')
@@ -675,13 +774,13 @@ def get_image_clusters(input_folder: str,
     features_df = get_features_df(input_folder=input_folder,
                                   images_extension=images_extension,
                                   labels_path=labels_path,
+                                  calc=PIXEL_CALC,
                                   output_folder=output_folder)
 
     # adding UMAP cols
     print('adding UMAP cols...')
     add_umap_cols(df=features_df)
 
-    # TODO: check if code below remains
     # getting clusters based on principal components
     print(f'getting clusters based on principal components (running K-Means with {N_CLUSTERS} clusters)...')
     features_array = get_features_array(df=features_df)
@@ -749,7 +848,7 @@ def main():
     print_gpu_usage()
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running get_image_clusters function
     get_image_clusters(input_folder=input_folder,

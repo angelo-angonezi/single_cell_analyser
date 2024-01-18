@@ -37,7 +37,8 @@ print('all required libraries successfully imported.')  # noqa
 
 COLOR_DICT = {'model': (0, 102, 204),
               'fornma': (0, 204, 102),
-              'DT': (255, 153, 102)}
+              'DT': (255, 153, 102),
+              'text': (0, 0, 0)}
 
 #####################################################################
 # argument parsing related functions
@@ -122,6 +123,7 @@ def get_args_dict() -> dict:
 def add_single_overlay(open_img: ndarray,
                        obbs_df_row: Series,
                        color_dict: dict,
+                       cell_index: int,
                        style: str = 'rectangle'
                        ) -> None:
     """
@@ -131,6 +133,7 @@ def add_single_overlay(open_img: ndarray,
     :param open_img: ndarray. Represents an open image.
     :param obbs_df_row: Series. Represents single obb data.
     :param color_dict: Dictionary. Represents colors to be used in overlays.
+    :param cell_index: Integer. Represents cell id to be added as text in overlay.
     :param style: String. Represents overlays style (rectangle/circle/ellipse).
     :return: None.
     """
@@ -142,9 +145,11 @@ def add_single_overlay(open_img: ndarray,
     angle = float(obbs_df_row['angle'])
     det_class = str(obbs_df_row['class'])
     evaluator = str(obbs_df_row['evaluator'])
+    cell_index_text = str(cell_index)
 
-    # defining color for overlay
+    # defining color for overlay/text
     overlay_color = color_dict[evaluator]
+    text_color = color_dict['text']
 
     # defining thickness
     thickness = 2
@@ -191,11 +196,11 @@ def add_single_overlay(open_img: ndarray,
 
     # adding class text
     putText(open_img,
-            det_class,
+            cell_index_text,
             (int(cx), int(cy)),
             FONT_HERSHEY_SIMPLEX,
-            0.0001,  # TODO: change this once we got more classes and think of better way to display class info
-            overlay_color,
+            0.5,
+            text_color,
             2)
 
 
@@ -213,8 +218,14 @@ def add_multiple_overlays(open_img: ndarray,
     :param style: String. Represents overlays style (rectangle/circle/ellipse).
     :return: None.
     """
+    # sorting df by cx (ensures that different codes follow the same order)
+    current_image_df = current_image_df.sort_values(by='cx')
+
     # getting df rows
     df_rows = current_image_df.iterrows()
+
+    # defining starter for current cell index
+    current_cell_index = 1
 
     # iterating over df_rows
     for row_index, row_data in df_rows:
@@ -223,7 +234,11 @@ def add_multiple_overlays(open_img: ndarray,
         add_single_overlay(open_img=open_img,
                            obbs_df_row=row_data,
                            color_dict=color_dict,
+                           cell_index=current_cell_index,
                            style=style)
+
+        # updating current cell index
+        current_cell_index += 1
 
 
 def add_overlays_to_single_image(image_name: str,

@@ -379,6 +379,9 @@ def get_single_image_crops(image: ndarray,
     :param progress_string: String. Represents a progress string.
     :return: Data Frame. Represents crops info.
     """
+    # sorting df by cx (ensures that different codes follow the same order)
+    image_group = image_group.sort_values(by='cx')
+
     # getting current image obbs
     current_image_obbs = get_obbs_from_df(df=image_group)
 
