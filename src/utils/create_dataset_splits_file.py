@@ -164,7 +164,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running create_dataset_description_file function
     create_dataset_splits_file(dataset_description_file=dataset_description_file,

@@ -110,6 +110,14 @@ def get_args_dict() -> dict:
                         default='ellipse',
                         help=style_help)
 
+    # expansion ratio param
+    expansion_help = 'defines ratio of expansion of width/height to generate larger-than-orig-nucleus crops'
+    parser.add_argument('-er', '--expansion-ratio',
+                        dest='expansion_ratio',
+                        help=expansion_help,
+                        required=False,
+                        default=1.0)
+
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
 
@@ -123,6 +131,7 @@ def get_args_dict() -> dict:
 def add_single_overlay(open_img: ndarray,
                        obbs_df_row: Series,
                        color_dict: dict,
+                       expansion_ratio: float,
                        cell_index: int,
                        style: str = 'rectangle'
                        ) -> None:
@@ -134,6 +143,7 @@ def add_single_overlay(open_img: ndarray,
     :param obbs_df_row: Series. Represents single obb data.
     :param color_dict: Dictionary. Represents colors to be used in overlays.
     :param cell_index: Integer. Represents cell id to be added as text in overlay.
+    :param expansion_ratio: Float. Represents a ratio to expand width/height.
     :param style: String. Represents overlays style (rectangle/circle/ellipse).
     :return: None.
     """
@@ -146,6 +156,10 @@ def add_single_overlay(open_img: ndarray,
     det_class = str(obbs_df_row['class'])
     evaluator = str(obbs_df_row['evaluator'])
     cell_index_text = str(cell_index)
+
+    # updating width/height based on expansion ratio
+    width = width * expansion_ratio
+    height = height * expansion_ratio
 
     # defining color for overlay/text
     overlay_color = color_dict[evaluator]
@@ -208,6 +222,7 @@ def add_single_overlay(open_img: ndarray,
 def add_multiple_overlays(open_img: ndarray,
                           current_image_df: DataFrame,
                           color_dict: dict,
+                          expansion_ratio: float,
                           style: str = 'rectangle'
                           ) -> None:
     """
@@ -216,6 +231,7 @@ def add_multiple_overlays(open_img: ndarray,
     :param open_img: ndarray. Represents an open image.
     :param current_image_df: DataFrame. Represents current image detection/annotation data.
     :param color_dict: Dictionary. Represents colors to be used in overlays.
+    :param expansion_ratio: Float. Represents a ratio to expand width/height.
     :param style: String. Represents overlays style (rectangle/circle/ellipse).
     :return: None.
     """
@@ -235,6 +251,7 @@ def add_multiple_overlays(open_img: ndarray,
         add_single_overlay(open_img=open_img,
                            obbs_df_row=row_data,
                            color_dict=color_dict,
+                           expansion_ratio=expansion_ratio,
                            cell_index=current_cell_index,
                            style=style)
 
@@ -248,6 +265,7 @@ def add_overlays_to_single_image(image_name: str,
                                  detection_threshold: float,
                                  output_path: str,
                                  color_dict: dict,
+                                 expansion_ratio: float,
                                  style: str = 'rectangle'
                                  ) -> None:
     """
@@ -260,6 +278,7 @@ def add_overlays_to_single_image(image_name: str,
     :param detection_threshold: Float. Represents detection threshold to be applied as filter.
     :param output_path: String. Represents a file path.
     :param color_dict: Dictionary. Represents colors to be used in overlays.
+    :param expansion_ratio: Float. Represents a ratio to expand width/height.
     :param style: String. Represents overlays style (rectangle/circle/ellipse).
     :return: None.
     """
@@ -311,6 +330,7 @@ def add_overlays_to_single_image(image_name: str,
     add_multiple_overlays(open_img=open_img,
                           current_image_df=current_image_df,
                           color_dict=color_dict,
+                          expansion_ratio=expansion_ratio,
                           style=style)
 
     # saving image in output path
@@ -325,7 +345,8 @@ def add_overlays_to_multiple_images(input_folder: str,
                                     output_folder: str,
                                     detection_threshold: float,
                                     color_dict: dict,
-                                    style: str
+                                    style: str,
+                                    expansion_ratio: float
                                     ) -> None:
     """
     Given a path to a folder containing images,
@@ -342,6 +363,7 @@ def add_overlays_to_multiple_images(input_folder: str,
     :param detection_threshold: Float. Represents detection threshold to be applied as filter.
     :param color_dict: Dictionary. Represents colors to be used in overlays.
     :param style: String. Represents overlays style (rectangle/circle/ellipse).
+    :param expansion_ratio: Float. Represents a ratio to expand width/height.
     :return: None.
     """
     # getting merged detections df
@@ -386,7 +408,8 @@ def add_overlays_to_multiple_images(input_folder: str,
                                      detection_threshold=detection_threshold,
                                      output_path=output_path,
                                      color_dict=color_dict,
-                                     style=style)
+                                     style=style,
+                                     expansion_ratio=expansion_ratio)
 
     # printing execution message
     f_string = f'overlays added to all {images_num} images!'
@@ -419,6 +442,10 @@ def main():
     # getting overlays style
     overlays_style = args_dict['overlays_style']
 
+    # getting expansion ratio
+    expansion_ratio = args_dict['expansion_ratio']
+    expansion_ratio = float(expansion_ratio)
+
     # getting detection threshold
     detection_threshold = args_dict['detection_threshold']
     detection_threshold = float(detection_threshold)
@@ -437,7 +464,8 @@ def main():
                                     output_folder=output_folder,
                                     detection_threshold=detection_threshold,
                                     color_dict=COLOR_DICT,
-                                    style=overlays_style)
+                                    style=overlays_style,
+                                    expansion_ratio=expansion_ratio)
 
 ######################################################################
 # running main function
