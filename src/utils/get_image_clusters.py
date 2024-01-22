@@ -175,8 +175,7 @@ def get_pixel_intensity(file_path: str,
     else:
         pixel_intensity = img.mean()
 
-    pixel_intensity = 0
-
+    # TODO: check this part -> runtime error because of zero/nan division
     pixel_min = img.min()
     pixel_max = img.max()
     pixel_mean = img.mean()
@@ -858,7 +857,7 @@ def main():
     print_gpu_usage()
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running get_image_clusters function
     get_image_clusters(input_folder=input_folder,
