@@ -47,7 +47,8 @@ N_COMPONENTS = 10  # defines number of principal components in PCA
 N_CLUSTERS = 3  # if set to zero, plots k-means elbow plot and asks user input
 N_SAMPLE = 30  # defines number of images per cluster plot
 PIXEL_CALC = 'mean'  # defines pixel intensity calculation (mean/min/max)
-LABEL_COL = 'label'
+# LABEL_COL = 'label'
+LABEL_COL = 'class'
 
 #####################################################################
 # argument parsing related functions
@@ -308,7 +309,7 @@ def get_label(file_name: str,
     returns label in respective col.
     """
     # filtering df for line matching current file
-    file_df = labels_df[labels_df['file'] == file_name]
+    file_df = labels_df[labels_df['crop_name'] == file_name]
 
     # getting current file df row
     file_row = file_df.iloc[0]
@@ -316,15 +317,13 @@ def get_label(file_name: str,
     # getting current label
     current_label = file_row[label_col]
 
-    # converting label to string
-    current_label = f'L{current_label}'
-
     # returning current label
     return current_label
 
 
 def add_labels_col(df: DataFrame,
-                   labels_path: str
+                   labels_path: str,
+                   images_extension: str
                    ) -> None:
     """
     Given a base image names data frame,
@@ -363,6 +362,9 @@ def add_labels_col(df: DataFrame,
 
         # getting current row image name
         file_name = row_data['file_name']
+
+        # removing file extension
+        file_name = file_name.replace(images_extension, '')
 
         # getting current row label
         current_label = get_label(file_name=file_name,
@@ -499,7 +501,8 @@ def create_features_df(input_folder: str,
 
     # adding labels col
     add_labels_col(df=features_df,
-                   labels_path=labels_path)
+                   labels_path=labels_path,
+                   images_extension=images_extension)
 
     # adding features col
     add_features_col(df=features_df)
