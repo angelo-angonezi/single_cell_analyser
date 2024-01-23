@@ -1,4 +1,5 @@
 # image format converter (* -> 8bit)
+
 ######################################################################
 # imports
 
@@ -9,7 +10,9 @@ from os.path import join
 from numpy import ndarray
 from numpy import uint8 as np_uint8
 from argparse import ArgumentParser
+from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
+from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
 
 #####################################################################
@@ -143,6 +146,12 @@ def main():
 
     # getting output path
     output_folder = args_dict['output_folder']
+
+    # printing execution parameters
+    print_execution_parameters(params_dict=args_dict)
+
+    # waiting for user input
+    enter_to_continue()
 
     # running multiple converter function
     convert_multiple_files(input_folder_path=input_folder,
