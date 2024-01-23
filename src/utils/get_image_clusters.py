@@ -142,7 +142,8 @@ def get_vgg_features(file_path: str,
 
     # get the feature vector
     features = model.predict(processed_image,
-                             use_multiprocessing=True)
+                             use_multiprocessing=True,
+                             verbose=0)
 
     # returning features
     return features
@@ -810,7 +811,7 @@ def get_image_clusters(input_folder: str,
 
     # plotting UMAP
     print('plotting UMAP...')
-    save_name = f'clusters_umap.html'
+    save_name = f'umap.html'
     save_path = join(output_folder,
                      save_name)
     plot_umap(df=features_df,
@@ -868,7 +869,7 @@ def main():
     print_gpu_usage()
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running get_image_clusters function
     get_image_clusters(input_folder=input_folder,
