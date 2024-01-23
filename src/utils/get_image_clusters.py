@@ -179,6 +179,11 @@ def get_pixel_intensity(file_path: str,
     pixel_min = img.min()
     pixel_max = img.max()
     pixel_mean = img.mean()
+    print(pixel_min)
+    print(pixel_max)
+    print(pixel_mean)
+    print(file_path)
+    exit()
     pixel_intensity = pixel_max / pixel_mean
 
     # converting pixel intensity to float
@@ -503,12 +508,12 @@ def create_features_df(input_folder: str,
                    labels_path=labels_path,
                    images_extension=images_extension)
 
-    # adding features col
-    add_features_col(df=features_df)
-
     # adding mean intensity col
     add_pixel_intensity_col(df=features_df,
                             calc=calc)
+
+    # adding features col
+    add_features_col(df=features_df)
 
     # returning features df
     return features_df
@@ -857,7 +862,7 @@ def main():
     print_gpu_usage()
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running get_image_clusters function
     get_image_clusters(input_folder=input_folder,
