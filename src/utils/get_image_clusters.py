@@ -18,7 +18,6 @@ from pandas import read_csv
 from pandas import DataFrame
 from pandas import read_pickle
 from keras.models import Model
-from seaborn import scatterplot
 from keras.utils import load_img
 from sklearn.cluster import KMeans
 from plotly.express import scatter
