@@ -10,10 +10,8 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-
-from os import environ
-
 from umap import UMAP
+from os import environ
 from os.path import join
 from numpy import ndarray
 from os.path import exists
@@ -33,10 +31,12 @@ from keras.applications.vgg16 import VGG16
 from src.utils.aux_funcs import print_gpu_usage
 from sklearn.preprocessing import StandardScaler
 from src.utils.aux_funcs import enter_to_continue
+from keras.applications.resnet_v2 import ResNet50V2
 from keras.applications.vgg16 import preprocess_input
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
+from keras.applications.inception_resnet_v2 import InceptionResNetV2
 print('all required libraries successfully imported.')  # noqa
 
 # setting tensorflow warnings off
@@ -45,16 +45,20 @@ environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 #####################################################################
 # defining global variables
 
-IMG_WIDTH = 224
-IMG_HEIGHT = 224
+# IMG_WIDTH = 224
+IMG_WIDTH = 299
+# IMG_HEIGHT = 224
+IMG_HEIGHT = 299
 SEED = 53
 N_COMPONENTS = 10  # defines number of principal components in PCA
-N_CLUSTERS = 3  # if set to zero, plots k-means elbow plot and asks user input
+N_CLUSTERS = 4  # if set to zero, plots k-means elbow plot and asks user input
 N_SAMPLE = 30  # defines number of images per cluster plot
 PIXEL_CALC = 'het'  # defines pixel intensity calculation (mean/min/max/het)
 # LABEL_COL = 'label'
 LABEL_COL = 'class'
-MODEL_NAME = 'vgg16'
+# MODEL_NAME = 'vgg16'
+MODEL_NAME = 'inception'
+# MODEL_NAME = 'resnet'
 
 #####################################################################
 # argument parsing related functions
@@ -111,34 +115,33 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_vgg16_layers() -> Model:
-    """
-    Returns loaded VGG16 model
-    until penultimate layer.
-    """
-    # defining model
-    model = VGG16()
-
-    # updating model (cutting final layers)
-    model = Model(inputs=model.inputs, outputs=model.layers[-2].output)
-
-    # returning model
-    return model
-
-
 def get_base_model(model_name: str) -> Model:
     """
     Returns specified loaded model
     until penultimate layer.
     """
+    # printing execution message
+    f_string = f'loading "{model_name}" model...'
+    print(f_string)
+
     # defining placeholder value for model
     model = None
 
     # checking given model name
     if model_name == 'vgg16':
 
-        # getting vgg16 layers
-        model = get_vgg16_layers()
+        # loading VGG16
+        model = VGG16()
+
+    elif model_name == 'inception':
+
+        # loading InceptionNet
+        model = InceptionResNetV2()
+
+    elif model_name == 'resnet':
+
+        # loading ResNet
+        model = ResNet50V2()
 
     else:
 
@@ -149,6 +152,9 @@ def get_base_model(model_name: str) -> Model:
 
         # quitting
         exit()
+
+    # updating model (cutting final layers)
+    model = Model(inputs=model.inputs, outputs=model.layers[-2].output)
 
     # returning model
     return model
