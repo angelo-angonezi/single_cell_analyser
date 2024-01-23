@@ -104,7 +104,7 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_base_model() -> Model:
+def get_vgg16_layers() -> Model:
     """
     Returns loaded VGG16 model
     until penultimate layer.
@@ -114,6 +114,34 @@ def get_base_model() -> Model:
 
     # updating model (cutting final layers)
     model = Model(inputs=model.inputs, outputs=model.layers[-2].output)
+
+    # returning model
+    return model
+
+
+def get_base_model(model_name: str) -> Model:
+    """
+    Returns specified loaded model
+    until penultimate layer.
+    """
+    # defining placeholder value for model
+    model = None
+
+    # checking given model name
+    if model_name == 'vgg16':
+
+        # getting vgg16 layers
+        model = get_vgg16_layers()
+
+    else:
+
+        # printing execution message
+        f_string = f'model {model_name} not specified.\n'
+        f_string += f'Please, check and try again.'
+        print(f_string)
+
+        # quitting
+        exit()
 
     # returning model
     return model
@@ -180,10 +208,20 @@ def get_pixel_intensity(file_path: str,
         pixel_intensity = img.mean()
 
     # calculating intensities ratio ('het')
-    else:
+    elif calc == 'het':
         pixel_max = img.max()
         pixel_mean = img.mean()
         pixel_intensity = pixel_max / pixel_mean
+
+    else:
+
+        # printing execution message
+        f_string = f'calc mode {calc} not specified.\n'
+        f_string += f'Please, check and try again.'
+        print(f_string)
+
+        # quitting
+        exit()
 
     # converting pixel intensity to float
     pixel_intensity = float(pixel_intensity)
@@ -503,9 +541,9 @@ def create_features_df(input_folder: str,
                       input_folder=input_folder)
 
     # adding labels col
-    add_labels_col(df=features_df,
-                   labels_path=labels_path,
-                   images_extension=images_extension)
+    # add_labels_col(df=features_df,
+    #                labels_path=labels_path,
+    #                images_extension=images_extension)
 
     # adding mean intensity col
     add_pixel_intensity_col(df=features_df,
