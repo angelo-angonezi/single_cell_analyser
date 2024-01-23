@@ -48,6 +48,7 @@ N_SAMPLE = 30  # defines number of images per cluster plot
 PIXEL_CALC = 'het'  # defines pixel intensity calculation (mean/min/max/het)
 # LABEL_COL = 'label'
 LABEL_COL = 'class'
+MODEL_NAME = 'vgg16'
 
 #####################################################################
 # argument parsing related functions
@@ -147,9 +148,9 @@ def get_base_model(model_name: str) -> Model:
     return model
 
 
-def get_vgg_features(file_path: str,
-                     model: Model
-                     ) -> Model:
+def get_model_features(file_path: str,
+                       model: Model
+                       ) -> Model:
     """
     Given a file path, loads image
     and returns extracted features
@@ -419,14 +420,16 @@ def add_labels_col(df: DataFrame,
         current_row_index += 1
 
 
-def add_features_col(df: DataFrame) -> None:
+def add_features_col(df: DataFrame,
+                     model_name: str
+                     ) -> None:
     """
     Given a base image names data frame,
-    adds features column, based on VGG16
-    features extraction.
+    adds features column, based on specified
+    model features extraction.
     """
     # defining col name
-    col_name = 'vgg_features'
+    col_name = f'{model_name}_features'
 
     # adding placeholder values to col
     df[col_name] = None
@@ -441,13 +444,13 @@ def add_features_col(df: DataFrame) -> None:
     current_row_index = 1
 
     # loading base model
-    base_model = get_base_model()
+    base_model = get_base_model(model_name=model_name)
 
     # iterating over rows
     for row in df_rows:
 
         # printing progress message
-        base_string = f'adding vgg features col (row #INDEX# of #TOTAL#)'
+        base_string = f'adding {model_name} features col (row #INDEX# of #TOTAL#)'
         print_progress_message(base_string=base_string,
                                index=current_row_index,
                                total=rows_num)
@@ -459,8 +462,8 @@ def add_features_col(df: DataFrame) -> None:
         file_path = row_data['file_path']
 
         # getting current feature vector
-        current_features = get_vgg_features(file_path=file_path,
-                                            model=base_model)
+        current_features = get_model_features(file_path=file_path,
+                                              model=base_model)
 
         # TODO: ADD AREA AND AXIS RATIO HERE
 
@@ -523,6 +526,7 @@ def add_pixel_intensity_col(df: DataFrame,
 def create_features_df(input_folder: str,
                        images_extension: str,
                        labels_path: str,
+                       model_name: str,
                        calc: str
                        ) -> DataFrame:
     """
@@ -541,16 +545,17 @@ def create_features_df(input_folder: str,
                       input_folder=input_folder)
 
     # adding labels col
-    # add_labels_col(df=features_df,
-    #                labels_path=labels_path,
-    #                images_extension=images_extension)
+    add_labels_col(df=features_df,
+                   labels_path=labels_path,
+                   images_extension=images_extension)
 
     # adding mean intensity col
     add_pixel_intensity_col(df=features_df,
                             calc=calc)
 
     # adding features col
-    add_features_col(df=features_df)
+    add_features_col(df=features_df,
+                     model_name=model_name)
 
     # returning features df
     return features_df
@@ -559,6 +564,7 @@ def create_features_df(input_folder: str,
 def get_features_df(input_folder: str,
                     images_extension: str,
                     labels_path: str,
+                    model_name: str,
                     calc: str,
                     output_folder: str
                     ) -> DataFrame:
@@ -593,6 +599,7 @@ def get_features_df(input_folder: str,
         features_df = create_features_df(input_folder=input_folder,
                                          images_extension=images_extension,
                                          labels_path=labels_path,
+                                         model_name=model_name,
                                          calc=calc)
 
         # saving features df
@@ -828,6 +835,7 @@ def get_image_clusters(input_folder: str,
     features_df = get_features_df(input_folder=input_folder,
                                   images_extension=images_extension,
                                   labels_path=labels_path,
+                                  model_name=MODEL_NAME,
                                   calc=PIXEL_CALC,
                                   output_folder=output_folder)
 
