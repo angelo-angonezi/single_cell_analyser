@@ -46,7 +46,7 @@ SEED = 53
 N_COMPONENTS = 10  # defines number of principal components in PCA
 N_CLUSTERS = 3  # if set to zero, plots k-means elbow plot and asks user input
 N_SAMPLE = 30  # defines number of images per cluster plot
-PIXEL_CALC = 'mean'  # defines pixel intensity calculation (mean/min/max)
+PIXEL_CALC = 'het'  # defines pixel intensity calculation (mean/min/max/het)
 # LABEL_COL = 'label'
 LABEL_COL = 'class'
 
@@ -166,25 +166,24 @@ def get_pixel_intensity(file_path: str,
     pixel_intensity = None
 
     # getting current intensity value based on given calc str
+
+    # calculating min intensity
     if calc == 'min':
         pixel_intensity = img.min()
 
+    # calculating max intensity
     elif calc == 'max':
         pixel_intensity = img.max()
 
-    else:
+    # calculating mean intensity
+    elif calc == 'mean':
         pixel_intensity = img.mean()
 
-    # TODO: check this part -> runtime error because of zero/nan division
-    pixel_min = img.min()
-    pixel_max = img.max()
-    pixel_mean = img.mean()
-    print(pixel_min)
-    print(pixel_max)
-    print(pixel_mean)
-    print(file_path)
-    exit()
-    pixel_intensity = pixel_max / pixel_mean
+    # calculating intensities ratio ('het')
+    else:
+        pixel_max = img.max()
+        pixel_mean = img.mean()
+        pixel_intensity = pixel_max / pixel_mean
 
     # converting pixel intensity to float
     pixel_intensity = float(pixel_intensity)
@@ -750,15 +749,18 @@ def add_umap_cols(df: DataFrame) -> None:
     df['umap_y'] = umap_y
 
 
-def plot_umap(df: DataFrame) -> None:
+def plot_umap(df: DataFrame,
+              output_path: str
+              ) -> None:
     """
     Given a features data frame containing
     added umap cols, plots UMAP, coloring
     the plot based on label column.
     !!!INTERACTIVE PLOT!!!
     """
-    # converting pixel intensity col to
+    # converting pixel intensity col to float (allows continuous coloring)
     df['pixel_intensity'] = df['pixel_intensity'].astype(float)
+
     # plotting UMAP
     fig = scatter(data_frame=df,
                   x='umap_x',
@@ -768,8 +770,8 @@ def plot_umap(df: DataFrame) -> None:
                   hover_data='file_name',
                   text='cluster')
 
-    # showing plot
-    fig.show()
+    # saving plot
+    fig.write_html(output_path)
 
 
 def get_image_clusters(input_folder: str,
@@ -792,7 +794,7 @@ def get_image_clusters(input_folder: str,
                                   output_folder=output_folder)
 
     # adding UMAP cols
-    print('adding UMAP cols...')
+    print('running UMAP (adding UMAP X/Y cols)...')
     add_umap_cols(df=features_df)
 
     # getting clusters based on principal components
@@ -808,7 +810,11 @@ def get_image_clusters(input_folder: str,
 
     # plotting UMAP
     print('plotting UMAP...')
-    plot_umap(df=features_df)
+    save_name = f'clusters_umap.html'
+    save_path = join(output_folder,
+                     save_name)
+    plot_umap(df=features_df,
+              output_path=save_path)
 
     # saving clusters df
     print('saving clusters df...')
