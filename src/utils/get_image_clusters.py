@@ -27,16 +27,23 @@ from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 from sklearn.decomposition import PCA
 from os import makedirs as os_makedirs
-from keras.applications.vgg16 import VGG16
 from src.utils.aux_funcs import print_gpu_usage
 from sklearn.preprocessing import StandardScaler
 from src.utils.aux_funcs import enter_to_continue
-from keras.applications.resnet_v2 import ResNet50V2
-from keras.applications.vgg16 import preprocess_input
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
+
+# models related
+from keras.applications.vgg16 import VGG16
+from keras.applications.vgg16 import preprocess_input as vgg_preprocess
+
+from keras.applications.resnet_v2 import ResNet50V2
+from keras.applications.resnet_v2 import preprocess_input as resnet_preprocess
+
 from keras.applications.inception_resnet_v2 import InceptionResNetV2
+from keras.applications.inception_resnet_v2 import preprocess_input as inception_preprocess
+
 print('all required libraries successfully imported.')  # noqa
 
 # setting tensorflow warnings off
@@ -51,7 +58,7 @@ IMG_WIDTH = 299
 IMG_HEIGHT = 299
 SEED = 53
 N_COMPONENTS = 10  # defines number of principal components in PCA
-N_CLUSTERS = 4  # if set to zero, plots k-means elbow plot and asks user input
+N_CLUSTERS = 3  # if set to zero, plots k-means elbow plot and asks user input
 N_SAMPLE = 30  # defines number of images per cluster plot
 PIXEL_CALC = 'het'  # defines pixel intensity calculation (mean/min/max/het)
 # LABEL_COL = 'label'
@@ -133,15 +140,15 @@ def get_base_model(model_name: str) -> Model:
         # loading VGG16
         model = VGG16()
 
-    elif model_name == 'inception':
-
-        # loading InceptionNet
-        model = InceptionResNetV2()
-
     elif model_name == 'resnet':
 
         # loading ResNet
         model = ResNet50V2()
+
+    elif model_name == 'inception':
+
+        # loading InceptionNet
+        model = InceptionResNetV2()
 
     else:
 
@@ -161,7 +168,8 @@ def get_base_model(model_name: str) -> Model:
 
 
 def get_model_features(file_path: str,
-                       model: Model
+                       model: Model,
+                       model_name: str
                        ) -> Model:
     """
     Given a file path, loads image
@@ -177,8 +185,25 @@ def get_model_features(file_path: str,
     # reshaping data for the model reshape(num_of_samples, width, height, channels)
     reshaped_img = img.reshape(1, IMG_WIDTH, IMG_HEIGHT, 3)
 
-    # prepare image for model
-    processed_image = preprocess_input(reshaped_img)
+    # preparing image for model according to respective model
+    if model_name == 'vgg16':
+        processed_image = vgg_preprocess(reshaped_img)
+
+    elif model_name == 'resnet':
+        processed_image = resnet_preprocess(reshaped_img)
+
+    elif model_name == 'inception':
+        processed_image = inception_preprocess(reshaped_img)
+
+    else:
+
+        # printing execution message
+        f_string = f'model {model_name} not specified.\n'
+        f_string += f'Please, check and try again.'
+        print(f_string)
+
+        # quitting
+        exit()
 
     # get the feature vector
     features = model.predict(processed_image,
@@ -475,7 +500,8 @@ def add_features_col(df: DataFrame,
 
         # getting current feature vector
         current_features = get_model_features(file_path=file_path,
-                                              model=base_model)
+                                              model=base_model,
+                                              model_name=model_name)
 
         # TODO: ADD AREA AND AXIS RATIO HERE
 
