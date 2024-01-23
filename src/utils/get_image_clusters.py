@@ -10,6 +10,9 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
+
+from os import environ
+
 from umap import UMAP
 from os.path import join
 from numpy import ndarray
@@ -35,6 +38,9 @@ from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
 print('all required libraries successfully imported.')  # noqa
+
+# setting tensorflow warnings off
+environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 #####################################################################
 # defining global variables
@@ -628,14 +634,19 @@ def add_cluster_col(df: DataFrame,
     df[col_name] = clusters_updated
 
 
-def get_features_array(df: DataFrame) -> ndarray:
+def get_features_array(df: DataFrame,
+                       model_name: str
+                       ) -> ndarray:
     """
     Given a features data frame, returns
     features array to be used as input for
     further analysis.
     """
+    # getting column name
+    col_name = f'{model_name}_features'
+
     # retrieving features col
-    features_col = df['vgg_features'].to_numpy()
+    features_col = df[col_name].to_numpy()
 
     # unpacking features arrays
     features_list = [feature_array[0] for feature_array in features_col]
@@ -772,14 +783,17 @@ def get_umap_cols(input_array: ndarray) -> tuple:
     return xy_tuple
 
 
-def add_umap_cols(df: DataFrame) -> None:
+def add_umap_cols(df: DataFrame,
+                  model_name: str
+                  ) -> None:
     """
     Given a features data frame,
     runs UMAP dimensionality reduction
     and adds respective columns to df.
     """
     # getting features array
-    features_array = get_features_array(df=df)
+    features_array = get_features_array(df=df,
+                                        model_name=model_name)
 
     # getting principal components
     # print(f'getting principal components (running PCA with {N_COMPONENTS} components)...')
@@ -841,11 +855,13 @@ def get_image_clusters(input_folder: str,
 
     # adding UMAP cols
     print('running UMAP (adding UMAP X/Y cols)...')
-    add_umap_cols(df=features_df)
+    add_umap_cols(df=features_df,
+                  model_name=MODEL_NAME)
 
     # getting clusters based on principal components
     print(f'getting clusters based on principal components (running K-Means with {N_CLUSTERS} clusters)...')
-    features_array = get_features_array(df=features_df)
+    features_array = get_features_array(df=features_df,
+                                        model_name=MODEL_NAME)
     clusters_labels = get_clusters_labels(principal_components=features_array,
                                           n_clusters=N_CLUSTERS)
 
