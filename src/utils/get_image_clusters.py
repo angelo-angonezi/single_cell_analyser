@@ -36,13 +36,23 @@ from src.utils.aux_funcs import get_specific_files_in_folder
 
 # models related
 from keras.applications.vgg16 import VGG16
-from keras.applications.vgg16 import preprocess_input as vgg_preprocess
+from keras.applications.vgg16 import preprocess_input as vgg16_preprocess
+
+from keras.applications.vgg19 import VGG19
+from keras.applications.vgg19 import preprocess_input as vgg19_preprocess
 
 from keras.applications.resnet_v2 import ResNet50V2
 from keras.applications.resnet_v2 import preprocess_input as resnet_preprocess
 
 from keras.applications.inception_resnet_v2 import InceptionResNetV2
 from keras.applications.inception_resnet_v2 import preprocess_input as inception_preprocess
+
+from keras.applications.densenet import DenseNet121
+from keras.applications.densenet import preprocess_input as densenet_preprocess
+
+from keras import Input
+from keras import layers
+from keras import Sequential
 
 print('all required libraries successfully imported.')  # noqa
 
@@ -52,20 +62,24 @@ environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 #####################################################################
 # defining global variables
 
-# IMG_WIDTH = 224
-IMG_WIDTH = 299
-# IMG_HEIGHT = 224
-IMG_HEIGHT = 299
+IMG_WIDTH = 224
+# IMG_WIDTH = 299
+IMG_HEIGHT = 224
+# IMG_HEIGHT = 299
 SEED = 53
 N_COMPONENTS = 10  # defines number of principal components in PCA
 N_CLUSTERS = 3  # if set to zero, plots k-means elbow plot and asks user input
-N_SAMPLE = 30  # defines number of images per cluster plot
+N_SAMPLE = 50  # defines number of images per cluster plot
 PIXEL_CALC = 'het'  # defines pixel intensity calculation (mean/min/max/het)
 # LABEL_COL = 'label'
-LABEL_COL = 'class'
-# MODEL_NAME = 'vgg16'
-MODEL_NAME = 'inception'
+# LABEL_COL = 'class'
+LABEL_COL = 'img_name'
+MODEL_NAME = 'vgg16'
+# MODEL_NAME = 'vgg19'
+# MODEL_NAME = 'inception'
 # MODEL_NAME = 'resnet'
+# MODEL_NAME = 'densenet'
+# MODEL_NAME = 'mnist'
 
 #####################################################################
 # argument parsing related functions
@@ -122,6 +136,22 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
+def get_mnist_model() -> Model:
+    model = Sequential(
+        [
+            Input(shape=(224, 224, 1)),
+            layers.Conv2D(32, kernel_size=(3, 3), activation="relu"),
+            layers.MaxPooling2D(pool_size=(2, 2)),
+            layers.Conv2D(64, kernel_size=(3, 3), activation="relu"),
+            layers.MaxPooling2D(pool_size=(2, 2)),
+            layers.Flatten(),
+            layers.Dropout(0.5),
+            layers.Dense(2, activation="softmax"),
+        ]
+    )
+    return model
+
+
 def get_base_model(model_name: str) -> Model:
     """
     Returns specified loaded model
@@ -140,6 +170,11 @@ def get_base_model(model_name: str) -> Model:
         # loading VGG16
         model = VGG16()
 
+    elif model_name == 'vgg19':
+
+        # loading VGG19
+        model = VGG19()
+
     elif model_name == 'resnet':
 
         # loading ResNet
@@ -149,6 +184,16 @@ def get_base_model(model_name: str) -> Model:
 
         # loading InceptionNet
         model = InceptionResNetV2()
+
+    elif model_name == 'densenet':
+
+        # loading DenseNet
+        model = DenseNet121()
+
+    elif model_name == 'mnist':
+
+        # loading mnist
+        model = get_mnist_model()
 
     else:
 
@@ -177,23 +222,36 @@ def get_model_features(file_path: str,
     based on given model.
     """
     # loading image
-    img = load_img(file_path, target_size=(IMG_WIDTH, IMG_HEIGHT))
+    img = load_img(path=file_path,
+                   # color_mode='grayscale',
+                   color_mode='rgb',
+                   target_size=(IMG_WIDTH, IMG_HEIGHT))
 
     # converting image to numpy array
     img = np_array(img)
 
     # reshaping data for the model reshape(num_of_samples, width, height, channels)
+    # reshaped_img = img.reshape(1, IMG_WIDTH, IMG_HEIGHT, 1)
     reshaped_img = img.reshape(1, IMG_WIDTH, IMG_HEIGHT, 3)
 
     # preparing image for model according to respective model
     if model_name == 'vgg16':
-        processed_image = vgg_preprocess(reshaped_img)
+        processed_image = vgg16_preprocess(reshaped_img)
+
+    elif model_name == 'vgg19':
+        processed_image = vgg19_preprocess(reshaped_img)
 
     elif model_name == 'resnet':
         processed_image = resnet_preprocess(reshaped_img)
 
     elif model_name == 'inception':
         processed_image = inception_preprocess(reshaped_img)
+
+    elif model_name == 'densenet':
+        processed_image = densenet_preprocess(reshaped_img)
+
+    elif model_name == 'mnist':
+        processed_image = reshaped_img
 
     else:
 
@@ -389,6 +447,8 @@ def get_label(file_name: str,
     """
     # filtering df for line matching current file
     file_df = labels_df[labels_df['crop_name'] == file_name]
+    # file_name = file_name + '.png'
+    # file_df = labels_df[labels_df['file'] == file_name]
 
     # getting current file df row
     file_row = file_df.iloc[0]
