@@ -30,7 +30,6 @@ from os import makedirs as os_makedirs
 from src.utils.aux_funcs import print_gpu_usage
 from sklearn.preprocessing import StandardScaler
 from src.utils.aux_funcs import enter_to_continue
-from src.utils.aux_funcs import get_pixel_intensity
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
@@ -317,73 +316,6 @@ def get_clusters_labels(principal_components: ndarray,
     return labels_list
 
 
-def get_base_df(files: list) -> DataFrame:
-    """
-    Given a list of files, returns base
-    data frame, used on following analysis.
-    """
-    # defining col name
-    col_name = 'file_name'
-
-    # assembling new col
-    new_col = {col_name: files}
-
-    # creating data frame
-    base_df = DataFrame(new_col)
-
-    # returning base df
-    return base_df
-
-
-def add_file_path_col(df: DataFrame,
-                      input_folder: str
-                      ) -> None:
-    """
-    Given a base image names data frame,
-    adds file path column, based on given
-    input folder.
-    """
-    # defining col name
-    col_name = 'file_path'
-
-    # adding placeholder values to col
-    df[col_name] = None
-
-    # getting df rows
-    df_rows = df.iterrows()
-
-    # getting rows num
-    rows_num = len(df)
-
-    # defining starter for current row index
-    current_row_index = 1
-
-    # iterating over rows
-    for row in df_rows:
-
-        # printing progress message
-        base_string = f'adding file path col (row #INDEX# of #TOTAL#)'
-        print_progress_message(base_string=base_string,
-                               index=current_row_index,
-                               total=rows_num)
-
-        # getting current row index/data
-        row_index, row_data = row
-
-        # getting current row image name
-        file_name = row_data['file_name']
-
-        # getting current row file path
-        current_file_path = join(input_folder,
-                                 file_name)
-
-        # updating current row col
-        df.at[row_index, col_name] = current_file_path
-
-        # updating current row index
-        current_row_index += 1
-
-
 def get_label(file_name: str,
               labels_df: DataFrame,
               label_col: str
@@ -517,6 +449,62 @@ def add_features_col(df: DataFrame,
 
         # updating current row index
         current_row_index += 1
+
+
+def get_pixel_intensity(file_path: str,
+                        calc: str,
+                        img_width: int,
+                        img_height: int
+                        ) -> float:
+    """
+    Given a file path, loads image
+    and returns pixel intensity value,
+    based on given calc method (mean, min, max).
+    """
+    # loading image
+    img = load_img(file_path, target_size=(img_width, img_height))
+
+    # converting image to numpy array
+    img = np_array(img)
+
+    # defining placeholder value for current intensity value
+    pixel_intensity = None
+
+    # getting current intensity value based on given calc str
+
+    # calculating min intensity
+    if calc == 'min':
+        pixel_intensity = img.min()
+
+    # calculating max intensity
+    elif calc == 'max':
+        pixel_intensity = img.max()
+
+    # calculating mean intensity
+    elif calc == 'mean':
+        pixel_intensity = img.mean()
+
+    # calculating intensities ratio ('het')
+    elif calc == 'het':
+        pixel_max = img.max()
+        pixel_mean = img.mean()
+        pixel_intensity = pixel_max / pixel_mean
+
+    else:
+
+        # printing execution message
+        f_string = f'calc mode {calc} not specified.\n'
+        f_string += f'Please, check and try again.'
+        print(f_string)
+
+        # quitting
+        exit()
+
+    # converting pixel intensity to float
+    pixel_intensity = float(pixel_intensity)
+
+    # returning pixel intensity value
+    return pixel_intensity
 
 
 def add_pixel_intensity_col(df: DataFrame,

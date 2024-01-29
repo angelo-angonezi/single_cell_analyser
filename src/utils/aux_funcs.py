@@ -1432,60 +1432,71 @@ def add_confluence_group_col(df: DataFrame) -> None:
     df['confluence_group'] = df['confluence_percentage_str'].replace('0', '<1')
 
 
-def get_pixel_intensity(file_path: str,
-                        calc: str,
-                        img_width: int,
-                        img_height: int
-                        ) -> float:
+def get_base_df(files: list) -> DataFrame:
     """
-    Given a file path, loads image
-    and returns pixel intensity value,
-    based on given calc method (mean, min, max).
+    Given a list of files, returns base
+    data frame, used on following analysis.
     """
-    # loading image
-    img = load_img(file_path, target_size=(img_width, img_height))
+    # defining col name
+    col_name = 'file_name'
 
-    # converting image to numpy array
-    img = np_array(img)
+    # assembling new col
+    new_col = {col_name: files}
 
-    # defining placeholder value for current intensity value
-    pixel_intensity = None
+    # creating data frame
+    base_df = DataFrame(new_col)
 
-    # getting current intensity value based on given calc str
+    # returning base df
+    return base_df
 
-    # calculating min intensity
-    if calc == 'min':
-        pixel_intensity = img.min()
 
-    # calculating max intensity
-    elif calc == 'max':
-        pixel_intensity = img.max()
+def add_file_path_col(df: DataFrame,
+                      input_folder: str
+                      ) -> None:
+    """
+    Given a base image names data frame,
+    adds file path column, based on given
+    input folder.
+    """
+    # defining col name
+    col_name = 'file_path'
 
-    # calculating mean intensity
-    elif calc == 'mean':
-        pixel_intensity = img.mean()
+    # adding placeholder values to col
+    df[col_name] = None
 
-    # calculating intensities ratio ('het')
-    elif calc == 'het':
-        pixel_max = img.max()
-        pixel_mean = img.mean()
-        pixel_intensity = pixel_max / pixel_mean
+    # getting df rows
+    df_rows = df.iterrows()
 
-    else:
+    # getting rows num
+    rows_num = len(df)
 
-        # printing execution message
-        f_string = f'calc mode {calc} not specified.\n'
-        f_string += f'Please, check and try again.'
-        print(f_string)
+    # defining starter for current row index
+    current_row_index = 1
 
-        # quitting
-        exit()
+    # iterating over rows
+    for row in df_rows:
 
-    # converting pixel intensity to float
-    pixel_intensity = float(pixel_intensity)
+        # printing progress message
+        base_string = f'adding file path col (row #INDEX# of #TOTAL#)'
+        print_progress_message(base_string=base_string,
+                               index=current_row_index,
+                               total=rows_num)
 
-    # returning pixel intensity value
-    return pixel_intensity
+        # getting current row index/data
+        row_index, row_data = row
+
+        # getting current row image name
+        file_name = row_data['file_name']
+
+        # getting current row file path
+        current_file_path = join(input_folder,
+                                 file_name)
+
+        # updating current row col
+        df.at[row_index, col_name] = current_file_path
+
+        # updating current row index
+        current_row_index += 1
 
 ######################################################################
 # end of current module
