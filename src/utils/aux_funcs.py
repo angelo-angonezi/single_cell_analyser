@@ -13,6 +13,7 @@ from time import time
 from cv2 import circle
 from numpy import intp
 from os import listdir
+from os import environ
 from cv2 import imread
 from sys import stdout
 from cv2 import ellipse
@@ -38,6 +39,9 @@ from keras.utils import image_dataset_from_directory
 
 # preventing "SettingWithoutCopyWarning" messages
 pd.options.mode.chained_assignment = None  # default='warn'
+
+# setting tensorflow warnings off
+environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 ######################################################################
 # defining global variables
