@@ -29,8 +29,10 @@ from pandas import DataFrame
 from cv2 import drawContours
 from numpy import add as np_add
 from numpy import count_nonzero
+from keras.utils import load_img
 from cv2 import IMREAD_GRAYSCALE
 from shutil import copy as sh_copy
+from numpy import array as np_array
 from cv2 import resize as cv_resize
 from numpy import zeros as np_zeroes
 from tensorflow import test as tf_test
@@ -1428,6 +1430,62 @@ def add_confluence_group_col(df: DataFrame) -> None:
 
     # getting confluence group values
     df['confluence_group'] = df['confluence_percentage_str'].replace('0', '<1')
+
+
+def get_pixel_intensity(file_path: str,
+                        calc: str,
+                        img_width: int,
+                        img_height: int
+                        ) -> float:
+    """
+    Given a file path, loads image
+    and returns pixel intensity value,
+    based on given calc method (mean, min, max).
+    """
+    # loading image
+    img = load_img(file_path, target_size=(img_width, img_height))
+
+    # converting image to numpy array
+    img = np_array(img)
+
+    # defining placeholder value for current intensity value
+    pixel_intensity = None
+
+    # getting current intensity value based on given calc str
+
+    # calculating min intensity
+    if calc == 'min':
+        pixel_intensity = img.min()
+
+    # calculating max intensity
+    elif calc == 'max':
+        pixel_intensity = img.max()
+
+    # calculating mean intensity
+    elif calc == 'mean':
+        pixel_intensity = img.mean()
+
+    # calculating intensities ratio ('het')
+    elif calc == 'het':
+        pixel_max = img.max()
+        pixel_mean = img.mean()
+        pixel_intensity = pixel_max / pixel_mean
+
+    else:
+
+        # printing execution message
+        f_string = f'calc mode {calc} not specified.\n'
+        f_string += f'Please, check and try again.'
+        print(f_string)
+
+        # quitting
+        exit()
+
+    # converting pixel intensity to float
+    pixel_intensity = float(pixel_intensity)
+
+    # returning pixel intensity value
+    return pixel_intensity
 
 ######################################################################
 # end of current module

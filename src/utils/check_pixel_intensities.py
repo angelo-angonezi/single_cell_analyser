@@ -11,7 +11,6 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-from umap import UMAP
 from os.path import join
 from numpy import ndarray
 from os.path import exists
@@ -33,50 +32,11 @@ from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
-
-# models related
-from keras.applications.vgg16 import VGG16
-from keras.applications.vgg16 import preprocess_input as vgg16_preprocess
-
-from keras.applications.vgg19 import VGG19
-from keras.applications.vgg19 import preprocess_input as vgg19_preprocess
-
-from keras.applications.resnet_v2 import ResNet50V2
-from keras.applications.resnet_v2 import preprocess_input as resnet_preprocess
-
-from keras.applications.inception_resnet_v2 import InceptionResNetV2
-from keras.applications.inception_resnet_v2 import preprocess_input as inception_preprocess
-
-from keras.applications.densenet import DenseNet121
-from keras.applications.densenet import preprocess_input as densenet_preprocess
-
-from keras import Input
-from keras import layers
-from keras import Sequential
-
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
 # defining global variables
 
-IMG_WIDTH = 224
-# IMG_WIDTH = 299
-IMG_HEIGHT = 224
-# IMG_HEIGHT = 299
-SEED = 53
-N_COMPONENTS = 10  # defines number of principal components in PCA
-N_CLUSTERS = 3  # if set to zero, plots k-means elbow plot and asks user input
-N_SAMPLE = 50  # defines number of images per cluster plot
-PIXEL_CALC = 'het'  # defines pixel intensity calculation (mean/min/max/het)
-# LABEL_COL = 'label'
-# LABEL_COL = 'class'
-LABEL_COL = 'img_name'
-MODEL_NAME = 'vgg16'
-# MODEL_NAME = 'vgg19'
-# MODEL_NAME = 'inception'
-# MODEL_NAME = 'resnet'
-# MODEL_NAME = 'densenet'
-# MODEL_NAME = 'mnist'
 
 #####################################################################
 # argument parsing related functions
@@ -88,7 +48,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = "gets image clusters based on features extracted from images"
+    description = "check pixel intensities module"
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
@@ -109,15 +69,8 @@ def get_args_dict() -> dict:
                         required=True,
                         help=extension_help)
 
-    # labels path param
-    labels_help = 'defines path to labels file'
-    parser.add_argument('-l', '--labels-path',
-                        dest='labels_path',
-                        required=True,
-                        help=labels_help)
-
     # output folder param
-    output_help = 'defines output folder'
+    output_help = 'defines folder which will contain output plots'
     parser.add_argument('-o', '--output-folder',
                         dest='output_folder',
                         required=True,
@@ -133,194 +86,10 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_mnist_model() -> Model:
-    model = Sequential(
-        [
-            Input(shape=(224, 224, 1)),
-            layers.Conv2D(32, kernel_size=(3, 3), activation="relu"),
-            layers.MaxPooling2D(pool_size=(2, 2)),
-            layers.Conv2D(64, kernel_size=(3, 3), activation="relu"),
-            layers.MaxPooling2D(pool_size=(2, 2)),
-            layers.Flatten(),
-            layers.Dropout(0.5),
-            layers.Dense(2, activation="softmax"),
-        ]
-    )
-    return model
 
 
-def get_base_model(model_name: str) -> Model:
-    """
-    Returns specified loaded model
-    until penultimate layer.
-    """
-    # printing execution message
-    f_string = f'loading "{model_name}" model...'
-    print(f_string)
-
-    # defining placeholder value for model
-    model = None
-
-    # checking given model name
-    if model_name == 'vgg16':
-
-        # loading VGG16
-        model = VGG16()
-
-    elif model_name == 'vgg19':
-
-        # loading VGG19
-        model = VGG19()
-
-    elif model_name == 'resnet':
-
-        # loading ResNet
-        model = ResNet50V2()
-
-    elif model_name == 'inception':
-
-        # loading InceptionNet
-        model = InceptionResNetV2()
-
-    elif model_name == 'densenet':
-
-        # loading DenseNet
-        model = DenseNet121()
-
-    elif model_name == 'mnist':
-
-        # loading mnist
-        model = get_mnist_model()
-
-    else:
-
-        # printing execution message
-        f_string = f'model {model_name} not specified.\n'
-        f_string += f'Please, check and try again.'
-        print(f_string)
-
-        # quitting
-        exit()
-
-    # updating model (cutting final layers)
-    model = Model(inputs=model.inputs, outputs=model.layers[-2].output)
-
-    # returning model
-    return model
 
 
-def get_model_features(file_path: str,
-                       model: Model,
-                       model_name: str
-                       ) -> Model:
-    """
-    Given a file path, loads image
-    and returns extracted features
-    based on given model.
-    """
-    # loading image
-    img = load_img(path=file_path,
-                   # color_mode='grayscale',
-                   color_mode='rgb',
-                   target_size=(IMG_WIDTH, IMG_HEIGHT))
-
-    # converting image to numpy array
-    img = np_array(img)
-
-    # reshaping data for the model reshape(num_of_samples, width, height, channels)
-    # reshaped_img = img.reshape(1, IMG_WIDTH, IMG_HEIGHT, 1)
-    reshaped_img = img.reshape(1, IMG_WIDTH, IMG_HEIGHT, 3)
-
-    # preparing image for model according to respective model
-    if model_name == 'vgg16':
-        processed_image = vgg16_preprocess(reshaped_img)
-
-    elif model_name == 'vgg19':
-        processed_image = vgg19_preprocess(reshaped_img)
-
-    elif model_name == 'resnet':
-        processed_image = resnet_preprocess(reshaped_img)
-
-    elif model_name == 'inception':
-        processed_image = inception_preprocess(reshaped_img)
-
-    elif model_name == 'densenet':
-        processed_image = densenet_preprocess(reshaped_img)
-
-    elif model_name == 'mnist':
-        processed_image = reshaped_img
-
-    else:
-
-        # printing execution message
-        f_string = f'model {model_name} not specified.\n'
-        f_string += f'Please, check and try again.'
-        print(f_string)
-
-        # quitting
-        exit()
-
-    # get the feature vector
-    features = model.predict(processed_image,
-                             use_multiprocessing=True,
-                             verbose=0)
-
-    # returning features
-    return features
-
-
-def get_pixel_intensity(file_path: str,
-                        calc: str
-                        ) -> float:
-    """
-    Given a file path, loads image
-    and returns pixel intensity value,
-    based on given calc method (mean, min, max).
-    """
-    # loading image
-    img = load_img(file_path, target_size=(IMG_WIDTH, IMG_HEIGHT))
-
-    # converting image to numpy array
-    img = np_array(img)
-
-    # defining placeholder value for current intensity value
-    pixel_intensity = None
-
-    # getting current intensity value based on given calc str
-
-    # calculating min intensity
-    if calc == 'min':
-        pixel_intensity = img.min()
-
-    # calculating max intensity
-    elif calc == 'max':
-        pixel_intensity = img.max()
-
-    # calculating mean intensity
-    elif calc == 'mean':
-        pixel_intensity = img.mean()
-
-    # calculating intensities ratio ('het')
-    elif calc == 'het':
-        pixel_max = img.max()
-        pixel_mean = img.mean()
-        pixel_intensity = pixel_max / pixel_mean
-
-    else:
-
-        # printing execution message
-        f_string = f'calc mode {calc} not specified.\n'
-        f_string += f'Please, check and try again.'
-        print(f_string)
-
-        # quitting
-        exit()
-
-    # converting pixel intensity to float
-    pixel_intensity = float(pixel_intensity)
-
-    # returning pixel intensity value
-    return pixel_intensity
 
 
 def get_principal_components(features: ndarray,
