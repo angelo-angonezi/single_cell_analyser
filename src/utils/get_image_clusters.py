@@ -27,8 +27,10 @@ from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 from sklearn.decomposition import PCA
 from os import makedirs as os_makedirs
+from src.utils.aux_funcs import get_base_df
 from src.utils.aux_funcs import print_gpu_usage
 from sklearn.preprocessing import StandardScaler
+from src.utils.aux_funcs import add_file_path_col
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
@@ -452,9 +454,7 @@ def add_features_col(df: DataFrame,
 
 
 def get_pixel_intensity(file_path: str,
-                        calc: str,
-                        img_width: int,
-                        img_height: int
+                        calc: str
                         ) -> float:
     """
     Given a file path, loads image
@@ -462,7 +462,7 @@ def get_pixel_intensity(file_path: str,
     based on given calc method (mean, min, max).
     """
     # loading image
-    img = load_img(file_path, target_size=(img_width, img_height))
+    img = load_img(file_path, target_size=(IMG_WIDTH, IMG_HEIGHT))
 
     # converting image to numpy array
     img = np_array(img)
@@ -605,7 +605,7 @@ def get_features_df(input_folder: str,
     Checks whether features data frame
     exists in given output folder, and
     returns loaded df. Creates it from
-    base df otherwise.
+    scratch otherwise.
     """
     # defining placeholder value for features df
     features_df = None
