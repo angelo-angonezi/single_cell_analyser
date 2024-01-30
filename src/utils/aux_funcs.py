@@ -29,10 +29,8 @@ from pandas import DataFrame
 from cv2 import drawContours
 from numpy import add as np_add
 from numpy import count_nonzero
-from keras.utils import load_img
 from cv2 import IMREAD_GRAYSCALE
 from shutil import copy as sh_copy
-from numpy import array as np_array
 from cv2 import resize as cv_resize
 from numpy import zeros as np_zeroes
 from tensorflow import test as tf_test
@@ -1258,13 +1256,14 @@ def add_area_col(df: DataFrame,
         df.at[row_index, area_col] = current_mask_area
 
 
-def get_image_confluence(df: DataFrame,
-                         style: str
-                         ) -> float:
+def get_segmentation_mask(df: DataFrame,
+                          style: str
+                          ) -> float:
     """
-    Given an image df, returns given image confluence
-    (overlays all detections with given style and counts
-    returns non-zero pixels divided by image area).
+    Given an image df, adds overlays to all
+    detections with given style and returns
+    a binary image where zero pixels mean
+    background and non-zero mean nuclei.
     """
     # defining base image
     base_img = get_blank_image(width=IMAGE_WIDTH,
@@ -1283,8 +1282,24 @@ def get_image_confluence(df: DataFrame,
         # overlaying current mask on base img
         base_img = np_add(base_img, current_mask)
 
+    # returning base img
+    return base_img
+
+
+def get_image_confluence(df: DataFrame,
+                         style: str
+                         ) -> float:
+    """
+    Given an image df, returns given image confluence
+    (overlays all detections with given style and counts
+    returns non-zero pixels divided by image area).
+    """
+    # getting segmentation mask
+    segmentation_mask = get_segmentation_mask(df=df,
+                                              style=style)
+
     # getting non-zero pixel count
-    non_zeroes_count = count_nonzero(base_img != 0)
+    non_zeroes_count = count_nonzero(segmentation_mask != 0)
 
     # getting confluence
     confluence = non_zeroes_count / IMAGE_AREA
