@@ -133,6 +133,9 @@ def split_multiple_images(images_list: list,
                            red_path=red_path,
                            green_path=green_path)
 
+        # updating current image index
+        current_image_index += 1
+
     # printing execution message
     f_string = f'all {images_num} images split!'
     print(f_string)

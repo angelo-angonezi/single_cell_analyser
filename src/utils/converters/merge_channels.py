@@ -13,7 +13,6 @@ print('importing required libraries...')  # noqa
 from cv2 import imread
 from cv2 import imwrite
 from os.path import join
-from cv2 import merge as cv_merge
 from argparse import ArgumentParser
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
@@ -135,6 +134,9 @@ def merge_multiple_images(images_list: list,
         merge_single_image(red_path=red_path,
                            green_path=green_path,
                            output_path=save_path)
+
+        # updating current image index
+        current_image_index += 1
 
     # printing execution message
     f_string = f'all {images_num} images merged!'
