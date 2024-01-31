@@ -2,7 +2,7 @@
 
 print('initializing...')  # noqa
 
-# Code destined to merging channels
+# Code destined to splitting channels
 # for forNMA integration.
 
 ######################################################################
@@ -69,9 +69,9 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def split_single_image(input_image_path: str,
-                       red_image_path: str,
-                       green_image_path: str
+def split_single_image(input_path: str,
+                       red_path: str,
+                       green_path: str
                        ) -> None:
     """
     Given a path to an RGB image,
@@ -80,19 +80,19 @@ def split_single_image(input_image_path: str,
     given output path.
     """
     # opening input image
-    rgb_image = imread(input_image_path, -1)
+    rgb_image = imread(input_path, -1)
 
     # splitting image
     blue, green, red = cv_split(rgb_image)
 
     # saving red/green splits
-    imwrite(red_image_path,
+    imwrite(red_path,
             red)
-    imwrite(green_image_path,
+    imwrite(green_path,
             green)
 
 
-def split_multiple_images(images_list: str,
+def split_multiple_images(images_list: list,
                           input_folder: str,
                           red_folder: str,
                           green_folder: str
@@ -129,9 +129,9 @@ def split_multiple_images(images_list: str,
                           image_name)
 
         # running split_single_image function
-        split_single_image(input_image_path=input_path,
-                           red_image_path=red_path,
-                           green_image_path=green_path)
+        split_single_image(input_path=input_path,
+                           red_path=red_path,
+                           green_path=green_path)
 
     # printing execution message
     f_string = f'all {images_num} images split!'
@@ -183,7 +183,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running split_channels function
     split_channels(input_folder=input_folder,
