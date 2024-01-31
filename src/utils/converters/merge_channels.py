@@ -13,7 +13,9 @@ print('importing required libraries...')  # noqa
 from cv2 import imread
 from cv2 import imwrite
 from os.path import join
+from numpy import add as np_add
 from argparse import ArgumentParser
+from numpy import uint8 as np_uint8
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
@@ -81,12 +83,14 @@ def merge_single_image(red_path: str,
     red = imread(red_path, -1)
     green = imread(green_path, -1)
 
+    # getting image halves (important to join them later and max still be 255)
+    red_half = red / 2
+    green_half = green / 2
+
     # merging images
-    # TODO: check if keep it this way!
-    from numpy import add as np_add
-    from numpy import uint8 as np_uint8
-    stacked = np_add(red, green)
-    merged = stacked / 2
+    merged = np_add(red_half, green_half)
+
+    # converting int type
     merged = merged.astype(np_uint8)
 
     # saving merged image
@@ -113,6 +117,9 @@ def merge_multiple_images(images_list: list,
 
     # iterating over images
     for image_name in images_list:
+
+        if image_name != 'u87_fucci_tmz_C3_9_04d00h00m.tif':
+            continue
 
         # printing execution message
         progress_base_string = 'merging image #INDEX# of #TOTAL#'

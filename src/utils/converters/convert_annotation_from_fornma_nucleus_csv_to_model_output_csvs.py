@@ -22,8 +22,8 @@ print('all required libraries successfully imported.')  # noqa
 # defining global variables
 
 PHENOTYPE = 'dna_damage'
-PHENOTYPE_COL = 'Total_foci_rg_merge'
-IMAGE_NAME_COL = 'Image_name_rg_merge'
+PHENOTYPE_COL = 'Total_foci_merge'
+IMAGE_NAME_COL = 'Image_name_merge'
 FOCI_THRESHOLD = 3
 
 #####################################################################
