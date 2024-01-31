@@ -736,7 +736,6 @@ def add_treatment_col_debs(df: DataFrame) -> None:
     :param df: DataFrame. Represents merged detections/annotations data.
     :return: None.
     """
-    # TODO: adjust this function to add TMZ/CTR column
     # adding treatment placeholder column to df
     df['treatment'] = None
 
@@ -951,9 +950,8 @@ def add_treatment_col(df: DataFrame,
                       ) -> None:
     """
     Given an analysis data frame, and
-    :param df: DataFrame. Represents an analysis data frame.
-    :param treatment_dict: Dictionary. Represents a treatment dictionary.
-    :return: None.
+    a treatment dict, adds treatment col
+    to data frame, based on each image well.
     """
     # defining treatment col string
     treatment_col = 'Treatment'
@@ -992,41 +990,27 @@ def create_analysis_df(fornma_file_path: str,
 
     # adding new columns based on image name
     extension_col_split = fornma_df['Image_name_no_extension'].str.split('_', expand=True)
-    datetime = extension_col_split[9] + extension_col_split[10]
-    print(datetime)
-    months = [f[5:7] for f in datetime]
-    wells = extension_col_split[7]
-    fornma_df['Month'] = months
-    fornma_df['Well'] = wells
-    fornma_df['Datetime'] = datetime
-    # new_cols = ['Experiment', 'Well', 'Field', 'Datetime']
-    # fornma_df[new_cols] = extension_col_split
+    experiment_col = extension_col_split[0]
+    for i in range(1, len(extension_col_split.columns) - 3):
+        experiment_col += '_'
+        experiment_col += extension_col_split[i]
+    # datetime = extension_col_split[9] + extension_col_split[10]
+    # months = [f[5:7] for f in datetime]
+    # wells = extension_col_split[7]
+    # fornma_df['Month'] = months
+    # fornma_df['Well'] = wells
+    # fornma_df['Datetime'] = datetime
+    # adding cols
+    fornma_df['Experiment'] = experiment_col
+    fornma_df['Well'] = extension_col_split[3]
+    fornma_df['Field'] = extension_col_split[4]
+    fornma_df['Datetime'] = extension_col_split[5]
 
     # defining cols to be kept in final df
-    cols_to_keep = ['Cell',
-                    'Well',
-                    'Field',
-                    'Datetime']
-
-    '''
-    # defining rows to be kept in final df
-    all_wells = get_col_set_list(df=fornma_df,
-                                 col='Well')
-    wells_to_keep = list(treatment_dict.keys())
-    wells_to_drop = [well
-                     for well
-                     in all_wells
-                     if well
-                     not in wells_to_keep]
-
-    # dropping unrequired columns
-    drop_unrequired_cols(df=fornma_df,
-                         cols_to_keep=cols_to_keep)
-
-    # dropping unrequired rows
-    drop_wells_rows(df=fornma_df,
-                    wells=wells_to_drop)
-    '''
+    # cols_to_keep = ['Cell',
+    #                 'Well',
+    #                 'Field',
+    #                 'Datetime']
 
     # adding treatment column
     add_treatment_col(df=fornma_df,

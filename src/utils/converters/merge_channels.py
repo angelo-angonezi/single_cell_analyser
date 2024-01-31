@@ -118,9 +118,6 @@ def merge_multiple_images(images_list: list,
     # iterating over images
     for image_name in images_list:
 
-        if image_name != 'u87_fucci_tmz_C3_9_04d00h00m.tif':
-            continue
-
         # printing execution message
         progress_base_string = 'merging image #INDEX# of #TOTAL#'
         print_progress_message(base_string=progress_base_string,
