@@ -13,6 +13,7 @@ print('importing required libraries...')  # noqa
 from os.path import join
 from pandas import DataFrame
 from seaborn import scatterplot
+from numpy import log2 as np_log2
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 from src.utils.aux_funcs import enter_to_continue
@@ -114,6 +115,12 @@ def get_analysis_df(fornma_file_path: str,
                     'Mean_green']
     analysis_df = analysis_df[cols_to_keep]
 
+    # adding red/green ratio col
+    analysis_df['red_green_ratio'] = analysis_df['Mean_red'] / analysis_df['Mean_green']
+
+    # adding red/green ratio log col
+    analysis_df['red_green_ratio_log2'] = np_log2(analysis_df['red_green_ratio'])
+
     # adding cell cycle col
     add_cell_cycle_col(df=analysis_df,
                        min_red_value=min_red_value,
@@ -150,21 +157,145 @@ def plot_cytometry(df: DataFrame,
         # setting figure size
         plt.figure(figsize=(14, 8))
 
+        # getting total cells count
+        total_cells_count = len(treatment_group)
+
+        # getting current cell cycle proportions
+        current_proportions = treatment_group['cell_cycle (%cells)'].unique()
+
+        # sorting proportions so that it's always [G1, G2, M-eG1, S]
+        sorted_proportions = sorted(current_proportions)
+
+        # defining palette based on order [G1, G2, M-eG1, S]
+        colors_list = ['red', 'green', 'tomato', 'yellow']
+
         # plotting figure
         scatterplot(data=treatment_group,
                     x='Mean_red',
                     y='Mean_green',
                     hue='cell_cycle (%cells)',
-                    # hue_order=['M-eG1', 'G1', 'S', 'G2'],
-                    palette=['tomato', 'red', 'yellow', 'green'])
+                    hue_order=sorted_proportions,
+                    palette=colors_list)
 
         # setting plot title
-        title = f'Fucci "Cytometry" results (pixel intensities) - {treatment}'
+        title = f'Fucci "Cytometry" (by mean pixel intensities) '
+        title += f'| Treatment: {treatment} '
+        title += f'| Total cells: {total_cells_count}'
         plt.title(title)
 
         # setting axes lims
         plt.xlim(0.0, 1.0)
         plt.ylim(0.0, 1.0)
+
+        # setting figure layout
+        plt.tight_layout()
+
+        # saving figure
+        plt.savefig(save_path)
+
+
+def plot_ratio_log(df: DataFrame,
+                   output_folder: str
+                   ) -> None:
+    """
+    Given an analysis data frame,
+    plots ratio log plot, saving plot
+    in given output folder.
+    """
+    # grouping df by treatment
+    treatment_groups = df.groupby('Treatment')
+
+    # iterating over treatment groups
+    for treatment, treatment_group in treatment_groups:
+
+        # defining save name/path
+        save_name = f'{treatment}_ratio_log.png'
+        save_path = join(output_folder,
+                         save_name)
+
+        # setting figure size
+        plt.figure(figsize=(14, 8))
+
+        # getting total cells count
+        total_cells_count = len(treatment_group)
+
+        # getting current cell cycle proportions
+        current_proportions = treatment_group['cell_cycle (%cells)'].unique()
+
+        # sorting proportions so that it's always [G1, G2, M-eG1, S]
+        sorted_proportions = sorted(current_proportions)
+
+        # defining palette based on order [G1, G2, M-eG1, S]
+        colors_list = ['red', 'green', 'tomato', 'yellow']
+
+        # plotting figure
+        scatterplot(data=treatment_group,
+                    x='red_green_ratio_log2',
+                    y='Area',
+                    hue='cell_cycle (%cells)',
+                    hue_order=sorted_proportions,
+                    palette=colors_list)
+
+        # setting plot title
+        title = f'Fucci log(red_mean/green_mean) '
+        title += f'| Treatment: {treatment} '
+        title += f'| Total cells: {total_cells_count}'
+        plt.title(title)
+
+        # setting figure layout
+        plt.tight_layout()
+
+        # saving figure
+        plt.savefig(save_path)
+
+
+def plot_ratio_log(df: DataFrame,
+                   output_folder: str
+                   ) -> None:
+    """
+    Given an analysis data frame,
+    plots ratio log plot, saving plot
+    in given output folder.
+    """
+    # grouping df by treatment
+    treatment_groups = df.groupby('Treatment')
+
+    # iterating over treatment groups
+    for treatment, treatment_group in treatment_groups:
+
+        # defining save name/path
+        save_name = f'{treatment}_ratio_log.png'
+        save_path = join(output_folder,
+                         save_name)
+
+        # setting figure size
+        plt.figure(figsize=(14, 8))
+
+        # getting total cells count
+        total_cells_count = len(treatment_group)
+
+        # getting current cell cycle proportions
+        current_proportions = treatment_group['cell_cycle (%cells)'].unique()
+
+        # sorting proportions so that it's always [G1, G2, M-eG1, S]
+        sorted_proportions = sorted(current_proportions)
+
+        # defining palette based on order [G1, G2, M-eG1, S]
+        colors_list = ['red', 'green', 'tomato', 'yellow']
+
+        # plotting figure
+        scatterplot(data=treatment_group,
+                    x='red_green_ratio_log2',
+                    y='Area',
+                    hue='cell_cycle (%cells)',
+                    hue_order=sorted_proportions,
+                    palette=colors_list)
+
+        # setting plot title
+        title = f'Fucci log(red_mean/green_mean) '
+        title += f'| Treatment: {treatment} '
+        title += f'| Total cells: {total_cells_count}'
+        plt.title(title)
 
         # setting figure layout
         plt.tight_layout()
@@ -196,6 +327,11 @@ def plot_fucci_cytometry(fornma_file_path: str,
     # plotting cytometry plot
     print('plotting cytometry-like plot...')
     plot_cytometry(df=analysis_df,
+                   output_folder=output_folder)
+
+    # plotting ratio log plot
+    print('plotting ratio log plot...')
+    plot_ratio_log(df=analysis_df,
                    output_folder=output_folder)
 
     # printing execution message
