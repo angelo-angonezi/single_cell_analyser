@@ -16,6 +16,7 @@ from seaborn import scatterplot
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import add_cell_cycle_col
 from src.utils.aux_funcs import create_analysis_df
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
@@ -24,9 +25,20 @@ print('all required libraries successfully imported.')  # noqa
 # defining global variables
 
 IMAGE_NAME_COL = 'Image_name_merge'
-# TODO: UPDATE TREATMENT DICT
-TREATMENT_DICT = {'A1': 'CTR',
-                  'A2': 'TMZ'}
+MIN_RED_VALUE = 0.1
+MIN_GREEN_VALUE = 0.1
+TREATMENT_DICT = {'A1': 'TMZ',
+                  'A2': 'CTR',
+                  'A3': 'TMZ',
+                  'A4': 'CTR',
+                  'B1': 'TMZ',
+                  'B2': 'CTR',
+                  'B3': 'TMZ',
+                  'B4': 'CTR',
+                  'C1': 'TMZ',
+                  'C2': 'CTR',
+                  'C3': 'TMZ',
+                  'C4': 'CTR'}
 
 #####################################################################
 # argument parsing related functions
@@ -70,13 +82,16 @@ def get_args_dict() -> dict:
 
 def get_analysis_df(fornma_file_path: str,
                     image_name_col: str,
-                    treatment_dict: dict
+                    treatment_dict: dict,
+                    min_red_value: float,
+                    min_green_value: float
                     ) -> DataFrame:
     """
     Given a fornma file path,
     returns base analysis data frame.
     """
     # getting analysis df
+    print('getting analysis df...')
     analysis_df = create_analysis_df(fornma_file_path=fornma_file_path,
                                      image_name_col=image_name_col,
                                      treatment_dict=treatment_dict)
@@ -91,10 +106,15 @@ def get_analysis_df(fornma_file_path: str,
                     'Field',
                     'Image_name_merge',
                     'Treatment',
-                    'Condition',
                     'Mean_red',
                     'Mean_green']
     analysis_df = analysis_df[cols_to_keep]
+
+    # adding cell cycle col
+    print('adding cell cycle col...')
+    add_cell_cycle_col(df=analysis_df,
+                       min_red_value=min_red_value,
+                       min_green_value=min_green_value)
 
     # returning analysis df
     return analysis_df
@@ -149,7 +169,9 @@ def plot_fucci_cytometry(fornma_file_path: str,
     # getting analysis df
     analysis_df = get_analysis_df(fornma_file_path=fornma_file_path,
                                   image_name_col= image_name_col,
-                                  treatment_dict=treatment_dict)
+                                  treatment_dict=treatment_dict,
+                                  min_red_value=MIN_RED_VALUE,
+                                  min_green_value=MIN_GREEN_VALUE)
 
     # plotting cytometry plot
     plot_cytometry(df=analysis_df,

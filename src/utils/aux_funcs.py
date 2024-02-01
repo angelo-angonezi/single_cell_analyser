@@ -1567,6 +1567,58 @@ def get_cell_cycle(red_value: float,
     return cell_cycle
 
 
-def add_cell_cycle_col
+def add_cell_cycle_col(df: DataFrame,
+                       min_red_value: float,
+                       min_green_value: float
+                       ):
+    """
+    Given an analysis data frame, and
+    min levels for red/green pixel values,
+    adds cell cycle col, based on pixel
+    intensities ratio.
+    """
+    # defining col name
+    col_name = 'cell_cycle'
+
+    # adding placeholder values to col
+    df[col_name] = None
+
+    # getting df rows
+    df_rows = df.iterrows()
+
+    # getting rows num
+    rows_num = len(df)
+
+    # defining starter for current row index
+    current_row_index = 1
+
+    # iterating over rows
+    for row in df_rows:
+
+        # printing progress message
+        base_string = f'adding cell cycle col (row #INDEX# of #TOTAL#)'
+        print_progress_message(base_string=base_string,
+                               index=current_row_index,
+                               total=rows_num)
+
+        # getting current row index/data
+        row_index, row_data = row
+
+        # getting current row red/green values
+        red_value = row_data['Mean_red']
+        green_value = row_data['Mean_green']
+
+        # getting current row cell cycle
+        current_cell_cycle = get_cell_cycle(red_value=red_value,
+                                            green_value=green_value,
+                                            min_red_value=min_red_value,
+                                            min_green_value=min_green_value)
+
+        # updating current row col
+        df.at[row_index, col_name] = current_cell_cycle
+
+        # updating current row index
+        current_row_index += 1
+
 ######################################################################
 # end of current module
