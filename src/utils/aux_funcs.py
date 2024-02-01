@@ -1497,5 +1497,76 @@ def add_file_path_col(df: DataFrame,
         # updating current row index
         current_row_index += 1
 
+
+def get_cell_cycle(red_value: float,
+                   green_value: float,
+                   min_red_value: float,
+                   min_green_value: float
+                   ) -> str:
+    """
+    Given red and green channels' means,
+    returns cell cycle, based on 0-1 scale
+    for pixels intensity and given min values.
+    """
+    # TODO: pass this function to aux_funcs module
+    # defining placeholder value for cell cycle
+    cell_cycle = None
+
+    # getting min values bool
+    just_red = (red_value > min_red_value) and (green_value < min_green_value)
+    just_green = (red_value < min_red_value) and (green_value > min_green_value)
+    neither_reach_min = (red_value < min_red_value) and (green_value < min_green_value)
+    both_reach_min = (red_value > min_red_value) and (green_value > min_green_value)
+
+    # checking whether pixels reached min level
+
+    if neither_reach_min:
+
+        # then, cell cycle must be 'M-eG1'
+        cell_cycle = 'M-eG1'
+
+    elif just_red:
+
+        # then, cell cycle must be 'G1' (red)
+        cell_cycle = 'G1'
+
+    elif just_green:
+
+        # then, cell cycle must be 'G2' (green)
+        cell_cycle = 'G2'
+
+    elif both_reach_min:
+
+        # TODO: adapt these values for experimental data!
+
+        # then, cell cycle must be 'S' (red AND green)
+        cell_cycle = 'S'
+
+        """
+        # calculating pixels' intensity ratio
+        pixel_ratio = red_value / green_value
+
+        # checking ratio
+        if pixel_ratio > 1.4:
+
+            # then, cell cycle must be 'G1' (red)
+            cell_cycle = 'G1'
+
+        elif pixel_ratio < 0.6:
+
+            # then, cell cycle must be 'G2' (green)
+            cell_cycle = 'G2'
+
+        else:
+
+            # then, cell cycle must be 'S' (red AND green)
+            cell_cycle = 'S'
+        """
+
+    # returning cell cycle
+    return cell_cycle
+
+
+def add_cell_cycle_col
 ######################################################################
 # end of current module

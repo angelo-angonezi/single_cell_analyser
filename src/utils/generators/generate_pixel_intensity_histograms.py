@@ -21,8 +21,7 @@ from numpy import min as np_min
 from numpy import max as np_max
 from numpy import all as np_all
 from argparse import ArgumentParser
-from matplotlib import pyplot as plt
-from src.utils.aux_funcs import get_crop_pixels
+from src.utils.aux_funcs import get_cell_cycle
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
@@ -96,72 +95,6 @@ def get_pixels_df(crops_file: str) -> DataFrame:
     return crops_df
 
 
-def get_cell_cycle(red_value: float,
-                   green_value: float,
-                   min_value: float = MIN_VALUE
-                   ) -> str:
-    """
-    Given red and green channels' means,
-    returns cell cycle, based on 0-1 scale
-    for pixels intensity and given min value.
-    :param red_value: Float. Represents a normalized pixel value.
-    :param green_value: Float. Represents a normalized pixel value.
-    :param min_value: Float. Represents a normalized pixel value minimum.
-    :return: String. Represents a cell cycle.
-    """
-    # TODO: pass this function to aux_funcs module
-    # defining placeholder value for cell cycle
-    cell_cycle = None
-
-    # getting min values bool
-    just_red = (red_value > min_value) and (green_value < min_value)
-    just_green = (red_value < min_value) and (green_value > min_value)
-    neither_reach_min = (red_value < min_value) and (green_value < min_value)
-    both_reach_min = (red_value > min_value) and (green_value > min_value)
-
-    # checking whether pixels reached min level
-
-    if neither_reach_min:
-
-        # then, cell cycle must be 'M'
-        cell_cycle = 'M'
-
-    if just_red:
-
-        # then, cell cycle must be 'G1' (red)
-        cell_cycle = 'G1'
-
-    if just_green:
-
-        # then, cell cycle must be 'G2' (green)
-        cell_cycle = 'G2'
-
-    if both_reach_min:
-
-        # calculating pixels' intensity ratio
-        pixel_ratio = red_value / green_value
-
-        # checking ratio
-        # TODO: adapt these values for experimental data!
-        if pixel_ratio > 1.4:
-
-            # then, cell cycle must be 'G1' (red)
-            cell_cycle = 'G1'
-
-        elif pixel_ratio < 0.6:
-
-            # then, cell cycle must be 'G2' (green)
-            cell_cycle = 'G2'
-
-        else:
-
-            # then, cell cycle must be 'S' (red AND green)
-            cell_cycle = 'S'
-
-    # returning cell cycle
-    return cell_cycle
-
-
 def plot_pixel_histograms(df: DataFrame,
                           output_folder: str
                           ) -> None:
@@ -214,7 +147,9 @@ def plot_pixel_histograms(df: DataFrame,
 
         # getting current cell cycle
         current_cell_cycle = get_cell_cycle(red_value=red_mean,
-                                            green_value=green_mean)
+                                            green_value=green_mean,
+                                            min_red_value=MIN_VALUE,
+                                            min_green_value=MIN_VALUE)
 
         # getting current crop channels lists
         red_list = ['red' for _ in red_pixels]
