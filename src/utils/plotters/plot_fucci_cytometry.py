@@ -19,6 +19,7 @@ from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import add_cell_cycle_col
 from src.utils.aux_funcs import create_analysis_df
 from src.utils.aux_funcs import print_execution_parameters
+from src.utils.aux_funcs import add_cell_cycle_proportions_col
 print('all required libraries successfully imported.')  # noqa
 
 ######################################################################
@@ -120,6 +121,9 @@ def get_analysis_df(fornma_file_path: str,
                        ratio_lower_threshold=ratio_lower_threshold,
                        ratio_upper_threshold=ratio_upper_threshold)
 
+    # adding cell cycle proportions col
+    add_cell_cycle_proportions_col(df=analysis_df)
+
     # returning analysis df
     return analysis_df
 
@@ -150,7 +154,9 @@ def plot_cytometry(df: DataFrame,
         scatterplot(data=treatment_group,
                     x='Mean_red',
                     y='Mean_green',
-                    hue='cell_cycle')
+                    hue='cell_cycle (%cells)',
+                    # hue_order=['M-eG1', 'G1', 'S', 'G2'],
+                    palette=['tomato', 'red', 'yellow', 'green'])
 
         # setting plot title
         title = f'Fucci "Cytometry" results (pixel intensities) - {treatment}'

@@ -1619,5 +1619,60 @@ def add_cell_cycle_col(df: DataFrame,
         # updating current row index
         current_row_index += 1
 
+
+def add_cell_cycle_proportions_col(df: DataFrame) -> None:
+    """
+    Given an analysis data frame,
+    adds cell cycle proportions col.
+    """
+    # defining col name
+    col_name = 'cell_cycle (%cells)'
+
+    # adding placeholder values to col
+    df[col_name] = None
+
+    # defining df group cols
+    group_cols = ['cell_cycle', 'Treatment']
+
+    # grouping df by cell cycle
+    df_groups = df.groupby(group_cols)
+
+    # getting groups num
+    groups_num = len(df_groups)
+
+    # getting total cells num
+    total_cells_count = len(df)
+
+    # defining starter for current group
+    current_group_index = 1
+
+    # iterating over df groups
+    for current_name, current_group in df_groups:
+
+        # getting current group cell cycle / treatment
+        current_cell_cycle, current_treatment = current_name
+
+        # printing progress message
+        base_string = f'adding cell cycle proportions col (group: #INDEX# of #TOTAL#)'
+        print_progress_message(base_string=base_string,
+                               index=current_group_index,
+                               total=groups_num)
+
+        # getting current group count
+        current_group_count = len(current_group)
+
+        # getting current group proportion
+        current_group_ratio = current_group_count / total_cells_count
+        current_group_percentage = current_group_ratio * 100
+        current_group_percentage_round = round(current_group_percentage)
+        current_group_percentage_str = f'{current_cell_cycle} ({current_group_percentage_round}%)'
+
+        # updating current group cell cycle proportion col
+        for row_index, row_data in current_group.iterrows():
+            df.at[row_index, col_name] = current_group_percentage_str
+
+        # updating current group index
+        current_group_index += 1
+
 ######################################################################
 # end of current module
