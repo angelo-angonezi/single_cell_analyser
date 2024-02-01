@@ -154,6 +154,7 @@ def print_progress_message(base_string: str,
     progress_string = progress_string.replace('#TOTAL#', str(total))
     progress_string += '...'
     progress_string += f' ({progress_percentage_round}%)'
+    progress_string += '     '
 
     # showing progress message
     flush_or_print(string=progress_string,
