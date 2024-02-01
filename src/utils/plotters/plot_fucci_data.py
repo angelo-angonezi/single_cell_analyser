@@ -150,7 +150,7 @@ def plot_cytometry(df: DataFrame,
     for treatment, treatment_group in treatment_groups:
 
         # defining save name/path
-        save_name = f'{treatment}_fucci_cytometry.png'
+        save_name = f'fucci_cytometry_{treatment}.png'
         save_path = join(output_folder,
                          save_name)
 
@@ -167,7 +167,7 @@ def plot_cytometry(df: DataFrame,
         sorted_proportions = sorted(current_proportions)
 
         # defining palette based on order [G1, G2, M-eG1, S]
-        colors_list = ['red', 'green', 'tomato', 'yellow']
+        colors_list = ['red', 'green', 'magenta', 'yellow']
 
         # plotting figure
         scatterplot(data=treatment_group,
@@ -209,7 +209,7 @@ def plot_ratio_log(df: DataFrame,
     for treatment, treatment_group in treatment_groups:
 
         # defining save name/path
-        save_name = f'{treatment}_ratio_log.png'
+        save_name = f'ratio_log_{treatment}.png'
         save_path = join(output_folder,
                          save_name)
 
@@ -226,7 +226,7 @@ def plot_ratio_log(df: DataFrame,
         sorted_proportions = sorted(current_proportions)
 
         # defining palette based on order [G1, G2, M-eG1, S]
-        colors_list = ['red', 'green', 'tomato', 'yellow']
+        colors_list = ['red', 'green', 'magenta', 'yellow']
 
         # plotting figure
         scatterplot(data=treatment_group,
@@ -242,6 +242,10 @@ def plot_ratio_log(df: DataFrame,
         title += f'| Total cells: {total_cells_count}'
         plt.title(title)
 
+        # setting axes lims
+        plt.xlim(-5.0, 5.0)
+        plt.ylim(0.0, 10000)
+
         # setting figure layout
         plt.tight_layout()
 
@@ -249,12 +253,12 @@ def plot_ratio_log(df: DataFrame,
         plt.savefig(save_path)
 
 
-def plot_ratio_log(df: DataFrame,
+def plot_fucci_nma(df: DataFrame,
                    output_folder: str
                    ) -> None:
     """
     Given an analysis data frame,
-    plots ratio log plot, saving plot
+    plots fucci NMA plot, saving plot
     in given output folder.
     """
     # grouping df by treatment
@@ -264,7 +268,7 @@ def plot_ratio_log(df: DataFrame,
     for treatment, treatment_group in treatment_groups:
 
         # defining save name/path
-        save_name = f'{treatment}_ratio_log.png'
+        save_name = f'fucci_nma_{treatment}.png'
         save_path = join(output_folder,
                          save_name)
 
@@ -281,21 +285,25 @@ def plot_ratio_log(df: DataFrame,
         sorted_proportions = sorted(current_proportions)
 
         # defining palette based on order [G1, G2, M-eG1, S]
-        colors_list = ['red', 'green', 'tomato', 'yellow']
+        colors_list = ['red', 'green', 'magenta', 'yellow']
 
         # plotting figure
         scatterplot(data=treatment_group,
-                    x='red_green_ratio_log2',
+                    x='NII',
                     y='Area',
                     hue='cell_cycle (%cells)',
                     hue_order=sorted_proportions,
                     palette=colors_list)
 
         # setting plot title
-        title = f'Fucci log(red_mean/green_mean) '
+        title = f'Fucci NMA '
         title += f'| Treatment: {treatment} '
         title += f'| Total cells: {total_cells_count}'
         plt.title(title)
+
+        # setting axes lims
+        plt.xlim(0.0, 60)
+        plt.ylim(0.0, 10000)
 
         # setting figure layout
         plt.tight_layout()
@@ -332,6 +340,11 @@ def plot_fucci_cytometry(fornma_file_path: str,
     # plotting ratio log plot
     print('plotting ratio log plot...')
     plot_ratio_log(df=analysis_df,
+                   output_folder=output_folder)
+
+    # plotting fucci NMA plot
+    print('plotting fucci NMA plot...')
+    plot_fucci_nma(df=analysis_df,
                    output_folder=output_folder)
 
     # printing execution message

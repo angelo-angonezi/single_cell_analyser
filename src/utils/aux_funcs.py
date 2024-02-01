@@ -1510,7 +1510,6 @@ def get_cell_cycle(red_value: float,
     returns cell cycle, based on 0-1 scale
     for pixels intensity and given min values.
     """
-    # TODO: pass this function to aux_funcs module
     # defining placeholder value for cell cycle
     cell_cycle = None
 
@@ -1631,48 +1630,53 @@ def add_cell_cycle_proportions_col(df: DataFrame) -> None:
     # adding placeholder values to col
     df[col_name] = None
 
-    # defining df group cols
-    group_cols = ['cell_cycle', 'Treatment']
+    # grouping df by treatment
+    treatment_groups = df.groupby('Treatment')
 
-    # grouping df by cell cycle
-    df_groups = df.groupby(group_cols)
+    # getting rows num
+    rows_num = len(df)
 
-    # getting groups num
-    groups_num = len(df_groups)
+    # defining placeholder value for current_row_index
+    current_row_index = 1
 
-    # getting total cells num
-    total_cells_count = len(df)
+    # iterating over treatment groups
+    for treatment, treatment_group in treatment_groups:
 
-    # defining starter for current group
-    current_group_index = 1
+        # getting current treatment total cells count
+        total_cells_count = len(treatment_group)
 
-    # iterating over df groups
-    for current_name, current_group in df_groups:
+        # grouping df by cell cycle
+        cell_cycle_groups = treatment_group.groupby('cell_cycle')
 
-        # getting current group cell cycle / treatment
-        current_cell_cycle, current_treatment = current_name
+        # iterating over cell cycle group
+        for cell_cycle, cell_cycle_group in cell_cycle_groups:
 
-        # printing progress message
-        base_string = f'adding cell cycle proportions col (group: #INDEX# of #TOTAL#)'
-        print_progress_message(base_string=base_string,
-                               index=current_group_index,
-                               total=groups_num)
+            # getting current cell cycle cell count
+            current_cells_count = len(cell_cycle_group)
 
-        # getting current group count
-        current_group_count = len(current_group)
+            # getting current group proportion
+            current_group_ratio = current_cells_count / total_cells_count
+            current_group_percentage = current_group_ratio * 100
+            current_group_percentage_round = round(current_group_percentage)
+            current_group_percentage_str = f'{cell_cycle} ({current_group_percentage_round}%)'
 
-        # getting current group proportion
-        current_group_ratio = current_group_count / total_cells_count
-        current_group_percentage = current_group_ratio * 100
-        current_group_percentage_round = round(current_group_percentage)
-        current_group_percentage_str = f'{current_cell_cycle} ({current_group_percentage_round}%)'
+            # getting current group rows
+            df_rows = cell_cycle_group.iterrows()
 
-        # updating current group cell cycle proportion col
-        for row_index, row_data in current_group.iterrows():
-            df.at[row_index, col_name] = current_group_percentage_str
+            # iterating over current group rows
+            for row_index, row_data in df_rows:
 
-        # updating current group index
-        current_group_index += 1
+                # printing progress message
+                base_string = f'adding cell cycle proportions col (row #INDEX# of #TOTAL#)'
+                print_progress_message(base_string=base_string,
+                                       index=current_row_index,
+                                       total=rows_num)
+
+                # updating current group cell cycle proportion col
+                df.at[row_index, col_name] = current_group_percentage_str
+
+                # updating row index
+                current_row_index += 1
 
 ######################################################################
 # end of current module
