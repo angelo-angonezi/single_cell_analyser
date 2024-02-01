@@ -1501,7 +1501,9 @@ def add_file_path_col(df: DataFrame,
 def get_cell_cycle(red_value: float,
                    green_value: float,
                    min_red_value: float,
-                   min_green_value: float
+                   min_green_value: float,
+                   ratio_lower_threshold: float,
+                   ratio_upper_threshold: float
                    ) -> str:
     """
     Given red and green channels' means,
@@ -1537,22 +1539,16 @@ def get_cell_cycle(red_value: float,
 
     elif both_reach_min:
 
-        # TODO: adapt these values for experimental data!
-
-        # then, cell cycle must be 'S' (red AND green)
-        cell_cycle = 'S'
-
-        """
         # calculating pixels' intensity ratio
         pixel_ratio = red_value / green_value
 
         # checking ratio
-        if pixel_ratio > 1.4:
+        if pixel_ratio > ratio_upper_threshold:
 
             # then, cell cycle must be 'G1' (red)
             cell_cycle = 'G1'
 
-        elif pixel_ratio < 0.6:
+        elif pixel_ratio < ratio_lower_threshold:
 
             # then, cell cycle must be 'G2' (green)
             cell_cycle = 'G2'
@@ -1561,7 +1557,6 @@ def get_cell_cycle(red_value: float,
 
             # then, cell cycle must be 'S' (red AND green)
             cell_cycle = 'S'
-        """
 
     # returning cell cycle
     return cell_cycle
@@ -1569,7 +1564,9 @@ def get_cell_cycle(red_value: float,
 
 def add_cell_cycle_col(df: DataFrame,
                        min_red_value: float,
-                       min_green_value: float
+                       min_green_value: float,
+                       ratio_lower_threshold: float,
+                       ratio_upper_threshold: float
                        ):
     """
     Given an analysis data frame, and
@@ -1612,7 +1609,9 @@ def add_cell_cycle_col(df: DataFrame,
         current_cell_cycle = get_cell_cycle(red_value=red_value,
                                             green_value=green_value,
                                             min_red_value=min_red_value,
-                                            min_green_value=min_green_value)
+                                            min_green_value=min_green_value,
+                                            ratio_lower_threshold=ratio_lower_threshold,
+                                            ratio_upper_threshold=ratio_upper_threshold)
 
         # updating current row col
         df.at[row_index, col_name] = current_cell_cycle

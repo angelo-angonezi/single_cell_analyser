@@ -25,8 +25,10 @@ print('all required libraries successfully imported.')  # noqa
 # defining global variables
 
 IMAGE_NAME_COL = 'Image_name_merge'
-MIN_RED_VALUE = 0.1
-MIN_GREEN_VALUE = 0.1
+MIN_RED_VALUE = 0.10
+MIN_GREEN_VALUE = 0.05
+RATIO_LOWER_THRESHOLD = 0.8
+RATIO_UPPER_THRESHOLD = 1.2
 TREATMENT_DICT = {'A1': 'TMZ',
                   'A2': 'CTR',
                   'A3': 'TMZ',
@@ -84,14 +86,15 @@ def get_analysis_df(fornma_file_path: str,
                     image_name_col: str,
                     treatment_dict: dict,
                     min_red_value: float,
-                    min_green_value: float
+                    min_green_value: float,
+                    ratio_lower_threshold: float,
+                    ratio_upper_threshold: float
                     ) -> DataFrame:
     """
     Given a fornma file path,
     returns base analysis data frame.
     """
     # getting analysis df
-    print('getting analysis df...')
     analysis_df = create_analysis_df(fornma_file_path=fornma_file_path,
                                      image_name_col=image_name_col,
                                      treatment_dict=treatment_dict)
@@ -111,10 +114,11 @@ def get_analysis_df(fornma_file_path: str,
     analysis_df = analysis_df[cols_to_keep]
 
     # adding cell cycle col
-    print('adding cell cycle col...')
     add_cell_cycle_col(df=analysis_df,
                        min_red_value=min_red_value,
-                       min_green_value=min_green_value)
+                       min_green_value=min_green_value,
+                       ratio_lower_threshold=ratio_lower_threshold,
+                       ratio_upper_threshold=ratio_upper_threshold)
 
     # returning analysis df
     return analysis_df
@@ -128,8 +132,10 @@ def plot_cytometry(df: DataFrame,
     plots cytometry-like plot,
     saving plot in given output folder.
     """
-    treatment_groups = df.groupby('Condition')
+    # grouping df by treatment
+    treatment_groups = df.groupby('Treatment')
 
+    # iterating over treatment groups
     for treatment, treatment_group in treatment_groups:
 
         # defining save name/path
@@ -143,11 +149,16 @@ def plot_cytometry(df: DataFrame,
         # plotting figure
         scatterplot(data=treatment_group,
                     x='Mean_red',
-                    y='Mean_green')
+                    y='Mean_green',
+                    hue='cell_cycle')
 
         # setting plot title
         title = f'Fucci "Cytometry" results (pixel intensities) - {treatment}'
         plt.title(title)
+
+        # setting axes lims
+        plt.xlim(0.0, 1.0)
+        plt.ylim(0.0, 1.0)
 
         # setting figure layout
         plt.tight_layout()
@@ -167,13 +178,17 @@ def plot_fucci_cytometry(fornma_file_path: str,
     red/green channels intensities.
     """
     # getting analysis df
+    print('getting analysis df...')
     analysis_df = get_analysis_df(fornma_file_path=fornma_file_path,
                                   image_name_col= image_name_col,
                                   treatment_dict=treatment_dict,
                                   min_red_value=MIN_RED_VALUE,
-                                  min_green_value=MIN_GREEN_VALUE)
+                                  min_green_value=MIN_GREEN_VALUE,
+                                  ratio_lower_threshold=RATIO_LOWER_THRESHOLD,
+                                  ratio_upper_threshold=RATIO_UPPER_THRESHOLD)
 
     # plotting cytometry plot
+    print('plotting cytometry-like plot...')
     plot_cytometry(df=analysis_df,
                    output_folder=output_folder)
 
