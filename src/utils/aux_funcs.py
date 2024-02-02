@@ -946,6 +946,59 @@ def simple_hungarian_algorithm(cost_matrix: ndarray) -> tuple:
     return assignments
 
 
+def add_experiment_cols(df: DataFrame,
+                        file_name_col: str
+                        ) -> None:
+    """
+    Given an analysis (fornma/model/crops)
+    data frame, adds experiment related columns
+    based on file name, specified by given col.
+    """
+    # defining col names
+    experiment_col = 'Experiment'
+    well_col = 'Well'
+
+    # adding placeholder values to col
+    df[col_name] = None
+
+    # getting df rows
+    df_rows = df.iterrows()
+
+    # getting rows num
+    rows_num = len(df)
+
+    # defining starter for current row index
+    current_row_index = 1
+
+    # iterating over rows
+    for row in df_rows:
+
+        # printing progress message
+        base_string = f'adding cell cycle col (row #INDEX# of #TOTAL#)'
+        print_progress_message(base_string=base_string,
+                               index=current_row_index,
+                               total=rows_num)
+
+        # getting current row index/data
+        row_index, row_data = row
+
+
+        # updating current row col
+        df.at[row_index, col_name] = current_cell_cycle
+
+        # updating current row index
+        current_row_index += 1
+
+
+def get_treatment_dict(treatment_file: str) -> dict:
+    """
+    Given a path to a file containing
+    treatment info, returns a dictionary
+    representing well-treatment relationship.
+    """
+    pass
+
+
 def add_treatment_col(df: DataFrame,
                       treatment_dict: dict
                       ) -> None:
@@ -975,7 +1028,7 @@ def create_analysis_df(fornma_file_path: str,
     """
     Given a path to a fornma output file,
     returns a data frame, with added/removed
-    columns for cell count analysis.
+    columns for further analysis.
     :param fornma_file_path: String. Represents a path to a fornma output file.
     :param image_name_col: String. Represents a column name.
     :param treatment_dict: Dictionary. Represents a treatment dictionary.
@@ -990,6 +1043,7 @@ def create_analysis_df(fornma_file_path: str,
     fornma_df[new_cols] = extension_col_split
 
     # adding new columns based on image name
+    add_
     extension_col_split = fornma_df['Image_name_no_extension'].str.split('_', expand=True)
     experiment_col = extension_col_split[0]
     for i in range(1, len(extension_col_split.columns) - 3):
