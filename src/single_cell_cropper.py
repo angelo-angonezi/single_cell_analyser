@@ -303,7 +303,7 @@ def crop_multiple_obbs(image: ndarray,
         CURRENT_ITERATION += 1
 
         # checking if current crop already exists
-        if not exists(current_crop_output_path):
+        if exists(current_crop_output_path):
 
             # skipping current crop image generation
             continue
