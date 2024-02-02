@@ -955,8 +955,10 @@ def add_experiment_cols(df: DataFrame,
     based on file name, specified by given col.
     """
     # defining col names
-    experiment_col = 'Experiment'
-    well_col = 'Well'
+    experiment_col = 'experiment'
+    well_col = 'well'
+    print(df)
+    exit()
 
     # adding placeholder values to col
     df[col_name] = None

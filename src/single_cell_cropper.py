@@ -26,6 +26,9 @@ from cv2 import resize as cv_resize
 from scipy.ndimage import rotate as scp_rotate
 from src.utils.aux_funcs import get_obbs_from_df
 from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import add_treatment_col
+from src.utils.aux_funcs import get_treatment_dict
+from src.utils.aux_funcs import add_experiment_cols
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
@@ -60,7 +63,6 @@ def get_args_dict() -> dict:
                         help='defines path to folder containing images',
                         required=True)
 
-    # image extension param
     parser.add_argument('-x', '--images-extension',
                         dest='images_extension',
                         required=True,
@@ -81,6 +83,11 @@ def get_args_dict() -> dict:
                         help='defines detection threshold for ml model results',
                         required=False,
                         default=0.5)
+
+    parser.add_argument('-tr', '--treatment-file',
+                        dest='treatment_file',
+                        help='defines path to file containing treatment info',
+                        required=True)
 
     parser.add_argument('-er', '--expansion-ratio',
                         dest='expansion_ratio',
@@ -487,21 +494,15 @@ def single_cell_cropper(input_folder: str,
                         images_extension: str,
                         detections_df_path: str,
                         detection_threshold: float,
+                        treatment_file: str,
                         expansion_ratio: float,
                         output_folder: str,
                         resize_toggle: bool
                         ) -> None:
     """
     Given execution parameters, runs
-    cropping function on multiple images.
-    :param input_folder: String. Represents a path to a folder.
-    :param images_extension: String. Represents image extension.
-    :param detections_df_path: String. Represents a path to a file.
-    :param detection_threshold: Float. Represents threshold for ml model results.
-    :param expansion_ratio: Float. Represents a ratio to expand width/height.
-    :param output_folder: String. Represents a path to a folder.
-    :param resize_toggle: Bool. Represents a toggle.
-    :return: None.
+    cropping function on multiple images,
+    saving output crops and crops info file.
     """
     # getting data from consolidated df csv
     print('getting data from consolidated df...')
@@ -525,15 +526,34 @@ def single_cell_cropper(input_folder: str,
                                         resize_toggle=resize_toggle)
     print(f'image crops saved at "{output_folder}".')
 
+    # adding cols to crops df
+    print('adding analysis cols to crops df...')
+
+    # getting treatment dict
+    treatment_dict = get_treatment_dict(treatment_file=treatment_file)
+
+    # adding experiment cols
+    add_experiment_cols(df=crops_df,
+                        file_name_col='img_name')
+
+    # adding treatment col
+    add_treatment_col(df=crops_df,
+                      treatment_dict=treatment_dict)
+
+    # selecting cols to keep/reordering cols
+    cols_to_keep = ['img_name', 'crop_index', 'crop_name', 'cx', 'cy', 'width', 'height', 'angle']
+
+    # dropping unrequired cols
+    crops_df = crops_df[cols_to_keep]
+
     # saving final crops df in output folder
     print('saving crops info df...')
-    df_name = 'crops_info'
-    df_name_w_extension = f'{df_name}.csv'
-    df_path = join(output_folder,
-                   df_name_w_extension)
-    crops_df.to_csv(df_path,
+    save_name = 'crops_info.csv'
+    save_path = join(output_folder,
+                     save_name)
+    crops_df.to_csv(save_path,
                     index=False)
-    print(f'crops info df saved at "{df_path}".')
+    print(f'crops info df saved at "{save_path}".')
 
 ######################################################################
 # defining main function
@@ -562,6 +582,9 @@ def main():
     detection_threshold = args_dict['detection_threshold']
     detection_threshold = float(detection_threshold)
 
+    # getting treatment file path
+    treatment_file = args_dict['treatment_file']
+
     # getting expansion ratio
     expansion_ratio = args_dict['expansion_ratio']
     expansion_ratio = float(expansion_ratio)
@@ -580,6 +603,7 @@ def main():
                         images_extension=images_extension,
                         detections_df_path=detections_df_path,
                         detection_threshold=detection_threshold,
+                        treatment_file=treatment_file,
                         expansion_ratio=expansion_ratio,
                         output_folder=output_folder,
                         resize_toggle=resize_toggle)
