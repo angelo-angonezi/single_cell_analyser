@@ -262,44 +262,14 @@ def crop_multiple_obbs(image: ndarray,
     # iterating over obbs in obbs list
     for obb_index, obb in enumerate(obbs_list, 1):
 
-        # getting current crop string
-        current_crop_str = f'{obb_index:0{obbs_total_str_len}d}'
-
         # printing execution message
         current_progress_string = f'{progress_string} (crop: {obb_index} of {obbs_total})'
         print_progress_message(base_string=current_progress_string,
                                index=CURRENT_ITERATION,
                                total=ITERATIONS_TOTAL)
 
-        # updating global parameters
-        CURRENT_ITERATION += 1
-
-        # getting current obb crop
-        current_obb_crop = crop_single_obb(image=image,
-                                           obb=obb,
-                                           expansion_ratio=expansion_ratio)
-
-        # TODO: skipping next part to work with
-        #  fluorescence crops. I should find
-        #  a better way to find if obb is in
-        #  the corner of the image to prevent
-        #  skipping all crops (current problem).
-        # checking if there black pixels in current crop
-        # (meaning its OBB is in image corner)
-        # if black_pixels_in_crop(crop=current_obb_crop):
-        #
-        #     # skipping to next crop
-        #     continue
-
-        # checking resize toggle
-        if resize_toggle:
-
-            # getting global parameters
-            global RESIZE_DIMENSIONS
-
-            # resizing image to specified dimensions
-            current_obb_crop = resize_crop(crop=current_obb_crop,
-                                           resize_dimensions=RESIZE_DIMENSIONS)
+        # getting current crop string
+        current_crop_str = f'{obb_index:0{obbs_total_str_len}d}'
 
         # getting current crop output name/path
         current_crop_output_name = f'{image_name}_'
@@ -307,25 +277,6 @@ def crop_multiple_obbs(image: ndarray,
         current_crop_output_name_w_extension = f'{current_crop_output_name}.tif'
         current_crop_output_path = join(output_folder,
                                         current_crop_output_name_w_extension)
-
-        # def convert(img, target_type_min, target_type_max, target_type):
-        #     imin = img.min()
-        #     imax = img.max()
-        #
-        #     a = (target_type_max - target_type_min) / (imax - imin)
-        #     b = target_type_max - a * imax
-        #     new_img = (a * img + b).astype(target_type)
-        #     return new_img
-
-        # saving current crop
-        # print(current_obb_crop)
-        # print(type(current_obb_crop))
-        # current_obb_crop = convert(img=current_obb_crop,
-        #                            target_type_min=0,
-        #                            target_type_max=255,
-        #                            target_type=int)
-        imwrite(filename=current_crop_output_path,
-                img=current_obb_crop)
 
         # getting current obb info
         cx, cy, width, height, angle, cell_class = obb
@@ -347,6 +298,34 @@ def crop_multiple_obbs(image: ndarray,
 
         # appending current crop df to dfs list
         dfs_list.append(current_crop_df)
+
+        # updating global parameters
+        CURRENT_ITERATION += 1
+
+        # checking if current crop already exists
+        if not exists(current_crop_output_path):
+
+            # skipping current crop image generation
+            continue
+
+        # getting current obb crop
+        current_obb_crop = crop_single_obb(image=image,
+                                           obb=obb,
+                                           expansion_ratio=expansion_ratio)
+
+        # checking resize toggle
+        if resize_toggle:
+
+            # getting global parameters
+            global RESIZE_DIMENSIONS
+
+            # resizing image to specified dimensions
+            current_obb_crop = resize_crop(crop=current_obb_crop,
+                                           resize_dimensions=RESIZE_DIMENSIONS)
+
+        # saving current crop
+        imwrite(filename=current_crop_output_path,
+                img=current_obb_crop)
 
     # concatenating dfs in dfs list
     crops_df = concat(dfs_list,
