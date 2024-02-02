@@ -269,14 +269,14 @@ def crop_multiple_obbs(image: ndarray,
     # iterating over obbs in obbs list
     for obb_index, obb in enumerate(obbs_list, 1):
 
+        # getting current crop string
+        current_crop_str = f'{obb_index:0{obbs_total_str_len}d}'
+
         # printing execution message
-        current_progress_string = f'{progress_string} (crop: {obb_index} of {obbs_total})'
+        current_progress_string = f'{progress_string} (crop: {current_crop_str} of {obbs_total})'
         print_progress_message(base_string=current_progress_string,
                                index=CURRENT_ITERATION,
                                total=ITERATIONS_TOTAL)
-
-        # getting current crop string
-        current_crop_str = f'{obb_index:0{obbs_total_str_len}d}'
 
         # getting current crop output name/path
         current_crop_output_name = f'{image_name}_'
