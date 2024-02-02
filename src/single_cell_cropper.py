@@ -540,15 +540,6 @@ def single_cell_cropper(input_folder: str,
     add_treatment_col(df=crops_df,
                       treatment_dict=treatment_dict)
 
-    print(crops_df)
-    exit()
-
-    # selecting cols to keep/reordering cols
-    cols_to_keep = ['img_name', 'crop_index', 'crop_name', 'cx', 'cy', 'width', 'height', 'angle']
-
-    # dropping unrequired cols
-    crops_df = crops_df[cols_to_keep]
-
     # saving final crops df in output folder
     print('saving crops info df...')
     save_name = 'crops_info.csv'

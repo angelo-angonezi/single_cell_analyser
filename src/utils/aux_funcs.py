@@ -996,7 +996,8 @@ def add_experiment_cols(df: DataFrame,
         img_split = current_img_name.split('_')
 
         # getting file name related info
-        current_experiment = img_split[0:-4]
+        current_experiment_split = img_split[0:-4]
+        current_experiment = '_'.join(current_experiment_split)
         current_well = img_split[-4]
         current_field = img_split[-3]
         current_date = img_split[-2]
