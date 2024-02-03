@@ -142,7 +142,7 @@ def black_pixels_in_crop(crop: ndarray) -> bool:
     """
     # checking if there are black pixels in array
     black_pixels_in_array = 0 in crop
-    
+
     # returning boolean
     return black_pixels_in_array
 
