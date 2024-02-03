@@ -957,11 +957,16 @@ def add_experiment_cols(df: DataFrame,
     # defining col names
     experiment_col = 'experiment'
     well_col = 'well'
-    print(df)
-    exit()
+    field_col = 'field'
+    date_col = 'date'
+    time_col = 'time'
 
-    # adding placeholder values to col
-    df[col_name] = None
+    # adding placeholder values to cols
+    df[experiment_col] = None
+    df[well_col] = None
+    df[field_col] = None
+    df[date_col] = None
+    df[time_col] = None
 
     # getting df rows
     df_rows = df.iterrows()
@@ -976,7 +981,7 @@ def add_experiment_cols(df: DataFrame,
     for row in df_rows:
 
         # printing progress message
-        base_string = f'adding cell cycle col (row #INDEX# of #TOTAL#)'
+        base_string = f'adding experiment cols (row #INDEX# of #TOTAL#)'
         print_progress_message(base_string=base_string,
                                index=current_row_index,
                                total=rows_num)
@@ -984,9 +989,26 @@ def add_experiment_cols(df: DataFrame,
         # getting current row index/data
         row_index, row_data = row
 
+        # getting current row image name
+        current_img_name = row_data[file_name_col]
 
-        # updating current row col
-        df.at[row_index, col_name] = current_cell_cycle
+        # splitting current file name split
+        img_split = current_img_name.split('_')
+
+        # getting file name related info
+        current_experiment_split = img_split[0:-4]
+        current_experiment = '_'.join(current_experiment_split)
+        current_well = img_split[-4]
+        current_field = img_split[-3]
+        current_date = img_split[-2]
+        current_time = img_split[-1]
+
+        # updating current row cols
+        df.at[row_index, experiment_col] = current_experiment
+        df.at[row_index, well_col] = current_well
+        df.at[row_index, field_col] = current_field
+        df.at[row_index, date_col] = current_date
+        df.at[row_index, time_col] = current_time
 
         # updating current row index
         current_row_index += 1
@@ -998,7 +1020,34 @@ def get_treatment_dict(treatment_file: str) -> dict:
     treatment info, returns a dictionary
     representing well-treatment relationship.
     """
-    pass
+    # defining placeholder value for treatment dict
+    treatment_dict = {}
+
+    # reading input file
+    with open(treatment_file, 'r') as open_file:
+
+        # getting file lines
+        lines = open_file.readlines()
+
+        # iterating over file lines
+        for line in lines:
+
+            # removing "enter"
+            line = line.replace('\n', '')
+
+            # getting current line treatment key/value
+            current_line_split = line.split('=')
+            current_key = current_line_split[0]
+            current_value = current_line_split[1]
+
+            # assembling new dict element
+            new_dict_element = {current_key: current_value}
+
+            # updating treatment dict
+            treatment_dict.update(new_dict_element)
+
+    # returning treatment dict
+    return treatment_dict
 
 
 def add_treatment_col(df: DataFrame,
@@ -1010,10 +1059,10 @@ def add_treatment_col(df: DataFrame,
     to data frame, based on each image well.
     """
     # defining treatment col string
-    treatment_col = 'Treatment'
+    treatment_col = 'treatment'
 
     # adding placeholder value for treatment col
-    df[treatment_col] = df['Well']
+    df[treatment_col] = df['well']
 
     # defining replacement dict
     replacement_dict = {treatment_col: treatment_dict}
