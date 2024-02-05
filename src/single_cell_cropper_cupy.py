@@ -166,7 +166,6 @@ def print_global_progress():
     progress_string += f'| progress: {progress_percentage:02.2f}% '
     progress_string += f'| time elapsed: {time_elapsed_str} '
     progress_string += f'| ETC: {etc_str}'
-    progress_string += f'| {CURRENT_ITERATION} / {ITERATIONS_TOTAL}'
     progress_string += '   '
 
     # printing execution message
