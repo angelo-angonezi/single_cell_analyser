@@ -83,51 +83,6 @@ def get_args_dict() -> dict:
 ######################################################################
 # defining auxiliary functions
 
-
-def get_phenotype(row_data: Series,
-                  phenotype: str,
-                  phenotype_col: str):
-    """
-    Given a row data, phenotype and a
-    phenotype column, returns respective
-    "phenotype value".
-    """
-    # defining placeholder value for phenotype value
-    phenotype_value = None
-
-    # trying to access column value
-    try:
-
-        # getting phenotype col value
-        row_value = row_data[phenotype_col]
-
-    # if column does not exist
-    except KeyError:
-
-        # printing error message
-        e_string = f'Phenotype column "{phenotype_col}" does not exist.'
-        e_string += 'Please, check and try again.'
-        print(e_string)
-        exit()
-
-    # checking phenotype
-    if phenotype == 'dna_damage':
-
-        # getting phenotype
-        phenotype_value = 'HighDamage' if row_value > FOCI_THRESHOLD else 'LowDamage'
-
-    else:
-
-        # printing error message
-        e_string = f'Invalid phenotype: "{phenotype}"'
-        e_string += 'Please, check available phenotypes and try again.'
-        print(e_string)
-        exit()
-
-    # returning phenotype value
-    return phenotype_value
-
-
 def convert_single_file(input_csv_file_path: str,
                         red_folder: str,
                         green_folder: str,
@@ -142,8 +97,6 @@ def convert_single_file(input_csv_file_path: str,
     # opening csv file
     print('reading input file...')
     crops_df = read_csv(input_csv_file_path)
-
-    # adding experiment based columns
 
     # defining placeholder value for dfs list
     dfs_list = []
@@ -174,11 +127,15 @@ def convert_single_file(input_csv_file_path: str,
         current_cy = row_data['cy']
         current_width = row_data['width']
         current_height = row_data['height']
-        current_angle = row_data['angle']
+
+        # adding extension to crop name
+        current_crop_name_w_extension = f'{current_crop_name}{images_extension}'
 
         # getting current crop channel paths
-        current_red_path = join(red_folder, current_img_name)
-        current_green_path = join(green_folder, current_img_name)
+        current_red_path = join(red_folder,
+                                current_crop_name_w_extension)
+        current_green_path = join(green_folder,
+                                  current_crop_name_w_extension)
 
         # getting current crop mean pixel intensities
         red_mean = get_pixel_intensity(file_path=current_red_path,
@@ -198,12 +155,9 @@ def convert_single_file(input_csv_file_path: str,
                             'Y': current_cy,
                             'Area': current_area,
                             'NII': current_nii,
-                            'Well': ,
-                            'Field',
-                            'Image_name_merge',
-                            'Treatment',
-                            'Mean_red',
-                            'Mean_green'}
+                            'Image_name_merge': current_img_name,
+                            'Mean_red': red_mean,
+                            'Mean_green': green_mean}
 
         # creating current obb df
         current_obb_df = DataFrame(current_obb_dict,
@@ -257,7 +211,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running converter function
     convert_single_file(input_csv_file_path=input_file,
