@@ -40,7 +40,6 @@ sleep(0.8)
 ITERATIONS_TOTAL = 0
 CURRENT_ITERATION = 1
 RESIZE_DIMENSIONS = (100, 100)
-START_IMAGE_INDEX = 0
 
 #####################################################################
 # argument parsing related functions
@@ -432,12 +431,6 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
 
     # iterating over images groups
     for image_index, (image_name, image_group) in enumerate(image_groups, 1):
-
-        # checking current image index
-        if image_index < START_IMAGE_INDEX:
-
-            # skipping current image
-            continue
 
         # getting image name string
         image_name = str(image_name)

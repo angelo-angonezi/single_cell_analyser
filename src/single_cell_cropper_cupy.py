@@ -16,25 +16,27 @@ from os.path import join
 from cv2 import cvtColor
 from cupy import ndarray
 from cupy import asnumpy
-# from numpy import ndarray
+from cupy import asarray
 from pandas import concat
 from os.path import exists
 from pandas import read_csv
 from pandas import DataFrame
 from cv2 import COLOR_GRAY2RGB
 from cupy import pad as np_pad
-# from numpy import pad as np_pad
 from argparse import ArgumentParser
 from cv2 import resize as cv_resize
 from cupyx.scipy.ndimage import rotate as scp_rotate
-# from scipy.ndimage import rotate as scp_rotate
+from src.utils.aux_funcs import flush_or_print
 from src.utils.aux_funcs import print_gpu_usage
 from src.utils.aux_funcs import get_obbs_from_df
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import add_treatment_col
 from src.utils.aux_funcs import get_treatment_dict
 from src.utils.aux_funcs import add_experiment_cols
-from src.utils.aux_funcs import print_progress_message
+from src.utils.aux_funcs import get_time_elapsed
+from src.utils.aux_funcs import get_current_time
+from src.utils.aux_funcs import get_etc
+from src.utils.aux_funcs import get_time_str
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
 sleep(0.8)
@@ -42,10 +44,16 @@ sleep(0.8)
 #####################################################################
 # defining global variables
 
+RESIZE_DIMENSIONS = (100, 100)
+
+# progress bar related
 ITERATIONS_TOTAL = 0
 CURRENT_ITERATION = 1
-RESIZE_DIMENSIONS = (100, 100)
-START_IMAGE_INDEX = 0
+IMAGES_TOTAL = 0
+CURRENT_IMAGE = 1
+CROPS_TOTAL = 0
+CURRENT_CROP = 1
+START_TIME = 0
 
 #####################################################################
 # argument parsing related functions
@@ -116,6 +124,54 @@ def get_args_dict() -> dict:
 
 ######################################################################
 # defining auxiliary functions
+
+
+def print_global_progress():
+    """
+    Takes global parameters and prints
+    progress message on console.
+    """
+    # getting global variables
+    global CURRENT_ITERATION
+    global ITERATIONS_TOTAL
+    global IMAGES_TOTAL
+    global CURRENT_IMAGE
+    global CROPS_TOTAL
+    global CURRENT_CROP
+    global START_TIME
+
+    # getting current progress
+    progress_ratio = CURRENT_ITERATION / ITERATIONS_TOTAL
+    progress_percentage = progress_ratio * 100
+
+    # getting current time
+    current_time = get_current_time()
+
+    # getting time elapsed
+    time_elapsed = get_time_elapsed(start_time=START_TIME,
+                                    current_time=current_time)
+
+    # getting estimated time of completion
+    etc = get_etc(time_elapsed=time_elapsed,
+                  current_iteration=CURRENT_ITERATION,
+                  iterations_total=ITERATIONS_TOTAL)
+
+    # converting times to adequate format
+    time_elapsed_str = get_time_str(time_in_seconds=time_elapsed)
+    etc_str = get_time_str(time_in_seconds=etc)
+
+    # defining progress string
+    progress_string = f'generating crops for image {CURRENT_IMAGE} of {IMAGES_TOTAL}... '
+    progress_string += f'| crop: {CURRENT_CROP}/{CROPS_TOTAL} '
+    progress_string += f'| progress: {progress_percentage:02.2f}% '
+    progress_string += f'| time elapsed: {time_elapsed_str} '
+    progress_string += f'| ETC: {etc_str}'
+    progress_string += '   '
+
+    # printing execution message
+    flush_or_print(string=progress_string,
+                   index=CURRENT_ITERATION,
+                   total=ITERATIONS_TOTAL)
 
 
 def resize_crop(crop: ndarray,
@@ -242,8 +298,7 @@ def crop_multiple_obbs(image: ndarray,
                        obbs_list: list,
                        output_folder: str,
                        expansion_ratio: float,
-                       resize_toggle: bool,
-                       progress_string: str
+                       resize_toggle: bool
                        ) -> DataFrame:
     """
     Given an array representing an image,
@@ -258,7 +313,6 @@ def crop_multiple_obbs(image: ndarray,
     :param output_folder: String. Represents a path to a folder.
     :param expansion_ratio: Float. Represents a ratio to expand width/height.
     :param resize_toggle: Boolean. Represents a toggle.
-    :param progress_string: String. Represents a progress string.
     :return: Data Frame. Represents crops info.
     """
     # getting global parameters
@@ -268,6 +322,10 @@ def crop_multiple_obbs(image: ndarray,
     obbs_total = len(obbs_list)
     obbs_total_str = str(obbs_total)
     obbs_total_str_len = len(obbs_total_str)
+
+    # updating global parameters
+    global CROPS_TOTAL
+    CROPS_TOTAL = obbs_total
 
     # defining placeholder value for dfs list
     dfs_list = []
@@ -279,10 +337,7 @@ def crop_multiple_obbs(image: ndarray,
         current_crop_str = f'{obb_index:0{obbs_total_str_len}d}'
 
         # printing execution message
-        current_progress_string = f'{progress_string} (crop: {current_crop_str} of {obbs_total})'
-        print_progress_message(base_string=current_progress_string,
-                               index=CURRENT_ITERATION,
-                               total=ITERATIONS_TOTAL)
+        print_global_progress()
 
         # getting current crop output name/path
         current_crop_output_name = f'{image_name}_'
@@ -342,6 +397,14 @@ def crop_multiple_obbs(image: ndarray,
         # saving current crop
         imwrite(filename=current_crop_output_path,
                 img=current_obb_crop)
+        input()
+
+        # updating global parameters
+        global CURRENT_CROP
+        CURRENT_CROP += 1
+
+    # resetting global parameters
+    CURRENT_CROP = 1
 
     # concatenating dfs in dfs list
     crops_df = concat(dfs_list,
@@ -356,8 +419,7 @@ def get_single_image_crops(image: ndarray,
                            image_group: DataFrame,
                            output_folder: str,
                            expansion_ratio: float,
-                           resize_toggle: bool,
-                           progress_string: str
+                           resize_toggle: bool
                            ) -> DataFrame:
     """
     Given an array representing an image,
@@ -371,7 +433,6 @@ def get_single_image_crops(image: ndarray,
     :param output_folder: String. Represents a path to a folder.
     :param expansion_ratio: Float. Represents a ratio to expand width/height.
     :param resize_toggle: Boolean. Represents a toggle.
-    :param progress_string: String. Represents a progress string.
     :return: Data Frame. Represents crops info.
     """
     # sorting df by cx (ensures that different codes follow the same order)
@@ -386,8 +447,7 @@ def get_single_image_crops(image: ndarray,
                                   obbs_list=current_image_obbs,
                                   output_folder=output_folder,
                                   expansion_ratio=expansion_ratio,
-                                  resize_toggle=resize_toggle,
-                                  progress_string=progress_string)
+                                  resize_toggle=resize_toggle)
 
     # returning crops df
     return crops_df
@@ -432,20 +492,16 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
 
     # getting total number of images
     image_total = len(image_groups)
-    image_total_str = str(image_total)
-    image_total_str_len = len(image_total_str)
+
+    # updating global parameters
+    global IMAGES_TOTAL
+    IMAGES_TOTAL = image_total
 
     # defining placeholder value for dfs list
     dfs_list = []
 
     # iterating over images groups
-    for image_index, (image_name, image_group) in enumerate(image_groups, 1):
-
-        # checking current image index
-        if image_index < START_IMAGE_INDEX:
-
-            # skipping current image
-            continue
+    for image_name, image_group in image_groups:
 
         # getting image name string
         image_name = str(image_name)
@@ -478,12 +534,7 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
         current_image_array = cvtColor(current_image_array, COLOR_GRAY2RGB)
 
         # converting image to cupy array
-        from cupy import asarray
         current_image_array = asarray(current_image_array)
-
-        # assembling current progress string
-        progress_string = f'generating crops for image {image_index:0{image_total_str_len}d}'
-        progress_string += f' of {image_total}'
 
         # running single image cropper
         crops_df = get_single_image_crops(image=current_image_array,
@@ -491,11 +542,14 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
                                           image_group=image_group,
                                           output_folder=output_folder,
                                           expansion_ratio=expansion_ratio,
-                                          resize_toggle=resize_toggle,
-                                          progress_string=progress_string)
+                                          resize_toggle=resize_toggle)
 
         # appending current image crops df to dfs list
         dfs_list.append(crops_df)
+
+        # updating global parameters
+        global CURRENT_IMAGE
+        CURRENT_IMAGE += 1
 
     # printing execution message
     f_string = f'all crops generated!'
@@ -534,6 +588,13 @@ def single_cell_cropper(input_folder: str,
     # sorting df
     print('sorting data frame...')
     sorted_df = filtered_df.sort_values('img_file_name')
+
+    # getting current time
+    current_time = get_current_time()
+
+    # updating global variables
+    global START_TIME
+    START_TIME = current_time
 
     # running multiple image cropper function
     print('initializing crops generator...')
