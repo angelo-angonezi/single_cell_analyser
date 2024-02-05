@@ -19,6 +19,7 @@ from matplotlib import pyplot as plt
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import add_cell_cycle_col
 from src.utils.aux_funcs import create_analysis_df
+from src.utils.aux_funcs import get_treatment_dict
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import add_cell_cycle_proportions_col
 print('all required libraries successfully imported.')  # noqa
@@ -66,6 +67,12 @@ def get_args_dict() -> dict:
                         dest='fornma_file',
                         required=True,
                         help='defines path to fornma output file (.csv)')
+
+    # treatments file param
+    parser.add_argument('-tr', '--treatment-file',
+                        dest='treatment_file',
+                        help='defines path to file containing treatment info',
+                        required=True)
 
     # output folder param
     output_help = 'defines path to output folder'
@@ -314,7 +321,7 @@ def plot_fucci_nma(df: DataFrame,
 
 def plot_fucci_cytometry(fornma_file_path: str,
                          image_name_col: str,
-                         treatment_dict: dict,
+                         treatment_file: str,
                          output_folder: str
                          ) -> None:
     """
@@ -322,10 +329,13 @@ def plot_fucci_cytometry(fornma_file_path: str,
     plots cytometry-like plot, based on
     red/green channels intensities.
     """
+    # getting treatment dict
+    treatment_dict = get_treatment_dict(treatment_file=treatment_file)
+
     # getting analysis df
     print('getting analysis df...')
     analysis_df = get_analysis_df(fornma_file_path=fornma_file_path,
-                                  image_name_col= image_name_col,
+                                  image_name_col=image_name_col,
                                   treatment_dict=treatment_dict,
                                   min_red_value=MIN_RED_VALUE,
                                   min_green_value=MIN_GREEN_VALUE,
@@ -362,6 +372,9 @@ def main():
     # getting fornma file path
     fornma_file = args_dict['fornma_file']
 
+    # getting treatment file path
+    treatment_file = args_dict['treatment_file']
+
     # getting output folder
     output_folder = args_dict['output_folder']
 
@@ -374,7 +387,7 @@ def main():
     # running plot_fucci_cytometry function
     plot_fucci_cytometry(fornma_file_path=fornma_file,
                          image_name_col=IMAGE_NAME_COL,
-                         treatment_dict=TREATMENT_DICT,
+                         treatment_file=treatment_file,
                          output_folder=output_folder)
 
 ######################################################################

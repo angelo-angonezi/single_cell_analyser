@@ -32,6 +32,7 @@ from src.utils.aux_funcs import print_gpu_usage
 from sklearn.preprocessing import StandardScaler
 from src.utils.aux_funcs import add_file_path_col
 from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import get_pixel_intensity
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
@@ -451,60 +452,6 @@ def add_features_col(df: DataFrame,
 
         # updating current row index
         current_row_index += 1
-
-
-def get_pixel_intensity(file_path: str,
-                        calc: str
-                        ) -> float:
-    """
-    Given a file path, loads image
-    and returns pixel intensity value,
-    based on given calc method (mean, min, max).
-    """
-    # loading image
-    img = load_img(file_path, target_size=(IMG_WIDTH, IMG_HEIGHT))
-
-    # converting image to numpy array
-    img = np_array(img)
-
-    # defining placeholder value for current intensity value
-    pixel_intensity = None
-
-    # getting current intensity value based on given calc str
-
-    # calculating min intensity
-    if calc == 'min':
-        pixel_intensity = img.min()
-
-    # calculating max intensity
-    elif calc == 'max':
-        pixel_intensity = img.max()
-
-    # calculating mean intensity
-    elif calc == 'mean':
-        pixel_intensity = img.mean()
-
-    # calculating intensities ratio ('het')
-    elif calc == 'het':
-        pixel_max = img.max()
-        pixel_mean = img.mean()
-        pixel_intensity = pixel_max / pixel_mean
-
-    else:
-
-        # printing execution message
-        f_string = f'calc mode {calc} not specified.\n'
-        f_string += f'Please, check and try again.'
-        print(f_string)
-
-        # quitting
-        exit()
-
-    # converting pixel intensity to float
-    pixel_intensity = float(pixel_intensity)
-
-    # returning pixel intensity value
-    return pixel_intensity
 
 
 def add_pixel_intensity_col(df: DataFrame,

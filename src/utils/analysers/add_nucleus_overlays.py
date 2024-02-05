@@ -35,6 +35,7 @@ print('all required libraries successfully imported.')  # noqa
 #####################################################################
 # defining global variables
 
+ADD_INDEX_LABELS = False
 COLOR_DICT = {'model': (0, 102, 204),
               'fornma': (0, 204, 102),
               'DT': (255, 153, 102),
@@ -209,14 +210,17 @@ def add_single_overlay(open_img: ndarray,
                      color=overlay_color,
                      thickness=overlays_thickness)
 
-    # adding class text
-    putText(open_img,
-            cell_index_text,
-            (int(cx), int(cy)),
-            FONT_HERSHEY_SIMPLEX,
-            0.5,
-            text_color,
-            text_thickness)
+    # checking global variables
+    if ADD_INDEX_LABELS:
+
+        # adding index text
+        putText(open_img,
+                cell_index_text,
+                (int(cx), int(cy)),
+                FONT_HERSHEY_SIMPLEX,
+                0.5,
+                text_color,
+                text_thickness)
 
 
 def add_multiple_overlays(open_img: ndarray,

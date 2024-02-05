@@ -1784,5 +1784,57 @@ def add_cell_cycle_proportions_col(df: DataFrame) -> None:
                 # updating row index
                 current_row_index += 1
 
+
+def get_pixel_intensity(file_path: str,
+                        calc: str
+                        ) -> float:
+    """
+    Given a file path, loads image
+    and returns pixel intensity value,
+    based on given calc method (mean, min, max).
+    """
+    # loading image
+    img = imread(file_path,
+                 -1)
+
+    # defining placeholder value for current intensity value
+    pixel_intensity = None
+
+    # getting current intensity value based on given calc str
+
+    # calculating min intensity
+    if calc == 'min':
+        pixel_intensity = img.min()
+
+    # calculating max intensity
+    elif calc == 'max':
+        pixel_intensity = img.max()
+
+    # calculating mean intensity
+    elif calc == 'mean':
+        pixel_intensity = img.mean()
+
+    # calculating intensities ratio ('het')
+    elif calc == 'het':
+        pixel_max = img.max()
+        pixel_mean = img.mean()
+        pixel_intensity = pixel_max / pixel_mean
+
+    else:
+
+        # printing execution message
+        f_string = f'calc mode {calc} not specified.\n'
+        f_string += f'Please, check and try again.'
+        print(f_string)
+
+        # quitting
+        exit()
+
+    # converting pixel intensity to float
+    pixel_intensity = float(pixel_intensity)
+
+    # returning pixel intensity value
+    return pixel_intensity
+
 ######################################################################
 # end of current module
