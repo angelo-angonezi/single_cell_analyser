@@ -14,16 +14,21 @@ from cv2 import imread
 from cv2 import imwrite
 from os.path import join
 from cv2 import cvtColor
-from numpy import ndarray
+from cupy import ndarray
+from cupy import asnumpy
+# from numpy import ndarray
 from pandas import concat
 from os.path import exists
 from pandas import read_csv
 from pandas import DataFrame
 from cv2 import COLOR_GRAY2RGB
-from numpy import pad as np_pad
+from cupy import pad as np_pad
+# from numpy import pad as np_pad
 from argparse import ArgumentParser
 from cv2 import resize as cv_resize
-from scipy.ndimage import rotate as scp_rotate
+from cupyx.scipy.ndimage import rotate as scp_rotate
+# from scipy.ndimage import rotate as scp_rotate
+from src.utils.aux_funcs import print_gpu_usage
 from src.utils.aux_funcs import get_obbs_from_df
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import add_treatment_col
@@ -331,6 +336,9 @@ def crop_multiple_obbs(image: ndarray,
             current_obb_crop = resize_crop(crop=current_obb_crop,
                                            resize_dimensions=RESIZE_DIMENSIONS)
 
+        # converting current crop back to numpy
+        current_obb_crop = asnumpy(current_obb_crop)
+
         # saving current crop
         imwrite(filename=current_crop_output_path,
                 img=current_obb_crop)
@@ -469,6 +477,10 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
         # converting image to grayscale
         current_image_array = cvtColor(current_image_array, COLOR_GRAY2RGB)
 
+        # converting image to cupy array
+        from cupy import asarray
+        current_image_array = asarray(current_image_array)
+
         # assembling current progress string
         progress_string = f'generating crops for image {image_index:0{image_total_str_len}d}'
         progress_string += f' of {image_total}'
@@ -595,6 +607,9 @@ def main():
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
+
+    # checking gpu usage
+    print_gpu_usage()
 
     # waiting for user input
     enter_to_continue()
