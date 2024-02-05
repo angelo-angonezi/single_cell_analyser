@@ -166,6 +166,7 @@ def print_global_progress():
     progress_string += f'| progress: {progress_percentage:02.2f}% '
     progress_string += f'| time elapsed: {time_elapsed_str} '
     progress_string += f'| ETC: {etc_str}'
+    progress_string += f'| {CURRENT_ITERATION} / {ITERATIONS_TOTAL}'
     progress_string += '   '
 
     # printing execution message
@@ -326,6 +327,7 @@ def crop_multiple_obbs(image: ndarray,
     # updating global parameters
     global CROPS_TOTAL, CURRENT_CROP
     CROPS_TOTAL = obbs_total
+    CURRENT_CROP = 1
 
     # defining placeholder value for dfs list
     dfs_list = []
@@ -368,6 +370,7 @@ def crop_multiple_obbs(image: ndarray,
         dfs_list.append(current_crop_df)
 
         # updating global parameters
+        CURRENT_CROP += 1
         CURRENT_ITERATION += 1
 
         # checking if current crop already exists
@@ -391,18 +394,12 @@ def crop_multiple_obbs(image: ndarray,
             current_obb_crop = resize_crop(crop=current_obb_crop,
                                            resize_dimensions=RESIZE_DIMENSIONS)
 
-        # converting current crop back to numpy
+        # converting current crop back to numpy (necessary to save with cv2.imwrite function)
         current_obb_crop = asnumpy(current_obb_crop)
 
         # saving current crop
         imwrite(filename=current_crop_output_path,
                 img=current_obb_crop)
-
-        # updating global parameters
-        CURRENT_CROP += 1
-
-    # resetting global parameters
-    CURRENT_CROP = 1
 
     # concatenating dfs in dfs list
     crops_df = concat(dfs_list,
