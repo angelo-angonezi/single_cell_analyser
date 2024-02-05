@@ -324,7 +324,7 @@ def crop_multiple_obbs(image: ndarray,
     obbs_total_str_len = len(obbs_total_str)
 
     # updating global parameters
-    global CROPS_TOTAL
+    global CROPS_TOTAL, CURRENT_CROP
     CROPS_TOTAL = obbs_total
 
     # defining placeholder value for dfs list
@@ -397,10 +397,8 @@ def crop_multiple_obbs(image: ndarray,
         # saving current crop
         imwrite(filename=current_crop_output_path,
                 img=current_obb_crop)
-        input()
 
         # updating global parameters
-        global CURRENT_CROP
         CURRENT_CROP += 1
 
     # resetting global parameters
