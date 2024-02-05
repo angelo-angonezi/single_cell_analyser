@@ -1072,64 +1072,41 @@ def add_treatment_col(df: DataFrame,
                inplace=True)
 
 
-def create_analysis_df(fornma_file_path: str,
+def create_analysis_df(base_df_path: str,
                        image_name_col: str,
-                       treatment_dict: dict
+                       treatment_file: str
                        ) -> DataFrame:
     """
-    Given a path to a fornma output file,
-    returns a data frame, with added/removed
-    columns for further analysis.
-    :param fornma_file_path: String. Represents a path to a fornma output file.
-    :param image_name_col: String. Represents a column name.
-    :param treatment_dict: Dictionary. Represents a treatment dictionary.
-    return: DataFrame. Represents an analysis data frame.
+    Given a path to a base data frame
+    (crops_info, fornma or model detections),
+    adds image name-based columns, such as
+    Well, Field, and Treatment, returning
+    analysis data frame.
     """
-    # reading input file
-    fornma_df = read_csv(fornma_file_path)
+    # reading base df
+    analysis_df = read_csv(base_df_path)
 
-    # adding new columns based on image extension
-    extension_col_split = fornma_df[image_name_col].str.split('.', expand=True)
-    new_cols = ['Image_name_no_extension', 'Extension']
-    fornma_df[new_cols] = extension_col_split
+    # adding experiment cols
+    print('adding experiment cols...')
+    add_experiment_cols(df=analysis_df,
+                        file_name_col=image_name_col)
 
-    # adding new columns based on image name
-    add_
-    extension_col_split = fornma_df['Image_name_no_extension'].str.split('_', expand=True)
-    experiment_col = extension_col_split[0]
-    for i in range(1, len(extension_col_split.columns) - 3):
-        experiment_col += '_'
-        experiment_col += extension_col_split[i]
-    # datetime = extension_col_split[9] + extension_col_split[10]
-    # months = [f[5:7] for f in datetime]
-    # wells = extension_col_split[7]
-    # fornma_df['Month'] = months
-    # fornma_df['Well'] = wells
-    # fornma_df['Datetime'] = datetime
-    # adding cols
-    fornma_df['Experiment'] = experiment_col
-    fornma_df['Well'] = extension_col_split[3]
-    fornma_df['Field'] = extension_col_split[4]
-    fornma_df['Datetime'] = extension_col_split[5]
-
-    # defining cols to be kept in final df
-    # cols_to_keep = ['Cell',
-    #                 'Well',
-    #                 'Field',
-    #                 'Datetime']
+    # getting treatment dict
+    treatment_dict = get_treatment_dict(treatment_file=treatment_file)
 
     # adding treatment column
-    add_treatment_col(df=fornma_df,
+    print('adding treatment col...')
+    add_treatment_col(df=analysis_df,
                       treatment_dict=treatment_dict)
 
-    # returning fornma_df
-    return fornma_df
+    # returning base df
+    return analysis_df
 
 
 def get_analysis_df(fornma_file_path: str,
                     image_name_col: str,
                     output_folder: str,
-                    treatment_dict: dict
+                    treatment_file: str
                     ) -> DataFrame:
     """
     Returns analysis data frame built
@@ -1137,11 +1114,6 @@ def get_analysis_df(fornma_file_path: str,
     Checks if analysis df is already
     in output folder, and creates/saves
     analysis df should it be non-existent.
-    :param fornma_file_path: String. Represents a path to a fornma output file.
-    :param image_name_col: String. Represents a column name.
-    :param output_folder: String. Represents a path to a folder.
-    :param treatment_dict: Dictionary. Represents a treatment dictionary.
-    return: DataFrame. Represents an analysis data frame.
     """
     # defining csv output path
     save_name = 'analysis_df.csv'
@@ -1163,9 +1135,9 @@ def get_analysis_df(fornma_file_path: str,
 
         # creating analysis_df
         print('creating analysis df...')
-        analysis_df = create_analysis_df(fornma_file_path=fornma_file_path,
+        analysis_df = create_analysis_df(base_df_path=fornma_file_path,
                                          image_name_col=image_name_col,
-                                         treatment_dict=treatment_dict)
+                                         treatment_file=treatment_file)
 
         # saving output csv
         print('saving analysis df...')
@@ -1737,7 +1709,7 @@ def add_cell_cycle_proportions_col(df: DataFrame) -> None:
     df[col_name] = None
 
     # grouping df by treatment
-    treatment_groups = df.groupby('Treatment')
+    treatment_groups = df.groupby('treatment')
 
     # getting rows num
     rows_num = len(df)

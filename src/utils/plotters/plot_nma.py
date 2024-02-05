@@ -41,10 +41,10 @@ TREATMENT_DICT = {'A2': 'CTR',
 
 # functions
 # le csvs
-fornma_df = get_analysis_df(fornma_file_path=FORNMA_INPUT,
-                            image_name_col='Image_name_rg_merge',
-                            output_folder=OUTPUT_FOLDER,
-                            treatment_dict=TREATMENT_DICT)
+# fornma_df = get_analysis_df(fornma_file_path=FORNMA_INPUT,
+#                             image_name_col='Image_name_rg_merge',
+#                             output_folder=OUTPUT_FOLDER,
+#                             treatment_file=TREATMENT_DICT)
 cell_cycle_df = pd.read_csv(CELL_CYCLE_INPUT)
 
 print(fornma_df)

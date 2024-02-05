@@ -8,6 +8,7 @@
 
 # importing required libraries
 print('importing required libraries...')  # noqa
+from os.path import join
 from pandas import concat
 from pandas import Series
 from pandas import read_csv
@@ -48,6 +49,24 @@ def get_args_dict() -> dict:
                         dest='input_file',
                         required=True,
                         help='defines path to crops info df (.csv) file')
+
+    # red folder param
+    parser.add_argument('-r', '--red-folder',
+                        dest='red_folder',
+                        required=True,
+                        help='defines red input folder (folder containing crops in fluorescence channel)')
+
+    # green folder param
+    parser.add_argument('-g', '--green-folder',
+                        dest='green_folder',
+                        required=True,
+                        help='defines green input folder (folder containing crops in fluorescence channel)')
+
+    # images extension param
+    parser.add_argument('-x', '--images-extension',
+                        dest='images_extension',
+                        required=True,
+                        help='defines extension (.tif, .png, .jpg) of images in input folders')
 
     # output path param
     parser.add_argument('-o', '--output-path',
@@ -110,6 +129,9 @@ def get_phenotype(row_data: Series,
 
 
 def convert_single_file(input_csv_file_path: str,
+                        red_folder: str,
+                        green_folder: str,
+                        images_extension: str,
                         output_path: str
                         ) -> None:
     """
@@ -120,6 +142,8 @@ def convert_single_file(input_csv_file_path: str,
     # opening csv file
     print('reading input file...')
     crops_df = read_csv(input_csv_file_path)
+
+    # adding experiment based columns
 
     # defining placeholder value for dfs list
     dfs_list = []
@@ -151,30 +175,35 @@ def convert_single_file(input_csv_file_path: str,
         current_width = row_data['width']
         current_height = row_data['height']
         current_angle = row_data['angle']
-        current_experiment = row_data['experiment']
-        current_well = row_data['well']
-        current_field = row_data['field']
-        current_date = row_data['date']
-        current_time = row_data['time']
-        current_treatment = row_data['treatment']
-        print(current_crop_name)
-        exit()
 
         # getting current crop channel paths
-        current_red_path = None
-        current_green_path = None
+        current_red_path = join(red_folder, current_img_name)
+        current_green_path = join(green_folder, current_img_name)
 
         # getting current crop mean pixel intensities
+        red_mean = get_pixel_intensity(file_path=current_red_path,
+                                       calc='mean')
+        green_mean = get_pixel_intensity(file_path=current_green_path,
+                                         calc='mean')
+
+        # getting current crop area
+        current_area = current_width * current_height
+
+        # getting current crop NII
+        current_nii = 0.0
 
         # creating current obb dict
-        current_obb_dict = {'img_file_name': file_name,
-                            'detection_threshold': 1.0,
-                            'cx': cx_float,
-                            'cy': cy_float,
-                            'width': width_float,
-                            'height': height_float,
-                            'angle': angle_in_degs_float,
-                            'class': current_class}
+        current_obb_dict = {'Cell': current_crop_index,
+                            'X': current_cx,
+                            'Y': current_cy,
+                            'Area': current_area,
+                            'NII': current_nii,
+                            'Well': ,
+                            'Field',
+                            'Image_name_merge',
+                            'Treatment',
+                            'Mean_red',
+                            'Mean_green'}
 
         # creating current obb df
         current_obb_df = DataFrame(current_obb_dict,
@@ -212,6 +241,15 @@ def main():
     # getting input file
     input_file = args_dict['input_file']
 
+    # getting red folder
+    red_folder = args_dict['red_folder']
+
+    # getting green folder
+    green_folder = args_dict['green_folder']
+
+    # getting image extension
+    images_extension = args_dict['images_extension']
+
     # getting output path
     output_path = args_dict['output_path']
 
@@ -219,10 +257,13 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running converter function
     convert_single_file(input_csv_file_path=input_file,
+                        red_folder=red_folder,
+                        green_folder=green_folder,
+                        images_extension=images_extension,
                         output_path=output_path)
 
 ######################################################################

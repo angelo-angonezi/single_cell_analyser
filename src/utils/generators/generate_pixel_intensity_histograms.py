@@ -49,7 +49,7 @@ def get_args_dict() -> dict:
 
     # adding arguments to parser
 
-    # red folder param
+    # crops df param
     parser.add_argument('-d', '--crops-pixels-df',
                         dest='crops_pixels_df',
                         required=True,
@@ -149,7 +149,9 @@ def plot_pixel_histograms(df: DataFrame,
         current_cell_cycle = get_cell_cycle(red_value=red_mean,
                                             green_value=green_mean,
                                             min_red_value=MIN_VALUE,
-                                            min_green_value=MIN_VALUE)
+                                            min_green_value=MIN_VALUE,
+                                            ratio_lower_threshold=1.2,
+                                            ratio_upper_threshold=0.8)
 
         # getting current crop channels lists
         red_list = ['red' for _ in red_pixels]

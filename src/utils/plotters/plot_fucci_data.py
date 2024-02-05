@@ -16,10 +16,9 @@ from seaborn import scatterplot
 from numpy import log2 as np_log2
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
+from src.utils.aux_funcs import get_analysis_df
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import add_cell_cycle_col
-from src.utils.aux_funcs import create_analysis_df
-from src.utils.aux_funcs import get_treatment_dict
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import add_cell_cycle_proportions_col
 print('all required libraries successfully imported.')  # noqa
@@ -32,18 +31,6 @@ MIN_RED_VALUE = 0.10
 MIN_GREEN_VALUE = 0.05
 RATIO_LOWER_THRESHOLD = 0.8
 RATIO_UPPER_THRESHOLD = 1.2
-TREATMENT_DICT = {'A1': 'TMZ',
-                  'A2': 'CTR',
-                  'A3': 'TMZ',
-                  'A4': 'CTR',
-                  'B1': 'TMZ',
-                  'B2': 'CTR',
-                  'B3': 'TMZ',
-                  'B4': 'CTR',
-                  'C1': 'TMZ',
-                  'C2': 'CTR',
-                  'C3': 'TMZ',
-                  'C4': 'CTR'}
 
 #####################################################################
 # argument parsing related functions
@@ -55,7 +42,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = "plot fucci histograms module"
+    description = "plot fucci data module"
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
@@ -68,18 +55,18 @@ def get_args_dict() -> dict:
                         required=True,
                         help='defines path to fornma output file (.csv)')
 
+    # output folder param
+    output_help = 'defines path to output folder'
+    parser.add_argument('-o', '--output-folder',
+                        dest='output_folder',
+                        required=True,
+                        help=output_help)
+
     # treatments file param
     parser.add_argument('-tr', '--treatment-file',
                         dest='treatment_file',
                         help='defines path to file containing treatment info',
                         required=True)
-
-    # output folder param
-    output_help = 'defines path to output folder'
-    parser.add_argument('-o', '--output-folder',
-                        dest='output_folder',
-                        required=False,
-                        help=output_help)
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -91,22 +78,24 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_analysis_df(fornma_file_path: str,
-                    image_name_col: str,
-                    treatment_dict: dict,
-                    min_red_value: float,
-                    min_green_value: float,
-                    ratio_lower_threshold: float,
-                    ratio_upper_threshold: float
-                    ) -> DataFrame:
+def get_fucci_df(fornma_file_path: str,
+                 image_name_col: str,
+                 treatment_file: str,
+                 min_red_value: float,
+                 min_green_value: float,
+                 ratio_lower_threshold: float,
+                 ratio_upper_threshold: float,
+                 output_folder: str
+                 ) -> DataFrame:
     """
     Given a fornma file path,
     returns base analysis data frame.
     """
     # getting analysis df
-    analysis_df = create_analysis_df(fornma_file_path=fornma_file_path,
-                                     image_name_col=image_name_col,
-                                     treatment_dict=treatment_dict)
+    analysis_df = get_analysis_df(fornma_file_path=fornma_file_path,
+                                  image_name_col=image_name_col,
+                                  output_folder=output_folder,
+                                  treatment_file=treatment_file)
 
     # dropping unrequired cols
     cols_to_keep = ['Cell',
@@ -114,10 +103,10 @@ def get_analysis_df(fornma_file_path: str,
                     'Y',
                     'Area',
                     'NII',
-                    'Well',
-                    'Field',
+                    'well',
+                    'field',
                     'Image_name_merge',
-                    'Treatment',
+                    'treatment',
                     'Mean_red',
                     'Mean_green']
     analysis_df = analysis_df[cols_to_keep]
@@ -127,6 +116,12 @@ def get_analysis_df(fornma_file_path: str,
 
     # adding red/green ratio log col
     analysis_df['red_green_ratio_log2'] = np_log2(analysis_df['red_green_ratio'])
+
+    # adding area log col
+    analysis_df['area_log2'] = np_log2(analysis_df['Area'])
+
+    # adding red+green log col
+    analysis_df['red_and_green'] = analysis_df['Mean_red'] + analysis_df['Mean_green']
 
     # adding cell cycle col
     add_cell_cycle_col(df=analysis_df,
@@ -151,7 +146,7 @@ def plot_cytometry(df: DataFrame,
     saving plot in given output folder.
     """
     # grouping df by treatment
-    treatment_groups = df.groupby('Treatment')
+    treatment_groups = df.groupby('treatment')
 
     # iterating over treatment groups
     for treatment, treatment_group in treatment_groups:
@@ -210,7 +205,7 @@ def plot_ratio_log(df: DataFrame,
     in given output folder.
     """
     # grouping df by treatment
-    treatment_groups = df.groupby('Treatment')
+    treatment_groups = df.groupby('treatment')
 
     # iterating over treatment groups
     for treatment, treatment_group in treatment_groups:
@@ -238,7 +233,8 @@ def plot_ratio_log(df: DataFrame,
         # plotting figure
         scatterplot(data=treatment_group,
                     x='red_green_ratio_log2',
-                    y='Area',
+                    #y='area_log2',
+                    y='red_and_green',
                     hue='cell_cycle (%cells)',
                     hue_order=sorted_proportions,
                     palette=colors_list)
@@ -250,8 +246,8 @@ def plot_ratio_log(df: DataFrame,
         plt.title(title)
 
         # setting axes lims
-        plt.xlim(-5.0, 5.0)
-        plt.ylim(0.0, 10000)
+        # plt.xlim(-5.0, 5.0)
+        # plt.ylim(0.0, 10000)
 
         # setting figure layout
         plt.tight_layout()
@@ -269,7 +265,7 @@ def plot_fucci_nma(df: DataFrame,
     in given output folder.
     """
     # grouping df by treatment
-    treatment_groups = df.groupby('Treatment')
+    treatment_groups = df.groupby('treatment')
 
     # iterating over treatment groups
     for treatment, treatment_group in treatment_groups:
@@ -329,18 +325,23 @@ def plot_fucci_cytometry(fornma_file_path: str,
     plots cytometry-like plot, based on
     red/green channels intensities.
     """
-    # getting treatment dict
-    treatment_dict = get_treatment_dict(treatment_file=treatment_file)
-
     # getting analysis df
-    print('getting analysis df...')
-    analysis_df = get_analysis_df(fornma_file_path=fornma_file_path,
-                                  image_name_col=image_name_col,
-                                  treatment_dict=treatment_dict,
-                                  min_red_value=MIN_RED_VALUE,
-                                  min_green_value=MIN_GREEN_VALUE,
-                                  ratio_lower_threshold=RATIO_LOWER_THRESHOLD,
-                                  ratio_upper_threshold=RATIO_UPPER_THRESHOLD)
+    print('getting fucci analysis df...')
+    analysis_df = get_fucci_df(fornma_file_path=fornma_file_path,
+                               image_name_col=image_name_col,
+                               treatment_file=treatment_file,
+                               min_red_value=MIN_RED_VALUE,
+                               min_green_value=MIN_GREEN_VALUE,
+                               ratio_lower_threshold=RATIO_LOWER_THRESHOLD,
+                               ratio_upper_threshold=RATIO_UPPER_THRESHOLD,
+                               output_folder=output_folder)
+
+    # saving fucci df
+    save_name = 'fucci_df.csv'
+    save_path = join(output_folder,
+                     save_name)
+    analysis_df.to_csv(save_path,
+                       index=False)
 
     # plotting cytometry plot
     print('plotting cytometry-like plot...')
@@ -372,11 +373,11 @@ def main():
     # getting fornma file path
     fornma_file = args_dict['fornma_file']
 
-    # getting treatment file path
-    treatment_file = args_dict['treatment_file']
-
     # getting output folder
     output_folder = args_dict['output_folder']
+
+    # getting treatment file path
+    treatment_file = args_dict['treatment_file']
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
