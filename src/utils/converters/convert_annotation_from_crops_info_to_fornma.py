@@ -10,10 +10,10 @@
 print('importing required libraries...')  # noqa
 from os.path import join
 from pandas import concat
-from pandas import Series
 from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
+from src.utils.aux_funcs import get_axis_ratio
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import get_pixel_intensity
 from src.utils.aux_funcs import print_progress_message
@@ -147,7 +147,8 @@ def convert_single_file(input_csv_file_path: str,
         current_area = current_width * current_height
 
         # getting current crop NII
-        current_nii = 0.0
+        current_nii = get_axis_ratio(width=current_width,
+                                     height=current_height)
 
         # creating current obb dict
         current_obb_dict = {'Cell': current_crop_index,
