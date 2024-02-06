@@ -144,6 +144,10 @@ def convert_single_file(input_csv_file_path: str,
         green_mean = get_pixel_intensity(file_path=current_green_path,
                                          calc='mean')
 
+        # normalizing intensities
+        red_mean_normalized = red_mean / 255
+        green_mean_normalized = green_mean / 255
+
         # getting current crop area
         current_area = current_width * current_height
 
@@ -158,8 +162,8 @@ def convert_single_file(input_csv_file_path: str,
                             'Area': current_area,
                             'NII': current_nii,
                             'Image_name_merge': current_img_name,
-                            'Mean_red': red_mean,
-                            'Mean_green': green_mean}
+                            'Mean_red': red_mean_normalized,
+                            'Mean_green': green_mean_normalized}
 
         # creating current obb df
         current_obb_df = DataFrame(current_obb_dict,
