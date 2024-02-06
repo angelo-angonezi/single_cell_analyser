@@ -83,6 +83,7 @@ def get_args_dict() -> dict:
 ######################################################################
 # defining auxiliary functions
 
+
 def convert_single_file(input_csv_file_path: str,
                         red_folder: str,
                         green_folder: str,

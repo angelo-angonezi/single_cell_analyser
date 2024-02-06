@@ -992,6 +992,11 @@ def add_experiment_cols(df: DataFrame,
         # getting current row image name
         current_img_name = row_data[file_name_col]
 
+        # removing current image extension
+        current_img_name = current_img_name.replace('.tif', '')
+        current_img_name = current_img_name.replace('.jpg', '')
+        current_img_name = current_img_name.replace('.png', '')
+
         # splitting current file name split
         img_split = current_img_name.split('_')
 

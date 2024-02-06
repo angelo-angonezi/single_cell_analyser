@@ -11,6 +11,8 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 from os.path import join
+from os.path import exists
+from pandas import read_csv
 from pandas import DataFrame
 from seaborn import scatterplot
 from numpy import log2 as np_log2
@@ -78,18 +80,19 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_fucci_df(fornma_file_path: str,
-                 image_name_col: str,
-                 treatment_file: str,
-                 min_red_value: float,
-                 min_green_value: float,
-                 ratio_lower_threshold: float,
-                 ratio_upper_threshold: float,
-                 output_folder: str
-                 ) -> DataFrame:
+def create_fucci_df(fornma_file_path: str,
+                    image_name_col: str,
+                    treatment_file: str,
+                    min_red_value: float,
+                    min_green_value: float,
+                    ratio_lower_threshold: float,
+                    ratio_upper_threshold: float,
+                    output_folder: str
+                    ) -> DataFrame:
     """
-    Given a fornma file path,
-    returns base analysis data frame.
+    Given a fornma file path, returns
+    df with added columns for further
+    cell cycle analysis.
     """
     # getting analysis df
     analysis_df = get_analysis_df(fornma_file_path=fornma_file_path,
@@ -105,6 +108,8 @@ def get_fucci_df(fornma_file_path: str,
                     'NII',
                     'well',
                     'field',
+                    'date',
+                    'time',
                     'Image_name_merge',
                     'treatment',
                     'Mean_red',
@@ -135,6 +140,58 @@ def get_fucci_df(fornma_file_path: str,
 
     # returning analysis df
     return analysis_df
+
+
+def get_fucci_df(fornma_file_path: str,
+                 image_name_col: str,
+                 treatment_file: str,
+                 min_red_value: float,
+                 min_green_value: float,
+                 ratio_lower_threshold: float,
+                 ratio_upper_threshold: float,
+                 output_folder: str
+                 ) -> DataFrame:
+    """
+    Checks whether fucci df already exists in
+    output folder, loads and returns it.
+    Creates it from scratch otherwise.
+    """
+    # defining csv output path
+    save_name = 'fucci_df.csv'
+    save_path = join(output_folder,
+                     save_name)
+
+    # defining placeholder value for fucci_df
+    fucci_df = None
+
+    # checking if csv output already exists
+    if exists(save_path):
+
+        # reading already existent data frame
+        print('reading already existent data frame...')
+        fucci_df = read_csv(save_path)
+
+    # if output csv does not already exist
+    else:
+
+        # creating analysis_df
+        print('creating fucci df...')
+        fucci_df = create_fucci_df(fornma_file_path=fornma_file_path,
+                                   image_name_col=image_name_col,
+                                   treatment_file=treatment_file,
+                                   min_red_value=min_red_value,
+                                   min_green_value=min_green_value,
+                                   ratio_lower_threshold=ratio_lower_threshold,
+                                   ratio_upper_threshold=ratio_upper_threshold,
+                                   output_folder=output_folder)
+
+        # saving output csv
+        print('saving fucci df...')
+        fucci_df.to_csv(save_path,
+                        index=False)
+
+    # returning analysis_df
+    return fucci_df
 
 
 def plot_cytometry(df: DataFrame,
@@ -315,6 +372,46 @@ def plot_fucci_nma(df: DataFrame,
         plt.savefig(save_path)
 
 
+def generate_fucci_plots(df: DataFrame,
+                         output_folder: str
+                         ) -> None:
+    """
+    Given a fucci analysis df, groups
+    data according to treatment and datetime,
+    generating multiple plots in given output
+    folder.
+    """
+    # defining group cols
+    group_cols = ['treatment', 'date', 'time']
+
+    # grouping df
+    df_groups = df.groupby(group_cols)
+
+    # iterating over df groups
+    for df_name, df_group in df_groups:
+
+        # getting current group info
+        current_treatment, current_date, current_time = df_name
+        print(df_name)
+        print(df_group)
+        exit()
+
+    # plotting cytometry plot
+    print('plotting cytometry-like plot...')
+    plot_cytometry(df=df,
+                   output_folder=output_folder)
+
+    # plotting ratio log plot
+    print('plotting ratio log plot...')
+    plot_ratio_log(df=df,
+                   output_folder=output_folder)
+
+    # plotting fucci NMA plot
+    print('plotting fucci NMA plot...')
+    plot_fucci_nma(df=df,
+                   output_folder=output_folder)
+
+
 def plot_fucci_cytometry(fornma_file_path: str,
                          image_name_col: str,
                          treatment_file: str,
@@ -336,27 +433,10 @@ def plot_fucci_cytometry(fornma_file_path: str,
                                ratio_upper_threshold=RATIO_UPPER_THRESHOLD,
                                output_folder=output_folder)
 
-    # saving fucci df
-    save_name = 'fucci_df.csv'
-    save_path = join(output_folder,
-                     save_name)
-    analysis_df.to_csv(save_path,
-                       index=False)
-
-    # plotting cytometry plot
-    print('plotting cytometry-like plot...')
-    plot_cytometry(df=analysis_df,
-                   output_folder=output_folder)
-
-    # plotting ratio log plot
-    print('plotting ratio log plot...')
-    plot_ratio_log(df=analysis_df,
-                   output_folder=output_folder)
-
-    # plotting fucci NMA plot
-    print('plotting fucci NMA plot...')
-    plot_fucci_nma(df=analysis_df,
-                   output_folder=output_folder)
+    # generating plots
+    print('generating plots...')
+    generate_fucci_plots(df=analysis_df,
+                         output_folder=output_folder)
 
     # printing execution message
     print('analysis complete.')
