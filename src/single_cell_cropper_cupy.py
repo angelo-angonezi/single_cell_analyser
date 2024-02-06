@@ -12,8 +12,8 @@ print('importing required libraries...')  # noqa
 from time import sleep
 from cv2 import imread
 from cv2 import imwrite
-from os.path import join
 from cv2 import cvtColor
+from os.path import join
 from cupy import ndarray
 from cupy import asnumpy
 from cupy import asarray
@@ -25,18 +25,18 @@ from cv2 import COLOR_GRAY2RGB
 from cupy import pad as np_pad
 from argparse import ArgumentParser
 from cv2 import resize as cv_resize
-from cupyx.scipy.ndimage import rotate as scp_rotate
+from src.utils.aux_funcs import get_etc
+from src.utils.aux_funcs import get_time_str
 from src.utils.aux_funcs import flush_or_print
 from src.utils.aux_funcs import print_gpu_usage
+from src.utils.aux_funcs import get_current_time
+from src.utils.aux_funcs import get_time_elapsed
 from src.utils.aux_funcs import get_obbs_from_df
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import add_treatment_col
 from src.utils.aux_funcs import get_treatment_dict
 from src.utils.aux_funcs import add_experiment_cols
-from src.utils.aux_funcs import get_time_elapsed
-from src.utils.aux_funcs import get_current_time
-from src.utils.aux_funcs import get_etc
-from src.utils.aux_funcs import get_time_str
+from cupyx.scipy.ndimage import rotate as scp_rotate
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
 sleep(0.8)
