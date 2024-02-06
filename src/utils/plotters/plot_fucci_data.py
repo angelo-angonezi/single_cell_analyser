@@ -195,181 +195,141 @@ def get_fucci_df(fornma_file_path: str,
 
 
 def plot_cytometry(df: DataFrame,
+                   treatment: str,
+                   date: str,
+                   time: str,
+                   total_cells: int,
+                   proportions: list,
+                   colors: list,
                    output_folder: str
                    ) -> None:
     """
     Given an analysis data frame,
     plots cytometry-like plot,
-    saving plot in given output folder.
+    saving plot to given output path.
     """
-    # grouping df by treatment
-    treatment_groups = df.groupby('treatment')
+    # defining save name/path
+    save_name = f'cytometry_{treatment}_{date}_{time}.png'
+    save_path = join(output_folder,
+                     save_name)
 
-    # iterating over treatment groups
-    for treatment, treatment_group in treatment_groups:
+    # setting figure size
+    plt.figure(figsize=(14, 8))
 
-        # defining save name/path
-        save_name = f'fucci_cytometry_{treatment}.png'
-        save_path = join(output_folder,
-                         save_name)
+    # plotting figure
+    scatterplot(data=df,
+                x='Mean_red',
+                y='Mean_green',
+                hue='cell_cycle (%cells)',
+                hue_order=proportions,
+                palette=colors)
 
-        # setting figure size
-        plt.figure(figsize=(14, 8))
+    # setting plot title
+    title = f'Fucci "Cytometry" (by mean pixel intensities) '
+    title += f'| Treatment: {treatment} '
+    title += f'| Total cells: {total_cells}'
+    plt.title(title)
 
-        # getting total cells count
-        total_cells_count = len(treatment_group)
+    # setting axes lims
+    plt.xlim(0.0, 1.0)
+    plt.ylim(0.0, 1.0)
 
-        # getting current cell cycle proportions
-        current_proportions = treatment_group['cell_cycle (%cells)'].unique()
+    # setting figure layout
+    plt.tight_layout()
 
-        # sorting proportions so that it's always [G1, G2, M-eG1, S]
-        sorted_proportions = sorted(current_proportions)
-
-        # defining palette based on order [G1, G2, M-eG1, S]
-        colors_list = ['red', 'green', 'magenta', 'yellow']
-
-        # plotting figure
-        scatterplot(data=treatment_group,
-                    x='Mean_red',
-                    y='Mean_green',
-                    hue='cell_cycle (%cells)',
-                    hue_order=sorted_proportions,
-                    palette=colors_list)
-
-        # setting plot title
-        title = f'Fucci "Cytometry" (by mean pixel intensities) '
-        title += f'| Treatment: {treatment} '
-        title += f'| Total cells: {total_cells_count}'
-        plt.title(title)
-
-        # setting axes lims
-        plt.xlim(0.0, 1.0)
-        plt.ylim(0.0, 1.0)
-
-        # setting figure layout
-        plt.tight_layout()
-
-        # saving figure
-        plt.savefig(save_path)
+    # saving figure
+    plt.savefig(save_path)
 
 
 def plot_ratio_log(df: DataFrame,
+                   treatment: str,
+                   date: str,
+                   time: str,
+                   total_cells: int,
+                   proportions: list,
+                   colors: list,
                    output_folder: str
                    ) -> None:
     """
     Given an analysis data frame,
     plots ratio log plot, saving plot
-    in given output folder.
+    to given output path.
     """
-    # grouping df by treatment
-    treatment_groups = df.groupby('treatment')
+    # defining save name/path
+    save_name = f'ratio_{treatment}_{date}_{time}.png'
+    save_path = join(output_folder,
+                     save_name)
 
-    # iterating over treatment groups
-    for treatment, treatment_group in treatment_groups:
+    # setting figure size
+    plt.figure(figsize=(14, 8))
 
-        # defining save name/path
-        save_name = f'ratio_log_{treatment}.png'
-        save_path = join(output_folder,
-                         save_name)
+    # plotting figure
+    scatterplot(data=df,
+                x='red_green_ratio_log2',
+                y='area_log2',
+                # y='red_and_green',
+                hue='cell_cycle (%cells)',
+                hue_order=proportions,
+                palette=colors)
 
-        # setting figure size
-        plt.figure(figsize=(14, 8))
+    # setting plot title
+    title = f'Fucci log(red_mean/green_mean) '
+    title += f'| Treatment: {treatment} '
+    title += f'| Total cells: {total_cells}'
+    plt.title(title)
 
-        # getting total cells count
-        total_cells_count = len(treatment_group)
+    # setting figure layout
+    plt.tight_layout()
 
-        # getting current cell cycle proportions
-        current_proportions = treatment_group['cell_cycle (%cells)'].unique()
-
-        # sorting proportions so that it's always [G1, G2, M-eG1, S]
-        sorted_proportions = sorted(current_proportions)
-
-        # defining palette based on order [G1, G2, M-eG1, S]
-        colors_list = ['red', 'green', 'magenta', 'yellow']
-
-        # plotting figure
-        scatterplot(data=treatment_group,
-                    x='red_green_ratio_log2',
-                    #y='area_log2',
-                    y='red_and_green',
-                    hue='cell_cycle (%cells)',
-                    hue_order=sorted_proportions,
-                    palette=colors_list)
-
-        # setting plot title
-        title = f'Fucci log(red_mean/green_mean) '
-        title += f'| Treatment: {treatment} '
-        title += f'| Total cells: {total_cells_count}'
-        plt.title(title)
-
-        # setting axes lims
-        # plt.xlim(-5.0, 5.0)
-        # plt.ylim(0.0, 10000)
-
-        # setting figure layout
-        plt.tight_layout()
-
-        # saving figure
-        plt.savefig(save_path)
+    # saving figure
+    plt.savefig(save_path)
 
 
 def plot_fucci_nma(df: DataFrame,
+                   treatment: str,
+                   date: str,
+                   time: str,
+                   total_cells: int,
+                   proportions: list,
+                   colors: list,
                    output_folder: str
                    ) -> None:
     """
     Given an analysis data frame,
     plots fucci NMA plot, saving plot
-    in given output folder.
+    to given output path.
     """
-    # grouping df by treatment
-    treatment_groups = df.groupby('treatment')
+    # defining save name/path
+    save_name = f'nma_{treatment}_{date}_{time}.png'
+    save_path = join(output_folder,
+                     save_name)
 
-    # iterating over treatment groups
-    for treatment, treatment_group in treatment_groups:
+    # setting figure size
+    plt.figure(figsize=(14, 8))
 
-        # defining save name/path
-        save_name = f'fucci_nma_{treatment}.png'
-        save_path = join(output_folder,
-                         save_name)
+    # plotting figure
+    scatterplot(data=df,
+                x='NII',
+                y='Area',
+                hue='cell_cycle (%cells)',
+                hue_order=proportions,
+                palette=colors)
 
-        # setting figure size
-        plt.figure(figsize=(14, 8))
+    # setting plot title
+    title = f'Fucci NMA '
+    title += f'| Treatment: {treatment} '
+    title += f'| Total cells: {total_cells}'
+    plt.title(title)
 
-        # getting total cells count
-        total_cells_count = len(treatment_group)
+    # setting axes lims
+    plt.xlim(0.0, 60)
+    plt.ylim(0.0, 10000)
 
-        # getting current cell cycle proportions
-        current_proportions = treatment_group['cell_cycle (%cells)'].unique()
+    # setting figure layout
+    plt.tight_layout()
 
-        # sorting proportions so that it's always [G1, G2, M-eG1, S]
-        sorted_proportions = sorted(current_proportions)
-
-        # defining palette based on order [G1, G2, M-eG1, S]
-        colors_list = ['red', 'green', 'magenta', 'yellow']
-
-        # plotting figure
-        scatterplot(data=treatment_group,
-                    x='NII',
-                    y='Area',
-                    hue='cell_cycle (%cells)',
-                    hue_order=sorted_proportions,
-                    palette=colors_list)
-
-        # setting plot title
-        title = f'Fucci NMA '
-        title += f'| Treatment: {treatment} '
-        title += f'| Total cells: {total_cells_count}'
-        plt.title(title)
-
-        # setting axes lims
-        plt.xlim(0.0, 60)
-        plt.ylim(0.0, 10000)
-
-        # setting figure layout
-        plt.tight_layout()
-
-        # saving figure
-        plt.savefig(save_path)
+    # saving figure
+    plt.savefig(save_path)
 
 
 def generate_fucci_plots(df: DataFrame,
@@ -392,24 +352,48 @@ def generate_fucci_plots(df: DataFrame,
 
         # getting current group info
         current_treatment, current_date, current_time = df_name
-        print(df_name)
-        print(df_group)
-        exit()
 
-    # plotting cytometry plot
-    print('plotting cytometry-like plot...')
-    plot_cytometry(df=df,
-                   output_folder=output_folder)
+        # getting total cells count
+        total_cells_count = len(df_group)
 
-    # plotting ratio log plot
-    print('plotting ratio log plot...')
-    plot_ratio_log(df=df,
-                   output_folder=output_folder)
+        # getting current cell cycle proportions
+        current_proportions = df_group['cell_cycle (%cells)'].unique()
 
-    # plotting fucci NMA plot
-    print('plotting fucci NMA plot...')
-    plot_fucci_nma(df=df,
-                   output_folder=output_folder)
+        # sorting proportions so that it's always [G1, G2, M-eG1, S]
+        sorted_proportions = sorted(current_proportions)
+
+        # defining palette based on order [G1, G2, M-eG1, S]
+        colors_list = ['red', 'green', 'magenta', 'yellow']
+
+        # plotting cytometry plot
+        plot_cytometry(df=df_group,
+                       treatment=current_treatment,
+                       date=current_date,
+                       time=current_time,
+                       total_cells=total_cells_count,
+                       proportions=sorted_proportions,
+                       colors=colors_list,
+                       output_folder=output_folder)
+
+        # plotting ratio log plot
+        plot_ratio_log(df=df_group,
+                       treatment=current_treatment,
+                       date=current_date,
+                       time=current_time,
+                       total_cells=total_cells_count,
+                       proportions=sorted_proportions,
+                       colors=colors_list,
+                       output_folder=output_folder)
+
+        # plotting fucci NMA plot
+        plot_fucci_nma(df=df_group,
+                       treatment=current_treatment,
+                       date=current_date,
+                       time=current_time,
+                       total_cells=total_cells_count,
+                       proportions=sorted_proportions,
+                       colors=colors_list,
+                       output_folder=output_folder)
 
 
 def plot_fucci_cytometry(fornma_file_path: str,
