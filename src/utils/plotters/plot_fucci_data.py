@@ -29,8 +29,8 @@ print('all required libraries successfully imported.')  # noqa
 # defining global variables
 
 IMAGE_NAME_COL = 'Image_name_merge'
-MIN_RED_VALUE = 0.10
-MIN_GREEN_VALUE = 0.05
+MIN_RED_VALUE = 0.15
+MIN_GREEN_VALUE = 0.15
 RATIO_LOWER_THRESHOLD = 0.8
 RATIO_UPPER_THRESHOLD = 1.2
 
@@ -322,7 +322,7 @@ def plot_fucci_nma(df: DataFrame,
     plt.title(title)
 
     # setting axes lims
-    plt.xlim(0.0, 60)
+    # plt.xlim(0.0, 60)
     plt.ylim(0.0, 10000)
 
     # setting figure layout
@@ -408,18 +408,18 @@ def plot_fucci_cytometry(fornma_file_path: str,
     """
     # getting analysis df
     print('getting fucci analysis df...')
-    analysis_df = get_fucci_df(fornma_file_path=fornma_file_path,
-                               image_name_col=image_name_col,
-                               treatment_file=treatment_file,
-                               min_red_value=MIN_RED_VALUE,
-                               min_green_value=MIN_GREEN_VALUE,
-                               ratio_lower_threshold=RATIO_LOWER_THRESHOLD,
-                               ratio_upper_threshold=RATIO_UPPER_THRESHOLD,
-                               output_folder=output_folder)
+    fucci_df = get_fucci_df(fornma_file_path=fornma_file_path,
+                            image_name_col=image_name_col,
+                            treatment_file=treatment_file,
+                            min_red_value=MIN_RED_VALUE,
+                            min_green_value=MIN_GREEN_VALUE,
+                            ratio_lower_threshold=RATIO_LOWER_THRESHOLD,
+                            ratio_upper_threshold=RATIO_UPPER_THRESHOLD,
+                            output_folder=output_folder)
 
     # generating plots
     print('generating plots...')
-    generate_fucci_plots(df=analysis_df,
+    generate_fucci_plots(df=fucci_df,
                          output_folder=output_folder)
 
     # printing execution message
@@ -447,7 +447,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running plot_fucci_cytometry function
     plot_fucci_cytometry(fornma_file_path=fornma_file,

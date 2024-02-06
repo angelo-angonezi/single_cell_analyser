@@ -331,6 +331,10 @@ def crop_multiple_obbs(image: ndarray,
     # defining placeholder value for dfs list
     dfs_list = []
 
+    # getting current image min/max
+    img_min = image.min()
+    img_max = image.max()
+
     # iterating over obbs in obbs list
     for obb_index, obb in enumerate(obbs_list, 1):
 
@@ -352,6 +356,8 @@ def crop_multiple_obbs(image: ndarray,
 
         # assembling current crop dict
         current_crop_dict = {'img_name': image_name,
+                             'img_min': img_min,
+                             'img_max': img_max,
                              'crop_index': current_crop_str,
                              'crop_name': current_crop_output_name,
                              'cx': cx,

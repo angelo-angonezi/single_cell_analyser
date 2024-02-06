@@ -122,6 +122,8 @@ def convert_single_file(input_csv_file_path: str,
 
         # getting current row cols
         current_img_name = row_data['img_name']
+        current_img_min = row_data['img_min']
+        current_img_max = row_data['img_max']
         current_crop_index = row_data['crop_index']
         current_crop_name = row_data['crop_name']
         current_cx = row_data['cx']
@@ -145,8 +147,8 @@ def convert_single_file(input_csv_file_path: str,
                                          calc='mean')
 
         # normalizing intensities
-        red_mean_normalized = red_mean / 255
-        green_mean_normalized = green_mean / 255
+        red_mean_normalized = (red_mean - current_img_min) / current_img_max
+        green_mean_normalized = (green_mean - current_img_min) / current_img_max
 
         # getting current crop area
         current_area = current_width * current_height
