@@ -148,8 +148,12 @@ def plot_cytometry(df: DataFrame,
     # grouping df by treatment
     treatment_groups = df.groupby('treatment')
 
+    print(df.columns)
+
     # iterating over treatment groups
     for treatment, treatment_group in treatment_groups:
+
+        print(treatment, treatment_group)
 
         # defining save name/path
         save_name = f'fucci_cytometry_{treatment}.png'
@@ -163,7 +167,18 @@ def plot_cytometry(df: DataFrame,
         total_cells_count = len(treatment_group)
 
         # getting current cell cycle proportions
-        current_proportions = treatment_group['cell_cycle (%cells)'].unique()
+        current_proportions = treatment_group['cell_cycle (%cells)']
+        a = treatment_group[treatment_group['cell_cycle (%cells)'].isna()]
+        b = df.iloc[2085]
+        print(a)
+        print(b)
+        exit()
+        print(current_proportions)
+        current_proportions = current_proportions.to_list()
+        print(current_proportions)
+        current_proportions = set(current_proportions)
+        print(current_proportions)
+        exit()
 
         # sorting proportions so that it's always [G1, G2, M-eG1, S]
         sorted_proportions = sorted(current_proportions)
@@ -383,7 +398,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running plot_fucci_cytometry function
     plot_fucci_cytometry(fornma_file_path=fornma_file,

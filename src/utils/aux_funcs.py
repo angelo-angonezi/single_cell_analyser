@@ -1592,10 +1592,10 @@ def get_cell_cycle(red_value: float,
     cell_cycle = None
 
     # getting min values bool
-    just_red = (red_value > min_red_value) and (green_value < min_green_value)
-    just_green = (red_value < min_red_value) and (green_value > min_green_value)
+    just_red = (red_value >= min_red_value) and (green_value < min_green_value)
+    just_green = (red_value < min_red_value) and (green_value >= min_green_value)
     neither_reach_min = (red_value < min_red_value) and (green_value < min_green_value)
-    both_reach_min = (red_value > min_red_value) and (green_value > min_green_value)
+    both_reach_min = (red_value >= min_red_value) and (green_value >= min_green_value)
 
     # checking whether pixels reached min level
 
