@@ -282,6 +282,7 @@ def generate_autophagy_df(images_folder: str,
     autophagy_df.to_pickle(save_path)
 
     # drawing contours
+    print('adding contours overlays...')
     draw_cell_foci_contours(df=autophagy_df,
                             images_folder=images_folder,
                             output_folder=output_folder,
