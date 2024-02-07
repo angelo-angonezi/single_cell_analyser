@@ -10,16 +10,27 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
+from cv2 import imread
 from os.path import join
 from pandas import concat
 from pandas import read_csv
 from pandas import DataFrame
+from cv2 import findContours
+from cv2 import RETR_EXTERNAL
+from cv2 import CHAIN_APPROX_NONE
 from argparse import ArgumentParser
 from src.utils.aux_funcs import get_crop_pixels
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
+from src.utils.aux_funcs import get_specific_files_in_folder
 print('all required libraries successfully imported.')  # noqa
+
+######################################################################
+# defining global variables
+
+MIN_CELL_AREA = 2
+MIN_FOCI_AREA = 2
 
 #####################################################################
 # argument parsing related functions
@@ -38,30 +49,17 @@ def get_args_dict() -> dict:
 
     # adding arguments to parser
 
-    # red folder param
-    parser.add_argument('-r', '--red-folder',
-                        dest='red_folder',
+    # cell masks folder param
+    parser.add_argument('-c', '--cell-masks-folder',
+                        dest='cell_masks_folder',
                         required=True,
-                        help='defines red input folder (folder containing crops in fluorescence channel)')
+                        help='defines path to folder containing cell segmentation masks (macro output)')
 
-    # green folder param
-    parser.add_argument('-g', '--green-folder',
-                        dest='green_folder',
+    # foci masks folder param
+    parser.add_argument('-f', '--foci-masks-folder',
+                        dest='foci_masks_folder',
                         required=True,
-                        help='defines green input folder (folder containing crops in fluorescence channel)')
-
-    # images extension param
-    parser.add_argument('-x', '--images-extension',
-                        dest='images_extension',
-                        required=True,
-                        help='defines extension (.tif, .png, .jpg) of images in input folders')
-
-    # crops file param
-    crops_help = 'defines path to crops file (containing crops info)'
-    parser.add_argument('-c', '--crops-file',
-                        dest='crops_file',
-                        required=True,
-                        help=crops_help)
+                        help='defines path to folder containing foci segmentation masks (macro output)')
 
     # output path param
     parser.add_argument('-o', '--output-path',
@@ -79,19 +77,57 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def generate_autophagy_df(red_folder: str,
-                          green_folder: str,
-                          images_extension: str,
-                          crops_file: str,
+def generate_autophagy_df(cell_masks_folder: str,
+                          foci_masks_folder: str,
                           output_path: str,
                           ) -> None:
     """
-    TODO: update!
-    Given a path to a folder containing crops,
-    and a path to a file containing crops info,
-    generates crops pixels data frame, and saves
-    it to given output path.
+    Given paths to folders containing segmentation
+    masks (cells/foci), analyses images to generate
+    an autophagy analysis data frame.
     """
+    # defining placeholder value for dfs list
+    dfs_list = []
+
+    # getting images input folder
+    images_list = get_specific_files_in_folder(path_to_folder=cell_masks_folder,
+                                               extension='.tif')
+
+    # iterating over images list
+    for image_name in images_list:
+
+        # getting image paths
+        cell_masks_path = join(cell_masks_folder,
+                               image_name)
+        foci_masks_path = join(foci_masks_folder,
+                               image_name)
+
+        # reading images
+        cell_masks_img = imread(cell_masks_path,
+                                -1)
+        foci_masks_img = imread(foci_masks_path,
+                                -1)
+
+        # getting image contours
+        cell_masks_contours, _ = findContours(cell_masks_img, RETR_EXTERNAL, CHAIN_APPROX_NONE)
+        foci_masks_contours, _ = findContours(foci_masks_img, RETR_EXTERNAL, CHAIN_APPROX_NONE)
+
+        # filtering contours by area
+        # TODO: add this part
+
+        # drawing contours
+        import cv2
+        cell_masks_img_rgb = cv2.cvtColor(cell_masks_img, cv2.COLOR_GRAY2BGR)
+        save_path = output_path.replace('.csv', '_cell.png')
+        cv2.drawContours(cell_masks_img_rgb, cell_masks_contours, -1, (0, 255, 0), 1)
+        cv2.imwrite(save_path,
+                    cell_masks_img_rgb)
+
+        foci_masks_img_rgb = cv2.cvtColor(foci_masks_img, cv2.COLOR_GRAY2BGR)
+        save_path = output_path.replace('.csv', '_foci.png')
+        cv2.drawContours(foci_masks_img_rgb, foci_masks_contours, -1, (0, 255, 0), 1)
+        cv2.imwrite(save_path,
+                    foci_masks_img_rgb)
 
     # printing execution message
     print(f'output saved to {output_path}')
@@ -106,17 +142,11 @@ def main():
     # getting args dict
     args_dict = get_args_dict()
 
-    # getting red folder
-    red_folder = args_dict['red_folder']
+    # getting cell folder path
+    cell_masks_folder = args_dict['cell_masks_folder']
 
-    # getting green folder
-    green_folder = args_dict['green_folder']
-
-    # getting image extension
-    images_extension = args_dict['images_extension']
-
-    # getting crops file
-    crops_file = args_dict['crops_file']
+    # getting foci folder path
+    foci_masks_folder = args_dict['foci_masks_folder']
 
     # getting output path
     output_path = args_dict['output_path']
@@ -125,13 +155,11 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running generate_autophagy_df function
-    generate_autophagy_df(red_folder=red_folder,
-                          green_folder=green_folder,
-                          images_extension=images_extension,
-                          crops_file=crops_file,
+    generate_autophagy_df(cell_masks_folder=cell_masks_folder,
+                          foci_masks_folder=foci_masks_folder,
                           output_path=output_path)
 
 ######################################################################
