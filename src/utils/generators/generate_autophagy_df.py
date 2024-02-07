@@ -286,6 +286,8 @@ def generate_autophagy_df(images_folder: str,
                             output_folder=output_folder,
                             color_dict=COLOR_DICT)
 
+    # getting
+
     # printing execution message
     print(f'output saved to {output_folder}')
     print('analysis complete!')
