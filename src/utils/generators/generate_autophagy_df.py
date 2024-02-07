@@ -15,8 +15,6 @@ from cv2 import imwrite
 from cv2 import cvtColor
 from os.path import join
 from pandas import concat
-from numpy import ndarray
-from pandas import read_csv
 from cv2 import contourArea
 from cv2 import drawContours
 from pandas import DataFrame
@@ -317,7 +315,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running generate_autophagy_df function
     generate_autophagy_df(images_folder=images_folder,
