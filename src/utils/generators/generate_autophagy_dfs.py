@@ -12,13 +12,14 @@ print('initializing...')  # noqa
 print('importing required libraries...')  # noqa
 from cv2 import imread
 from cv2 import imwrite
-from cv2 import moments
+from cv2 import putText
 from cv2 import cvtColor
 from os.path import join
 from pandas import concat
 from pandas import Series
 from numpy import ndarray
 from cv2 import contourArea
+from cv2 import boundingRect
 from cv2 import drawContours
 from pandas import DataFrame
 from cv2 import findContours
@@ -27,6 +28,7 @@ from cv2 import COLOR_GRAY2BGR
 from cv2 import pointPolygonTest
 from cv2 import CHAIN_APPROX_NONE
 from argparse import ArgumentParser
+from cv2 import FONT_HERSHEY_SIMPLEX
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
@@ -99,12 +101,19 @@ def get_contour_centroid(contour: ndarray) -> tuple:
     of following structure:
     (cx, cy)
     """
-    # getting contour moments
-    contour_moments = moments(contour)
+    # getting contour coords
+    contour_coords = boundingRect(contour)
 
-    # getting cx/cy
-    cx = int(contour_moments["m10"] / contour_moments["m00"])
-    cy = int(contour_moments["m01"] / contour_moments["m00"])
+    # extracting features from coords tuple
+    corner_x, corner_y, width, height = contour_coords
+
+    # getting current center points
+    cx = corner_x + (width / 2)
+    cy = corner_y + (height / 2)
+
+    # converting cx/cy to ints
+    cx = int(cx)
+    cy = int(cy)
 
     # assembling coords tuple
     coords_tuple = (cx, cy)
@@ -214,9 +223,7 @@ def get_autophagy_df(cell_masks_folder: str,
 
 
 def draw_single_contour(base_img: ndarray,
-                        contour: ndarray,
-                        contour_index: int,
-                        contour_type: str,
+                        row_data: Series,
                         color_dict: dict
                         ) -> ndarray:
     """
@@ -225,13 +232,41 @@ def draw_single_contour(base_img: ndarray,
     on contour type and color dict,
     returning image with added overlay.
     """
+    # getting current row contour
+    contour = row_data['contour']
+
+    # getting current row contour index text
+    contour_index = row_data['contour_index']
+
+    # getting current row contour type
+    contour_type = row_data['contour_type']
+
+    # getting current row contour label
+    current_label = f'{contour_index}'
+
+    # getting current row contour coords
+    contour_coords = row_data['coords']
+    corner_x, corner_y = contour_coords
+    coords_tuple = (corner_x, corner_y)
+
     # getting color based on color dict
     contour_color = color_dict[contour_type]
 
     # drawing current contour
-    drawContours(base_img, [contour], -1, contour_color, 1)
+    drawContours(base_img,
+                 [contour],
+                 -1,
+                 contour_color,
+                 1)
 
-    # getting current contour
+    # adding index label
+    putText(base_img,
+            current_label,
+            coords_tuple,
+            FONT_HERSHEY_SIMPLEX,
+            0.3,
+            contour_color,
+            1)
 
     # returning image with contours
     return base_img
@@ -262,20 +297,9 @@ def draw_multiple_contours(df: DataFrame,
     # iterating over df rows
     for row_index, row_data in df_rows:
 
-        # getting current row contour
-        current_contour = row_data['contour']
-
-        # getting current row contour index
-        current_contour_index = row_data['contour_index']
-
-        # getting current row contour type
-        current_contour_type = row_data['contour_type']
-
         # adding overlay of current contour
         draw_single_contour(base_img=base_img,
-                            contour=current_contour,
-                            contour_index=current_contour_index,
-                            contour_type=current_contour_type,
+                            row_data=row_data,
                             color_dict=color_dict)
 
     # saving current image
@@ -345,19 +369,12 @@ def get_cell_foci(cell_contour: ndarray,
     # iterating over foci contours
     for foci_contour in foci_contours:
 
-        # getting current foci contour coords
+        # getting current foci contour center coords
         current_foci_coords = get_contour_centroid(foci_contour)
-        print(current_foci_coords)
-        exit()
-
-        # getting current foci contour x/y
-        # TODO: check for center instead of outer xy!!!
-        cx, cy, _, _ = current_foci_coords
-        foci_coords = (cx, cy)
 
         # getting foci_is_inside_cell bool
         foci_is_inside_cell = pointPolygonTest(cell_contour,
-                                               foci_coords,
+                                               current_foci_coords,
                                                measureDist=False)
 
         # checking whether current foci contour is inside cell contour
