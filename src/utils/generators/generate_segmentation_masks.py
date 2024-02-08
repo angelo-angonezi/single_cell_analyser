@@ -1,9 +1,9 @@
-# generate autophagy dfs module
+# generate segmentation masks module
 
 print('initializing...')  # noqa
 
-# Code destined to generating autophagy
-# data frame, based on segmentation masks.
+# Code destined to generating segmentation
+# masks based on BRAIND detections.
 
 ######################################################################
 # imports
@@ -39,9 +39,9 @@ print('all required libraries successfully imported.')  # noqa
 # defining global variables
 
 CELL_MIN_AREA = 100
-FOCI_MIN_AREA = 0
-COLOR_DICT = {'cell': (0, 0, 255),  # red
-              'foci': (255, 0, 0)}  # blue
+FOCI_MIN_AREA = 2
+COLOR_DICT = {'cell': (0, 0, 255),  # blue
+              'foci': (0, 255, 0)}  # green
 
 #####################################################################
 # argument parsing related functions
@@ -188,20 +188,8 @@ def get_autophagy_df(cell_masks_folder: str,
     images_list = get_specific_files_in_folder(path_to_folder=cell_masks_folder,
                                                extension='.tif')
 
-    # getting images num
-    images_num = len(images_list)
-
-    # defining starter for current_img_index
-    current_img_index = 1
-
     # iterating over images list
     for image_name in images_list:
-
-        # printing progress message
-        base_string = 'getting autophagy data for image #INDEX# of #TOTAL#'
-        print_progress_message(base_string=base_string,
-                               index=current_img_index,
-                               total=images_num)
 
         # getting current image paths
         cell_masks_path = join(cell_masks_folder,
@@ -224,9 +212,6 @@ def get_autophagy_df(cell_masks_folder: str,
         # appending dfs to dfs list
         dfs_list.append(cell_contours_df)
         dfs_list.append(foci_contours_df)
-
-        # updating current_img_index
-        current_img_index += 1
 
     # concatenating dfs in dfs list
     print('assembling final df...')
@@ -304,7 +289,7 @@ def draw_multiple_contours(df: DataFrame,
                       -1)
 
     # converting current image to rgb
-    # base_img = cvtColor(base_img, COLOR_GRAY2BGR)
+    base_img = cvtColor(base_img, COLOR_GRAY2BGR)
 
     # getting current df rows
     df_rows = df.iterrows()
@@ -489,6 +474,7 @@ def get_associations_df(cell_df: DataFrame,
         current_cell_index += 1
 
     # concatenating dfs in dfs list
+    print('assembling final df...')
     final_df = concat(dfs_list,
                       ignore_index=True)
 
