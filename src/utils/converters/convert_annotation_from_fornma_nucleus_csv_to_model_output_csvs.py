@@ -13,6 +13,7 @@ from pandas import Series
 from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
+from src.utils.aux_funcs import get_cell_cycle
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
@@ -21,10 +22,21 @@ print('all required libraries successfully imported.')  # noqa
 #####################################################################
 # defining global variables
 
-PHENOTYPE = 'dna_damage'
-PHENOTYPE_COL = 'Total_foci_merge'
+# common to all phenotypes
 IMAGE_NAME_COL = 'Image_name_merge'
+
+# phenotype selection
+# PHENOTYPE = 'dna_damage'
+PHENOTYPE = 'cell_cycle'
+
+# dna damage parameters
 FOCI_THRESHOLD = 3
+
+# cell cycle parameters
+MIN_RED_VALUE = 0.15
+MIN_GREEN_VALUE = 0.15
+RATIO_LOWER_THRESHOLD = 0.8
+RATIO_UPPER_THRESHOLD = 1.2
 
 #####################################################################
 # argument parsing related functions
@@ -66,8 +78,8 @@ def get_args_dict() -> dict:
 
 
 def get_phenotype(row_data: Series,
-                  phenotype: str,
-                  phenotype_col: str):
+                  phenotype: str
+                  ) -> str:
     """
     Given a row data, phenotype and a
     phenotype column, returns respective
@@ -76,26 +88,28 @@ def get_phenotype(row_data: Series,
     # defining placeholder value for phenotype value
     phenotype_value = None
 
-    # trying to access column value
-    try:
-
-        # getting phenotype col value
-        row_value = row_data[phenotype_col]
-
-    # if column does not exist
-    except KeyError:
-
-        # printing error message
-        e_string = f'Phenotype column "{phenotype_col}" does not exist.'
-        e_string += 'Please, check and try again.'
-        print(e_string)
-        exit()
-
     # checking phenotype
     if phenotype == 'dna_damage':
 
+        # getting phenotype col value
+        row_value = row_data['Total_foci_counts']
+
         # getting phenotype
         phenotype_value = 'HighDamage' if row_value > FOCI_THRESHOLD else 'LowDamage'
+
+    elif phenotype == 'cell_cycle':
+
+        # getting phenotype col values
+        red_value = row_data['Mean_red']
+        green_value = row_data['Mean_green']
+
+        # getting phenotype
+        phenotype_value = get_cell_cycle(red_value=red_value,
+                                         green_value=green_value,
+                                         min_red_value=0.15,
+                                         min_green_value=0.15,
+                                         ratio_lower_threshold=0.8,
+                                         ratio_upper_threshold=1.2)
 
     else:
 
@@ -168,8 +182,7 @@ def convert_single_file(input_csv_file_path: str,
 
         # defining current class based on foci count
         current_class = get_phenotype(row_data=row_data,
-                                      phenotype=PHENOTYPE,
-                                      phenotype_col=PHENOTYPE_COL)
+                                      phenotype=PHENOTYPE)
 
         # creating current obb dict
         current_obb_dict = {'img_file_name': file_name,

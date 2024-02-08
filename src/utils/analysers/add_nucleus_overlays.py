@@ -35,7 +35,9 @@ print('all required libraries successfully imported.')  # noqa
 #####################################################################
 # defining global variables
 
-ADD_INDEX_LABELS = False
+# LABEL = False
+# LABEL = 'cell_index'  # adds indices to cells (facilitates comparison to data frame info)
+LABEL = 'phenotype'  # retrieves info from 'class' col
 COLOR_DICT = {'model': (0, 102, 204),
               'fornma': (0, 204, 102),
               'DT': (255, 153, 102),
@@ -210,17 +212,28 @@ def add_single_overlay(open_img: ndarray,
                      color=overlay_color,
                      thickness=overlays_thickness)
 
-    # checking global variables
-    if ADD_INDEX_LABELS:
+    # defining placeholder value for current label
+    current_label = ''
 
-        # adding index text
-        putText(open_img,
-                cell_index_text,
-                (int(cx), int(cy)),
-                FONT_HERSHEY_SIMPLEX,
-                0.5,
-                text_color,
-                text_thickness)
+    # checking global variables
+    if LABEL == 'cell_index':
+
+        # updating current label
+        current_label = cell_index_text
+
+    elif LABEL == 'phenotype':
+
+        # updating current label
+        current_label = det_class
+
+    # adding label text
+    putText(open_img,
+            current_label,
+            (int(cx), int(cy)),
+            FONT_HERSHEY_SIMPLEX,
+            0.5,
+            text_color,
+            text_thickness)
 
 
 def add_multiple_overlays(open_img: ndarray,
