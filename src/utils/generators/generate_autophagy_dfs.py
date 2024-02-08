@@ -22,6 +22,7 @@ from cv2 import boundingRect
 from cv2 import findContours
 from cv2 import RETR_EXTERNAL
 from cv2 import COLOR_GRAY2BGR
+from cv2 import pointPolygonTest
 from cv2 import CHAIN_APPROX_NONE
 from argparse import ArgumentParser
 from src.utils.aux_funcs import enter_to_continue
@@ -258,7 +259,37 @@ def draw_cell_foci_contours(df: DataFrame,
 def get_cell_foci(cell_contour: list,
                   foci_contours: list
                   ) -> list:
-    pass
+    """
+    Given a cell contour, and a list of
+    possible foci contours, returns a list
+    of foci which are inside given cell.
+    """
+    # defining placeholder value for valid foci list
+    valid_foci = []
+
+    # iterating over foci contours
+    for foci_contour in foci_contours:
+
+        # getting current foci contour coords
+        current_foci_coords = boundingRect(foci_contour)
+
+        # getting current foci contour x/y
+        cx, cy, _, _ = current_foci_coords
+        foci_coords = (cx, cy)
+
+        # getting foci_is_inside_cell bool
+        foci_is_inside_cell = pointPolygonTest(cell_contour,
+                                               foci_coords,
+                                               measureDist=False)
+
+        # checking whether current foci contour is inside cell contour
+        if foci_is_inside_cell:
+
+            # appending current foci contours to valid foci list
+            valid_foci.append(foci_contour)
+
+    # returning valid foci list
+    return valid_foci
 
 
 def get_associations_df(cell_df: DataFrame,
@@ -301,17 +332,14 @@ def get_associations_df(cell_df: DataFrame,
         current_cell_area = row_data['area']
 
         # getting current foci contours
-        # current_foci_contours = get_cell_foci(cell_contour=current_cell_contour,
-        #                                       foci_contours=foci_contours)
-        current_foci_contours = None
+        current_foci_contours = get_cell_foci(cell_contour=current_cell_contour,
+                                              foci_contours=foci_contours)
 
         # getting current contours coords
-        # current_foci_coords = [boundingRect(contour) for contour in current_foci_contours]
-        current_foci_coords = None
+        current_foci_coords = [boundingRect(contour) for contour in current_foci_contours]
 
         # getting current contours areas
-        # current_foci_areas = [contourArea(contour) for contour in current_foci_contours]
-        current_foci_areas = None
+        current_foci_areas = [contourArea(contour) for contour in current_foci_contours]
 
         # assembling current cell dict
         current_cell_dict = {'image_name': current_cell_image_name,
