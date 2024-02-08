@@ -27,16 +27,20 @@ IMAGE_NAME_COL = 'Image_name_merge'
 
 # phenotype selection
 # PHENOTYPE = 'dna_damage'
-PHENOTYPE = 'cell_cycle'
+# PHENOTYPE = 'cell_cycle'
+PHENOTYPE = 'autophagy'
 
 # dna damage parameters
-FOCI_THRESHOLD = 3
+BP1_FOCI_THRESHOLD = 3
 
 # cell cycle parameters
 MIN_RED_VALUE = 0.15
 MIN_GREEN_VALUE = 0.15
 RATIO_LOWER_THRESHOLD = 0.8
 RATIO_UPPER_THRESHOLD = 1.2
+
+# autophagy parameters
+LC3_FOCI_THRESHOLD = 5
 
 #####################################################################
 # argument parsing related functions
@@ -95,7 +99,7 @@ def get_phenotype(row_data: Series,
         row_value = row_data['Total_foci_counts']
 
         # getting phenotype
-        phenotype_value = 'HighDamage' if row_value > FOCI_THRESHOLD else 'LowDamage'
+        phenotype_value = 'HighDamage' if row_value > BP1_FOCI_THRESHOLD else 'LowDamage'
 
     elif phenotype == 'cell_cycle':
 
@@ -110,6 +114,14 @@ def get_phenotype(row_data: Series,
                                          min_green_value=0.15,
                                          ratio_lower_threshold=0.8,
                                          ratio_upper_threshold=1.2)
+
+    elif phenotype == 'autophagy':
+
+        # getting phenotype col value
+        row_value = row_data['Total_foci_counts']
+
+        # getting phenotype
+        phenotype_value = 'HighAutophagy' if row_value > LC3_FOCI_THRESHOLD else 'LowAutophagy'
 
     else:
 

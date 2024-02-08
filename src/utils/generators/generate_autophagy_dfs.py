@@ -12,13 +12,15 @@ print('initializing...')  # noqa
 print('importing required libraries...')  # noqa
 from cv2 import imread
 from cv2 import imwrite
+from cv2 import moments
 from cv2 import cvtColor
 from os.path import join
 from pandas import concat
+from pandas import Series
+from numpy import ndarray
 from cv2 import contourArea
 from cv2 import drawContours
 from pandas import DataFrame
-from cv2 import boundingRect
 from cv2 import findContours
 from cv2 import RETR_EXTERNAL
 from cv2 import COLOR_GRAY2BGR
@@ -90,6 +92,27 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
+def get_contour_centroid(contour: ndarray) -> tuple:
+    """
+    Given a contour, returns
+    center coordinates in a tuple
+    of following structure:
+    (cx, cy)
+    """
+    # getting contour moments
+    contour_moments = moments(contour)
+
+    # getting cx/cy
+    cx = int(contour_moments["m10"] / contour_moments["m00"])
+    cy = int(contour_moments["m01"] / contour_moments["m00"])
+
+    # assembling coords tuple
+    coords_tuple = (cx, cy)
+
+    # returning coords tuple
+    return coords_tuple
+
+
 def get_contours_df(image_name: str,
                     image_path: str,
                     contour_type: str
@@ -110,8 +133,11 @@ def get_contours_df(image_name: str,
     contours_num = len(contours)
     contours_num_range = range(contours_num)
 
+    # getting current contours indices
+    contours_indices = [f for f in contours_num_range]
+
     # getting current contours coords
-    contours_coords = [boundingRect(contour) for contour in contours]
+    contours_coords = [get_contour_centroid(contour) for contour in contours]
 
     # getting current contours areas
     contours_areas = [contourArea(contour) for contour in contours]
@@ -122,6 +148,7 @@ def get_contours_df(image_name: str,
 
     # assembling contours dict
     contours_dict = {'image_name': image_names,
+                     'contour_index': contours_indices,
                      'contour': contours,
                      'contour_type': contour_types,
                      'coords': contours_coords,
@@ -178,11 +205,82 @@ def get_autophagy_df(cell_masks_folder: str,
         dfs_list.append(foci_contours_df)
 
     # concatenating dfs in dfs list
+    print('assembling final df...')
     final_df = concat(dfs_list,
                       ignore_index=True)
 
     # returning final df
     return final_df
+
+
+def draw_single_contour(base_img: ndarray,
+                        contour: ndarray,
+                        contour_index: int,
+                        contour_type: str,
+                        color_dict: dict
+                        ) -> ndarray:
+    """
+    Given an open image, draws given
+    contour in image, coloring it based
+    on contour type and color dict,
+    returning image with added overlay.
+    """
+    # getting color based on color dict
+    contour_color = color_dict[contour_type]
+
+    # drawing current contour
+    drawContours(base_img, [contour], -1, contour_color, 1)
+
+    # getting current contour
+
+    # returning image with contours
+    return base_img
+
+
+def draw_multiple_contours(df: DataFrame,
+                           image_path: str,
+                           output_path: str,
+                           color_dict: dict
+                           ) -> None:
+    """
+    Given an autophagy df for a single
+    image, loads image and adds cell/foci
+    overlays, coloring it based on color
+    dict, saving overlays image in given
+    output path.
+    """
+    # opening current image
+    base_img = imread(image_path,
+                      -1)
+
+    # converting current image to rgb
+    base_img = cvtColor(base_img, COLOR_GRAY2BGR)
+
+    # getting current df rows
+    df_rows = df.iterrows()
+
+    # iterating over df rows
+    for row_index, row_data in df_rows:
+
+        # getting current row contour
+        current_contour = row_data['contour']
+
+        # getting current row contour index
+        current_contour_index = row_data['contour_index']
+
+        # getting current row contour type
+        current_contour_type = row_data['contour_type']
+
+        # adding overlay of current contour
+        draw_single_contour(base_img=base_img,
+                            contour=current_contour,
+                            contour_index=current_contour_index,
+                            contour_type=current_contour_type,
+                            color_dict=color_dict)
+
+    # saving current image
+    imwrite(output_path,
+            base_img)
 
 
 def draw_cell_foci_contours(df: DataFrame,
@@ -217,46 +315,23 @@ def draw_cell_foci_contours(df: DataFrame,
                                index=current_img_index,
                                total=contours_num)
 
-        # getting current image path
+        # getting current image input/output paths
         current_image_path = join(images_folder,
                                   image_name)
-
-        # opening current image
-        base_img = imread(current_image_path,
-                          -1)
-
-        # converting current image to rgb
-        base_img = cvtColor(base_img, COLOR_GRAY2BGR)
-
-        # getting colors based on color dict
-        cell_color = color_dict['cell']
-        foci_color = color_dict['foci']
-
-        # getting current image cell/foci dfs
-        cell_df = df_group[df_group['contour_type'] == 'cell']
-        foci_df = df_group[df_group['contour_type'] == 'foci']
-
-        # getting current image cell/foci contours
-        cell_contours = cell_df['contour'].to_list()
-        foci_contours = foci_df['contour'].to_list()
-
-        # drawing contours
-        drawContours(base_img, cell_contours, -1, cell_color, 1)
-        drawContours(base_img, foci_contours, -1, foci_color, 1)
-
-        # defining current image save path
         current_image_save_path = join(output_folder,
                                        image_name)
 
-        # saving current image
-        imwrite(current_image_save_path,
-                base_img)
+        # adding overlays to current image
+        draw_multiple_contours(df=df_group,
+                               image_path=current_image_path,
+                               output_path=current_image_save_path,
+                               color_dict=color_dict)
 
         # updating current_img_index
         current_img_index += 1
 
 
-def get_cell_foci(cell_contour: list,
+def get_cell_foci(cell_contour: ndarray,
                   foci_contours: list
                   ) -> list:
     """
@@ -271,9 +346,12 @@ def get_cell_foci(cell_contour: list,
     for foci_contour in foci_contours:
 
         # getting current foci contour coords
-        current_foci_coords = boundingRect(foci_contour)
+        current_foci_coords = get_contour_centroid(foci_contour)
+        print(current_foci_coords)
+        exit()
 
         # getting current foci contour x/y
+        # TODO: check for center instead of outer xy!!!
         cx, cy, _, _ = current_foci_coords
         foci_coords = (cx, cy)
 
@@ -283,7 +361,7 @@ def get_cell_foci(cell_contour: list,
                                                measureDist=False)
 
         # checking whether current foci contour is inside cell contour
-        if foci_is_inside_cell:
+        if foci_is_inside_cell > -1:
 
             # appending current foci contours to valid foci list
             valid_foci.append(foci_contour)
@@ -327,6 +405,7 @@ def get_associations_df(cell_df: DataFrame,
 
         # getting current cell info
         current_cell_image_name = row_data['image_name']
+        current_cell_id = row_data['contour_index']
         current_cell_contour = row_data['contour']
         current_cell_coords = row_data['coords']
         current_cell_area = row_data['area']
@@ -335,20 +414,37 @@ def get_associations_df(cell_df: DataFrame,
         current_foci_contours = get_cell_foci(cell_contour=current_cell_contour,
                                               foci_contours=foci_contours)
 
+        # getting current foci count
+        current_foci_count = len(current_foci_contours)
+
         # getting current contours coords
-        current_foci_coords = [boundingRect(contour) for contour in current_foci_contours]
+        current_foci_coords = [get_contour_centroid(contour) for contour in current_foci_contours]
 
         # getting current contours areas
         current_foci_areas = [contourArea(contour) for contour in current_foci_contours]
 
+        # converting areas to Series object
+        current_foci_areas_series = Series(current_foci_areas,
+                                           dtype=float)
+
+        # getting current contours areas sum/mean/std
+        current_foci_areas_sum = current_foci_areas_series.sum()
+        current_foci_areas_mean = current_foci_areas_series.mean()
+        current_foci_areas_std = current_foci_areas_series.std()
+
         # assembling current cell dict
         current_cell_dict = {'image_name': current_cell_image_name,
+                             'cell_index': current_cell_id,
                              'cell_contour': [current_cell_contour],
                              'cell_coords': [current_cell_coords],
                              'cell_area': current_cell_area,
+                             'foci_count': current_foci_count,
                              'foci_contours': [current_foci_contours],
                              'foci_coords': [current_foci_coords],
-                             'foci_areas': [current_foci_areas]}
+                             'foci_areas': [current_foci_areas],
+                             'foci_areas_sum': current_foci_areas_sum,
+                             'foci_areas_mean': current_foci_areas_mean,
+                             'foci_areas_std': current_foci_areas_std}
 
         # assembling current cell df
         current_cell_df = DataFrame(current_cell_dict,
@@ -361,6 +457,7 @@ def get_associations_df(cell_df: DataFrame,
         current_cell_index += 1
 
     # concatenating dfs in dfs list
+    print('assembling final df...')
     final_df = concat(dfs_list,
                       ignore_index=True)
 
@@ -405,12 +502,18 @@ def get_cells_foci_df(df: DataFrame) -> DataFrame:
         # getting current image associations df
         associations_df = get_associations_df(cell_df=cell_df,
                                               foci_df=foci_df)
-        print(associations_df)
-        print(associations_df.iloc[0])
-        exit()
+
+        # appending current image associations df to dfs list
+        dfs_list.append(associations_df)
 
         # updating current_img_index
         current_img_index += 1
+
+    # concatenating dfs in dfs list
+    final_df = concat(dfs_list)
+
+    # returning final df
+    return final_df
 
 
 def generate_autophagy_dfs(images_folder: str,
@@ -445,7 +548,34 @@ def generate_autophagy_dfs(images_folder: str,
                             color_dict=COLOR_DICT)
 
     # getting cells foci df
+    print('establishing cells-foci associations...')
     cells_foci_df = get_cells_foci_df(df=autophagy_df)
+
+    # saving cells-foci df
+    print('saving cells-foci df...')
+    save_name = 'cells_foci_df.pickle'
+    save_path = join(output_folder,
+                     save_name)
+    cells_foci_df.to_pickle(save_path)
+
+    # dropping unrequired cols
+    print('creating analysis df...')
+    cols_to_keep = ['image_name',
+                    'cell_index',
+                    'cell_area',
+                    'foci_count',
+                    'foci_areas_sum',
+                    'foci_areas_mean',
+                    'foci_areas_std']
+    analysis_df = cells_foci_df[cols_to_keep]
+
+    # saving analysis df
+    print('saving analysis df...')
+    save_name = 'analysis_df.csv'
+    save_path = join(output_folder,
+                     save_name)
+    analysis_df.to_csv(save_path,
+                       index=False)
 
     # printing execution message
     print(f'output saved to {output_folder}')
