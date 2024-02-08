@@ -1,4 +1,4 @@
-# generate autophagy df module
+# generate autophagy dfs module
 
 print('initializing...')  # noqa
 
@@ -48,7 +48,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'generate autophagy df module'
+    description = 'generate autophagy dfs module'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
@@ -255,11 +255,141 @@ def draw_cell_foci_contours(df: DataFrame,
         current_img_index += 1
 
 
-def generate_autophagy_df(images_folder: str,
-                          cell_masks_folder: str,
-                          foci_masks_folder: str,
-                          output_folder: str,
-                          ) -> None:
+def get_cell_foci(cell_contour: list,
+                  foci_contours: list
+                  ) -> list:
+    pass
+
+
+def get_associations_df(cell_df: DataFrame,
+                        foci_df: DataFrame
+                        ) -> DataFrame:
+    """
+    Given a set of cells/foci dfs for
+    a single image, returns cells-foci
+    associations df.
+    """
+    # defining placeholder value for dfs list
+    dfs_list = []
+
+    # getting cells/foci num
+    cell_num = len(cell_df)
+
+    # getting cell df rows
+    cell_df_rows = cell_df.iterrows()
+
+    # getting foci contours
+    foci_contours_col = foci_df['contour']
+    foci_contours = foci_contours_col.to_list()
+
+    # defining starter for current cell index
+    current_cell_index = 1
+
+    # iterating over cell df rows
+    for row_index, row_data in cell_df_rows:
+
+        # printing execution message
+        base_string = 'getting foci for cell #INDEX# of #TOTAL#'
+        print_progress_message(base_string=base_string,
+                               index=current_cell_index,
+                               total=cell_num)
+
+        # getting current cell info
+        current_cell_image_name = row_data['image_name']
+        current_cell_contour = row_data['contour']
+        current_cell_coords = row_data['coords']
+        current_cell_area = row_data['area']
+
+        # getting current foci contours
+        # current_foci_contours = get_cell_foci(cell_contour=current_cell_contour,
+        #                                       foci_contours=foci_contours)
+        current_foci_contours = None
+
+        # getting current contours coords
+        # current_foci_coords = [boundingRect(contour) for contour in current_foci_contours]
+        current_foci_coords = None
+
+        # getting current contours areas
+        # current_foci_areas = [contourArea(contour) for contour in current_foci_contours]
+        current_foci_areas = None
+
+        # assembling current cell dict
+        current_cell_dict = {'image_name': current_cell_image_name,
+                             'cell_contour': [current_cell_contour],
+                             'cell_coords': [current_cell_coords],
+                             'cell_area': current_cell_area,
+                             'foci_contours': [current_foci_contours],
+                             'foci_coords': [current_foci_coords],
+                             'foci_areas': [current_foci_areas]}
+
+        # assembling current cell df
+        current_cell_df = DataFrame(current_cell_dict,
+                                    index=[0])
+
+        # appending current df to dfs list
+        dfs_list.append(current_cell_df)
+
+        # updating current cell index
+        current_cell_index += 1
+
+    # concatenating dfs in dfs list
+    final_df = concat(dfs_list,
+                      ignore_index=True)
+
+    # returning final df
+    return final_df
+
+
+def get_cells_foci_df(df: DataFrame) -> DataFrame:
+    """
+    Given an autophagy cells/foci df,
+    returns a data frame containing
+    linked cells-foci contours data.
+    """
+    # defining group cols
+    group_cols = 'image_name'
+
+    # grouping df
+    df_groups = df.groupby(group_cols)
+
+    # defining starter for current_img_index
+    current_img_index = 1
+
+    # getting contours total
+    contours_num = len(df_groups)
+
+    # defining placeholder value for dfs list
+    dfs_list = []
+
+    # iterating over df groups
+    for image_name, df_group in df_groups:
+
+        # printing execution message
+        base_string = f'getting cells-foci associations for image #INDEX# of #TOTAL#'
+        print_progress_message(base_string=base_string,
+                               index=current_img_index,
+                               total=contours_num)
+
+        # getting current image cell/foci dfs
+        cell_df = df_group[df_group['contour_type'] == 'cell']
+        foci_df = df_group[df_group['contour_type'] == 'foci']
+
+        # getting current image associations df
+        associations_df = get_associations_df(cell_df=cell_df,
+                                              foci_df=foci_df)
+        print(associations_df)
+        print(associations_df.iloc[0])
+        exit()
+
+        # updating current_img_index
+        current_img_index += 1
+
+
+def generate_autophagy_dfs(images_folder: str,
+                           cell_masks_folder: str,
+                           foci_masks_folder: str,
+                           output_folder: str,
+                           ) -> None:
     """
     Given paths to folders containing segmentation
     masks (cells/foci), analyses images to generate
@@ -286,7 +416,8 @@ def generate_autophagy_df(images_folder: str,
                             output_folder=output_folder,
                             color_dict=COLOR_DICT)
 
-    # getting
+    # getting cells foci df
+    cells_foci_df = get_cells_foci_df(df=autophagy_df)
 
     # printing execution message
     print(f'output saved to {output_folder}')
@@ -317,13 +448,13 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
-    # running generate_autophagy_df function
-    generate_autophagy_df(images_folder=images_folder,
-                          cell_masks_folder=cell_masks_folder,
-                          foci_masks_folder=foci_masks_folder,
-                          output_folder=output_folder)
+    # running generate_autophagy_dfs function
+    generate_autophagy_dfs(images_folder=images_folder,
+                           cell_masks_folder=cell_masks_folder,
+                           foci_masks_folder=foci_masks_folder,
+                           output_folder=output_folder)
 
 ######################################################################
 # running main function
