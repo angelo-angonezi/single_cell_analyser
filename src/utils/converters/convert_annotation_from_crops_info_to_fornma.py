@@ -151,7 +151,10 @@ def convert_single_file(input_csv_file_path: str,
         green_mean_normalized = (green_mean - current_img_min) / current_img_max
 
         # getting current crop area
-        current_area = current_width * current_height
+        # TODO: check this
+        from src.utils.aux_funcs import get_mask_area
+        current_area = get_mask_area(row_data=row_data,
+                                     style='ellipse')
 
         # getting current crop NII
         current_nii = get_axis_ratio(width=current_width,
