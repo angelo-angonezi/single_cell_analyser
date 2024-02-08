@@ -533,6 +533,76 @@ def get_cells_foci_df(df: DataFrame) -> DataFrame:
     return final_df
 
 
+def get_summary_df(df: DataFrame) -> DataFrame:
+    """
+    Given an autophagy df, returns
+    data frame containing summary info.
+    """
+    # defining placeholder value for dfs list
+    dfs_list = []
+
+    # defining group cols
+    group_cols = 'image_name'
+
+    # grouping df
+    df_groups = df.groupby(group_cols)
+
+    # defining starter for current_img_index
+    current_img_index = 1
+
+    # getting contours total
+    contours_num = len(df_groups)
+
+    # iterating over df groups
+    for image_name, df_group in df_groups:
+
+        # printing execution message
+        base_string = f'getting summary info for image #INDEX# of #TOTAL#'
+        print_progress_message(base_string=base_string,
+                               index=current_img_index,
+                               total=contours_num)
+
+        # getting current image cell/foci dfs
+        current_image_cell_df = df_group[df_group['contour_type'] == 'cell']
+        current_image_foci_df = df_group[df_group['contour_type'] == 'foci']
+
+        # getting current image cell/foci count
+        current_image_cell_count = len(current_image_cell_df)
+        current_image_foci_count = len(current_image_foci_df)
+
+        # getting current image cell/foci area
+        current_image_cell_area = current_image_cell_df['area'].sum()
+        current_image_foci_area = current_image_foci_df['area'].sum()
+
+        # getting current image cell/foci area ratio
+        current_area_ratio = current_image_foci_area / current_image_cell_area
+
+        # assembling current image dict
+        current_dict = {'image_name': image_name,
+                        'cell_count': current_image_cell_count,
+                        'total_cell_area': current_image_cell_area,
+                        'foci_count': current_image_foci_count,
+                        'total_foci_area': current_image_foci_area,
+                        'foci_by_cell_area_ratio': current_area_ratio}
+
+        # assembling current image df
+        current_df = DataFrame(current_dict,
+                               index=[0])
+
+        # appending current df to dfs list
+        dfs_list.append(current_df)
+
+        # updating current_img_index
+        current_img_index += 1
+
+    # concatenating dfs in dfs list
+    final_df = concat(dfs_list,
+                      ignore_index=True)
+
+    # returning summary df
+    return final_df
+
+
 def generate_autophagy_dfs(images_folder: str,
                            cell_masks_folder: str,
                            foci_masks_folder: str,
@@ -593,6 +663,17 @@ def generate_autophagy_dfs(images_folder: str,
                      save_name)
     analysis_df.to_csv(save_path,
                        index=False)
+
+    # getting summary df
+    summary_df = get_summary_df(df=autophagy_df)
+
+    # saving summary df
+    print('saving analysis df...')
+    save_name = 'summary_df.csv'
+    save_path = join(output_folder,
+                     save_name)
+    summary_df.to_csv(save_path,
+                      index=False)
 
     # printing execution message
     print(f'output saved to {output_folder}')
