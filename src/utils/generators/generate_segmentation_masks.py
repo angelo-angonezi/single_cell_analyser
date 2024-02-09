@@ -10,33 +10,16 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-from cv2 import imread
 from cv2 import imwrite
-from cv2 import putText
-from cv2 import cvtColor
 from os.path import join
-from pandas import concat
 from pandas import read_csv
-from pandas import Series
-from numpy import ndarray
-from cv2 import contourArea
-from cv2 import boundingRect
-from cv2 import drawContours
 from pandas import DataFrame
-from cv2 import findContours
-from cv2 import RETR_EXTERNAL
-from cv2 import COLOR_GRAY2BGR
-from cv2 import pointPolygonTest
-from cv2 import CHAIN_APPROX_NONE
 from numpy import uint8 as np_uint8
 from argparse import ArgumentParser
-from cv2 import FONT_HERSHEY_SIMPLEX
-from src.utils.aux_funcs import draw_ellipse
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import get_segmentation_mask
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
-from src.utils.aux_funcs import get_specific_files_in_folder
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
