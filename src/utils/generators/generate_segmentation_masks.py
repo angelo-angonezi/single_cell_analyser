@@ -28,6 +28,7 @@ from cv2 import RETR_EXTERNAL
 from cv2 import COLOR_GRAY2BGR
 from cv2 import pointPolygonTest
 from cv2 import CHAIN_APPROX_NONE
+from numpy import uint8 as np_uint8
 from argparse import ArgumentParser
 from cv2 import FONT_HERSHEY_SIMPLEX
 from src.utils.aux_funcs import draw_ellipse
@@ -121,6 +122,12 @@ def create_segmentation_masks(df: DataFrame,
                                                   style='ellipse',
                                                   expansion_ratio=expansion_ratio)
 
+        # converting image to binary
+        segmentation_mask[segmentation_mask > 0] = 255
+
+        # converting int type
+        segmentation_mask = segmentation_mask.astype(np_uint8)
+
         # saving current segmentation mask
         imwrite(save_path,
                 segmentation_mask)
@@ -175,7 +182,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running generate_autophagy_dfs function
     generate_segmentation_masks(detections_file=detections_file,
