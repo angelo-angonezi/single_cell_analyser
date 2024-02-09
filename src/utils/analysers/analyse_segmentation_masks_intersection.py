@@ -2,8 +2,8 @@
 
 print('initializing...')  # noqa
 
-# Code destined to generating segmentation
-# masks based on BRAIND detections.
+# Code destined to analyse segmentation
+# masks overlays based on BRAIND detections.
 
 ######################################################################
 # imports
@@ -14,6 +14,7 @@ from cv2 import imread
 from cv2 import imwrite
 from cv2 import putText
 from cv2 import cvtColor
+from numpy import arange
 from os.path import join
 from pandas import concat
 from pandas import read_csv
@@ -39,6 +40,13 @@ from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
 print('all required libraries successfully imported.')  # noqa
 
+######################################################################
+# defining global variables
+
+ER_MIN = 1.0
+ER_MAX = 4.0
+ER_STEP = 0.2
+
 #####################################################################
 # argument parsing related functions
 
@@ -49,7 +57,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'generate segmentation masks module'
+    description = 'analyse segmentation masks overlays module'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
@@ -68,13 +76,6 @@ def get_args_dict() -> dict:
                         required=True,
                         help='defines path to output folder')
 
-    # expansion ratio param
-    parser.add_argument('-er', '--expansion-ratio',
-                        dest='expansion_ratio',
-                        help='defines ratio of expansion of width/height to generate larger-than-orig-nucleus crops',
-                        required=False,
-                        default=1.0)
-
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
 
@@ -85,75 +86,89 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def create_segmentation_masks(df: DataFrame,
-                              output_folder: str,
-                              expansion_ratio: float
-                              ) -> None:
+def get_single_er_df(df: DataFrame,
+                     er: float
+                     ) -> DataFrame:
     """
     Given a detections data frame,
-    creates segmentation masks, and
-    saves them in given output folder.
+    and an expansion ratio value,
+    returns OBBs intersection df.
     """
-    # grouping df by image
-    image_groups = df.groupby('img_file_name')
+    pass
 
-    # getting number of images
-    images_num = len(image_groups)
 
-    # defining starter for current_img_index
-    current_img_index = 1
+def get_ers_df(df: DataFrame,
+               er_min: float,
+               er_max: float,
+               er_step: float
+               ) -> DataFrame:
+    """
+    Given a detections data frame,
+    and parameters for expansion ratio
+    range, returns masks overlays
+    analysis data frame.
+    """
+    # defining placeholder value for dfs list
+    dfs_list = []
 
-    # iterating over image groups
-    for image_name, image_group in image_groups:
+    # getting expansion ratio range
+    ers_range = arange(start=er_min,
+                       stop=er_max,
+                       step=er_step)
 
-        # printing execution message
-        base_string = 'creating segmentation mask for image #INDEX# of #TOTAL#'
+    # getting expansion ratio list
+    ers = [er for er in ers_range]
+    ers_num = len(ers)
+
+    # defining starter for current_er_index
+    current_er_index = 1
+
+    # iterating over er in er list
+    for er in ers:
+
+        # printing progress message
+        base_string = f'calculating obbs intersection for er {er} | #INDEX# of #TOTAL#'
         print_progress_message(base_string=base_string,
-                               index=current_img_index,
-                               total=images_num)
+                               index=current_er_index,
+                               total=ers_num)
 
-        # defining current image save name/path
-        save_name = f'{image_name}.tif'
-        save_path = join(output_folder,
-                         save_name)
+        # getting current er df
+        current_er_df = get_single_er_df(df=df,
+                                         er=er)
 
-        # generating segmentation mask for current image
-        segmentation_mask = get_segmentation_mask(df=image_group,
-                                                  style='ellipse',
-                                                  expansion_ratio=expansion_ratio)
+        # appending current er df to dfs list
+        dfs_list.append(current_er_df)
 
-        # converting image to binary
-        segmentation_mask[segmentation_mask > 0] = 255
+        # updating current_er_index
+        current_er_index += 1
 
-        # converting int type
-        segmentation_mask = segmentation_mask.astype(np_uint8)
+    # concatenating dfs in dfs list
+    final_df = concat(dfs_list,
+                      ignore_index=True)
 
-        # saving current segmentation mask
-        imwrite(save_path,
-                segmentation_mask)
-
-        # updating current_img_index
-        current_img_index += 1
+    # returning final df
+    return final_df
 
 
-def generate_segmentation_masks(detections_file: str,
-                                output_folder: str,
-                                expansion_ratio: float
-                                ) -> None:
+def analyse_segmentation_masks_overlays(detections_file: str,
+                                        output_folder: str,
+                                        expansion_ratio: float
+                                        ) -> None:
     """
     Given paths to model detections file,
-    creates segmentation masks based on
-    OBBs info, saving results in given
-    output folder.
+    creates analysis data frames and plots
+    to assess overlay between OBBs in increasing
+    expansion ratios.
     """
     # reading detections file
     print('reading detections file...')
     detections_df = read_csv(detections_file)
 
-    # generating segmentation masks
-    create_segmentation_masks(df=detections_df,
-                              output_folder=output_folder,
-                              expansion_ratio=expansion_ratio)
+    # getting ers df
+    ers_df = get_ers_df(df=detections_df,
+                        er_min=ER_MIN,
+                        er_max=ER_MAX,
+                        er_step=ER_STEP)
 
     # printing execution message
     print(f'output saved to {output_folder}')
@@ -185,9 +200,9 @@ def main():
     enter_to_continue()
 
     # running generate_autophagy_dfs function
-    generate_segmentation_masks(detections_file=detections_file,
-                                output_folder=output_folder,
-                                expansion_ratio=expansion_ratio)
+    analyse_segmentation_masks_overlays(detections_file=detections_file,
+                                        output_folder=output_folder,
+                                        expansion_ratio=expansion_ratio)
 
 ######################################################################
 # running main function
