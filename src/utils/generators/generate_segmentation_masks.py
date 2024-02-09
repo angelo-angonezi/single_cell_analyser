@@ -16,6 +16,7 @@ from cv2 import putText
 from cv2 import cvtColor
 from os.path import join
 from pandas import concat
+from pandas import read_csv
 from pandas import Series
 from numpy import ndarray
 from cv2 import contourArea
@@ -29,19 +30,13 @@ from cv2 import pointPolygonTest
 from cv2 import CHAIN_APPROX_NONE
 from argparse import ArgumentParser
 from cv2 import FONT_HERSHEY_SIMPLEX
+from src.utils.aux_funcs import draw_ellipse
 from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import get_segmentation_mask
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
 print('all required libraries successfully imported.')  # noqa
-
-######################################################################
-# defining global variables
-
-CELL_MIN_AREA = 100
-FOCI_MIN_AREA = 2
-COLOR_DICT = {'cell': (0, 0, 255),  # blue
-              'foci': (0, 255, 0)}  # green
 
 #####################################################################
 # argument parsing related functions
@@ -53,36 +48,31 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'generate autophagy dfs module'
+    description = 'generate segmentation masks module'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
 
     # adding arguments to parser
 
-    # images folder param
-    parser.add_argument('-i', '--images-folder',
-                        dest='images_folder',
+    # detection file param
+    parser.add_argument('-d', '--detection_file',
+                        dest='detection_file',
                         required=True,
-                        help='defines path to folder containing original images (8-bit .tif)')
-
-    # cell masks folder param
-    parser.add_argument('-c', '--cell-masks-folder',
-                        dest='cell_masks_folder',
-                        required=True,
-                        help='defines path to folder containing cell segmentation masks (macro output)')
-
-    # foci masks folder param
-    parser.add_argument('-f', '--foci-masks-folder',
-                        dest='foci_masks_folder',
-                        required=True,
-                        help='defines path to folder containing foci segmentation masks (macro output)')
+                        help='defines path to csv file containing model detections')
 
     # output folder param
     parser.add_argument('-o', '--output-folder',
                         dest='output_folder',
                         required=True,
                         help='defines path to output folder')
+
+    # expansion ratio param
+    parser.add_argument('-er', '--expansion-ratio',
+                        dest='expansion_ratio',
+                        help='defines ratio of expansion of width/height to generate larger-than-orig-nucleus crops',
+                        required=False,
+                        default=1.0)
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -94,586 +84,69 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_contour_centroid(contour: ndarray) -> tuple:
+def create_segmentation_masks(df: DataFrame,
+                              output_folder: str,
+                              expansion_ratio: float
+                              ) -> None:
     """
-    Given a contour, returns
-    center coordinates in a tuple
-    of following structure:
-    (cx, cy)
+    Given a detections data frame,
+    creates segmentation masks, and
+    saves them in given output folder.
     """
-    # getting contour coords
-    contour_coords = boundingRect(contour)
+    # grouping df by image
+    image_groups = df.groupby('img_file_name')
 
-    # extracting features from coords tuple
-    corner_x, corner_y, width, height = contour_coords
-
-    # getting current center points
-    cx = corner_x + (width / 2)
-    cy = corner_y + (height / 2)
-
-    # converting cx/cy to ints
-    cx = int(cx)
-    cy = int(cy)
-
-    # assembling coords tuple
-    coords_tuple = (cx, cy)
-
-    # returning coords tuple
-    return coords_tuple
-
-
-def get_contours_df(image_name: str,
-                    image_path: str,
-                    contour_type: str
-                    ) -> DataFrame:
-    """
-    Given a path to a binary image,
-    finds contours and returns data
-    frame containing contours coords.
-    """
-    # reading image
-    image = imread(image_path,
-                   -1)
-
-    # finding contours in image
-    contours, _ = findContours(image, RETR_EXTERNAL, CHAIN_APPROX_NONE)
-
-    # getting number of contours found in image
-    contours_num = len(contours)
-    contours_num_range = range(contours_num)
-
-    # getting current contours indices
-    contours_indices = [f for f in contours_num_range]
-
-    # getting current contours coords
-    contours_coords = [get_contour_centroid(contour) for contour in contours]
-
-    # getting current contours areas
-    contours_areas = [contourArea(contour) for contour in contours]
-
-    # getting current image col lists
-    image_names = [image_name for _ in contours_num_range]
-    contour_types = [contour_type for _ in contours_num_range]
-
-    # assembling contours dict
-    contours_dict = {'image_name': image_names,
-                     'contour_index': contours_indices,
-                     'contour': contours,
-                     'contour_type': contour_types,
-                     'coords': contours_coords,
-                     'area': contours_areas}
-
-    # assembling contours df
-    contours_df = DataFrame(contours_dict)
-
-    # returning contours df
-    return contours_df
-
-
-def get_autophagy_df(cell_masks_folder: str,
-                     foci_masks_folder: str,
-                     cell_min_area: int,
-                     foci_min_area: int
-                     ) -> DataFrame:
-    """
-    Given paths to folders containing
-    segmentation masks (cells/foci),
-    returns an autophagy analysis data
-    frame.
-    """
-    # defining placeholder value for dfs list
-    dfs_list = []
-
-    # getting images input folder
-    images_list = get_specific_files_in_folder(path_to_folder=cell_masks_folder,
-                                               extension='.tif')
-
-    # iterating over images list
-    for image_name in images_list:
-
-        # getting current image paths
-        cell_masks_path = join(cell_masks_folder,
-                               image_name)
-        foci_masks_path = join(foci_masks_folder,
-                               image_name)
-
-        # getting current image contours dfs
-        cell_contours_df = get_contours_df(image_name=image_name,
-                                           image_path=cell_masks_path,
-                                           contour_type='cell')
-        foci_contours_df = get_contours_df(image_name=image_name,
-                                           image_path=foci_masks_path,
-                                           contour_type='foci')
-
-        # filtering dfs by respective minimums
-        cell_contours_df = cell_contours_df[cell_contours_df['area'] >= cell_min_area]
-        foci_contours_df = foci_contours_df[foci_contours_df['area'] >= foci_min_area]
-
-        # appending dfs to dfs list
-        dfs_list.append(cell_contours_df)
-        dfs_list.append(foci_contours_df)
-
-    # concatenating dfs in dfs list
-    print('assembling final df...')
-    final_df = concat(dfs_list,
-                      ignore_index=True)
-
-    # returning final df
-    return final_df
-
-
-def draw_single_contour(base_img: ndarray,
-                        row_data: Series,
-                        color_dict: dict
-                        ) -> ndarray:
-    """
-    Given an open image, draws given
-    contour in image, coloring it based
-    on contour type and color dict,
-    returning image with added overlay.
-    """
-    # getting current row contour
-    contour = row_data['contour']
-
-    # getting current row contour index text
-    contour_index = row_data['contour_index']
-
-    # getting current row contour type
-    contour_type = row_data['contour_type']
-
-    # getting current row contour label
-    current_label = f'{contour_index}'
-
-    # getting current row contour coords
-    contour_coords = row_data['coords']
-    corner_x, corner_y = contour_coords
-    coords_tuple = (corner_x, corner_y)
-
-    # getting color based on color dict
-    contour_color = color_dict[contour_type]
-
-    # drawing current contour
-    drawContours(base_img,
-                 [contour],
-                 -1,
-                 contour_color,
-                 1)
-
-    # adding index label
-    putText(base_img,
-            current_label,
-            coords_tuple,
-            FONT_HERSHEY_SIMPLEX,
-            0.3,
-            contour_color,
-            1)
-
-    # returning image with contours
-    return base_img
-
-
-def draw_multiple_contours(df: DataFrame,
-                           image_path: str,
-                           output_path: str,
-                           color_dict: dict
-                           ) -> None:
-    """
-    Given an autophagy df for a single
-    image, loads image and adds cell/foci
-    overlays, coloring it based on color
-    dict, saving overlays image in given
-    output path.
-    """
-    # opening current image
-    base_img = imread(image_path,
-                      -1)
-
-    # converting current image to rgb
-    base_img = cvtColor(base_img, COLOR_GRAY2BGR)
-
-    # getting current df rows
-    df_rows = df.iterrows()
-
-    # iterating over df rows
-    for row_index, row_data in df_rows:
-
-        # adding overlay of current contour
-        draw_single_contour(base_img=base_img,
-                            row_data=row_data,
-                            color_dict=color_dict)
-
-    # saving current image
-    imwrite(output_path,
-            base_img)
-
-
-def draw_cell_foci_contours(df: DataFrame,
-                            images_folder: str,
-                            output_folder: str,
-                            color_dict: dict
-                            ) -> None:
-    """
-    Given an autophagy analysis df,
-    adds cells/foci contours on top
-    of original images, saving overlays
-    in output folder.
-    """
-    # defining group cols
-    group_cols = 'image_name'
-
-    # grouping df
-    df_groups = df.groupby(group_cols)
+    # getting number of images
+    images_num = len(image_groups)
 
     # defining starter for current_img_index
     current_img_index = 1
 
-    # getting contours total
-    contours_num = len(df_groups)
-
-    # iterating over df groups
-    for image_name, df_group in df_groups:
+    # iterating over image groups
+    for image_name, image_group in image_groups:
 
         # printing execution message
-        base_string = f'adding overlays to image #INDEX# of #TOTAL#'
+        base_string = 'creating segmentation mask for image #INDEX# of #TOTAL#'
         print_progress_message(base_string=base_string,
                                index=current_img_index,
-                               total=contours_num)
+                               total=images_num)
 
-        # getting current image input/output paths
-        current_image_path = join(images_folder,
-                                  image_name)
-        current_image_save_path = join(output_folder,
-                                       image_name)
+        # defining current image save name/path
+        save_name = f'{image_name}.tif'
+        save_path = join(output_folder,
+                         save_name)
 
-        # adding overlays to current image
-        draw_multiple_contours(df=df_group,
-                               image_path=current_image_path,
-                               output_path=current_image_save_path,
-                               color_dict=color_dict)
+        # generating segmentation mask for current image
+        segmentation_mask = get_segmentation_mask(df=image_group,
+                                                  style='ellipse',
+                                                  expansion_ratio=expansion_ratio)
+
+        # saving current segmentation mask
+        imwrite(save_path,
+                segmentation_mask)
 
         # updating current_img_index
         current_img_index += 1
 
 
-def get_cell_foci(cell_contour: ndarray,
-                  foci_contours: list
-                  ) -> list:
+def generate_segmentation_masks(detections_file: str,
+                                output_folder: str,
+                                expansion_ratio: float
+                                ) -> None:
     """
-    Given a cell contour, and a list of
-    possible foci contours, returns a list
-    of foci which are inside given cell.
+    Given paths to model detections file,
+    creates segmentation masks based on
+    OBBs info, saving results in given
+    output folder.
     """
-    # defining placeholder value for valid foci list
-    valid_foci = []
-
-    # iterating over foci contours
-    for foci_contour in foci_contours:
-
-        # getting current foci contour center coords
-        current_foci_coords = get_contour_centroid(foci_contour)
-
-        # getting foci_is_inside_cell bool
-        foci_is_inside_cell = pointPolygonTest(cell_contour,
-                                               current_foci_coords,
-                                               measureDist=False)
-
-        # checking whether current foci contour is inside cell contour
-        if foci_is_inside_cell > -1:
-
-            # appending current foci contours to valid foci list
-            valid_foci.append(foci_contour)
-
-    # returning valid foci list
-    return valid_foci
-
-
-def get_associations_df(cell_df: DataFrame,
-                        foci_df: DataFrame
-                        ) -> DataFrame:
-    """
-    Given a set of cells/foci dfs for
-    a single image, returns cells-foci
-    associations df.
-    """
-    # defining placeholder value for dfs list
-    dfs_list = []
-
-    # getting cells/foci num
-    cell_num = len(cell_df)
-
-    # getting cell df rows
-    cell_df_rows = cell_df.iterrows()
-
-    # getting foci contours
-    foci_contours_col = foci_df['contour']
-    foci_contours = foci_contours_col.to_list()
-
-    # defining starter for current cell index
-    current_cell_index = 1
-
-    # iterating over cell df rows
-    for row_index, row_data in cell_df_rows:
-
-        # printing execution message
-        base_string = 'getting foci for cell #INDEX# of #TOTAL#'
-        print_progress_message(base_string=base_string,
-                               index=current_cell_index,
-                               total=cell_num)
-
-        # getting current cell info
-        current_cell_image_name = row_data['image_name']
-        current_cell_id = row_data['contour_index']
-        current_cell_contour = row_data['contour']
-        current_cell_coords = row_data['coords']
-        current_cell_area = row_data['area']
-
-        # getting current foci contours
-        current_foci_contours = get_cell_foci(cell_contour=current_cell_contour,
-                                              foci_contours=foci_contours)
-
-        # getting current foci count
-        current_foci_count = len(current_foci_contours)
-
-        # getting current contours coords
-        current_foci_coords = [get_contour_centroid(contour) for contour in current_foci_contours]
-
-        # getting current contours areas
-        current_foci_areas = [contourArea(contour) for contour in current_foci_contours]
-
-        # converting areas to Series object
-        current_foci_areas_series = Series(current_foci_areas,
-                                           dtype=float)
-
-        # getting current contours areas sum/mean/std
-        current_foci_areas_sum = current_foci_areas_series.sum()
-        current_foci_areas_mean = current_foci_areas_series.mean()
-        current_foci_areas_std = current_foci_areas_series.std()
-
-        # assembling current cell dict
-        current_cell_dict = {'image_name': current_cell_image_name,
-                             'cell_index': current_cell_id,
-                             'cell_contour': [current_cell_contour],
-                             'cell_coords': [current_cell_coords],
-                             'cell_area': current_cell_area,
-                             'foci_count': current_foci_count,
-                             'foci_contours': [current_foci_contours],
-                             'foci_coords': [current_foci_coords],
-                             'foci_areas': [current_foci_areas],
-                             'foci_areas_sum': current_foci_areas_sum,
-                             'foci_areas_mean': current_foci_areas_mean,
-                             'foci_areas_std': current_foci_areas_std}
-
-        # assembling current cell df
-        current_cell_df = DataFrame(current_cell_dict,
-                                    index=[0])
-
-        # appending current df to dfs list
-        dfs_list.append(current_cell_df)
-
-        # updating current cell index
-        current_cell_index += 1
-
-    # concatenating dfs in dfs list
-    print('assembling final df...')
-    final_df = concat(dfs_list,
-                      ignore_index=True)
-
-    # returning final df
-    return final_df
-
-
-def get_cells_foci_df(df: DataFrame) -> DataFrame:
-    """
-    Given an autophagy cells/foci df,
-    returns a data frame containing
-    linked cells-foci contours data.
-    """
-    # defining group cols
-    group_cols = 'image_name'
-
-    # grouping df
-    df_groups = df.groupby(group_cols)
-
-    # defining starter for current_img_index
-    current_img_index = 1
-
-    # getting contours total
-    contours_num = len(df_groups)
-
-    # defining placeholder value for dfs list
-    dfs_list = []
-
-    # iterating over df groups
-    for image_name, df_group in df_groups:
-
-        # printing execution message
-        base_string = f'getting cells-foci associations for image #INDEX# of #TOTAL#'
-        print_progress_message(base_string=base_string,
-                               index=current_img_index,
-                               total=contours_num)
-
-        # getting current image cell/foci dfs
-        cell_df = df_group[df_group['contour_type'] == 'cell']
-        foci_df = df_group[df_group['contour_type'] == 'foci']
-
-        # getting current image associations df
-        associations_df = get_associations_df(cell_df=cell_df,
-                                              foci_df=foci_df)
-
-        # appending current image associations df to dfs list
-        dfs_list.append(associations_df)
-
-        # updating current_img_index
-        current_img_index += 1
-
-    # concatenating dfs in dfs list
-    final_df = concat(dfs_list)
-
-    # returning final df
-    return final_df
-
-
-def get_summary_df(df: DataFrame) -> DataFrame:
-    """
-    Given an autophagy df, returns
-    data frame containing summary info.
-    """
-    # defining placeholder value for dfs list
-    dfs_list = []
-
-    # defining group cols
-    group_cols = 'image_name'
-
-    # grouping df
-    df_groups = df.groupby(group_cols)
-
-    # defining starter for current_img_index
-    current_img_index = 1
-
-    # getting contours total
-    contours_num = len(df_groups)
-
-    # iterating over df groups
-    for image_name, df_group in df_groups:
-
-        # printing execution message
-        base_string = f'getting summary info for image #INDEX# of #TOTAL#'
-        print_progress_message(base_string=base_string,
-                               index=current_img_index,
-                               total=contours_num)
-
-        # getting current image cell/foci dfs
-        current_image_cell_df = df_group[df_group['contour_type'] == 'cell']
-        current_image_foci_df = df_group[df_group['contour_type'] == 'foci']
-
-        # getting current image cell/foci count
-        current_image_cell_count = len(current_image_cell_df)
-        current_image_foci_count = len(current_image_foci_df)
-
-        # getting current image cell/foci area
-        current_image_cell_area = current_image_cell_df['area'].sum()
-        current_image_foci_area = current_image_foci_df['area'].sum()
-
-        # getting current image cell/foci area ratio
-        current_area_ratio = current_image_foci_area / current_image_cell_area
-
-        # assembling current image dict
-        current_dict = {'image_name': image_name,
-                        'cell_count': current_image_cell_count,
-                        'total_cell_area': current_image_cell_area,
-                        'foci_count': current_image_foci_count,
-                        'total_foci_area': current_image_foci_area,
-                        'foci_by_cell_area_ratio': current_area_ratio}
-
-        # assembling current image df
-        current_df = DataFrame(current_dict,
-                               index=[0])
-
-        # appending current df to dfs list
-        dfs_list.append(current_df)
-
-        # updating current_img_index
-        current_img_index += 1
-
-    # concatenating dfs in dfs list
-    final_df = concat(dfs_list,
-                      ignore_index=True)
-
-    # returning summary df
-    return final_df
-
-
-def generate_autophagy_dfs(images_folder: str,
-                           cell_masks_folder: str,
-                           foci_masks_folder: str,
-                           output_folder: str,
-                           ) -> None:
-    """
-    Given paths to folders containing segmentation
-    masks (cells/foci), analyses images to generate
-    an autophagy analysis data frame.
-    """
-    # getting autophagy df
-    print('getting autophagy df...')
-    autophagy_df = get_autophagy_df(cell_masks_folder=cell_masks_folder,
-                                    foci_masks_folder=foci_masks_folder,
-                                    cell_min_area=CELL_MIN_AREA,
-                                    foci_min_area=FOCI_MIN_AREA)
-
-    # saving autophagy df
-    print('saving autophagy df...')
-    save_name = 'autophagy_df.pickle'
-    save_path = join(output_folder,
-                     save_name)
-    autophagy_df.to_pickle(save_path)
-
-    # drawing contours
-    print('adding contours overlays...')
-    draw_cell_foci_contours(df=autophagy_df,
-                            images_folder=images_folder,
-                            output_folder=output_folder,
-                            color_dict=COLOR_DICT)
-
-    # getting cells foci df
-    print('establishing cells-foci associations...')
-    cells_foci_df = get_cells_foci_df(df=autophagy_df)
-
-    # saving cells-foci df
-    print('saving cells-foci df...')
-    save_name = 'cells_foci_df.pickle'
-    save_path = join(output_folder,
-                     save_name)
-    cells_foci_df.to_pickle(save_path)
-
-    # dropping unrequired cols
-    print('creating analysis df...')
-    cols_to_keep = ['image_name',
-                    'cell_index',
-                    'cell_area',
-                    'foci_count',
-                    'foci_areas_sum',
-                    'foci_areas_mean',
-                    'foci_areas_std']
-    analysis_df = cells_foci_df[cols_to_keep]
-
-    # saving analysis df
-    print('saving analysis df...')
-    save_name = 'analysis_df.csv'
-    save_path = join(output_folder,
-                     save_name)
-    analysis_df.to_csv(save_path,
-                       index=False)
-
-    # getting summary df
-    summary_df = get_summary_df(df=autophagy_df)
-
-    # saving summary df
-    print('saving analysis df...')
-    save_name = 'summary_df.csv'
-    save_path = join(output_folder,
-                     save_name)
-    summary_df.to_csv(save_path,
-                      index=False)
+    # reading detections file
+    print('reading detections file...')
+    detections_df = read_csv(detections_file)
+
+    # generating segmentation masks
+    create_segmentation_masks(df=detections_df,
+                              output_folder=output_folder,
+                              expansion_ratio=expansion_ratio)
 
     # printing execution message
     print(f'output saved to {output_folder}')
@@ -688,17 +161,15 @@ def main():
     # getting args dict
     args_dict = get_args_dict()
 
-    # getting images folder
-    images_folder = args_dict['images_folder']
-
-    # getting cell folder path
-    cell_masks_folder = args_dict['cell_masks_folder']
-
-    # getting foci folder path
-    foci_masks_folder = args_dict['foci_masks_folder']
+    # getting detections file
+    detections_file = args_dict['detection_file']
 
     # getting output folder
     output_folder = args_dict['output_folder']
+
+    # getting expansion ratio
+    expansion_ratio = args_dict['expansion_ratio']
+    expansion_ratio = float(expansion_ratio)
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
@@ -707,10 +178,9 @@ def main():
     # enter_to_continue()
 
     # running generate_autophagy_dfs function
-    generate_autophagy_dfs(images_folder=images_folder,
-                           cell_masks_folder=cell_masks_folder,
-                           foci_masks_folder=foci_masks_folder,
-                           output_folder=output_folder)
+    generate_segmentation_masks(detections_file=detections_file,
+                                output_folder=output_folder,
+                                expansion_ratio=expansion_ratio)
 
 ######################################################################
 # running main function

@@ -1207,14 +1207,12 @@ def get_iou(mask_a: ndarray,
 
 
 def get_pixel_mask(row_data: Series,
-                   style: str
+                   style: str,
+                   expansion_ratio: float = 1.0
                    ) -> ndarray:
     """
     Given an open image, and coordinates for OBB,
     returns image with respective style overlay.
-    :param row_data: Series. Represents OBB coords data.
-    :param style: String. Represents an overlay style.
-    :return: ndarray. Represents base image with mask overlay.
     """
     # extracting coords from row data
     cx = int(row_data['cx'])
@@ -1222,6 +1220,10 @@ def get_pixel_mask(row_data: Series,
     width = float(row_data['width'])
     height = float(row_data['height'])
     angle = float(row_data['angle'])
+
+    # expanding with/height
+    width = width * expansion_ratio
+    height = height * expansion_ratio
 
     # defining color (same for all styles)
     color = (1,)
@@ -1324,8 +1326,9 @@ def add_area_col(df: DataFrame,
 
 
 def get_segmentation_mask(df: DataFrame,
-                          style: str
-                          ) -> float:
+                          style: str,
+                          expansion_ratio: float = 1.0
+                          ) -> ndarray:
     """
     Given an image df, adds overlays to all
     detections with given style and returns
@@ -1344,7 +1347,8 @@ def get_segmentation_mask(df: DataFrame,
 
         # getting current row pixel mask
         current_mask = get_pixel_mask(row_data=row_data,
-                                      style=style)
+                                      style=style,
+                                      expansion_ratio=expansion_ratio)
 
         # overlaying current mask on base img
         base_img = np_add(base_img, current_mask)
