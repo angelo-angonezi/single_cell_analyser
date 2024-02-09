@@ -1,43 +1,28 @@
-# generate segmentation masks module
+# analyse segmentation masks intersection module
 
 print('initializing...')  # noqa
 
-# Code destined to analyse segmentation
-# masks overlays based on BRAIND detections.
+# Code destined to analysing segmentation
+# masks intersections based on BRAIND detections.
 
 ######################################################################
 # imports
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-from cv2 import imread
-from cv2 import imwrite
-from cv2 import putText
-from cv2 import cvtColor
 from numpy import arange
 from os.path import join
 from pandas import concat
 from pandas import read_csv
-from pandas import Series
-from numpy import ndarray
-from cv2 import contourArea
-from cv2 import boundingRect
-from cv2 import drawContours
 from pandas import DataFrame
-from cv2 import findContours
-from cv2 import RETR_EXTERNAL
-from cv2 import COLOR_GRAY2BGR
-from cv2 import pointPolygonTest
-from cv2 import CHAIN_APPROX_NONE
-from numpy import uint8 as np_uint8
+from seaborn import lineplot
+from numpy import count_nonzero
 from argparse import ArgumentParser
-from cv2 import FONT_HERSHEY_SIMPLEX
-from src.utils.aux_funcs import draw_ellipse
+from matplotlib import pyplot as plt
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import get_segmentation_mask
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
-from src.utils.aux_funcs import get_specific_files_in_folder
 print('all required libraries successfully imported.')  # noqa
 
 ######################################################################
@@ -57,7 +42,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'analyse segmentation masks overlays module'
+    description = 'analyse segmentation masks intersections module'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
@@ -94,7 +79,41 @@ def get_single_er_df(df: DataFrame,
     and an expansion ratio value,
     returns OBBs intersection df.
     """
-    pass
+    # defining placeholder value for dfs list
+    dfs_list = []
+
+    # grouping df by image
+    image_groups = df.groupby('img_file_name')
+
+    # iterating over image groups
+    for image_name, image_group in image_groups:
+
+        # generating segmentation mask for current image
+        segmentation_mask = get_segmentation_mask(df=image_group,
+                                                  style='ellipse',
+                                                  expansion_ratio=er)
+
+        # getting current image/er intersection pixels count
+        intersection_pixels_count = count_nonzero(segmentation_mask)
+
+        # assembling current image/er dict
+        current_dict = {'image_name': image_name,
+                        'er': er,
+                        'intersection_pixels_count': intersection_pixels_count}
+
+        # assembling current image/er df
+        current_df = DataFrame(current_dict,
+                               index=[0])
+
+        # appending current image/er df to dfs list
+        dfs_list.append(current_df)
+
+    # concatenating dfs in dfs list
+    final_df = concat(dfs_list,
+                      ignore_index=True)
+
+    # returning final df
+    return final_df
 
 
 def get_ers_df(df: DataFrame,
@@ -105,11 +124,14 @@ def get_ers_df(df: DataFrame,
     """
     Given a detections data frame,
     and parameters for expansion ratio
-    range, returns masks overlays
+    range, returns masks intersections
     analysis data frame.
     """
     # defining placeholder value for dfs list
     dfs_list = []
+
+    # updating max value
+    er_max += er_step
 
     # getting expansion ratio range
     ers_range = arange(start=er_min,
@@ -117,7 +139,7 @@ def get_ers_df(df: DataFrame,
                        step=er_step)
 
     # getting expansion ratio list
-    ers = [er for er in ers_range]
+    ers = [round(er, 2) for er in ers_range]
     ers_num = len(ers)
 
     # defining starter for current_er_index
@@ -127,7 +149,7 @@ def get_ers_df(df: DataFrame,
     for er in ers:
 
         # printing progress message
-        base_string = f'calculating obbs intersection for er {er} | #INDEX# of #TOTAL#'
+        base_string = f'calculating obbs intersection for er: {er} | #INDEX# of #TOTAL#'
         print_progress_message(base_string=base_string,
                                index=current_er_index,
                                total=ers_num)
@@ -150,25 +172,71 @@ def get_ers_df(df: DataFrame,
     return final_df
 
 
-def analyse_segmentation_masks_overlays(detections_file: str,
-                                        output_folder: str,
-                                        expansion_ratio: float
-                                        ) -> None:
+def plot_obbs_intersection(df: DataFrame,
+                           output_folder: str
+                           ) -> None:
+    """
+    Given an ers data frame,
+    plots data and saves it in
+    given output folder.
+    """
+    # defining save name/path
+    save_name = f'intersections_plot.png'
+    save_path = join(output_folder,
+                     save_name)
+
+    # setting figure size
+    plt.figure(figsize=(14, 8))
+
+    # plotting figure
+    lineplot(data=df,
+             x='er',
+             y='intersection_pixels_count',
+             hue='image_name')
+
+    # setting plot title
+    title = f'OBBs intersections plot'
+    plt.title(title)
+
+    # setting figure layout
+    plt.tight_layout()
+
+    # saving figure
+    plt.savefig(save_path)
+
+
+def analyse_segmentation_masks_intersections(detections_file: str,
+                                             output_folder: str
+                                             ) -> None:
     """
     Given paths to model detections file,
     creates analysis data frames and plots
-    to assess overlay between OBBs in increasing
-    expansion ratios.
+    to assess intersection between OBBs in
+    increasing expansion ratios.
     """
     # reading detections file
     print('reading detections file...')
     detections_df = read_csv(detections_file)
 
     # getting ers df
+    print('getting ers df...')
     ers_df = get_ers_df(df=detections_df,
                         er_min=ER_MIN,
                         er_max=ER_MAX,
                         er_step=ER_STEP)
+
+    # saving ers df
+    print('saving ers df...')
+    save_name = 'ers_df.csv'
+    save_path = join(output_folder,
+                     save_name)
+    ers_df.to_csv(save_path,
+                  index=False)
+
+    # plotting data
+    print('plotting data...')
+    plot_obbs_intersection(df=ers_df,
+                           output_folder=output_folder)
 
     # printing execution message
     print(f'output saved to {output_folder}')
@@ -189,10 +257,6 @@ def main():
     # getting output folder
     output_folder = args_dict['output_folder']
 
-    # getting expansion ratio
-    expansion_ratio = args_dict['expansion_ratio']
-    expansion_ratio = float(expansion_ratio)
-
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
@@ -200,9 +264,8 @@ def main():
     enter_to_continue()
 
     # running generate_autophagy_dfs function
-    analyse_segmentation_masks_overlays(detections_file=detections_file,
-                                        output_folder=output_folder,
-                                        expansion_ratio=expansion_ratio)
+    analyse_segmentation_masks_intersections(detections_file=detections_file,
+                                             output_folder=output_folder)
 
 ######################################################################
 # running main function
