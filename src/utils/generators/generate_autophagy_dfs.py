@@ -38,8 +38,6 @@ print('all required libraries successfully imported.')  # noqa
 ######################################################################
 # defining global variables
 
-CELL_MIN_AREA = 100
-FOCI_MIN_AREA = 0
 COLOR_DICT = {'cell': (0, 0, 255),  # red
               'foci': (255, 0, 0)}  # blue
 
@@ -83,6 +81,20 @@ def get_args_dict() -> dict:
                         dest='output_folder',
                         required=True,
                         help='defines path to output folder')
+
+    # cell min area param
+    parser.add_argument('-cm', '--cell-min-area',
+                        dest='cell_min_area',
+                        required=False,
+                        default=100,
+                        help='defines minimum area for a cell (in pixels)')
+
+    # foci min area param
+    parser.add_argument('-fm', '--foci-min-area',
+                        dest='foci_min_area',
+                        required=False,
+                        default=2,
+                        help='defines minimum area for a foci (in pixels)')
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -304,7 +316,7 @@ def draw_multiple_contours(df: DataFrame,
                       -1)
 
     # converting current image to rgb
-    # base_img = cvtColor(base_img, COLOR_GRAY2BGR)
+    base_img = cvtColor(base_img, COLOR_GRAY2BGR)
 
     # getting current df rows
     df_rows = df.iterrows()
@@ -413,9 +425,6 @@ def get_associations_df(cell_df: DataFrame,
     # defining placeholder value for dfs list
     dfs_list = []
 
-    # getting cells/foci num
-    cell_num = len(cell_df)
-
     # getting cell df rows
     cell_df_rows = cell_df.iterrows()
 
@@ -423,17 +432,8 @@ def get_associations_df(cell_df: DataFrame,
     foci_contours_col = foci_df['contour']
     foci_contours = foci_contours_col.to_list()
 
-    # defining starter for current cell index
-    current_cell_index = 1
-
     # iterating over cell df rows
     for row_index, row_data in cell_df_rows:
-
-        # printing execution message
-        base_string = 'getting foci for cell #INDEX# of #TOTAL#'
-        print_progress_message(base_string=base_string,
-                               index=current_cell_index,
-                               total=cell_num)
 
         # getting current cell info
         current_cell_image_name = row_data['image_name']
@@ -484,9 +484,6 @@ def get_associations_df(cell_df: DataFrame,
 
         # appending current df to dfs list
         dfs_list.append(current_cell_df)
-
-        # updating current cell index
-        current_cell_index += 1
 
     # concatenating dfs in dfs list
     final_df = concat(dfs_list,
@@ -621,6 +618,8 @@ def generate_autophagy_dfs(images_folder: str,
                            cell_masks_folder: str,
                            foci_masks_folder: str,
                            output_folder: str,
+                           cell_min_area: int,
+                           foci_min_area: int
                            ) -> None:
     """
     Given paths to folders containing segmentation
@@ -631,8 +630,8 @@ def generate_autophagy_dfs(images_folder: str,
     print('getting autophagy df...')
     autophagy_df = get_autophagy_df(cell_masks_folder=cell_masks_folder,
                                     foci_masks_folder=foci_masks_folder,
-                                    cell_min_area=CELL_MIN_AREA,
-                                    foci_min_area=FOCI_MIN_AREA)
+                                    cell_min_area=cell_min_area,
+                                    foci_min_area=foci_min_area)
 
     # saving autophagy df
     print('saving autophagy df...')
@@ -714,17 +713,25 @@ def main():
     # getting output folder
     output_folder = args_dict['output_folder']
 
+    # getting cell min area
+    cell_min_area = args_dict['cell_min_area']
+
+    # getting foci min area
+    foci_min_area = args_dict['foci_min_area']
+
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running generate_autophagy_dfs function
     generate_autophagy_dfs(images_folder=images_folder,
                            cell_masks_folder=cell_masks_folder,
                            foci_masks_folder=foci_masks_folder,
-                           output_folder=output_folder)
+                           output_folder=output_folder,
+                           cell_min_area=cell_min_area,
+                           foci_min_area=foci_min_area)
 
 ######################################################################
 # running main function
