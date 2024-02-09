@@ -715,9 +715,11 @@ def main():
 
     # getting cell min area
     cell_min_area = args_dict['cell_min_area']
+    cell_min_area = int(cell_min_area)
 
     # getting foci min area
     foci_min_area = args_dict['foci_min_area']
+    foci_min_area = int(foci_min_area)
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
