@@ -16,7 +16,6 @@ from pandas import concat
 from pandas import read_csv
 from pandas import DataFrame
 from seaborn import lineplot
-from numpy import count_nonzero
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 from src.utils.aux_funcs import enter_to_continue
@@ -94,7 +93,8 @@ def get_single_er_df(df: DataFrame,
                                                   expansion_ratio=er)
 
         # getting current image/er intersection pixels count
-        intersection_pixels_count = count_nonzero(segmentation_mask)
+        intersection_pixels = segmentation_mask[segmentation_mask > 1]
+        intersection_pixels_count = len(intersection_pixels)
 
         # assembling current image/er dict
         current_dict = {'image_name': image_name,
