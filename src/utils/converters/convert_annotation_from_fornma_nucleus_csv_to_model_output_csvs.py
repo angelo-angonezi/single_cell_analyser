@@ -23,7 +23,8 @@ print('all required libraries successfully imported.')  # noqa
 # defining global variables
 
 # common to all phenotypes
-IMAGE_NAME_COL = 'Image_name_merge'
+# IMAGE_NAME_COL = 'Image_name_merge'
+IMAGE_NAME_COL = 'Image_name_red'
 
 # phenotype selection
 # PHENOTYPE = 'dna_damage'
