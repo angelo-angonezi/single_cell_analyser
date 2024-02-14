@@ -28,7 +28,8 @@ IMAGE_NAME_COL = 'Image_name_merge'
 # phenotype selection
 # PHENOTYPE = 'dna_damage'
 # PHENOTYPE = 'cell_cycle'
-PHENOTYPE = 'autophagy'
+# PHENOTYPE = 'autophagy'
+PHENOTYPE = 'nii'
 
 # dna damage parameters
 BP1_FOCI_THRESHOLD = 3
@@ -122,6 +123,14 @@ def get_phenotype(row_data: Series,
 
         # getting phenotype
         phenotype_value = 'HighAutophagy' if row_value > LC3_FOCI_THRESHOLD else 'LowAutophagy'
+
+    elif phenotype == 'nii':
+
+        # getting phenotype col value
+        row_value = row_data['NII']
+
+        # getting phenotype
+        phenotype_value = row_value
 
     else:
 
