@@ -151,6 +151,32 @@ def add_dataset_col(df: DataFrame,
         current_group_index += 1
 
 
+def add_class_group_col(df: DataFrame) -> None:
+    """
+    Given a crops info df,
+    adds class group col,
+    adapting it should it be
+    a number.
+    """
+    # getting first element info
+    first_row = df.iloc[0]
+    first_class = first_row['first_class']
+    first_class_is_num = isinstance(first_class, float)
+
+    # checking whether class is a number
+    if first_class_is_num:
+
+        # adding class group col
+        df['class_group'] = df['class'].round()
+        df['class_group'] = df['class_group'].astype(int)
+        df['class_group'] = df['class_group'].astype(str)
+
+    else:
+
+        # adding class group col
+        df['class_group'] = df['class'].astype(str)
+
+
 def create_data_splits(crops_info_file: str,
                        images_folder: str,
                        extension: str,
@@ -168,8 +194,7 @@ def create_data_splits(crops_info_file: str,
 
     # adding class_group col
     print('adding class group col...')
-    crops_df['class_group'] = crops_df['class'].round()
-    crops_df['class_group'] = crops_df['class_group'].astype(int)
+    add_class_group_col(df=crops_df)
 
     # adding dataset col
     print('adding dataset col...')
