@@ -1,9 +1,9 @@
-# ImagesFilter create data splits module
+# NIIRegressor create data splits module
 
 print('initializing...')  # noqa
 
 # Code destined to splitting data for
-# ImagesFilter classification network.
+# NIIRegressor regression network.
 
 ######################################################################
 # imports
@@ -12,6 +12,7 @@ print('initializing...')  # noqa
 print('importing required libraries...')  # noqa
 from os.path import join
 from random import shuffle
+from pandas import read_csv
 from argparse import ArgumentParser
 from random import seed as set_seed
 from src.utils.aux_funcs import enter_to_continue
@@ -41,12 +42,18 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'ImagesFilter create data splits module'
+    description = 'NIIRegressor create data splits module'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
 
     # adding arguments to parser
+
+    # crops info file param
+    parser.add_argument('-c', '--crops-info-file',
+                        dest='crops_info_file',
+                        required=True,
+                        help='defines path to crops info df (.csv) file')
 
     # images folder param
     parser.add_argument('-i', '--images-folder',
@@ -76,11 +83,15 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def create_data_splits(images_folder: str,
+def create_data_splits(crops_info_file: str,
+                       images_folder: str,
                        extension: str,
-                       output_folder: str,
-                       data_class: str
+                       output_folder: str
                        ) -> None:
+    # reading crops info file
+    crops_df = read_csv(crops_info_file)
+    exit()
+
     # getting respective data class folders
     input_folder = join(images_folder, data_class)
 
@@ -157,6 +168,9 @@ def main():
     # getting args dict
     args_dict = get_args_dict()
 
+    # getting crops info file param
+    crops_info_file = args_dict['crops_info_file']
+
     # getting images folder param
     images_folder = args_dict['images_folder']
 
@@ -172,19 +186,11 @@ def main():
     # waiting for user input
     enter_to_continue()
 
-    # splitting included data
-    print('splitting images from class "included"...')
-    create_data_splits(images_folder=images_folder,
+    # splitting data
+    create_data_splits(crops_info_file=crops_info_file,
+                       images_folder=images_folder,
                        extension=extension,
-                       output_folder=output_folder,
-                       data_class='included')
-
-    # splitting excluded data
-    print('splitting images from class "excluded"...')
-    create_data_splits(images_folder=images_folder,
-                       extension=extension,
-                       output_folder=output_folder,
-                       data_class='excluded')
+                       output_folder=output_folder)
 
 ######################################################################
 # running main function
