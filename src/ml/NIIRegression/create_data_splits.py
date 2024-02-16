@@ -13,10 +13,12 @@ print('importing required libraries...')  # noqa
 from os.path import join
 from random import shuffle
 from pandas import read_csv
+from pandas import DataFrame
 from argparse import ArgumentParser
 from random import seed as set_seed
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import copy_multiple_files
+from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
 print('all required libraries successfully imported.')  # noqa
@@ -83,75 +85,174 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
+def add_dataset_col(df: DataFrame,
+                    train_size: float,
+                    val_size: float,
+                    test_size: float
+                    ) -> None:
+    """
+    Given an annotations df, groups
+    df by grouper cols, and adds
+    dataset column, balancing train/test
+    according to the df groups.
+    """
+    # defining split col name
+    split_col_name = 'split'
+
+    # adding placeholder "split" col
+    df[split_col_name] = None
+
+    # defining group col
+    group_col = 'class_group'
+
+    # grouping df
+    df_groups = df.groupby(group_col)
+
+    # getting groups num
+    groups_num = len(df_groups)
+
+    # printing execution message
+    f_string = f'{groups_num} groups were found based on: {group_col}'
+    print(f_string)
+
+    # defining starter for current group index
+    current_group_index = 1
+
+    # iterating over groups
+    for df_name, df_group in df_groups:
+
+        # printing execution message
+        base_string = 'adding data split col to group #INDEX# of #TOTAL#'
+        print_progress_message(base_string=base_string,
+                               index=current_group_index,
+                               total=groups_num)
+
+        # randomly splitting current group rows
+        current_test_split = df_group.sample(frac=test_size)
+        rest_df = df_group.drop(current_test_split.index)
+        val_frac = val_size / (train_size + val_size)
+        current_val_split = rest_df.sample(frac=val_frac)
+        current_train_split = rest_df.drop(current_val_split.index)
+
+        # getting train/test indices
+        train_indices = current_train_split.index
+        val_indices = current_val_split.index
+        test_indices = current_test_split.index
+
+        # adding split column based on current samples
+        for train_index in train_indices:
+            df.at[train_index, split_col_name] = 'train'
+        for val_index in val_indices:
+            df.at[val_index, split_col_name] = 'val'
+        for test_index in test_indices:
+            df.at[test_index, split_col_name] = 'test'
+
+        # updating current group index
+        current_group_index += 1
+
+
 def create_data_splits(crops_info_file: str,
                        images_folder: str,
                        extension: str,
                        output_folder: str
                        ) -> None:
     # reading crops info file
+    print('reading crops info file...')
     crops_df = read_csv(crops_info_file)
-    exit()
 
-    # getting respective data class folders
-    input_folder = join(images_folder, data_class)
+    # dropping unrequired columns
+    print('dropping unrequired columns...')
+    cols_to_keep = ['crop_name',
+                    'class']
+    crops_df = crops_df[cols_to_keep]
 
-    # getting images in input folder
-    print('getting images in input folder...')
-    images = get_specific_files_in_folder(path_to_folder=input_folder,
-                                          extension=extension)
+    # adding class_group col
+    print('adding class group col...')
+    crops_df['class_group'] = crops_df['class'].round()
+    crops_df['class_group'] = crops_df['class_group'].astype(int)
 
-    # removing extension (already add later on code) <- required to work with already existent aux_func
-    images = [image.replace(extension, '')
-              for image
-              in images]
+    # adding dataset col
+    print('adding dataset col...')
+    add_dataset_col(df=crops_df,
+                    train_size=TRAIN_SPLIT,
+                    val_size=VAL_SPLIT,
+                    test_size=TEST_SPLIT)
+
+    # from matplotlib import pyplot as plt
+    # from seaborn import histplot
+    # histplot(data=crops_df,
+    #          x='class')
+    # plt.show()
+    # plt.close()
+    # exit()
+
+    # checking stratification
+    # a = crops_df[crops_df['class_group'] == 2]['split'].describe()
+    # print(a)
+    # a = crops_df[crops_df['class_group'] == 6]['split'].describe()
+    # print(a)
+    # a = crops_df[crops_df['class_group'] == 45]['split'].describe()
+    # print(a)
+    # exit()
 
     # getting images num
-    images_num = len(images)
-
-    # getting split sizes
-    train_size = int(TRAIN_SPLIT * images_num)
-    val_size = int(VAL_SPLIT * images_num)
-    test_size = int(TEST_SPLIT * images_num)
-
-    # getting subfolder paths
-    train_folder = join(output_folder, 'train', data_class)
-    val_folder = join(output_folder, 'val', data_class)
-    test_folder = join(output_folder, 'test', data_class)
-
-    # printing execution message
-    f_string = f'found {images_num} images in "{data_class}" input folder.\n'
-    f_string += f'{train_size} will be copied to "train" folder.\n'
-    f_string += f'{val_size} will be copied to "val" folder.\n'
-    f_string += f'{test_size} will be copied to "test" folder.'
-    print(f_string)
-
-    # shuffling data (randomizes order)
-    print('shuffling images list...')
-    shuffle(images)
+    images_num = len(crops_df)
 
     # getting splits
-    print('creating splits...')
-    train_files = images[0: train_size]
-    val_files = images[train_size: train_size + val_size]
-    test_files = images[train_size + val_size: -1]
+    print('getting splits file paths...')
+    train_files = crops_df[crops_df['split'] == 'train']
+    val_files = crops_df[crops_df['split'] == 'val']
+    test_files = crops_df[crops_df['split'] == 'test']
+
+    # getting split sizes
+    train_size = len(train_files)
+    val_size = len(val_files)
+    test_size = len(test_files)
+
+    # getting split ratios
+    train_ratio = train_size / images_num
+    val_ratio = val_size / images_num
+    test_ratio = test_size / images_num
+
+    # getting split percentages
+    train_percentage = train_ratio * 100
+    val_percentage = val_ratio * 100
+    test_percentage = test_ratio * 100
+
+    # rounding values
+    train_percentage_round = round(train_percentage)
+    val_percentage_round = round(val_percentage)
+    test_percentage_round = round(test_percentage)
+
+    # getting subfolder paths
+    train_folder = join(output_folder, 'train')
+    val_folder = join(output_folder, 'val')
+    test_folder = join(output_folder, 'test')
+
+    # printing execution message
+    f_string = f'found {images_num} (100%) images in input folder.\n'
+    f_string += f'{train_size} ({train_percentage_round}%) will be copied to "train" folder.\n'
+    f_string += f'{val_size} ({val_percentage_round}%) will be copied to "val" folder.\n'
+    f_string += f'{test_size} ({test_percentage_round}%) will be copied to "test" folder.'
+    print(f_string)
 
     # copying train images
     print('copying train images...')
-    copy_multiple_files(src_folder_path=input_folder,
+    copy_multiple_files(src_folder_path=images_folder,
                         dst_folder_path=train_folder,
                         files_list=train_files,
                         file_extension=extension)
 
     # copying val images
     print('copying val images...')
-    copy_multiple_files(src_folder_path=input_folder,
+    copy_multiple_files(src_folder_path=images_folder,
                         dst_folder_path=val_folder,
                         files_list=val_files,
                         file_extension=extension)
 
     # copying test images
     print('copying test images...')
-    copy_multiple_files(src_folder_path=input_folder,
+    copy_multiple_files(src_folder_path=images_folder,
                         dst_folder_path=test_folder,
                         files_list=test_files,
                         file_extension=extension)
@@ -184,7 +285,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # splitting data
     create_data_splits(crops_info_file=crops_info_file,

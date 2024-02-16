@@ -76,7 +76,10 @@ def add_dataset_col(df: DataFrame,
                     test_size: float
                     ) -> None:
     """
-    Docstring.
+    Given an annotations df, groups
+    df by grouper cols, and adds
+    dataset column, balancing train/test
+    according to the df groups.
     """
     # defining split col name
     split_col_name = 'split'
@@ -85,8 +88,9 @@ def add_dataset_col(df: DataFrame,
     df[split_col_name] = None
 
     # defining groups
-    # TODO: add class here
-    groups_list = ['cell_line', 'treatment', 'confluence_group']
+    groups_list = ['cell_line',
+                   'treatment',
+                   'confluence_group']
 
     # grouping df
     df_groups = df.groupby(groups_list)
@@ -95,7 +99,7 @@ def add_dataset_col(df: DataFrame,
     groups_num = len(df_groups)
 
     # printing execution message
-    f_string = f'{groups_num} were found based on: {groups_list}'
+    f_string = f'{groups_num} groups were found based on: {groups_list}'
     print(f_string)
 
     # iterating over groups
