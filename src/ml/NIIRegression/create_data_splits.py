@@ -1,9 +1,10 @@
-# NIIRegressor create data splits module
+# create data splits module
 
 print('initializing...')  # noqa
 
 # Code destined to splitting data for
-# NIIRegressor regression network.
+# single cell crops regression and/or
+# classification networks.
 
 ######################################################################
 # imports
@@ -11,7 +12,6 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 from os.path import join
-from random import shuffle
 from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
@@ -44,7 +44,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'NIIRegressor create data splits module'
+    description = 'create data splits module'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)

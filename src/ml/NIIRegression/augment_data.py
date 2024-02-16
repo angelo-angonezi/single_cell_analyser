@@ -1,9 +1,10 @@
-# NIIRegression augment data module
+# augment data module
 
 print('initializing...')  # noqa
 
 # Code destined to augmenting data for
-# NIIRegression classification network.
+# single cell crops regression and/or
+# classification networks.
 
 ######################################################################
 # imports
@@ -31,7 +32,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'NIIRegression data augmentation module'
+    description = 'data augmentation module'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
