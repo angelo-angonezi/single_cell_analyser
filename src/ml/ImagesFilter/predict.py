@@ -197,16 +197,16 @@ def main():
     args_dict = get_args_dict()
 
     # getting images folder param
-    images_folder = str(args_dict['images_folder'])
+    images_folder = args_dict['images_folder']
 
     # getting images extension param
-    extension = str(args_dict['extension'])
+    extension = args_dict['extension']
 
     # getting model path param
-    model_path = str(args_dict['model_path'])
+    model_path = args_dict['model_path']
 
     # getting output path param
-    output_path = str(args_dict['output_path'])
+    output_path = args_dict['output_path']
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)

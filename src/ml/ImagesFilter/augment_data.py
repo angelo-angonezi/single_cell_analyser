@@ -227,13 +227,13 @@ def main():
     args_dict = get_args_dict()
 
     # getting images folder param
-    images_folder = str(args_dict['images_folder'])
+    images_folder = args_dict['images_folder']
 
     # getting images extension param
-    extension = str(args_dict['extension'])
+    extension = args_dict['extension']
 
     # getting output folder param
-    output_folder = str(args_dict['output_folder'])
+    output_folder = args_dict['output_folder']
 
     # getting resize param
     resize = bool(args_dict['resize'])
@@ -242,7 +242,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running augment_data function
     augment_data(images_folder=images_folder,

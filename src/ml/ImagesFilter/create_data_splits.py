@@ -10,18 +10,10 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-from cv2 import flip
-from cv2 import imread
-from cv2 import rotate
-from cv2 import imwrite
 from os.path import join
-from cv2 import ROTATE_180
 from random import shuffle
-from cv2 import convertScaleAbs
 from argparse import ArgumentParser
 from random import seed as set_seed
-from src.utils.aux_funcs import IMAGE_SIZE
-from src.utils.aux_funcs import resize_image
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import copy_multiple_files
 from src.utils.aux_funcs import print_execution_parameters
@@ -166,13 +158,13 @@ def main():
     args_dict = get_args_dict()
 
     # getting images folder param
-    images_folder = str(args_dict['images_folder'])
+    images_folder = args_dict['images_folder']
 
     # getting images extension param
-    extension = str(args_dict['extension'])
+    extension = args_dict['extension']
 
     # getting output folder param
-    output_folder = str(args_dict['output_folder'])
+    output_folder = args_dict['output_folder']
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)

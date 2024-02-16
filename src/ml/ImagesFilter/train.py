@@ -401,13 +401,13 @@ def main():
     args_dict = get_args_dict()
 
     # getting splits folder param
-    splits_folder = str(args_dict['splits_folder'])
+    splits_folder = args_dict['splits_folder']
 
     # getting logs folder param
-    logs_folder = str(args_dict['logs_folder'])
+    logs_folder = args_dict['logs_folder']
 
     # getting model path param
-    model_path = str(args_dict['model_path'])
+    model_path = args_dict['model_path']
 
     # getting output path param
     learning_rate = float(args_dict['learning_rate'])
@@ -419,7 +419,7 @@ def main():
     batch_size = int(args_dict['batch_size'])
 
     # getting model type param
-    model_type = str(args_dict['model_type'])
+    model_type = args_dict['model_type']
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
@@ -430,7 +430,7 @@ def main():
     print(using_gpu_str)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running image_filter_train function
     image_filter_train(splits_folder=splits_folder,

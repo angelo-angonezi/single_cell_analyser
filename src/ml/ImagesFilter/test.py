@@ -169,13 +169,13 @@ def main():
     args_dict = get_args_dict()
 
     # getting splits folder param
-    splits_folder = str(args_dict['splits_folder'])
+    splits_folder = args_dict['splits_folder']
 
     # getting batch size param
     batch_size = int(args_dict['batch_size'])
 
     # getting model path param
-    model_path = str(args_dict['model_path'])
+    model_path = args_dict['model_path']
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
