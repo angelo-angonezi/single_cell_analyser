@@ -58,6 +58,12 @@ def get_args_dict() -> dict:
                         required=True,
                         help='defines splits folder name (contains "train", "val" and "test" subfolders).')
 
+    # dataset file param
+    parser.add_argument('-d', '--dataset-file',
+                        dest='dataset_file',
+                        required=True,
+                        help='defines path to dataset df (.csv) file')
+
     # logs folder param
     parser.add_argument('-l', '--logs-folder',
                         dest='logs_folder',
@@ -109,6 +115,7 @@ def get_model():
 
 
 def nii_regression_train(splits_folder: str,
+                         dataset_file: str,
                          logs_folder: str,
                          model_path: str,
                          learning_rate: float,
@@ -116,6 +123,9 @@ def nii_regression_train(splits_folder: str,
                          batch_size: int,
                          model_type: str
                          ) -> None:
+    """
+    Trains nii regression model.
+    """
     # getting data splits
     # TODO: update get data function for regression network!
     train_data = get_data_split(splits_folder=splits_folder,
@@ -175,6 +185,9 @@ def main():
     # getting splits folder param
     splits_folder = args_dict['splits_folder']
 
+    # getting dataset file param
+    dataset_file = args_dict['dataset_file']
+
     # getting logs folder param
     logs_folder = args_dict['logs_folder']
 
@@ -206,6 +219,7 @@ def main():
 
     # running nii_regression_train function
     nii_regression_train(splits_folder=splits_folder,
+                         dataset_file=dataset_file,
                          logs_folder=logs_folder,
                          model_path=model_path,
                          learning_rate=learning_rate,

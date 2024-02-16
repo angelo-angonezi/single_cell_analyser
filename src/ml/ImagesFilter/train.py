@@ -12,6 +12,7 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 import tensorflow as tf
+from tensorflow import Tensor
 from keras.layers import Dense
 from keras.layers import Conv2D
 from keras.layers import Flatten
@@ -253,7 +254,13 @@ def get_sequential_model(learning_rate: float,
     return model
 
 
-def scheduler(epoch, lr):
+def scheduler(epoch: int,
+              lr: Tensor
+              ) -> Tensor:
+    """
+    Given an epoch, and a learning
+    rate, returns updated learning rate.
+    """
     if epoch < 20:
         return lr
     else:
@@ -268,6 +275,9 @@ def image_filter_train(splits_folder: str,
                        batch_size: int,
                        model_type: str
                        ) -> None:
+    """
+    Trains image filter model.
+    """
     # getting data splits
     train_data = get_data_split(splits_folder=splits_folder,
                                 split='train',
