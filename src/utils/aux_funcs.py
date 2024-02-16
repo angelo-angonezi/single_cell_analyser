@@ -1839,17 +1839,28 @@ def augment_image(image_name: str,
                   output_folder: str,
                   resize: bool
                   ) -> None:
+    # adding extension to image name
+    image_name = f'{image_name}{extension}'
+
+    # defining base save path
+    save_path = join(output_folder,
+                     image_name)
+
+    # getting final save path (used to check current image augmentation)
+    final_save_path = save_path.replace('.jpg', '_hu.jpg')
+
+    # checking whether current save path already exists
+    if exists(final_save_path):
+
+        # skipping current image
+        return None
+
     # getting current image path
-    image_path = f'{image_name}{extension}'
     image_path = join(images_folder,
-                      image_path)
+                      image_name)
 
     # opening current image
     open_image = imread(image_path)
-
-    # defining save path
-    save_path = join(output_folder,
-                     image_name)
 
     # checking resize toggle
     if resize:
@@ -1872,9 +1883,9 @@ def augment_image(image_name: str,
 
     # defining alpha and beta
     alpha_d = 0.9  # Contrast control
-    beta_d = -2  # Brightness control
+    beta_d = -2    # Brightness control
     alpha_u = 1.1  # Contrast control
-    beta_u = 5  # Brightness control
+    beta_u = 5     # Brightness control
 
     # getting contrast/brightness changed image
     od_contrast_image = convertScaleAbs(open_image,

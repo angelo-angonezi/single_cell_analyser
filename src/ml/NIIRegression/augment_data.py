@@ -100,6 +100,10 @@ def augment_data_split(df: DataFrame,
     # getting df rows
     df_rows = split_df.iterrows()
 
+    # updating output folder
+    output_folder = join(output_folder,
+                         split)
+
     # getting rows num
     rows_num = len(split_df)
 
@@ -224,25 +228,26 @@ def augment_data(dataset_file: str,
 
     # augmenting train data
     print('augmenting train data...')
-    # augment_data_split(df=dataset_df,
-    #                    split='train',
-    #                    splits_folder=splits_folder,
-    #                    extension=extension,
-    #                    output_folder=output_folder,
-    #                    resize=resize)
+    augment_data_split(df=dataset_df,
+                       split='train',
+                       splits_folder=splits_folder,
+                       extension=extension,
+                       output_folder=output_folder,
+                       resize=resize)
 
     # augmenting val data
     print('augmenting val data...')
-    # augment_data_split(df=dataset_df,
-    #                    split='val',
-    #                    splits_folder=splits_folder,
-    #                    extension=extension,
-    #                    output_folder=output_folder,
-    #                    resize=resize)
+    augment_data_split(df=dataset_df,
+                       split='val',
+                       splits_folder=splits_folder,
+                       extension=extension,
+                       output_folder=output_folder,
+                       resize=resize)
 
     # getting augmented df
     print('getting augmented df..')
     augmented_df = get_augmented_df(df=dataset_df)
+    augmented_num = len(augmented_df)
 
     # saving augmented images dataset df
     print('saving augmented images dataset df...')
@@ -254,6 +259,7 @@ def augment_data(dataset_file: str,
 
     # printing execution message
     print('augmentation complete!')
+    print(f'a total of {augmented_num} images have been saved to augmentation folder')
     print(f'results saved to "{output_folder}".')
 
 ######################################################################
@@ -284,7 +290,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running augment_data function
     augment_data(dataset_file=dataset_file,
