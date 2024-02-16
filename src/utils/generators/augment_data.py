@@ -46,8 +46,8 @@ def get_args_dict() -> dict:
                         help='defines path to dataset df (.csv) file')
 
     # input folder param
-    parser.add_argument('-i', '--splits-folder',
-                        dest='splits_folder',
+    parser.add_argument('-i', '--input-folder',
+                        dest='input_folder',
                         required=True,
                         help='defines path to folder containing train/val subfolders.')
 
@@ -83,7 +83,7 @@ def get_args_dict() -> dict:
 
 def augment_data_split(df: DataFrame,
                        split: str,
-                       splits_folder: str,
+                       input_folder: str,
                        extension: str,
                        output_folder: str,
                        resize: bool
@@ -101,7 +101,9 @@ def augment_data_split(df: DataFrame,
     # getting df rows
     df_rows = split_df.iterrows()
 
-    # updating output folder
+    # updating input/output folders
+    input_folder = join(input_folder,
+                         split)
     output_folder = join(output_folder,
                          split)
 
@@ -126,7 +128,7 @@ def augment_data_split(df: DataFrame,
         # augmenting current image
         augment_image(image_name=file_name,
                       extension=extension,
-                      images_folder=splits_folder,
+                      images_folder=input_folder,
                       output_folder=output_folder,
                       resize=resize)
 
@@ -218,7 +220,7 @@ def get_augmented_df(df: DataFrame) -> DataFrame:
 
 
 def augment_data(dataset_file: str,
-                 splits_folder: str,
+                 input_folder: str,
                  extension: str,
                  output_folder: str,
                  resize: bool
@@ -235,7 +237,7 @@ def augment_data(dataset_file: str,
     print('augmenting train data...')
     augment_data_split(df=dataset_df,
                        split='train',
-                       splits_folder=splits_folder,
+                       input_folder=input_folder,
                        extension=extension,
                        output_folder=output_folder,
                        resize=resize)
@@ -244,7 +246,7 @@ def augment_data(dataset_file: str,
     print('augmenting val data...')
     augment_data_split(df=dataset_df,
                        split='val',
-                       splits_folder=splits_folder,
+                       input_folder=input_folder,
                        extension=extension,
                        output_folder=output_folder,
                        resize=resize)
@@ -280,8 +282,8 @@ def main():
     # getting dataset file param
     dataset_file = args_dict['dataset_file']
 
-    # getting splits folder param
-    splits_folder = args_dict['splits_folder']
+    # getting input folder param
+    input_folder = args_dict['input_folder']
 
     # getting images extension param
     extension = args_dict['extension']
@@ -300,7 +302,7 @@ def main():
 
     # running augment_data function
     augment_data(dataset_file=dataset_file,
-                 splits_folder=splits_folder,
+                 input_folder=input_folder,
                  extension=extension,
                  output_folder=output_folder,
                  resize=resize)
