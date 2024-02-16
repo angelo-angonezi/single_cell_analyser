@@ -85,6 +85,7 @@ def add_dataset_col(df: DataFrame,
     df[split_col_name] = None
 
     # defining groups
+    # TODO: add class here
     groups_list = ['cell_line', 'treatment', 'confluence_group']
 
     # grouping df
