@@ -117,6 +117,7 @@ def augment_data(images_folder: str,
 
         # augmenting current image
         augment_image(image_name=image,
+                      extension=extension,
                       images_folder=images_folder,
                       output_folder=output_folder,
                       resize=resize)

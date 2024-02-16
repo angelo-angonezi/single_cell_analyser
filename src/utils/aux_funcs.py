@@ -1834,13 +1834,15 @@ def get_pixel_intensity(file_path: str,
 
 
 def augment_image(image_name: str,
+                  extension: str,
                   images_folder: str,
                   output_folder: str,
                   resize: bool
                   ) -> None:
     # getting current image path
+    image_path = f'{image_name}{extension}'
     image_path = join(images_folder,
-                      image_name)
+                      image_path)
 
     # opening current image
     open_image = imread(image_path)

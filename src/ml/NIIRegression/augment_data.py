@@ -10,11 +10,15 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
+from os.path import join
+from pandas import concat
+from pandas import read_csv
+from pandas import DataFrame
 from argparse import ArgumentParser
+from src.utils.aux_funcs import augment_image
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
-from src.utils.aux_funcs import get_specific_files_in_folder
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -34,17 +38,17 @@ def get_args_dict() -> dict:
 
     # adding arguments to parser
 
-    # crops info file param
-    parser.add_argument('-c', '--crops-info-file',
-                        dest='crops_info_file',
+    # dataset file param
+    parser.add_argument('-d', '--dataset-file',
+                        dest='dataset_file',
                         required=True,
-                        help='defines path to crops info df (.csv) file')
+                        help='defines path to dataset df (.csv) file')
 
     # input folder param
-    parser.add_argument('-i', '--input-folder',
-                        dest='input_folder',
+    parser.add_argument('-i', '--splits-folder',
+                        dest='splits_folder',
                         required=True,
-                        help='defines path to folder containing images to be augmented.')
+                        help='defines path to folder containing train/val subfolders.')
 
     # images extension param
     parser.add_argument('-e', '--extension',
@@ -56,7 +60,7 @@ def get_args_dict() -> dict:
     parser.add_argument('-o', '--output-folder',
                         dest='output_folder',
                         required=True,
-                        help='defines path to folder which will contain augmented images.')
+                        help='defines path to folder which will contain augmented images (must contain train/val subfolders).')  # noqa
 
     # resize param
     parser.add_argument('-r', '--resize',
@@ -76,53 +80,180 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def augment_data(images_folder: str,
+def augment_data_split(df: DataFrame,
+                       split: str,
+                       splits_folder: str,
+                       extension: str,
+                       output_folder: str,
+                       resize: bool
+                       ) -> None:
+    """
+    Given a dataset df and a folder
+    containing respective images,
+    augments data specified by
+    given split parameter, saving
+    augmented data to output folder.
+    """
+    # filtering df by split
+    split_df = df[df['split'] == split]
+
+    # getting df rows
+    df_rows = split_df.iterrows()
+
+    # getting rows num
+    rows_num = len(split_df)
+
+    # defining starter for current row index
+    current_row_index = 1
+
+    # iterating over df rows
+    for row_index, row_data in df_rows:
+
+        # printing execution message
+        base_string = f'augmenting data for "{split}" split #INDEX# #TOTAL#'
+        print_progress_message(base_string=base_string,
+                               index=current_row_index,
+                               total=rows_num)
+
+        # getting current row file path
+        file_name = row_data['crop_name']
+
+        # augmenting current image
+        augment_image(image_name=file_name,
+                      extension=extension,
+                      images_folder=splits_folder,
+                      output_folder=output_folder,
+                      resize=resize)
+
+        # updating current row index
+        current_row_index += 1
+
+
+def get_augmented_df(df: DataFrame) -> DataFrame:
+    """
+    Given a dataset df, adds
+    augmented images rows,
+    returning updated df.
+    """
+    # defining placeholder value for dfs list
+    dfs_list = []
+
+    # getting df rows
+    df_rows = df.iterrows()
+
+    # getting rows num
+    rows_num = len(df)
+
+    # defining augmentation "extensions"
+    augmentation_list = ['o',
+                         'r',
+                         'v',
+                         'h',
+                         'od',
+                         'rd',
+                         'vd',
+                         'hd',
+                         'ou',
+                         'ru',
+                         'vu',
+                         'hu']
+
+    # defining starter for current row index
+    current_row_index = 1
+
+    # iterating over df rows
+    for row_index, row_data in df_rows:
+
+        # printing execution message
+        base_string = 'getting augmented df for image #INDEX# of #TOTAL#'
+        print_progress_message(base_string=base_string,
+                               index=current_row_index,
+                               total=rows_num)
+
+        # getting current row file name
+        current_name = row_data['crop_name']
+
+        # getting current row file class
+        current_class = row_data['class']
+
+        # getting current row file split
+        current_split = row_data['split']
+
+        # getting current file expanded list
+        expanded_names = [f'{current_name}_{expansion}'
+                          for expansion
+                          in augmentation_list]
+
+        # getting expanded class list
+        expanded_class = [current_class for _ in expanded_names]
+
+        # getting expanded split list
+        expanded_splits = [current_split for _ in expanded_names]
+
+        # assembling current image dict
+        current_dict = {'crop_name': expanded_names,
+                        'class': expanded_class,
+                        'split': expanded_splits}
+
+        # assembling current image df
+        current_df = DataFrame(current_dict)
+
+        # appending current df to dfs list
+        dfs_list.append(current_df)
+
+        # updating current row index
+        current_row_index += 1
+
+    # concatenating dfs in dfs list
+    final_df = concat(dfs_list,
+                      ignore_index=True)
+
+    # returning updated df
+    return final_df
+
+
+def augment_data(dataset_file: str,
+                 splits_folder: str,
                  extension: str,
                  output_folder: str,
                  resize: bool
                  ) -> None:
-    # getting images in input folder
-    images = get_specific_files_in_folder(path_to_folder=images_folder,
-                                          extension=extension)
+    # reading dataset df
+    print('reading dataset df...')
+    dataset_df = read_csv(dataset_file)
 
-    # getting images num
-    images_num = len(images)
+    # augmenting train data
+    print('augmenting train data...')
+    # augment_data_split(df=dataset_df,
+    #                    split='train',
+    #                    splits_folder=splits_folder,
+    #                    extension=extension,
+    #                    output_folder=output_folder,
+    #                    resize=resize)
 
-    # setting number of modifications
-    mods_num = 12  # imwrite calls count inside augment_image
-    final_imgs_num = images_num * mods_num
+    # augmenting val data
+    print('augmenting val data...')
+    # augment_data_split(df=dataset_df,
+    #                    split='val',
+    #                    splits_folder=splits_folder,
+    #                    extension=extension,
+    #                    output_folder=output_folder,
+    #                    resize=resize)
 
-    # printing execution message
-    f_string = f'found {images_num} images in input folder.'
-    print(f_string)
+    # getting augmented df
+    print('getting augmented df..')
+    augmented_df = get_augmented_df(df=dataset_df)
 
-    # defining placeholder value for current_image_index
-    current_image_index = 1
-
-    # iterating over images
-    for image in images:
-
-        # getting current augmented images
-        current_augmented_images = current_image_index * mods_num
-
-        # printing execution message
-        base_string = f'augmenting image #INDEX# of #TOTAL# (total imgs: {current_augmented_images})'
-        print_progress_message(base_string=base_string,
-                               index=current_image_index,
-                               total=images_num)
-
-        # augmenting current image
-        augment_image(image_name=image,
-                      images_folder=images_folder,
-                      output_folder=output_folder,
-                      resize=resize)
-
-        # updating current_image_index
-        current_image_index += 1
+    # saving augmented images dataset df
+    print('saving augmented images dataset df...')
+    save_name = 'augmented_dataset_df.csv'
+    save_path = join(output_folder,
+                     save_name)
+    augmented_df.to_csv(save_path,
+                        index=False)
 
     # printing execution message
     print('augmentation complete!')
-    print(f'augmented data set now contains {final_imgs_num} images.')
     print(f'results saved to "{output_folder}".')
 
 ######################################################################
@@ -134,8 +265,11 @@ def main():
     # getting args dict
     args_dict = get_args_dict()
 
-    # getting images folder param
-    images_folder = args_dict['images_folder']
+    # getting dataset file param
+    dataset_file = args_dict['dataset_file']
+
+    # getting splits folder param
+    splits_folder = args_dict['splits_folder']
 
     # getting images extension param
     extension = args_dict['extension']
@@ -150,10 +284,11 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running augment_data function
-    augment_data(images_folder=images_folder,
+    augment_data(dataset_file=dataset_file,
+                 splits_folder=splits_folder,
                  extension=extension,
                  output_folder=output_folder,
                  resize=resize)
