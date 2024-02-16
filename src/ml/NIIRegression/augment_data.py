@@ -226,6 +226,10 @@ def augment_data(dataset_file: str,
     print('reading dataset df...')
     dataset_df = read_csv(dataset_file)
 
+    # filtering df for train/val data
+    dataset_df = dataset_df[dataset_df['split'] != 'test']
+    original_num = len(dataset_df)
+
     # augmenting train data
     print('augmenting train data...')
     augment_data_split(df=dataset_df,
@@ -259,7 +263,8 @@ def augment_data(dataset_file: str,
 
     # printing execution message
     print('augmentation complete!')
-    print(f'a total of {augmented_num} images have been saved to augmentation folder')
+    print(f'{original_num} images have been successfully augmented.')
+    print(f'a total of {augmented_num} images have been saved to augmentation folder.')
     print(f'results saved to "{output_folder}".')
 
 ######################################################################
