@@ -178,31 +178,29 @@ def create_data_splits(crops_info_file: str,
                     val_size=VAL_SPLIT,
                     test_size=TEST_SPLIT)
 
-    # from matplotlib import pyplot as plt
-    # from seaborn import histplot
-    # histplot(data=crops_df,
-    #          x='class')
-    # plt.show()
-    # plt.close()
-    # exit()
-
-    # checking stratification
-    # a = crops_df[crops_df['class_group'] == 2]['split'].describe()
-    # print(a)
-    # a = crops_df[crops_df['class_group'] == 6]['split'].describe()
-    # print(a)
-    # a = crops_df[crops_df['class_group'] == 45]['split'].describe()
-    # print(a)
-    # exit()
+    # saving df
+    print('saving dataset df...')
+    save_name = 'dataset_df.csv'
+    save_path = join(output_folder,
+                     save_name)
+    crops_df.to_csv(save_path,
+                    index=False)
 
     # getting images num
     images_num = len(crops_df)
 
-    # getting splits
-    print('getting splits file paths...')
-    train_files = crops_df[crops_df['split'] == 'train']
-    val_files = crops_df[crops_df['split'] == 'val']
-    test_files = crops_df[crops_df['split'] == 'test']
+    # printing execution message
+    print('getting images...')
+
+    # getting splits dfs
+    train_df = crops_df[crops_df['split'] == 'train']
+    val_df = crops_df[crops_df['split'] == 'val']
+    test_df = crops_df[crops_df['split'] == 'test']
+
+    # getting splits paths
+    train_files = train_df['crop_name'].to_list()
+    val_files = val_df['crop_name'].to_list()
+    test_files = test_df['crop_name'].to_list()
 
     # getting split sizes
     train_size = len(train_files)
@@ -285,7 +283,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # splitting data
     create_data_splits(crops_info_file=crops_info_file,
