@@ -1,10 +1,9 @@
-# ImagesFilter train module
+# NIIRegression train module
 
 print('initializing...')  # noqa
 
 # Code destined to training neural network
-# to classify images as "included" or "excluded"
-# from analyses.
+# to regress NII from single cell crops.
 
 ######################################################################
 # imports
@@ -23,7 +22,6 @@ from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 from keras.layers import MaxPooling2D
 from keras.callbacks import TensorBoard
-from keras.callbacks import LearningRateScheduler
 from keras.applications import ResNet50
 from src.utils.aux_funcs import IMAGE_SIZE
 from keras.losses import BinaryCrossentropy
@@ -32,6 +30,7 @@ from keras.engine.sequential import Sequential
 from src.utils.aux_funcs import normalize_data
 from src.utils.aux_funcs import get_data_split
 from keras.applications import InceptionResNetV2
+from keras.callbacks import LearningRateScheduler
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
@@ -46,7 +45,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'ImagesFilter train module'
+    description = 'NIIRegression train module'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
@@ -105,247 +104,20 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_resnet_model(input_shape: tuple) -> Sequential:
-    """
-    Given an input shape, returns
-    resnet-based model.
-    """
-    # defining base model
-    model = Sequential()
-
-    # getting resnet base layers
-    base_layers = ResNet50(include_top=False,
-                           input_shape=input_shape,
-                           pooling='max',
-                           weights='imagenet')
-
-    # setting resnet layers as untrainable
-    for layer in base_layers.layers:
-        layer.trainable = False
-
-    # adding resnet layers
-    model.add(base_layers)
-
-    # final dense layer
-    model.add(Dense(1, activation='sigmoid'))
-
-    # returning model
-    return model
+def get_model():
+    pass
 
 
-def get_inception_model(input_shape: tuple) -> Sequential:
-    """
-    Given an input shape, returns
-    inception-based model.
-    """
-    # defining base model
-    model = Sequential()
-
-    # getting resnet base layers
-    base_layers = InceptionResNetV2(include_top=False,
-                                    input_shape=input_shape,
-                                    pooling='max',
-                                    weights='imagenet')
-
-    # setting resnet layers as untrainable
-    for layer in base_layers.layers:
-        layer.trainable = False
-
-    # adding resnet layers
-    model.add(base_layers)
-
-    # final dense layer
-    model.add(Dense(1, activation='sigmoid'))
-
-    # returning model
-    return model
-
-
-def get_new_model(input_shape: tuple) -> Sequential:
-    """
-    Given an input shape, returns
-    new self-made model.
-    """
-    # defining base model
-    model = Sequential()
-
-    # defining CNN layers
-
-    # first convolution + pooling (input layer)
-    model.add(Conv2D(filters=32,
-                     kernel_size=(5, 5),
-                     strides=1,
-                     activation='relu',
-                     input_shape=input_shape))
-    model.add(MaxPooling2D())
-
-    # second convolution + pooling
-    model.add(Conv2D(filters=16,
-                     kernel_size=(3, 3),
-                     strides=1,
-                     activation='relu'))
-    model.add(MaxPooling2D())
-
-    # flattening layer
-    model.add(Flatten())
-
-    # mid-dense layers
-    model.add(Dense(32, activation='relu'))
-
-    # final dense layer
-    model.add(Dense(1, activation='sigmoid'))
-
-    # returning model
-    return model
-
-
-def get_sequential_model(learning_rate: float,
-                         base_layers: str
-                         ) -> Sequential:
-    """
-    Given a model base and a learning rate,
-    returns compiled model.
-    """
-    # defining model input
-    image_height, image_width = IMAGE_SIZE
-    input_shape = (image_height, image_width, 3)  # 3 because it is an RGB image
-
-    # getting model
-    print('getting model...')
-
-    # defining placeholder value for model
-    model = None
-
-    # getting base layers
-    if base_layers == 'resnet':
-
-        # getting resnet layers
-        model = get_resnet_model(input_shape=input_shape)
-
-    elif base_layers == 'inception':
-
-        # getting inception layers
-        models = get_inception_model(input_shape=input_shape)
-
-    else:
-
-        # getting new layers
-        model = get_new_model(input_shape=input_shape)
-
-    # defining optimizer
-    optimizer = Adam(learning_rate=learning_rate)
-
-    # defining loss function
-    loss = 'binary_crossentropy'
-
-    # defining metrics
-    metrics = ['accuracy']
-
-    # compiling model
-    print('compiling model...')
-    model.compile(optimizer=optimizer,
-                  loss=loss,
-                  metrics=metrics)
-
-    # printing model summary
-    print('printing model summary...')
-    model.summary()
-
-    # returning model
-    return model
-
-
-def train_model(model,
-                train_data,
-                val_data,
-                epochs,
-                callback
-                ):
-    # training model (and storing history)
-    print('training model...')
-    train_history = model.fit(train_data,
-                              epochs=epochs,
-                              validation_data=val_data,
-                              callbacks=[callback])
-    print('training complete!')
-
-    # getting train history dict
-    history_dict = train_history.history
-
-    # returning train history
-    return history_dict
-
-
-def save_model(model,
-               model_path
-               ):
-    print('saving model...')
-    model.save(model_path)
-    print(f'model saved to "{model_path}".')
-
-
-def get_history_df(history_dict):
-    # creating data frame based on dict
-    history_df = DataFrame(history_dict)
-
-    # adding epoch column
-    history_df['epoch'] = [f for f in range(len(history_df))]
-
-    # melting df
-    history_df = history_df.melt('epoch')
-
-    # returning df
-    return history_df
-
-
-def generate_history_plot(logs_folder: str,
-                          df: DataFrame
-                          ) -> None:
-    # getting save path
-    save_name = 'train_history.png'
-    save_path = join(logs_folder,
-                     save_name)
-
-    # plotting history
-    print('plotting history...')
-    lineplot(data=df,
-             x='epoch',
-             y='value',
-             hue='variable')
-
-    # setting x ticks
-    epochs = df['epoch'].unique()
-    x_ticks = [e + 1 for e in epochs]
-    plt.xticks(x_ticks)
-
-    # setting plot title
-    title = 'Train History'
-    plt.title(title)
-
-    # setting y lim
-    plt.ylim(0.0, 1.0)
-
-    # saving figure
-    fig_path = join(save_path)
-    plt.savefig(fig_path)
-
-
-def scheduler(epoch, lr):
-    if epoch < 20:
-        return lr
-    else:
-        return lr * tf.math.exp(-0.1)
-
-
-def image_filter_train(splits_folder: str,
-                       logs_folder: str,
-                       model_path: str,
-                       learning_rate: float,
-                       epochs: int,
-                       batch_size: int,
-                       model_type: str
-                       ) -> None:
+def nii_regression_train(splits_folder: str,
+                         logs_folder: str,
+                         model_path: str,
+                         learning_rate: float,
+                         epochs: int,
+                         batch_size: int,
+                         model_type: str
+                         ) -> None:
     # getting data splits
+    # TODO: update get data function for regression network!
     train_data = get_data_split(splits_folder=splits_folder,
                                 split='train',
                                 batch_size=batch_size)
@@ -432,14 +204,14 @@ def main():
     # waiting for user input
     enter_to_continue()
 
-    # running image_filter_train function
-    image_filter_train(splits_folder=splits_folder,
-                       logs_folder=logs_folder,
-                       model_path=model_path,
-                       learning_rate=learning_rate,
-                       epochs=epochs,
-                       batch_size=batch_size,
-                       model_type=model_type)
+    # running nii_regression_train function
+    nii_regression_train(splits_folder=splits_folder,
+                         logs_folder=logs_folder,
+                         model_path=model_path,
+                         learning_rate=learning_rate,
+                         epochs=epochs,
+                         batch_size=batch_size,
+                         model_type=model_type)
 
 ######################################################################
 # running main function

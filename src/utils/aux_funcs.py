@@ -29,14 +29,17 @@ from os.path import exists
 from cv2 import ROTATE_180
 from cv2 import INTER_AREA
 from pandas import read_csv
+from seaborn import lineplot
 from pandas import DataFrame
 from cv2 import drawContours
 from cv2 import convertScaleAbs
 from numpy import add as np_add
 from numpy import count_nonzero
+from pandas import DataFrame
 from cv2 import IMREAD_GRAYSCALE
 from shutil import copy as sh_copy
 from cv2 import resize as cv_resize
+from matplotlib import pyplot as plt
 from numpy import zeros as np_zeroes
 from tensorflow import test as tf_test
 from scipy.optimize import linear_sum_assignment
@@ -1933,6 +1936,88 @@ def augment_image(image_name: str,
     imwrite(save_path.replace('.jpg', '_ru.jpg'), ru_contrast_image)
     imwrite(save_path.replace('.jpg', '_vu.jpg'), vu_contrast_image)
     imwrite(save_path.replace('.jpg', '_hu.jpg'), hu_contrast_image)
+
+
+def train_model(model,
+                train_data,
+                val_data,
+                epochs,
+                callback
+                ):
+    """
+    Given a model, data, and execution
+    parameters, trains model on given
+    data, returning train history.
+    """
+    # training model (and storing history)
+    print('training model...')
+    train_history = model.fit(train_data,
+                              epochs=epochs,
+                              validation_data=val_data,
+                              callbacks=[callback])
+    print('training complete!')
+
+    # getting train history dict
+    history_dict = train_history.history
+
+    # returning train history
+    return history_dict
+
+
+def get_history_df(history_dict):
+    """
+    Given a history dict (output from
+    train function), returns a history
+    df (useful for plotting data).
+    """
+    # creating data frame based on dict
+    history_df = DataFrame(history_dict)
+
+    # adding epoch column
+    history_df['epoch'] = [f for f in range(len(history_df))]
+
+    # melting df
+    history_df = history_df.melt('epoch')
+
+    # returning df
+    return history_df
+
+
+def generate_history_plot(df: DataFrame,
+                          logs_folder: str
+                          ) -> None:
+    """
+    Given a train history df,
+    generates history plot,
+    saving it to given logs folder.
+    """
+    # getting save path
+    save_name = 'train_history.png'
+    save_path = join(logs_folder,
+                     save_name)
+
+    # plotting history
+    print('plotting history...')
+    lineplot(data=df,
+             x='epoch',
+             y='value',
+             hue='variable')
+
+    # setting x ticks
+    epochs = df['epoch'].unique()
+    x_ticks = [e + 1 for e in epochs]
+    plt.xticks(x_ticks)
+
+    # setting plot title
+    title = 'Train History'
+    plt.title(title)
+
+    # setting y lim
+    plt.ylim(0.0, 1.0)
+
+    # saving figure
+    fig_path = join(save_path)
+    plt.savefig(fig_path)
 
 ######################################################################
 # end of current module

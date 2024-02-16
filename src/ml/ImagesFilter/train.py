@@ -12,27 +12,25 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 import tensorflow as tf
-from os.path import join
-from seaborn import lineplot
-from pandas import DataFrame
 from keras.layers import Dense
 from keras.layers import Conv2D
 from keras.layers import Flatten
 from keras.optimizers import Adam
 from argparse import ArgumentParser
-from matplotlib import pyplot as plt
 from keras.layers import MaxPooling2D
 from keras.callbacks import TensorBoard
-from keras.callbacks import LearningRateScheduler
 from keras.applications import ResNet50
 from src.utils.aux_funcs import IMAGE_SIZE
-from keras.losses import BinaryCrossentropy
+from src.utils.aux_funcs import train_model
 from src.utils.aux_funcs import is_using_gpu
 from keras.engine.sequential import Sequential
+from src.utils.aux_funcs import get_history_df
 from src.utils.aux_funcs import normalize_data
 from src.utils.aux_funcs import get_data_split
 from keras.applications import InceptionResNetV2
+from keras.callbacks import LearningRateScheduler
 from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import generate_history_plot
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
 
@@ -255,81 +253,6 @@ def get_sequential_model(learning_rate: float,
     return model
 
 
-def train_model(model,
-                train_data,
-                val_data,
-                epochs,
-                callback
-                ):
-    # training model (and storing history)
-    print('training model...')
-    train_history = model.fit(train_data,
-                              epochs=epochs,
-                              validation_data=val_data,
-                              callbacks=[callback])
-    print('training complete!')
-
-    # getting train history dict
-    history_dict = train_history.history
-
-    # returning train history
-    return history_dict
-
-
-def save_model(model,
-               model_path
-               ):
-    print('saving model...')
-    model.save(model_path)
-    print(f'model saved to "{model_path}".')
-
-
-def get_history_df(history_dict):
-    # creating data frame based on dict
-    history_df = DataFrame(history_dict)
-
-    # adding epoch column
-    history_df['epoch'] = [f for f in range(len(history_df))]
-
-    # melting df
-    history_df = history_df.melt('epoch')
-
-    # returning df
-    return history_df
-
-
-def generate_history_plot(logs_folder: str,
-                          df: DataFrame
-                          ) -> None:
-    # getting save path
-    save_name = 'train_history.png'
-    save_path = join(logs_folder,
-                     save_name)
-
-    # plotting history
-    print('plotting history...')
-    lineplot(data=df,
-             x='epoch',
-             y='value',
-             hue='variable')
-
-    # setting x ticks
-    epochs = df['epoch'].unique()
-    x_ticks = [e + 1 for e in epochs]
-    plt.xticks(x_ticks)
-
-    # setting plot title
-    title = 'Train History'
-    plt.title(title)
-
-    # setting y lim
-    plt.ylim(0.0, 1.0)
-
-    # saving figure
-    fig_path = join(save_path)
-    plt.savefig(fig_path)
-
-
 def scheduler(epoch, lr):
     if epoch < 20:
         return lr
@@ -378,8 +301,7 @@ def image_filter_train(splits_folder: str,
                                 callback=lr_callback)
 
     # saving model
-    save_model(model=model,
-               model_path=model_path)
+    model.save(model_path)
 
     # converting history dict to data frame
     history_df = get_history_df(history_dict=train_history)
