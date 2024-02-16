@@ -549,6 +549,7 @@ def get_summary_df(df: DataFrame) -> DataFrame:
     Given an autophagy df, returns
     data frame containing summary info.
     """
+    # TODO: convert to receive associations df instead of autophagy df
     # defining placeholder value for dfs list
     dfs_list = []
 

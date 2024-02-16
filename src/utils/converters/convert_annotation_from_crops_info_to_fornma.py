@@ -13,6 +13,7 @@ from pandas import concat
 from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
+from src.utils.aux_funcs import get_mask_area
 from src.utils.aux_funcs import get_axis_ratio
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import get_pixel_intensity
@@ -141,6 +142,7 @@ def convert_single_file(input_csv_file_path: str,
                                   current_crop_name_w_extension)
 
         # getting current crop mean pixel intensities
+        # TODO: check whether to use mean or median here
         red_mean = get_pixel_intensity(file_path=current_red_path,
                                        calc='mean')
         green_mean = get_pixel_intensity(file_path=current_green_path,
@@ -151,8 +153,6 @@ def convert_single_file(input_csv_file_path: str,
         green_mean_normalized = (green_mean - current_img_min) / current_img_max
 
         # getting current crop area
-        # TODO: check this
-        from src.utils.aux_funcs import get_mask_area
         current_area = get_mask_area(row_data=row_data,
                                      style='ellipse')
 

@@ -1795,11 +1795,21 @@ def get_pixel_intensity(file_path: str,
     elif calc == 'mean':
         pixel_intensity = img.mean()
 
+    # calculating median intensity
+    elif calc == 'median':
+        pixel_intensity = img.median()
+
     # calculating intensities ratio ('het')
-    elif calc == 'het':
+    elif calc == 'het_mean':
         pixel_max = img.max()
         pixel_mean = img.mean()
         pixel_intensity = pixel_max / pixel_mean
+
+    # calculating intensities ratio ('het')
+    elif calc == 'het_median':
+        pixel_max = img.max()
+        pixel_median = img.median()
+        pixel_intensity = pixel_max / pixel_median
 
     else:
 
