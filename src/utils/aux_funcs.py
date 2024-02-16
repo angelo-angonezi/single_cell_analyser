@@ -9,13 +9,16 @@
 # importing required libraries
 import pandas as pd
 from os import mkdir
+from cv2 import flip
 from time import time
+from cv2 import rotate
 from cv2 import circle
 from numpy import intp
 from os import listdir
 from os import environ
 from cv2 import imread
 from sys import stdout
+from cv2 import imwrite
 from cv2 import ellipse
 from os.path import join
 from numpy import ndarray
@@ -23,10 +26,12 @@ from cv2 import boxPoints
 from pandas import concat
 from pandas import Series
 from os.path import exists
+from cv2 import ROTATE_180
 from cv2 import INTER_AREA
 from pandas import read_csv
 from pandas import DataFrame
 from cv2 import drawContours
+from cv2 import convertScaleAbs
 from numpy import add as np_add
 from numpy import count_nonzero
 from cv2 import IMREAD_GRAYSCALE
@@ -1826,6 +1831,95 @@ def get_pixel_intensity(file_path: str,
 
     # returning pixel intensity value
     return pixel_intensity
+
+
+def augment_image(image_name: str,
+                  images_folder: str,
+                  output_folder: str,
+                  resize: bool
+                  ) -> None:
+    # getting current image path
+    image_path = join(images_folder,
+                      image_name)
+
+    # opening current image
+    open_image = imread(image_path)
+
+    # defining save path
+    save_path = join(output_folder,
+                     image_name)
+
+    # checking resize toggle
+    if resize:
+
+        # resizing image
+        open_image = resize_image(open_image=open_image,
+                                  image_size=IMAGE_SIZE)
+
+    # getting rotated image
+    rotated_image = rotate(open_image,
+                           ROTATE_180)
+
+    # getting vertically flipped image
+    v_flipped_image = flip(open_image,
+                           0)
+
+    # getting horizontally flipped image
+    h_flipped_image = flip(open_image,
+                           1)
+
+    # defining alpha and beta
+    alpha_d = 0.9  # Contrast control
+    beta_d = -2  # Brightness control
+    alpha_u = 1.1  # Contrast control
+    beta_u = 5  # Brightness control
+
+    # getting contrast/brightness changed image
+    od_contrast_image = convertScaleAbs(open_image,
+                                        alpha=alpha_d,
+                                        beta=beta_d)
+
+    rd_contrast_image = convertScaleAbs(rotated_image,
+                                        alpha=alpha_d,
+                                        beta=beta_d)
+
+    vd_contrast_image = convertScaleAbs(v_flipped_image,
+                                        alpha=alpha_d,
+                                        beta=beta_d)
+
+    hd_contrast_image = convertScaleAbs(h_flipped_image,
+                                        alpha=alpha_d,
+                                        beta=beta_d)
+
+    ou_contrast_image = convertScaleAbs(open_image,
+                                        alpha=alpha_u,
+                                        beta=beta_u)
+
+    ru_contrast_image = convertScaleAbs(rotated_image,
+                                        alpha=alpha_u,
+                                        beta=beta_u)
+
+    vu_contrast_image = convertScaleAbs(v_flipped_image,
+                                        alpha=alpha_u,
+                                        beta=beta_u)
+
+    hu_contrast_image = convertScaleAbs(h_flipped_image,
+                                        alpha=alpha_u,
+                                        beta=beta_u)
+
+    # saving images
+    imwrite(save_path.replace('.jpg', '_o.jpg'), open_image)
+    imwrite(save_path.replace('.jpg', '_r.jpg'), rotated_image)
+    imwrite(save_path.replace('.jpg', '_v.jpg'), v_flipped_image)
+    imwrite(save_path.replace('.jpg', '_h.jpg'), h_flipped_image)
+    imwrite(save_path.replace('.jpg', '_od.jpg'), od_contrast_image)
+    imwrite(save_path.replace('.jpg', '_rd.jpg'), rd_contrast_image)
+    imwrite(save_path.replace('.jpg', '_vd.jpg'), vd_contrast_image)
+    imwrite(save_path.replace('.jpg', '_hd.jpg'), hd_contrast_image)
+    imwrite(save_path.replace('.jpg', '_ou.jpg'), ou_contrast_image)
+    imwrite(save_path.replace('.jpg', '_ru.jpg'), ru_contrast_image)
+    imwrite(save_path.replace('.jpg', '_vu.jpg'), vu_contrast_image)
+    imwrite(save_path.replace('.jpg', '_hu.jpg'), hu_contrast_image)
 
 ######################################################################
 # end of current module
