@@ -11,8 +11,6 @@ print('all required libraries successfully imported.')  # noqa
 
 imgs_path = join('.',
                  'data',
-                 'ml',
-                 'dna_damage',
                  'keras_test',
                  '20-50')
 print(imgs_path)
@@ -41,6 +39,7 @@ image_df = images.sample(5000, random_state=1).reset_index(drop=True)
 train_df, test_df = train_test_split(image_df, train_size=0.7, shuffle=True, random_state=1)
 
 print(train_df)
+exit()
 
 train_generator = tf.keras.preprocessing.image.ImageDataGenerator(
     rescale=1./255,
