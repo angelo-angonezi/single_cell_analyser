@@ -39,7 +39,6 @@ image_df = images.sample(5000, random_state=1).reset_index(drop=True)
 train_df, test_df = train_test_split(image_df, train_size=0.7, shuffle=True, random_state=1)
 
 print(train_df)
-exit()
 
 train_generator = tf.keras.preprocessing.image.ImageDataGenerator(
     rescale=1./255,
@@ -108,7 +107,7 @@ model.compile(
 history = model.fit(
     train_images,
     validation_data=val_images,
-    epochs=100,
+    epochs=20,
     callbacks=[
         tf.keras.callbacks.EarlyStopping(
             monitor='val_loss',
