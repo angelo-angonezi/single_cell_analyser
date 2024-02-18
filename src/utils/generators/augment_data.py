@@ -116,6 +116,9 @@ def augment_data_split(df: DataFrame,
     # iterating over df rows
     for row_index, row_data in df_rows:
 
+        if current_row_index == 2:
+            exit()
+
         # printing execution message
         base_string = f'augmenting data for "{split}" split #INDEX# #TOTAL#'
         print_progress_message(base_string=base_string,

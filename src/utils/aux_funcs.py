@@ -1850,7 +1850,7 @@ def augment_image(image_name: str,
                      image_name)
 
     # getting final save path (used to check current image augmentation)
-    final_save_path = save_path.replace('.jpg', '_hu.jpg')
+    final_save_path = save_path.replace(extension, f'_hu{extension}')
 
     # checking whether current save path already exists
     if exists(final_save_path):
@@ -1924,18 +1924,18 @@ def augment_image(image_name: str,
                                         beta=beta_u)
 
     # saving images
-    imwrite(save_path.replace('.jpg', '_o.jpg'), open_image)
-    imwrite(save_path.replace('.jpg', '_r.jpg'), rotated_image)
-    imwrite(save_path.replace('.jpg', '_v.jpg'), v_flipped_image)
-    imwrite(save_path.replace('.jpg', '_h.jpg'), h_flipped_image)
-    imwrite(save_path.replace('.jpg', '_od.jpg'), od_contrast_image)
-    imwrite(save_path.replace('.jpg', '_rd.jpg'), rd_contrast_image)
-    imwrite(save_path.replace('.jpg', '_vd.jpg'), vd_contrast_image)
-    imwrite(save_path.replace('.jpg', '_hd.jpg'), hd_contrast_image)
-    imwrite(save_path.replace('.jpg', '_ou.jpg'), ou_contrast_image)
-    imwrite(save_path.replace('.jpg', '_ru.jpg'), ru_contrast_image)
-    imwrite(save_path.replace('.jpg', '_vu.jpg'), vu_contrast_image)
-    imwrite(save_path.replace('.jpg', '_hu.jpg'), hu_contrast_image)
+    imwrite(save_path.replace(extension, f'_o{extension}'), open_image)
+    imwrite(save_path.replace(extension, f'_r{extension}'), rotated_image)
+    imwrite(save_path.replace(extension, f'_v{extension}'), v_flipped_image)
+    imwrite(save_path.replace(extension, f'_h{extension}'), h_flipped_image)
+    imwrite(save_path.replace(extension, f'_od{extension}'), od_contrast_image)
+    imwrite(save_path.replace(extension, f'_rd{extension}'), rd_contrast_image)
+    imwrite(save_path.replace(extension, f'_vd{extension}'), vd_contrast_image)
+    imwrite(save_path.replace(extension, f'_hd{extension}'), hd_contrast_image)
+    imwrite(save_path.replace(extension, f'_ou{extension}'), ou_contrast_image)
+    imwrite(save_path.replace(extension, f'_ru{extension}'), ru_contrast_image)
+    imwrite(save_path.replace(extension, f'_vu{extension}'), vu_contrast_image)
+    imwrite(save_path.replace(extension, f'_hu{extension}'), hu_contrast_image)
 
 
 def train_model(model,
