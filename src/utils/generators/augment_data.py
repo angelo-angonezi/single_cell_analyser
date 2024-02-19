@@ -113,11 +113,15 @@ def augment_data_split(df: DataFrame,
     # defining starter for current row index
     current_row_index = 1
 
+    # printing execution message
+    f_string = f'augmenting data for {split} split'
+    print(f_string)
+
     # iterating over df rows
     for row_index, row_data in df_rows:
 
         # printing execution message
-        base_string = f'augmenting data for "{split}" split #INDEX# #TOTAL#'
+        base_string = 'augmenting image #INDEX# of #TOTAL#'
         print_progress_message(base_string=base_string,
                                index=current_row_index,
                                total=rows_num)
