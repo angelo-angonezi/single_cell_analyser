@@ -108,24 +108,25 @@ def add_dataset_col(df: DataFrame,
     # grouping df
     df_groups = df.groupby(group_col)
 
-    # getting groups num
+    # getting groups/rows num
     groups_num = len(df_groups)
+    rows_num = len(df)
 
     # printing execution message
     f_string = f'{groups_num} groups were found based on: {group_col}'
     print(f_string)
 
-    # defining starter for current group index
+    # defining starter for indices
     current_group_index = 1
+    current_row_index = 1
 
     # iterating over groups
     for df_name, df_group in df_groups:
 
-        # printing execution message
-        base_string = 'adding data split col to group #INDEX# of #TOTAL#'
-        print_progress_message(base_string=base_string,
-                               index=current_group_index,
-                               total=groups_num)
+        # defining execution message
+        base_string = f'adding data split col to group '
+        base_string += f'{current_group_index} of {groups_num} '
+        base_string += f'| row: #INDEX# of #TOTAL#'
 
         # randomly splitting current group rows
         current_test_split = df_group.sample(frac=test_size)
@@ -140,12 +141,48 @@ def add_dataset_col(df: DataFrame,
         test_indices = current_test_split.index
 
         # adding split column based on current samples
+
+        # iterating over train indices
         for train_index in train_indices:
+
+            # printing execution message
+            print_progress_message(base_string=base_string,
+                                   index=current_row_index,
+                                   total=rows_num)
+
+            # updating current row split col
             df.at[train_index, split_col_name] = 'train'
+
+            # updating current row index
+            current_row_index += 1
+
+        # iterating over val indices
         for val_index in val_indices:
+
+            # printing execution message
+            print_progress_message(base_string=base_string,
+                                   index=current_row_index,
+                                   total=rows_num)
+
+            # updating current row split col
             df.at[val_index, split_col_name] = 'val'
+
+            # updating current row index
+            current_row_index += 1
+
+        # iterating over test indices
         for test_index in test_indices:
+
+            # printing execution message
+            print_progress_message(base_string=base_string,
+                                   index=current_row_index,
+                                   total=rows_num)
+
+            # updating current row split col
             df.at[test_index, split_col_name] = 'test'
+
+            # updating current row index
+            current_row_index += 1
 
         # updating current group index
         current_group_index += 1
