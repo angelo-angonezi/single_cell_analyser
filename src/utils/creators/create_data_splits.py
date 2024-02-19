@@ -160,7 +160,7 @@ def add_class_group_col(df: DataFrame) -> None:
     """
     # getting first element info
     first_row = df.iloc[0]
-    first_class = first_row['first_class']
+    first_class = first_row['class']
     first_class_is_num = isinstance(first_class, float)
 
     # checking whether class is a number
