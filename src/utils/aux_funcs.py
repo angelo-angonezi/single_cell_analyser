@@ -7,6 +7,7 @@
 # imports
 
 # importing required libraries
+from os import sep
 import pandas as pd
 from os import mkdir
 from cv2 import flip
@@ -30,12 +31,11 @@ from cv2 import ROTATE_180
 from cv2 import INTER_AREA
 from pandas import read_csv
 from seaborn import lineplot
-from pandas import DataFrame
 from cv2 import drawContours
+from pandas import DataFrame
 from cv2 import convertScaleAbs
 from numpy import add as np_add
 from numpy import count_nonzero
-from pandas import DataFrame
 from cv2 import IMREAD_GRAYSCALE
 from shutil import copy as sh_copy
 from cv2 import resize as cv_resize
@@ -44,6 +44,7 @@ from numpy import zeros as np_zeroes
 from tensorflow import test as tf_test
 from scipy.optimize import linear_sum_assignment
 from keras.utils import image_dataset_from_directory
+from keras.preprocessing.image import ImageDataGenerator
 
 # preventing "SettingWithoutCopyWarning" messages
 pd.options.mode.chained_assignment = None  # default='warn'
@@ -1387,21 +1388,75 @@ def get_image_confluence(df: DataFrame,
     return confluence
 
 
-def get_data_split(splits_folder: str,
-                   split: str,
-                   batch_size: int
-                   ):
+def get_data_split_regression(splits_folder: str,
+                              dataset_df: DataFrame,
+                              split: str,
+                              batch_size: int
+                              ):
     """
     Given a path to a folder and a split name,
     returns given data split as tensorflow
     data set.
     """
+    # printing execution message
+    print(f'getting {split} data...')
+
+    # filtering df by current split
+    filtered_df = dataset_df[dataset_df['split'] == split]
+    rows_num = len(filtered_df)
+    rows_range = range(rows_num)
+
+    # adding folder column
+    folder_col = [splits_folder for _ in rows_range]
+    filtered_df['input_folder'] = folder_col
+
+    # adding file path column
+    path_col = filtered_df['input_folder'] + sep + filtered_df['crop_name']
+    filtered_df['crop_path'] = path_col
+
+    # dropping unrequired columns
+    cols_to_keep = ['crop_path', 'class']
+    filtered_df = filtered_df[cols_to_keep]
+    # https://rosenfelder.ai/keras-regression-efficient-net/
+    image_generator = ImageDataGenerator(rescale=1.0 / 255)
+
+    # loading data
+    print(f'loading data from folder "{splits_folder}"...')
+    split_data = image_generator.flow_from_dataframe(dataframe=filtered_df,
+                                                     x_col='crop_path',
+                                                     y_col='class',
+                                                     target_size=IMAGE_SIZE,
+                                                     color_mode='rgb',
+                                                     class_mode='raw',
+                                                     batch_size=batch_size,
+                                                     shuffle=True)
+    print(split_data)
+    exit()
+
+    # normalizing data to 0-1 scale (already performed by image generator)
+    print('normalizing data...')
+
+    # returning data
+    return split_data
+
+
+def get_data_split_classification(splits_folder: str,
+                                  split: str,
+                                  batch_size: int
+                                  ):
+    """
+    Given a path to a folder and a split name,
+    returns given data split as tensorflow
+    data set.
+    """
+    # printing execution message
+    print(f'getting {split} data...')
+
     # getting train/val/test paths
     data_path = join(splits_folder,
                      split)
 
     # loading data
-    print(f'getting {split} data...')
     print(f'loading data from folder "{data_path}"...')
     split_data = image_dataset_from_directory(directory=data_path,
                                               labels='inferred',
@@ -1412,8 +1467,12 @@ def get_data_split(splits_folder: str,
                                               image_size=IMAGE_SIZE,
                                               shuffle=True)
 
-    # returning data
-    return split_data
+    # normalizing data to 0-1 scale
+    print('normalizing data...')
+    normalized_data = normalize_data(data=split_data)
+
+    # returning normalized data
+    return normalized_data
 
 
 def normalize_data(data):

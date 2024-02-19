@@ -12,6 +12,7 @@ print('initializing...')  # noqa
 print('importing required libraries...')  # noqa
 import tensorflow as tf
 from os.path import join
+from pandas import read_csv
 from seaborn import lineplot
 from pandas import DataFrame
 from keras.layers import Dense
@@ -25,13 +26,16 @@ from keras.callbacks import TensorBoard
 from keras.applications import ResNet50
 from src.utils.aux_funcs import IMAGE_SIZE
 from keras.losses import BinaryCrossentropy
+from src.utils.aux_funcs import train_model
 from src.utils.aux_funcs import is_using_gpu
+from src.utils.aux_funcs import get_history_df
 from keras.engine.sequential import Sequential
 from src.utils.aux_funcs import normalize_data
-from src.utils.aux_funcs import get_data_split
 from keras.applications import InceptionResNetV2
 from keras.callbacks import LearningRateScheduler
 from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import generate_history_plot
+from src.utils.aux_funcs import get_data_split_regression
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
 
@@ -110,8 +114,44 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_model():
-    pass
+def get_regression_model(learning_rate: float,
+                         base_layers: str
+                         ) -> Sequential:
+    """
+    Given a model base and a learning rate,
+    returns compiled model.
+    """
+    # defining model input
+    image_height, image_width = IMAGE_SIZE
+    input_shape = (image_height, image_width, 3)  # 3 because it is an RGB image
+
+    # getting model
+    print('getting model...')
+
+    # defining placeholder value for model
+    model = None
+
+    # defining optimizer
+    optimizer = Adam(learning_rate=learning_rate)
+
+    # defining loss function
+    loss = 'binary_crossentropy'
+
+    # defining metrics
+    metrics = ['accuracy']
+
+    # compiling model
+    print('compiling model...')
+    model.compile(optimizer=optimizer,
+                  loss=loss,
+                  metrics=metrics)
+
+    # printing model summary
+    print('printing model summary...')
+    model.summary()
+
+    # returning model
+    return model
 
 
 def nii_regression_train(splits_folder: str,
@@ -126,42 +166,42 @@ def nii_regression_train(splits_folder: str,
     """
     Trains nii regression model.
     """
+    # reading dataset df
+    print('reading dataset df...')
+    dataset_df = read_csv(dataset_file)
+
     # getting data splits
-    # TODO: update get data function for regression network!
-    train_data = get_data_split(splits_folder=splits_folder,
-                                split='train',
-                                batch_size=batch_size)
-    val_data = get_data_split(splits_folder=splits_folder,
-                              split='val',
-                              batch_size=batch_size)
+    train_data = get_data_split_regression(splits_folder=splits_folder,
+                                           dataset_df=dataset_df,
+                                           split='train',
+                                           batch_size=batch_size)
+    val_data = get_data_split_regression(splits_folder=splits_folder,
+                                         dataset_df=dataset_df,
+                                         split='val',
+                                         batch_size=batch_size)
 
-    # printing found classes
-    classes_str = f'Classes: {train_data.class_names}'
-    print(classes_str)
-
-    # normalizing data to 0-1 scale
-    print('normalizing data...')
-    train_data = normalize_data(data=train_data)
-    val_data = normalize_data(data=val_data)
+    print(train_data)
+    print(val_data)
+    exit()
 
     # getting model
-    model = get_sequential_model(learning_rate=learning_rate,
+    model = get_regression_model(learning_rate=learning_rate,
                                  base_layers=model_type)
 
     # defining callback
     tensorboard_callback = TensorBoard(log_dir=logs_folder)
-    lr_callback = LearningRateScheduler(scheduler)
+    # lr_callback = LearningRateScheduler(scheduler)
 
     # training model (and saving history)
     train_history = train_model(model=model,
                                 train_data=train_data,
                                 val_data=val_data,
                                 epochs=epochs,
-                                callback=lr_callback)
+                                callback=tensorboard_callback)
 
     # saving model
-    save_model(model=model,
-               model_path=model_path)
+    print('saving model...')
+    model.save(model_path)
 
     # converting history dict to data frame
     history_df = get_history_df(history_dict=train_history)

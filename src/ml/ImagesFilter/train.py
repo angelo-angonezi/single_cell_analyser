@@ -27,12 +27,12 @@ from src.utils.aux_funcs import is_using_gpu
 from keras.engine.sequential import Sequential
 from src.utils.aux_funcs import get_history_df
 from src.utils.aux_funcs import normalize_data
-from src.utils.aux_funcs import get_data_split
 from keras.applications import InceptionResNetV2
 from keras.callbacks import LearningRateScheduler
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import generate_history_plot
 from src.utils.aux_funcs import print_execution_parameters
+from src.utils.aux_funcs import get_data_split_classification
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -198,9 +198,9 @@ def get_new_model(input_shape: tuple) -> Sequential:
     return model
 
 
-def get_sequential_model(learning_rate: float,
-                         base_layers: str
-                         ) -> Sequential:
+def get_classification_model(learning_rate: float,
+                             base_layers: str
+                             ) -> Sequential:
     """
     Given a model base and a learning rate,
     returns compiled model.
@@ -279,25 +279,20 @@ def image_filter_train(splits_folder: str,
     Trains image filter model.
     """
     # getting data splits
-    train_data = get_data_split(splits_folder=splits_folder,
-                                split='train',
-                                batch_size=batch_size)
-    val_data = get_data_split(splits_folder=splits_folder,
-                              split='val',
-                              batch_size=batch_size)
+    train_data = get_data_split_classification(splits_folder=splits_folder,
+                                               split='train',
+                                               batch_size=batch_size)
+    val_data = get_data_split_classification(splits_folder=splits_folder,
+                                             split='val',
+                                             batch_size=batch_size)
 
     # printing found classes
     classes_str = f'Classes: {train_data.class_names}'
     print(classes_str)
 
-    # normalizing data to 0-1 scale
-    print('normalizing data...')
-    train_data = normalize_data(data=train_data)
-    val_data = normalize_data(data=val_data)
-
     # getting model
-    model = get_sequential_model(learning_rate=learning_rate,
-                                 base_layers=model_type)
+    model = get_classification_model(learning_rate=learning_rate,
+                                     base_layers=model_type)
 
     # defining callback
     tensorboard_callback = TensorBoard(log_dir=logs_folder)
@@ -311,6 +306,7 @@ def image_filter_train(splits_folder: str,
                                 callback=lr_callback)
 
     # saving model
+    print('saving model...')
     model.save(model_path)
 
     # converting history dict to data frame
