@@ -189,6 +189,15 @@ def get_predictions_df(model_path: str,
     predictions_df = get_base_df(files=images_list,
                                  col_name='crop_name')
 
+    # adding random predictions col
+    print('adding random predictions col...')
+    from random import randint
+    random_values = [randint(10000, 100000)
+                     for _
+                     in images_list]
+    predictions_df['predictions'] = random_values
+    exit()
+
     # adding predictions col
     print('adding predictions col...')
     add_prediction_col(df=predictions_df,
