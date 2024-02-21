@@ -177,7 +177,8 @@ def create_pixel_intensities_df(input_folder: str,
                                          extension=images_extension)
 
     # creating df
-    intensities_df = get_base_df(files=files)
+    intensities_df = get_base_df(files=files,
+                                 col_name='file_name')
 
     # adding file path col
     add_file_path_col(df=intensities_df,

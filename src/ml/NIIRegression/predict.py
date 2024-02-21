@@ -19,6 +19,7 @@ from argparse import ArgumentParser
 from keras.models import load_model
 from numpy import float16 as np_float  # good to prevent memory crashes
 from src.utils.aux_funcs import IMAGE_SIZE
+from src.utils.aux_funcs import get_base_df
 from src.utils.aux_funcs import load_bgr_img
 from src.utils.aux_funcs import is_using_gpu
 from src.utils.aux_funcs import resize_image
@@ -79,71 +80,45 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_predictions_df(model_path: str,
-                       images_folder: str,
-                       extension: str,
-                       ) -> DataFrame:
+def add_prediction_col(df: DataFrame,
+                       model: any,
+                       input_folder: str,
+                       extension: str
+                       ) -> None:
     """
-    Given a path to a trained model, and a path
-    to a folder containing images, runs model
-    and returns a predictions data frame of
-    following structure:
-    |   image    | prediction |
-    | img01.jpg  |    3.08    |
-    | img02.jpg  |    1.54    |
-    ...
+    Given a base df, and a loaded
+    model adds new column based on
+    model predictions.
     """
-    # loading model
-    print('loading model...')
-    model = load_model(model_path)
-
-    # getting images in folder
-    print(f'getting images in folder "{images_folder}"...')
-    images_list = get_specific_files_in_folder(path_to_folder=images_folder,
-                                               extension=extension)
-
-    # removing image extensions
-    images_list = [image_name.replace(extension, '')
-                   for image_name
-                   in images_list]
-
-    # getting images num
-    images_num = len(images_list)
-
-    # creating base predictions dict
-    predictions_dict = {'crop_name': images_list,
-                        'prediction': None}
-
-    # creating base predictions df
-    print('creating base predictions df...')
-    predictions_df = DataFrame(predictions_dict)
+    # defining col name
+    col_name = 'prediction'
 
     # getting df rows
-    df_rows = predictions_df.iterrows()
+    df_rows = df.iterrows()
 
-    # defining starter for current index
-    current_index = 1
+    # getting rows num
+    rows_num = len(df)
+
+    # defining starter for current row index
+    current_row_index = 1
 
     # iterating over df rows
     for row_index, row_data in df_rows:
 
-        if current_index == 10:
-            break
-
-        # printing progress message
-        base_string = 'analysing image #INDEX# of #TOTAL#'
+        # printing execution message
+        base_string = f'adding {col_name} col to row #INDEX# #TOTAL#'
         print_progress_message(base_string=base_string,
-                               index=current_index,
-                               total=images_num)
+                               index=current_row_index,
+                               total=rows_num)
 
-        # getting current image name
+        # getting current row image name
         image_name = row_data['crop_name']
 
         # getting current image name with extension
         image_name_w_extension = f'{image_name}{extension}'
 
         # getting current image path
-        image_path = join(images_folder,
+        image_path = join(input_folder,
                           image_name_w_extension)
 
         # opening current image
@@ -170,13 +145,58 @@ def get_predictions_df(model_path: str,
         current_prediction_float = float(current_prediction)
 
         # updating current row value
-        predictions_df.at[row_index, 'prediction'] = current_prediction_float
+        df.at[row_index, col_name] = current_prediction_float
 
-        # updating current index
-        current_index += 1
+        # updating current row index
+        current_row_index += 1
 
-    print(predictions_df)
-    exit()
+
+def get_predictions_df(model_path: str,
+                       images_folder: str,
+                       extension: str,
+                       ) -> DataFrame:
+    """
+    Given a path to a trained model, and a path
+    to a folder containing images, runs model
+    and returns a predictions data frame of
+    following structure:
+    |   image    | prediction |
+    | img01.jpg  |    3.08    |
+    | img02.jpg  |    1.54    |
+    ...
+    """
+    # loading model
+    print('loading model...')
+    model = load_model(model_path)
+
+    # getting images in folder
+    print(f'getting images in folder "{images_folder}"...')
+    images_list = get_specific_files_in_folder(path_to_folder=images_folder,
+                                               extension=extension)
+
+    # getting images num
+    images_num = len(images_list)
+
+    # printing execution message
+    f_string = f'{images_num} found in input folder.'
+    print(f_string)
+
+    # removing image extensions
+    images_list = [image_name.replace(extension, '')
+                   for image_name
+                   in images_list]
+
+    # getting base df
+    print('getting base df...')
+    predictions_df = get_base_df(files=images_list,
+                                 col_name='crop_name')
+
+    # adding predictions col
+    print('adding predictions col...')
+    add_prediction_col(df=predictions_df,
+                       input_folder=images_folder,
+                       extension=extension,
+                       model=model)
 
     # returning predictions df
     return predictions_df

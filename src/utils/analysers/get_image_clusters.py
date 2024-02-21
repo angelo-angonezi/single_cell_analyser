@@ -518,7 +518,8 @@ def create_features_df(input_folder: str,
                                          extension=images_extension)
 
     # creating df
-    features_df = get_base_df(files=files)
+    features_df = get_base_df(files=files,
+                              col_name='file_name')
 
     # adding file path col
     add_file_path_col(df=features_df,

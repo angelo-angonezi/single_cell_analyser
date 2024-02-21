@@ -1592,14 +1592,13 @@ def add_confluence_group_col(df: DataFrame) -> None:
     df['confluence_group'] = df['confluence_percentage_str'].replace('0', '<1')
 
 
-def get_base_df(files: list) -> DataFrame:
+def get_base_df(files: list,
+                col_name: str
+                ) -> DataFrame:
     """
     Given a list of files, returns base
     data frame, used on following analysis.
     """
-    # defining col name
-    col_name = 'file_name'
-
     # assembling new col
     new_col = {col_name: files}
 
