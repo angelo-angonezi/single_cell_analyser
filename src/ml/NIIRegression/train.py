@@ -62,6 +62,12 @@ def get_args_dict() -> dict:
                         required=True,
                         help='defines splits folder name (contains "train", "val" and "test" subfolders).')
 
+    # images extension param
+    parser.add_argument('-x', '--images-extension',
+                        dest='images_extension',
+                        required=True,
+                        help='defines extension (.tif, .png, .jpg) of images in input folder')
+
     # dataset file param
     parser.add_argument('-d', '--dataset-file',
                         dest='dataset_file',
@@ -125,26 +131,35 @@ def get_regression_model(learning_rate: float,
     image_height, image_width = IMAGE_SIZE
     input_shape = (image_height, image_width, 3)  # 3 because it is an RGB image
 
-    # getting model
-    print('getting model...')
-
     # defining placeholder value for model
     model = None
+
+    # getting model
+    print('getting model...')
+    inputs = tf.keras.Input(shape=input_shape)
+    x = tf.keras.layers.Conv2D(filters=16, kernel_size=(3, 3), activation='relu')(inputs)
+    x = tf.keras.layers.MaxPool2D()(x)
+    x = tf.keras.layers.Conv2D(filters=32, kernel_size=(3, 3), activation='relu')(x)
+    x = tf.keras.layers.MaxPool2D()(x)
+    x = tf.keras.layers.GlobalAveragePooling2D()(x)
+    x = tf.keras.layers.Dense(64, activation='relu')(x)
+    x = tf.keras.layers.Dense(64, activation='relu')(x)
+    outputs = tf.keras.layers.Dense(1, activation='linear')(x)
+    model = tf.keras.Model(inputs=inputs, outputs=outputs)
 
     # defining optimizer
     optimizer = Adam(learning_rate=learning_rate)
 
     # defining loss function
-    loss = 'binary_crossentropy'
+    loss = 'mse'
 
     # defining metrics
-    metrics = ['accuracy']
+    # metrics = ['accuracy']
 
     # compiling model
     print('compiling model...')
     model.compile(optimizer=optimizer,
-                  loss=loss,
-                  metrics=metrics)
+                  loss=loss)
 
     # printing model summary
     print('printing model summary...')
@@ -155,6 +170,7 @@ def get_regression_model(learning_rate: float,
 
 
 def nii_regression_train(splits_folder: str,
+                         extension: str,
                          dataset_file: str,
                          logs_folder: str,
                          model_path: str,
@@ -172,17 +188,15 @@ def nii_regression_train(splits_folder: str,
 
     # getting data splits
     train_data = get_data_split_regression(splits_folder=splits_folder,
+                                           extension=extension,
                                            dataset_df=dataset_df,
                                            split='train',
                                            batch_size=batch_size)
     val_data = get_data_split_regression(splits_folder=splits_folder,
+                                         extension=extension,
                                          dataset_df=dataset_df,
                                          split='val',
                                          batch_size=batch_size)
-
-    print(train_data)
-    print(val_data)
-    exit()
 
     # getting model
     model = get_regression_model(learning_rate=learning_rate,
@@ -225,6 +239,9 @@ def main():
     # getting splits folder param
     splits_folder = args_dict['splits_folder']
 
+    # getting images extension param
+    extension = args_dict['images_extension']
+
     # getting dataset file param
     dataset_file = args_dict['dataset_file']
 
@@ -259,6 +276,7 @@ def main():
 
     # running nii_regression_train function
     nii_regression_train(splits_folder=splits_folder,
+                         extension=extension,
                          dataset_file=dataset_file,
                          logs_folder=logs_folder,
                          model_path=model_path,

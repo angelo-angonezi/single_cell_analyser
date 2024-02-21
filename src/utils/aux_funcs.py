@@ -59,7 +59,7 @@ environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 IMAGE_WIDTH = 1408
 IMAGE_HEIGHT = 1040
 IMAGE_AREA = IMAGE_WIDTH * IMAGE_HEIGHT
-IMAGE_SIZE = (512, 512)
+IMAGE_SIZE = (120, 120)
 
 ######################################################################
 # defining auxiliary functions
@@ -1389,6 +1389,7 @@ def get_image_confluence(df: DataFrame,
 
 
 def get_data_split_regression(splits_folder: str,
+                              extension: str,
                               dataset_df: DataFrame,
                               split: str,
                               batch_size: int
@@ -1406,22 +1407,28 @@ def get_data_split_regression(splits_folder: str,
     rows_num = len(filtered_df)
     rows_range = range(rows_num)
 
-    # adding folder column
-    folder_col = [splits_folder for _ in rows_range]
+    # adding current folder column
+    current_split_folder = splits_folder + sep + split
+    folder_col = [current_split_folder for _ in rows_range]
     filtered_df['input_folder'] = folder_col
 
+    # adding crop name with extension col
+    name_w_extension_col = filtered_df['crop_name'] + extension
+    filtered_df['crop_name_w_extension'] = name_w_extension_col
+
     # adding file path column
-    path_col = filtered_df['input_folder'] + sep + filtered_df['crop_name']
+    path_col = filtered_df['input_folder'] + sep + filtered_df['crop_name_w_extension']
     filtered_df['crop_path'] = path_col
 
     # dropping unrequired columns
     cols_to_keep = ['crop_path', 'class']
     filtered_df = filtered_df[cols_to_keep]
+    a = filtered_df.iloc[0]['crop_path']
     # https://rosenfelder.ai/keras-regression-efficient-net/
     image_generator = ImageDataGenerator(rescale=1.0 / 255)
 
     # loading data
-    print(f'loading data from folder "{splits_folder}"...')
+    print(f'loading data from folder "{current_split_folder}"...')
     split_data = image_generator.flow_from_dataframe(dataframe=filtered_df,
                                                      x_col='crop_path',
                                                      y_col='class',
@@ -1430,8 +1437,6 @@ def get_data_split_regression(splits_folder: str,
                                                      class_mode='raw',
                                                      batch_size=batch_size,
                                                      shuffle=True)
-    print(split_data)
-    exit()
 
     # normalizing data to 0-1 scale (already performed by image generator)
     print('normalizing data...')
