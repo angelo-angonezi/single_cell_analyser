@@ -16,6 +16,7 @@ from pandas import DataFrame
 from numpy import expand_dims
 from argparse import ArgumentParser
 from keras.models import load_model
+from gc import collect as collect_garbage
 from src.utils.aux_funcs import IMAGE_SIZE
 from src.utils.aux_funcs import get_base_df
 from src.utils.aux_funcs import load_bgr_img
@@ -151,7 +152,8 @@ def add_prediction_col(df: DataFrame,
         # updating current row index
         current_row_index += 1
 
-        print(df.info())
+        # collecting garbage / "cleaning memory"
+        collect_garbage()
 
 
 def get_predictions_df(model_path: str,
