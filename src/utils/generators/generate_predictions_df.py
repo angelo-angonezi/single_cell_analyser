@@ -195,7 +195,9 @@ def get_predictions_df(model_path: str,
     random_values = [randint(10000, 100000)
                      for _
                      in images_list]
+    print(predictions_df.info())
     predictions_df['predictions'] = random_values
+    print(predictions_df.info())
     exit()
 
     # adding predictions col
