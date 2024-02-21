@@ -315,8 +315,15 @@ def draw_multiple_contours(df: DataFrame,
     base_img = imread(image_path,
                       -1)
 
-    # converting current image to rgb
-    base_img = cvtColor(base_img, COLOR_GRAY2BGR)
+    # checking current image shape (grayscale/RGB)
+    image_shape = base_img.shape
+    image_len = len(image_shape)
+
+    # checking image type
+    if image_len < 3:  # not rgb (grayscale)
+
+        # converting current image to rgb
+        base_img = cvtColor(base_img, COLOR_GRAY2BGR)
 
     # getting current df rows
     df_rows = df.iterrows()
