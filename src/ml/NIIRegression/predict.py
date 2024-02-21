@@ -11,6 +11,7 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
+from os import environ
 from os.path import join
 from pandas import concat
 from pandas import DataFrame
@@ -137,7 +138,8 @@ def get_predictions_df(model_path: str,
         expanded_image = expand_dims(normalized_image, 0)
 
         # getting current image prediction
-        current_prediction_list = model.predict(expanded_image)
+        current_prediction_list = model.predict(expanded_image,
+                                                verbose=0)
 
         # extracting current prediction from list
         current_prediction = current_prediction_list[0]
