@@ -102,27 +102,33 @@ def get_predictions_df(model_path: str,
     images_list = get_specific_files_in_folder(path_to_folder=images_folder,
                                                extension=extension)
 
+    # removing image extensions
+    images_list = [image_name.replace(extension, '')
+                   for image_name
+                   in images_list]
+
+    # getting images num
+    images_num = len(images_list)
+
     # creating base predictions dict
     predictions_dict = {'crop_name': images_list,
                         'prediction': None}
 
     # creating base predictions df
+    print('creating base predictions df...')
     predictions_df = DataFrame(predictions_dict)
-    print(predictions_df)
-    exit()
 
-    # getting images num
-    images_num = len(images_list)
-
-    # defining dict types
-    dict_types = {'image_name': str,
-                  'prediction': np_float}
+    # getting df rows
+    df_rows = predictions_df.iterrows()
 
     # defining starter for current index
     current_index = 1
 
-    # iterating over images in images list
-    for image in images_list:
+    # iterating over df rows
+    for row_index, row_data in df_rows:
+
+        if current_index == 3:
+            break
 
         # printing progress message
         base_string = 'analysing image #INDEX# of #TOTAL#'
@@ -131,14 +137,17 @@ def get_predictions_df(model_path: str,
                                total=images_num)
 
         # getting current image name
-        image_name = image.replace(extension, '')
+        image_name = row_data['crop_name']
+
+        # getting current image name with extension
+        image_name_w_extension = f'{image_name}{extension}'
 
         # getting current image path
-        current_path = join(images_folder,
-                            image)
+        image_path = join(images_folder,
+                          image_name_w_extension)
 
         # opening current image
-        current_image = load_bgr_img(image_path=current_path)
+        current_image = load_bgr_img(image_path=image_path)
 
         # resizing image
         current_image = resize_image(open_image=current_image,
@@ -160,29 +169,17 @@ def get_predictions_df(model_path: str,
         # converting prediction to float
         current_prediction_float = float(current_prediction)
 
-        # assembling current image dict
-        current_dict = {'crop_name': image_name,
-                        'prediction': current_prediction_float}
-
-        # assembling current image df
-        current_df = DataFrame(current_dict,
-                               index=[0])
-
-        # converting df types  # TODO: check if it is a problem
-        current_df = current_df.astype(dict_types)
-
-        # appending current df to dfs list
-        dfs_list.append(current_df)
+        # updating current row value
+        predictions_df.at[row_index, 'prediction'] = current_prediction_float
 
         # updating current index
         current_index += 1
 
-    # concatenating dfs in dfs list
-    final_df = concat(dfs_list,
-                      ignore_index=True)
+    print(predictions_df)
+    exit()
 
-    # returning final df
-    return final_df
+    # returning predictions df
+    return predictions_df
 
 
 def nii_regression_predict(images_folder: str,
