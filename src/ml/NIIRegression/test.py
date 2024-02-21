@@ -10,7 +10,9 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
+from math import sqrt
 from os.path import join
+from pandas import merge
 from pandas import read_csv
 from pandas import DataFrame
 from keras.metrics import Recall
@@ -109,8 +111,28 @@ def get_metrics_df(test_df: DataFrame,
     dfs, calculates metrics and
     returns metrics df.
     """
-    print(test_df)
-    print(predictions_df)
+    # joining dfs by crop_name
+    print('joining dfs...')
+    predictions_df.columns = ['crop_name', 'prediction']
+    predictions_df['prediction'] = predictions_df['prediction'] + 1.5
+    joined_df = merge(left=test_df,
+                      right=predictions_df,
+                      on='crop_name')
+
+    # adding rmse cols
+    print('adding rmse cols...')
+    joined_df['error'] = joined_df['class'] - joined_df['prediction']
+    joined_df['squared_error'] = joined_df['error'] * joined_df['error']
+
+    # getting mean squared error
+    mse = joined_df['squared_error'].mean()
+
+    # getting root mean squared error
+    rmse = sqrt(mse)
+
+    print(joined_df)
+    print(mse)
+    print(rmse)
     exit()
 
 
@@ -137,7 +159,8 @@ def nii_regression_test(dataset_file: str,
 
     # getting predictions df
     print('getting predictions df...')
-    predictions_df = get_predictions_df(predictions_file=predictions_file)
+    # predictions_df = get_predictions_df(predictions_file=predictions_file)
+    predictions_df = get_test_df(dataset_file=predictions_file)
 
     # getting metrics df
     print('getting metrics df...')

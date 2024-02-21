@@ -1,10 +1,10 @@
-# NIIRegressor predict module
+# predict classes module
 
 print('initializing...')  # noqa
 
-# Code destined to predicting NII values
-# from single cell crops, using NIIRegressor
-# neural network.
+# Code destined to predicting classes
+# from single cell crops, using given
+# trained neural network.
 
 ######################################################################
 # imports
@@ -12,12 +12,10 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 from os.path import join
-from pandas import concat
 from pandas import DataFrame
 from numpy import expand_dims
 from argparse import ArgumentParser
 from keras.models import load_model
-from numpy import float16 as np_float  # good to prevent memory crashes
 from src.utils.aux_funcs import IMAGE_SIZE
 from src.utils.aux_funcs import get_base_df
 from src.utils.aux_funcs import load_bgr_img
@@ -39,7 +37,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'NIIRegressor predict module'
+    description = 'predict classes module'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
@@ -202,11 +200,11 @@ def get_predictions_df(model_path: str,
     return predictions_df
 
 
-def nii_regression_predict(images_folder: str,
-                           extension: str,
-                           model_path: str,
-                           output_path: str
-                           ) -> None:
+def generate_predictions_df(images_folder: str,
+                            extension: str,
+                            model_path: str,
+                            output_path: str
+                            ) -> None:
     # getting predictions df
     print('getting predictions df...')
     predictions_df = get_predictions_df(model_path=model_path,
@@ -254,11 +252,11 @@ def main():
     # waiting for user input
     enter_to_continue()
 
-    # running nii_regression_predict function
-    nii_regression_predict(images_folder=images_folder,
-                           extension=extension,
-                           model_path=model_path,
-                           output_path=output_path)
+    # running generate_predictions_df function
+    generate_predictions_df(images_folder=images_folder,
+                            extension=extension,
+                            model_path=model_path,
+                            output_path=output_path)
 
 ######################################################################
 # running main function
