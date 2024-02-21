@@ -143,12 +143,12 @@ def get_predictions_df(model_path: str,
         # extracting current prediction from list
         current_prediction = current_prediction_list[0]
 
-        # converting prediction to string
-        current_prediction_str = 'excluded' if current_prediction < 0.5 else 'included'
+        # converting prediction to float
+        current_prediction_float = float(current_prediction)
 
         # assembling current image dict
         current_dict = {'image': image,
-                        'prediction': current_prediction_str}
+                        'prediction': current_prediction_float}
 
         # assembling current image df
         current_df = DataFrame(current_dict,
