@@ -127,7 +127,7 @@ def get_predictions_df(model_path: str,
     # iterating over df rows
     for row_index, row_data in df_rows:
 
-        if current_index == 3:
+        if current_index == 10:
             break
 
         # printing progress message
