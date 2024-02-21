@@ -1,10 +1,9 @@
-# ImagesFilter test module
+# NIIRegressor test module
 
 print('initializing...')  # noqa
 
-# Code destined to testing neural network
-# to classify images as "included" or "excluded"
-# from analyses.
+# Code destined to testing NII
+# regression neural network.
 
 ######################################################################
 # imports
@@ -12,6 +11,8 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 from os.path import join
+from pandas import read_csv
+from pandas import DataFrame
 from keras.metrics import Recall
 from keras.models import load_model
 from keras.metrics import Precision
@@ -34,30 +35,24 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'ImagesFilter test module'
+    description = 'NIIRegressor test module'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
 
     # adding arguments to parser
 
-    # splits folder param
-    parser.add_argument('-s', '--splits-folder',
-                        dest='splits_folder',
+    # dataset file param
+    parser.add_argument('-d', '--dataset-file',
+                        dest='dataset_file',
                         required=True,
-                        help='defines splits folder name (contains "train", "val" and "test" subfolders).')
+                        help='defines path to dataset df (.csv) file')
 
-    # batch size param
-    parser.add_argument('-b', '--batch-size',
-                        dest='batch_size',
+    # predictions file param
+    parser.add_argument('-p', '--predictions-file',
+                        dest='predictions_file',
                         required=True,
-                        help='defines batch size.')
-
-    # model path param
-    parser.add_argument('-m', '--model-path',
-                        dest='model_path',
-                        required=True,
-                        help='defines path to trained model (.h5 file)')
+                        help='defines path to prediction df (.csv) file')
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -69,94 +64,43 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def test_model(model,
-               test_data,
-               ):
-    # defining placeholder values for gts/predictions list
-    gts_list = []
-    predictions_list = []
-
-    # getting test batches
-    test_batches = test_data.as_numpy_iterator()
-
-    # iterating over batches in test data set
-    for batch in test_batches:
-
-        # getting current gts and predictions
-        current_inputs, current_gts = batch
-        current_predictions = model.predict(current_inputs,
-                                            verbose=0)
-
-        # unpacking values
-        gts = [f[0] for f in current_gts]
-        predictions = [f[0] for f in current_predictions]
-
-        # appending gts/predictions to respective lists
-        for gt in gts:
-            gts_list.append(gt)
-        for prediction in predictions:
-            predictions_list.append(prediction)
-
-    # defining placeholder values for tps, tns, fps, fns
-    tps = 0
-    tns = 0
-    fps = 0
-    fns = 0
-
-    # converting values to respective classes (string format)
-    gts_list_str = ['excluded' if gt < 0.5 else 'included' for gt in gts_list]
-    predictions_list_str = ['excluded' if prediction < 0.5 else 'included' for prediction in predictions_list]
-
-    # zipping lists
-    a = zip(gts_list_str, predictions_list_str)
-    for i in a:
-        gt, prediction = i
-        if gt == 'included':
-            if prediction == 'included':
-                tps += 1
-            else:
-                fns += 1
-        elif gt == 'excluded':
-            if prediction == 'excluded':
-                tns += 1
-            else:
-                fps += 1
-
-    # calculating metrics
-    accuracy = (tps + tns) / (tps + tns + fps + fns)
-    precision = tps / (tps + fps)
-    recall = tps / (tps + fns)
-    f1_score = 2 * ((precision * recall) / (precision + recall))
-
-    # printing results
-    f_string = '--Metrics results--\n'
-    f_string += f'Accuracy:  {accuracy}\n'
-    f_string += f'Precision: {precision}\n'
-    f_string += f'Recall:    {recall}\n'
-    f_string += f'F1-Score:  {f1_score}'
-    print(f_string)
+def get_metrics_df(test_df: DataFrame,
+                   predictions_df: DataFrame
+                   ) -> DataFrame:
+    pass
 
 
-def image_filter_test(splits_folder: str,
-                      batch_size: int,
-                      model_path: str
-                      ) -> None:
-    # getting data splits
-    print('getting test data...')
-    test_data = get_data_split_regression(splits_folder=splits_folder,
-                                          extension='.tif',  # TODO: update here
-                                          dataset_df=None,  # TODO: update here
-                                          split='test',
-                                          batch_size=batch_size)
+def print_metrics(df: DataFrame) -> None:
+    pass
 
-    # loading model
-    print('loading model...')
-    model = load_model(model_path)
 
-    # testing model on test split
-    print('testing model...')
-    test_model(model=model,
-               test_data=test_data)
+def nii_regression_test(dataset_file: str,
+                        predictions_file: int
+                        ) -> None:
+    """
+    Given a path to dataset df, and
+    a path to a file containing test
+    data predictions, prints metrics
+    on console.
+    """
+    # reading dataset df
+    print('reading dataset df...')
+    dataset_df = read_csv(dataset_file)
+
+    # filtering df by test data
+    print('filtering df by test data...')
+    filtered_df = dataset_df[dataset_df['split'] == 'test']
+
+    # reading predictions df
+    print('reading predictions df...')
+    predictions_df = read_csv(dataset_file)
+
+    # getting metrics df
+    metrics_df = get_metrics_df(test_df=filtered_df,
+                                predictions_df=predictions_df)
+
+    # printing metrics on console
+    print_metrics(df=metrics_df)
 
 ######################################################################
 # defining main function
@@ -167,14 +111,11 @@ def main():
     # getting args dict
     args_dict = get_args_dict()
 
-    # getting splits folder param
-    splits_folder = args_dict['splits_folder']
+    # getting dataset file param
+    dataset_file = args_dict['dataset_file']
 
-    # getting batch size param
-    batch_size = int(args_dict['batch_size'])
-
-    # getting model path param
-    model_path = args_dict['model_path']
+    # predictions file param
+    predictions_file = args_dict['predictions_df']
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
@@ -187,10 +128,9 @@ def main():
     # waiting for user input
     enter_to_continue()
 
-    # running image_filter_test function
-    image_filter_test(splits_folder=splits_folder,
-                      batch_size=batch_size,
-                      model_path=model_path)
+    # running nii_regression_test function
+    nii_regression_test(dataset_file=dataset_file,
+                        predictions_file=predictions_file)
 
 ######################################################################
 # running main function

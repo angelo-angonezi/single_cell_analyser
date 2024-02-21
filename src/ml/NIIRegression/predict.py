@@ -11,7 +11,6 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-from os import environ
 from os.path import join
 from pandas import concat
 from pandas import DataFrame
@@ -169,11 +168,11 @@ def get_predictions_df(model_path: str,
     return final_df
 
 
-def image_filter_predict(images_folder: str,
-                         extension: str,
-                         model_path: str,
-                         output_path: str
-                         ) -> None:
+def nii_regression_predict(images_folder: str,
+                           extension: str,
+                           model_path: str,
+                           output_path: str
+                           ) -> None:
     # getting predictions df
     print('getting predictions df...')
     predictions_df = get_predictions_df(model_path=model_path,
@@ -221,11 +220,11 @@ def main():
     # waiting for user input
     enter_to_continue()
 
-    # running image_filter_test function
-    image_filter_predict(images_folder=images_folder,
-                         extension=extension,
-                         model_path=model_path,
-                         output_path=output_path)
+    # running nii_regression_predict function
+    nii_regression_predict(images_folder=images_folder,
+                           extension=extension,
+                           model_path=model_path,
+                           output_path=output_path)
 
 ######################################################################
 # running main function
