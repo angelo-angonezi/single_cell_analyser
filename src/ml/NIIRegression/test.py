@@ -84,7 +84,8 @@ def test_model(model,
 
         # getting current gts and predictions
         current_inputs, current_gts = batch
-        current_predictions = model.predict(current_inputs)
+        current_predictions = model.predict(current_inputs,
+                                            verbose=0)
 
         # unpacking values
         gts = [f[0] for f in current_gts]
@@ -147,10 +148,6 @@ def image_filter_test(splits_folder: str,
                                           dataset_df=None,  # TODO: update here
                                           split='test',
                                           batch_size=batch_size)
-
-    # normalizing data to 0-1 scale
-    print('normalizing data...')
-    test_data = normalize_data(data=test_data)
 
     # loading model
     print('loading model...')

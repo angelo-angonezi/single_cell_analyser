@@ -11,7 +11,6 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-from cv2 import imread
 from os.path import join
 from pandas import concat
 from pandas import DataFrame
@@ -89,8 +88,8 @@ def get_predictions_df(model_path: str,
     and returns a predictions data frame of
     following structure:
     |   image    | prediction |
-    | img01.jpg  |  included  |
-    | img02.jpg  |  excluded  |
+    | img01.jpg  |    3.08    |
+    | img02.jpg  |    1.54    |
     ...
     """
     # loading model
