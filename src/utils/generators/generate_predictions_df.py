@@ -91,6 +91,9 @@ def add_prediction_col(df: DataFrame,
     # defining col name
     col_name = 'prediction'
 
+    # defining placeholder value for prediction col
+    df[col_name] = None
+
     # getting df rows
     df_rows = df.iterrows()
 
@@ -188,17 +191,6 @@ def get_predictions_df(model_path: str,
     print('getting base df...')
     predictions_df = get_base_df(files=images_list,
                                  col_name='crop_name')
-
-    # adding random predictions col
-    print('adding random predictions col...')
-    from random import randint
-    random_values = [randint(10000, 100000)
-                     for _
-                     in images_list]
-    print(predictions_df.info())
-    predictions_df['predictions'] = random_values
-    print(predictions_df.info())
-    exit()
 
     # adding predictions col
     print('adding predictions col...')
