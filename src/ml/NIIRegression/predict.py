@@ -102,8 +102,14 @@ def get_predictions_df(model_path: str,
     images_list = get_specific_files_in_folder(path_to_folder=images_folder,
                                                extension=extension)
 
-    # defining placeholder value for dfs list
-    dfs_list = []
+    # creating base predictions dict
+    predictions_dict = {'crop_name': images_list,
+                        'prediction': None}
+
+    # creating base predictions df
+    predictions_df = DataFrame(predictions_dict)
+    print(predictions_df)
+    exit()
 
     # getting images num
     images_num = len(images_list)
