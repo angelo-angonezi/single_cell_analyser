@@ -178,7 +178,7 @@ def get_predictions_df(model_path: str,
     images_num = len(images_list)
 
     # printing execution message
-    f_string = f'{images_num} found in input folder.'
+    f_string = f'{images_num} images found in input folder.'
     print(f_string)
 
     # removing image extensions
