@@ -64,18 +64,66 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
+def get_test_df(dataset_file: str) -> DataFrame:
+    """
+    Given a path to a dataset file,
+    returns filtered df containing
+    only test data and required cols
+    for analysis.
+    """
+    # reading dataset df
+    dataset_df = read_csv(dataset_file)
+
+    # filtering df by test data
+    filtered_df = dataset_df[dataset_df['split'] == 'test']
+
+    # defining cols to keep
+    cols_to_keep = ['crop_name',
+                    'class']
+
+    # dropping unrequired cols
+    filtered_df = filtered_df[cols_to_keep]
+
+    # returning filtered df
+    return filtered_df
+
+
+def get_predictions_df(predictions_file: str) -> DataFrame:
+    """
+    Given a path to a predictions file,
+    returns loaded df filtered by cols
+    related to test analysis.
+    """
+    # reading predictions df
+    predictions_df = read_csv(predictions_file)
+
+    # returning predictions df
+    return predictions_df
+
+
 def get_metrics_df(test_df: DataFrame,
                    predictions_df: DataFrame
                    ) -> DataFrame:
-    pass
+    """
+    Given a test and predictions
+    dfs, calculates metrics and
+    returns metrics df.
+    """
+    print(test_df)
+    print(predictions_df)
+    exit()
 
 
 def print_metrics(df: DataFrame) -> None:
+    """
+    Given a metrics df, pretty
+    prints metrics on console.
+    """
     pass
 
 
 def nii_regression_test(dataset_file: str,
-                        predictions_file: int
+                        predictions_file: str
                         ) -> None:
     """
     Given a path to dataset df, and
@@ -83,23 +131,21 @@ def nii_regression_test(dataset_file: str,
     data predictions, prints metrics
     on console.
     """
-    # reading dataset df
-    print('reading dataset df...')
-    dataset_df = read_csv(dataset_file)
+    # getting test df
+    print('getting test df...')
+    test_df = get_test_df(dataset_file=dataset_file)
 
-    # filtering df by test data
-    print('filtering df by test data...')
-    filtered_df = dataset_df[dataset_df['split'] == 'test']
-
-    # reading predictions df
-    print('reading predictions df...')
-    predictions_df = read_csv(dataset_file)
+    # getting predictions df
+    print('getting predictions df...')
+    predictions_df = get_predictions_df(predictions_file=predictions_file)
 
     # getting metrics df
-    metrics_df = get_metrics_df(test_df=filtered_df,
+    print('getting metrics df...')
+    metrics_df = get_metrics_df(test_df=test_df,
                                 predictions_df=predictions_df)
 
     # printing metrics on console
+    print('printing metrics...')
     print_metrics(df=metrics_df)
 
 ######################################################################
@@ -115,7 +161,7 @@ def main():
     dataset_file = args_dict['dataset_file']
 
     # predictions file param
-    predictions_file = args_dict['predictions_df']
+    predictions_file = args_dict['predictions_file']
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)

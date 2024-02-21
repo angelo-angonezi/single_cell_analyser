@@ -155,14 +155,14 @@ def get_predictions_df(model_path: str,
         current_prediction_float = float(current_prediction)
 
         # assembling current image dict
-        current_dict = {'image_name': image_name,
+        current_dict = {'crop_name': image_name,
                         'prediction': current_prediction_float}
 
         # assembling current image df
         current_df = DataFrame(current_dict,
                                index=[0])
 
-        # converting df types
+        # converting df types  # TODO: check if it is a problem
         current_df = current_df.astype(dict_types)
 
         # appending current df to dfs list
