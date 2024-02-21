@@ -17,6 +17,7 @@ from pandas import DataFrame
 from numpy import expand_dims
 from argparse import ArgumentParser
 from keras.models import load_model
+from numpy import float16 as np_float  # good to prevent memory crashes
 from src.utils.aux_funcs import IMAGE_SIZE
 from src.utils.aux_funcs import load_bgr_img
 from src.utils.aux_funcs import is_using_gpu
@@ -107,6 +108,10 @@ def get_predictions_df(model_path: str,
     # getting images num
     images_num = len(images_list)
 
+    # defining dict types
+    dict_types = {'image_name': str,
+                  'prediction': np_float}
+
     # defining starter for current index
     current_index = 1
 
@@ -156,6 +161,12 @@ def get_predictions_df(model_path: str,
         # assembling current image df
         current_df = DataFrame(current_dict,
                                index=[0])
+        print(current_df)
+
+        # converting df types
+        current_df = current_df.astype(dict_types)
+        print(current_df)
+        exit()
 
         # appending current df to dfs list
         dfs_list.append(current_df)
