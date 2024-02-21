@@ -162,10 +162,12 @@ def get_predictions_df(model_path: str,
         current_df = DataFrame(current_dict,
                                index=[0])
         print(current_df)
+        print(type(current_df.iloc[0]['prediction']))
 
         # converting df types
         current_df = current_df.astype(dict_types)
         print(current_df)
+        print(type(current_df.iloc[0]['prediction']))
         exit()
 
         # appending current df to dfs list
