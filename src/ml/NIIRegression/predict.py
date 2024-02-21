@@ -1,10 +1,10 @@
-# ImagesFilter predict module
+# NIIRegressor predict module
 
 print('initializing...')  # noqa
 
-# Code destined to classifying images as
-# "included" or "excluded" from analyses,
-# using previously trained neural network.
+# Code destined to predicting NII values
+# from single cell crops, using NIIRegressor
+# neural network.
 
 ######################################################################
 # imports
@@ -19,6 +19,7 @@ from numpy import expand_dims
 from argparse import ArgumentParser
 from keras.models import load_model
 from src.utils.aux_funcs import IMAGE_SIZE
+from src.utils.aux_funcs import load_bgr_img
 from src.utils.aux_funcs import is_using_gpu
 from src.utils.aux_funcs import resize_image
 from src.utils.aux_funcs import enter_to_continue
@@ -37,7 +38,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'ImagesFilter predict module'
+    description = 'NIIRegressor predict module'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
@@ -124,7 +125,7 @@ def get_predictions_df(model_path: str,
                             image)
 
         # opening current image
-        current_image = imread(current_path)
+        current_image = load_bgr_img(image_path=current_path)
 
         # resizing image
         current_image = resize_image(open_image=current_image,

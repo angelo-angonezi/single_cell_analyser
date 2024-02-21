@@ -22,6 +22,7 @@ from sys import stdout
 from cv2 import imwrite
 from cv2 import ellipse
 from os.path import join
+from cv2 import cvtColor
 from numpy import ndarray
 from cv2 import boxPoints
 from pandas import concat
@@ -33,6 +34,7 @@ from pandas import read_csv
 from seaborn import lineplot
 from cv2 import drawContours
 from pandas import DataFrame
+from cv2 import COLOR_GRAY2BGR
 from cv2 import convertScaleAbs
 from numpy import add as np_add
 from numpy import count_nonzero
@@ -2079,6 +2081,29 @@ def generate_history_plot(df: DataFrame,
     # saving figure
     fig_path = join(save_path)
     plt.savefig(fig_path)
+
+
+def load_bgr_img(image_path: str) -> ndarray:
+    """
+    Given a path to an image,
+    returns image as BGR ndarray.
+    """
+    # opening current image
+    current_image = imread(image_path,
+                           -1)
+
+    # checking current image shape (grayscale/RGB)
+    image_shape = current_image.shape
+    image_len = len(image_shape)
+
+    # checking image type
+    if image_len < 3:  # not rgb (grayscale)
+
+        # converting current image to rgb
+        current_image = cvtColor(current_image, COLOR_GRAY2BGR)
+
+    # returning image
+    return current_image
 
 ######################################################################
 # end of current module

@@ -29,6 +29,7 @@ from cv2 import pointPolygonTest
 from cv2 import CHAIN_APPROX_NONE
 from argparse import ArgumentParser
 from cv2 import FONT_HERSHEY_SIMPLEX
+from src.utils.aux_funcs import load_bgr_img
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
@@ -312,18 +313,7 @@ def draw_multiple_contours(df: DataFrame,
     output path.
     """
     # opening current image
-    base_img = imread(image_path,
-                      -1)
-
-    # checking current image shape (grayscale/RGB)
-    image_shape = base_img.shape
-    image_len = len(image_shape)
-
-    # checking image type
-    if image_len < 3:  # not rgb (grayscale)
-
-        # converting current image to rgb
-        base_img = cvtColor(base_img, COLOR_GRAY2BGR)
+    base_img = load_bgr_img(image_path=image_path)
 
     # getting current df rows
     df_rows = df.iterrows()
