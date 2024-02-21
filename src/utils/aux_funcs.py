@@ -2076,9 +2076,6 @@ def generate_history_plot(df: DataFrame,
     title = 'Train History'
     plt.title(title)
 
-    # setting y lim
-    plt.ylim(0.0, 1.0)
-
     # saving figure
     fig_path = join(save_path)
     plt.savefig(fig_path)

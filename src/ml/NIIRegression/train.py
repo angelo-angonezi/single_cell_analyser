@@ -120,9 +120,7 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_regression_model(learning_rate: float,
-                         base_layers: str
-                         ) -> Sequential:
+def get_regression_model(learning_rate: float) -> Sequential:
     """
     Given a model base and a learning rate,
     returns compiled model.
@@ -199,8 +197,7 @@ def nii_regression_train(splits_folder: str,
                                          batch_size=batch_size)
 
     # getting model
-    model = get_regression_model(learning_rate=learning_rate,
-                                 base_layers=model_type)
+    model = get_regression_model(learning_rate=learning_rate)
 
     # defining callback
     tensorboard_callback = TensorBoard(log_dir=logs_folder)
