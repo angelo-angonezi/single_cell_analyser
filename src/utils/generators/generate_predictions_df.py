@@ -151,6 +151,8 @@ def add_prediction_col(df: DataFrame,
         # updating current row index
         current_row_index += 1
 
+        print(df.info())
+
 
 def get_predictions_df(model_path: str,
                        images_folder: str,
