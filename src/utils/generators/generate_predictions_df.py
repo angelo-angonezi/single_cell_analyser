@@ -152,12 +152,6 @@ def add_prediction_col(df: DataFrame,
         # updating current row index
         current_row_index += 1
 
-        # cleaning memory
-        del image_name, image_name_w_extension, image_path
-        del current_image, normalized_image, expanded_image
-        del current_prediction_list, current_prediction, current_prediction_float
-        collect_garbage()
-
 
 def get_predictions_df(model_path: str,
                        images_folder: str,
