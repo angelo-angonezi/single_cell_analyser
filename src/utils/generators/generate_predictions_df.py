@@ -21,6 +21,8 @@ from src.utils.aux_funcs import get_base_df
 from src.utils.aux_funcs import load_bgr_img
 from src.utils.aux_funcs import is_using_gpu
 from src.utils.aux_funcs import resize_image
+from keras.engine.functional import Functional
+from keras.engine.sequential import Sequential
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
@@ -79,7 +81,7 @@ def get_args_dict() -> dict:
 
 
 def add_prediction_col(df: DataFrame,
-                       model_path: str,
+                       model: Sequential or Functional,
                        input_folder: str,
                        extension: str
                        ) -> None:
@@ -105,8 +107,6 @@ def add_prediction_col(df: DataFrame,
 
     # iterating over df rows
     for row_index, row_data in df_rows:
-
-        model = load_model(model_path)
 
         # printing execution message
         base_string = f'adding {col_name} col to row #INDEX# #TOTAL#'
@@ -203,7 +203,7 @@ def get_predictions_df(model_path: str,
     add_prediction_col(df=predictions_df,
                        input_folder=images_folder,
                        extension=extension,
-                       model_path=model_path)
+                       model=model)
 
     # returning predictions df
     return predictions_df
