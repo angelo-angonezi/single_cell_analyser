@@ -11,19 +11,12 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 from math import sqrt
-from os.path import join
 from pandas import merge
 from pandas import read_csv
 from pandas import DataFrame
-from keras.metrics import Recall
-from keras.models import load_model
-from keras.metrics import Precision
 from argparse import ArgumentParser
-from keras.metrics import BinaryAccuracy
 from src.utils.aux_funcs import is_using_gpu
-from src.utils.aux_funcs import normalize_data
 from src.utils.aux_funcs import enter_to_continue
-from src.utils.aux_funcs import get_data_split_regression
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
 
@@ -103,18 +96,16 @@ def get_predictions_df(predictions_file: str) -> DataFrame:
     return predictions_df
 
 
-def get_metrics_df(test_df: DataFrame,
-                   predictions_df: DataFrame
-                   ) -> DataFrame:
+def get_rmse(test_df: DataFrame,
+             predictions_df: DataFrame
+             ) -> float:
     """
     Given a test and predictions
     dfs, calculates metrics and
-    returns metrics df.
+    returns RMSE.
     """
     # joining dfs by crop_name
     print('joining dfs...')
-    predictions_df.columns = ['crop_name', 'prediction']
-    predictions_df['prediction'] = predictions_df['prediction'] + 1.5
     joined_df = merge(left=test_df,
                       right=predictions_df,
                       on='crop_name')
@@ -130,10 +121,8 @@ def get_metrics_df(test_df: DataFrame,
     # getting root mean squared error
     rmse = sqrt(mse)
 
-    print(joined_df)
-    print(mse)
-    print(rmse)
-    exit()
+    # returning rmse
+    return rmse
 
 
 def print_metrics(df: DataFrame) -> None:
@@ -157,19 +146,27 @@ def nii_regression_test(dataset_file: str,
     print('getting test df...')
     test_df = get_test_df(dataset_file=dataset_file)
 
+    # getting images num
+    images_num = len(test_df)
+
     # getting predictions df
     print('getting predictions df...')
-    # predictions_df = get_predictions_df(predictions_file=predictions_file)
-    predictions_df = get_test_df(dataset_file=predictions_file)
+    predictions_df = get_predictions_df(predictions_file=predictions_file)
 
     # getting metrics df
     print('getting metrics df...')
-    metrics_df = get_metrics_df(test_df=test_df,
-                                predictions_df=predictions_df)
+    rmse = get_rmse(test_df=test_df,
+                    predictions_df=predictions_df)
 
     # printing metrics on console
     print('printing metrics...')
-    print_metrics(df=metrics_df)
+    f_string = f'---Metrics Results---\n'
+    f_string += f'Test images num: {images_num}\n'
+    f_string += f'RMSE: {rmse}'
+    print(f_string)
+
+    # printing execution message
+    print('analysis complete!')
 
 ######################################################################
 # defining main function

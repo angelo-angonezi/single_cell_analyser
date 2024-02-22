@@ -1,10 +1,9 @@
-# NIIRegression train module
+# regression train module
 
 print('initializing...')  # noqa
 
-# TODO: maybe pass this whole code to separate folder, since logic is the same for all regression models
 # Code destined to training neural network
-# to regress NII from single cell crops.
+# to regress data from single cell crops.
 
 ######################################################################
 # imports
@@ -12,13 +11,7 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 import tensorflow as tf
-from os.path import join
 from pandas import read_csv
-from seaborn import lineplot
-from pandas import DataFrame
-from keras.layers import Dense
-from keras.layers import Conv2D
-from keras.layers import Flatten
 from keras.optimizers import Adam
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
