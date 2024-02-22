@@ -16,7 +16,6 @@ from pandas import DataFrame
 from numpy import expand_dims
 from argparse import ArgumentParser
 from keras.models import load_model
-from gc import collect as collect_garbage
 from src.utils.aux_funcs import IMAGE_SIZE
 from src.utils.aux_funcs import get_base_df
 from src.utils.aux_funcs import load_bgr_img
@@ -80,7 +79,7 @@ def get_args_dict() -> dict:
 
 
 def add_prediction_col(df: DataFrame,
-                       model: any,
+                       model_path: str,
                        input_folder: str,
                        extension: str
                        ) -> None:
@@ -93,7 +92,7 @@ def add_prediction_col(df: DataFrame,
     col_name = 'prediction'
 
     # defining placeholder value for prediction col
-    df[col_name] = None
+    df[col_name] = 0.0
 
     # getting df rows
     df_rows = df.iterrows()
@@ -106,6 +105,8 @@ def add_prediction_col(df: DataFrame,
 
     # iterating over df rows
     for row_index, row_data in df_rows:
+
+        model = load_model(model_path)
 
         # printing execution message
         base_string = f'adding {col_name} col to row #INDEX# #TOTAL#'
@@ -137,17 +138,21 @@ def add_prediction_col(df: DataFrame,
         expanded_image = expand_dims(normalized_image, 0)
 
         # getting current image prediction
-        current_prediction_list = model.predict(expanded_image,
-                                                verbose=0)
+        # current_prediction_list = model.predict(expanded_image,
+        #                                         verbose=0)
+        current_prediction_list = model(expanded_image,  # calling directly on image avoids
+                                        training=False)  # creation of generator, masking it
+                                                         # run faster on small datasets!                   # noqa
 
-        # extracting current prediction from list
-        current_prediction = current_prediction_list[0]
+        # extracting current prediction from Tensor
+        current_tensor = current_prediction_list[0][0]
 
         # converting prediction to float
-        current_prediction_float = float(current_prediction)
+        # TODO: adapt this part to check if prediction will be converted to string-like in classification networks
+        current_prediction = current_tensor.numpy()
 
         # updating current row value
-        df.at[row_index, col_name] = current_prediction_float
+        df.at[row_index, col_name] = current_prediction
 
         # updating current row index
         current_row_index += 1
@@ -198,7 +203,7 @@ def get_predictions_df(model_path: str,
     add_prediction_col(df=predictions_df,
                        input_folder=images_folder,
                        extension=extension,
-                       model=model)
+                       model_path=model_path)
 
     # returning predictions df
     return predictions_df

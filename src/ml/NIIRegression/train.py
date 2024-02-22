@@ -2,6 +2,7 @@
 
 print('initializing...')  # noqa
 
+# TODO: maybe pass this whole code to separate folder, since logic is the same for all regression models
 # Code destined to training neural network
 # to regress NII from single cell crops.
 

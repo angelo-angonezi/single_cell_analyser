@@ -103,7 +103,7 @@ def augment_data_split(df: DataFrame,
 
     # updating input/output folders
     input_folder = join(input_folder,
-                         split)
+                        split)
     output_folder = join(output_folder,
                          split)
 
