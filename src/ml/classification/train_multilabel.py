@@ -1,10 +1,9 @@
-# ImagesFilter train module
+# multi-label classification train module
 
 print('initializing...')  # noqa
 
-# Code destined to training neural network
-# to classify images as "included" or "excluded"
-# from analyses.
+# Code destined to training multi-label
+# classification neural network.
 
 ######################################################################
 # imports

@@ -1,8 +1,8 @@
-# NIIRegressor test module
+# regression test module
 
 print('initializing...')  # noqa
 
-# Code destined to testing NII
+# Code destined to testing
 # regression neural network.
 
 ######################################################################
@@ -30,7 +30,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'NIIRegressor test module'
+    description = 'regression test module'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
@@ -123,14 +123,6 @@ def get_rmse(test_df: DataFrame,
 
     # returning rmse
     return rmse
-
-
-def print_metrics(df: DataFrame) -> None:
-    """
-    Given a metrics df, pretty
-    prints metrics on console.
-    """
-    pass
 
 
 def nii_regression_test(dataset_file: str,

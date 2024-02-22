@@ -1,22 +1,17 @@
-# ImagesFilter test module
+# classification test module
 
 print('initializing...')  # noqa
 
-# Code destined to testing neural network
-# to classify images as "included" or "excluded"
-# from analyses.
+# Code destined to testing
+# classification neural network.
 
 ######################################################################
 # imports
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-from os.path import join
-from keras.metrics import Recall
 from keras.models import load_model
-from keras.metrics import Precision
 from argparse import ArgumentParser
-from keras.metrics import BinaryAccuracy
 from src.utils.aux_funcs import is_using_gpu
 from src.utils.aux_funcs import normalize_data
 from src.utils.aux_funcs import enter_to_continue
@@ -34,12 +29,14 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'ImagesFilter test module'
+    description = 'classification test module'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
 
     # adding arguments to parser
+
+    # TODO: update argparser and code to be more like regression test module
 
     # splits folder param
     parser.add_argument('-s', '--splits-folder',

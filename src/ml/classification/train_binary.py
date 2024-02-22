@@ -1,10 +1,9 @@
-# ImagesFilter train module
+# binary classification train module
 
 print('initializing...')  # noqa
 
-# Code destined to training neural network
-# to classify images as "included" or "excluded"
-# from analyses.
+# Code destined to training binary
+# classification neural network.
 
 ######################################################################
 # imports

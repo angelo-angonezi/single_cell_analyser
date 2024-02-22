@@ -14,19 +14,12 @@ import tensorflow as tf
 from pandas import read_csv
 from keras.optimizers import Adam
 from argparse import ArgumentParser
-from matplotlib import pyplot as plt
-from keras.layers import MaxPooling2D
 from keras.callbacks import TensorBoard
-from keras.applications import ResNet50
 from src.utils.aux_funcs import IMAGE_SIZE
-from keras.losses import BinaryCrossentropy
 from src.utils.aux_funcs import train_model
 from src.utils.aux_funcs import is_using_gpu
 from src.utils.aux_funcs import get_history_df
 from keras.engine.sequential import Sequential
-from src.utils.aux_funcs import normalize_data
-from keras.applications import InceptionResNetV2
-from keras.callbacks import LearningRateScheduler
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import generate_history_plot
 from src.utils.aux_funcs import get_data_split_regression
@@ -43,7 +36,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'NIIRegression train module'
+    description = 'regression train module'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
@@ -127,6 +120,7 @@ def get_regression_model(learning_rate: float) -> Sequential:
     model = None
 
     # getting model
+    # TODO: change model here!
     print('getting model...')
     inputs = tf.keras.Input(shape=input_shape)
     x = tf.keras.layers.Conv2D(filters=16, kernel_size=(3, 3), activation='relu')(inputs)
@@ -161,18 +155,18 @@ def get_regression_model(learning_rate: float) -> Sequential:
     return model
 
 
-def nii_regression_train(splits_folder: str,
-                         extension: str,
-                         dataset_file: str,
-                         logs_folder: str,
-                         model_path: str,
-                         learning_rate: float,
-                         epochs: int,
-                         batch_size: int,
-                         model_type: str
-                         ) -> None:
+def regression_train(splits_folder: str,
+                     extension: str,
+                     dataset_file: str,
+                     logs_folder: str,
+                     model_path: str,
+                     learning_rate: float,
+                     epochs: int,
+                     batch_size: int,
+                     model_type: str
+                     ) -> None:
     """
-    Trains nii regression model.
+    Trains regression model.
     """
     # reading dataset df
     print('reading dataset df...')
@@ -266,15 +260,15 @@ def main():
     enter_to_continue()
 
     # running nii_regression_train function
-    nii_regression_train(splits_folder=splits_folder,
-                         extension=extension,
-                         dataset_file=dataset_file,
-                         logs_folder=logs_folder,
-                         model_path=model_path,
-                         learning_rate=learning_rate,
-                         epochs=epochs,
-                         batch_size=batch_size,
-                         model_type=model_type)
+    regression_train(splits_folder=splits_folder,
+                     extension=extension,
+                     dataset_file=dataset_file,
+                     logs_folder=logs_folder,
+                     model_path=model_path,
+                     learning_rate=learning_rate,
+                     epochs=epochs,
+                     batch_size=batch_size,
+                     model_type=model_type)
 
 ######################################################################
 # running main function

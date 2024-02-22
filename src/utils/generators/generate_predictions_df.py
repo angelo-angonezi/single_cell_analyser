@@ -1,4 +1,4 @@
-# predict classes module
+# generate predictions df module
 
 print('initializing...')  # noqa
 
