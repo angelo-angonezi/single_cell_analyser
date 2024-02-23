@@ -222,6 +222,8 @@ def rotate_image(image: ndarray,
     :return: Array. Represents rotated image.
     """
     # defining image pads
+    # (since image has been cropped before,
+    # just need to set mid-points)
     pad_x = [pivot[0], pivot[1]]
     pad_y = [pivot[1], pivot[0]]
 
