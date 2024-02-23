@@ -260,6 +260,15 @@ def crop_single_obb(image: ndarray,
     width = width * expansion_ratio
     height = height * expansion_ratio
 
+    # getting current crop HBB dimensions
+    from math import sin
+    from math import cos
+    hbb_width = width * cos(angle)
+    hbb_height = height * sin(angle)
+    print(width)
+    print(hbb_width)
+    exit()
+
     # getting rotation angle (opposite to OBB angle, since the image
     # will be rotated to match OBB orientation)
     rotation_angle = angle * (-1)
