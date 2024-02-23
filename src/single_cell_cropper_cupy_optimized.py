@@ -291,6 +291,7 @@ def crop_single_obb(image: ndarray,
 
     # getting major axis
     major_axis = width if width > height else height
+    major_axis = major_axis * 2
 
     # cropping image for performance optimization
     # (crop approximate image first, then rotate, then crop precisely)
