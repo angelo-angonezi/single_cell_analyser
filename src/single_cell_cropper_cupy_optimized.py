@@ -289,20 +289,30 @@ def crop_single_obb(image: ndarray,
     width = width * expansion_ratio
     height = height * expansion_ratio
 
-    # getting current crop approximate HBB dimensions
-    hbb_width = width * 2
-    hbb_height = height * 2
+    # getting major axis
+    major_axis = width if width > height else height
 
     # cropping image for performance optimization
     # (crop approximate image first, then rotate, then crop precisely)
-    # first_crop = image[left:right, top:bottom]
+
+    # getting crop coords
+    crop_coords = get_crop_coordinates(cx=cx,
+                                       cy=cy,
+                                       width=major_axis,
+                                       height=major_axis)
+
+    # extracting crop coords
+    left, right, top, bottom = crop_coords
+
+    # cropping image (using numpy slicing)
+    first_crop = image[left:right, top:bottom]
 
     # getting rotation angle (opposite to OBB angle, since the image
     # will be rotated to match OBB orientation)
     rotation_angle = angle * (-1)
 
     # rotating current image to match current obb angle
-    rotated_image = rotate_image(image=image,
+    rotated_image = rotate_image(image=first_crop,
                                  angle=rotation_angle,
                                  pivot=(cx, cy))
 
@@ -311,34 +321,14 @@ def crop_single_obb(image: ndarray,
     cx = rotated_image_shape[0] / 2
     cy = rotated_image_shape[1] / 2
 
-    # getting margins
-    top = cy - (height / 2)
-    bottom = cy + (height / 2)
-    left = cx - (width / 2)
-    right = cx + (width / 2)
-
-    # converting margins to integers
-    top = int(top)
-    bottom = int(bottom)
-    left = int(left)
-    right = int(right)
-
+    # getting crop coords
     crop_coords = get_crop_coordinates(cx=cx,
                                        cy=cy,
                                        width=width,
                                        height=height)
 
     # extracting crop coords
-    a_left, a_right, a_top, a_bottom = crop_coords
-    print(left)
-    print(a_left)
-    print(right)
-    print(a_right)
-    print(top)
-    print(a_top)
-    print(bottom)
-    print(a_bottom)
-    exit()
+    left, right, top, bottom = crop_coords
 
     # cropping image (using numpy slicing)
     image_crop = rotated_image[left:right, top:bottom]
