@@ -227,8 +227,8 @@ def rotate_image(image: ndarray,
 
     # padding image
     padded_image = np_pad(array=image,
-                          pad_width=[pad_y,  # tuple defining above-below padding
-                                     pad_x,  # tuple defining left-right padding
+                          pad_width=[pad_y,    # tuple defining above-below padding
+                                     pad_x,    # tuple defining left-right padding
                                      [0, 0]],  # tuple defining z-dim padding
                           mode='constant')
 
@@ -311,6 +311,8 @@ def crop_single_obb(image: ndarray,
     first_crop_shape = first_crop.shape
     cx = first_crop_shape[0] / 2
     cy = first_crop_shape[1] / 2
+    cx = int(cx)
+    cy = int(cy)
 
     # getting rotation angle (opposite to OBB angle, since the image
     # will be rotated to match OBB orientation)
@@ -325,6 +327,8 @@ def crop_single_obb(image: ndarray,
     rotated_image_shape = rotated_image.shape
     cx = rotated_image_shape[0] / 2
     cy = rotated_image_shape[1] / 2
+    cx = int(cx)
+    cy = int(cy)
 
     # getting crop coords
     crop_coords = get_crop_coordinates(cx=cx,
