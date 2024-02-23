@@ -307,6 +307,11 @@ def crop_single_obb(image: ndarray,
     # cropping image (using numpy slicing)
     first_crop = image[left:right, top:bottom]
 
+    # getting new cx, cy values
+    first_crop_shape = first_crop.shape
+    cx = first_crop_shape[0] / 2
+    cy = first_crop_shape[1] / 2
+
     # getting rotation angle (opposite to OBB angle, since the image
     # will be rotated to match OBB orientation)
     rotation_angle = angle * (-1)
