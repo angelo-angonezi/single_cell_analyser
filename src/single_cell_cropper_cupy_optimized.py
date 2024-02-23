@@ -222,8 +222,8 @@ def rotate_image(image: ndarray,
     :return: Array. Represents rotated image.
     """
     # defining image pads
-    pad_x = pivot[0]
-    pad_y = pivot[1]
+    pad_x = [pivot[0], pivot[1]]
+    pad_y = [pivot[1], pivot[0]]
 
     # padding image
     padded_image = np_pad(array=image,
