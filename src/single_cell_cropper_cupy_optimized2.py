@@ -305,6 +305,7 @@ def crop_single_obb(image: ndarray,
 
     # getting major axis
     major_axis = width if width > height else height
+    major_axis = major_axis * 2
 
     # getting rotation angle (opposite to OBB angle, since the image
     # will be rotated to match OBB orientation)
@@ -578,7 +579,7 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
                                      -1)  # reads image as is (independent on input format)
 
         # converting image to grayscale
-        current_image_array = cvtColor(current_image_array, COLOR_GRAY2RGB)
+        #current_image_array = cvtColor(current_image_array, COLOR_GRAY2RGB)
 
         # converting image to cupy array
         current_image_array = asarray(current_image_array)
