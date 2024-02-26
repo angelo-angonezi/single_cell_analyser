@@ -531,7 +531,7 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
                                      -1)  # reads image as is (independent on input format)
 
         # converting image to grayscale
-        current_image_array = cvtColor(current_image_array, COLOR_GRAY2RGB)
+        #current_image_array = cvtColor(current_image_array, COLOR_GRAY2RGB)
 
         # converting image to cupy array
         current_image_array = asarray(current_image_array)

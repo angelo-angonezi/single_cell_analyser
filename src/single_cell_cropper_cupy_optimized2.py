@@ -162,7 +162,8 @@ def print_global_progress():
 
     # defining progress string
     progress_string = f'generating crops for image {CURRENT_IMAGE} of {IMAGES_TOTAL}... '
-    progress_string += f'| crop: {CURRENT_CROP}/{CROPS_TOTAL} '
+    #progress_string += f'| crop: {CURRENT_CROP}/{CROPS_TOTAL} '
+    progress_string += f'| crop: {CURRENT_ITERATION}/{ITERATIONS_TOTAL} '
     progress_string += f'| progress: {progress_percentage:02.2f}% '
     progress_string += f'| time elapsed: {time_elapsed_str} '
     progress_string += f'| ETC: {etc_str}'
@@ -208,42 +209,6 @@ def black_pixels_in_crop(crop: ndarray) -> bool:
     # returning boolean
     return black_pixels_in_array
 
-
-def rotate_image(image: ndarray,
-                 angle: float,
-                 pivot: tuple
-                 ) -> ndarray:
-    """
-    Given an image, and angle and coordinates
-    to pivot, returns rotated image.
-    :param image: Array. Represents an open image.
-    :param angle: Float. Represents rotation angle.
-    :param pivot: Float. Represents pivot coordinates (cx, cy).
-    :return: Array. Represents rotated image.
-    """
-    # defining image pads
-    # (since image has been cropped before,
-    # just need to set mid-points)
-    print(pivot[0])
-    pad_x = [pivot[0], pivot[1]]
-    pad_y = [pivot[1], pivot[0]]
-    print(pad_x, pad_y)
-    exit()
-
-    # padding image
-    padded_image = np_pad(array=image,
-                          pad_width=[pad_y,    # tuple defining above-below padding
-                                     pad_x,    # tuple defining left-right padding
-                                     [0, 0]],  # tuple defining z-dim padding
-                          mode='constant')     # fills 
-
-    # rotating image
-    rotated_image = scp_rotate(padded_image, angle, reshape=False)
-
-    # returning rotated image
-    return rotated_image
-
-
 def get_crop_coordinates(cx: int,
                          cy: int,
                          width: float,
@@ -273,6 +238,50 @@ def get_crop_coordinates(cx: int,
     return coords_tuple
 
 
+def rotate_image(image: ndarray,
+                 angle: float,
+                 pivot: tuple,
+                 roi_box_width: float
+                 ) -> ndarray:
+    """
+    Given an image, and angle and coordinates
+    to pivot, returns rotated image.
+    :param image: Array. Represents an open image.
+    :param angle: Float. Represents rotation angle.
+    :param pivot: Float. Represents pivot coordinates (cx, cy).
+    :return: Array. Represents rotated image.
+    """
+    # defining image pads
+    pad_x = [image.shape[1] - pivot[0], pivot[0]]
+    pad_y = [image.shape[0] - pivot[1], pivot[1]]
+
+    # padding image
+    padded_image = np_pad(array=image,
+                          pad_width=[pad_y,    # tuple defining above-below padding
+                                     pad_x,    # tuple defining left-right padding
+                                     [0, 0]],  # tuple defining z-dim padding
+                          mode='constant')     # fills background with zeroes
+
+    # getting ROI crop coords
+    padded_image_shape = padded_image.shape
+    cx = padded_image_shape[1] / 2
+    cy = padded_image_shape[0] / 2
+    cx = int(cx)
+    cy = int(cy)
+    crop_coords = get_crop_coordinates(cx=cx, cy=cy, width=roi_box_width, height=roi_box_width)
+    left, right, top, bottom = crop_coords
+
+    # cropping ROI (optimized code since rotation is costly)
+    #cropped_image = padded_image[left:right, top:bottom]
+    cropped_image = padded_image[top:bottom, left:right]
+
+    # rotating image
+    rotated_image = scp_rotate(cropped_image, angle, reshape=False)
+
+    # returning rotated image
+    return rotated_image
+
+
 def crop_single_obb(image: ndarray,
                     obb: tuple,
                     expansion_ratio: float = 1.0
@@ -296,62 +305,33 @@ def crop_single_obb(image: ndarray,
 
     # getting major axis
     major_axis = width if width > height else height
-    major_axis = major_axis * 2
-
-    # cropping image for performance optimization
-    # (crop approximate image first, then rotate, then crop precisely)
-
-    # getting crop coords
-    crop_coords = get_crop_coordinates(cx=cx,
-                                       cy=cy,
-                                       width=major_axis,
-                                       height=major_axis)
-
-    # extracting crop coords
-    left, right, top, bottom = crop_coords
-
-    # cropping image (using numpy slicing)
-    top = 1
-    first_crop = image[top:bottom, left:right]
-
-    print()
-    print(image.shape)
-    print(cx)
-    print(left, right, top, bottom)
-    print(first_crop)
-    exit()
-
-    # getting new cx, cy values
-    first_crop_shape = first_crop.shape
-    cx = first_crop_shape[0] / 2
-    cy = first_crop_shape[1] / 2
-    cx = int(cx)
-    cy = int(cy)
 
     # getting rotation angle (opposite to OBB angle, since the image
     # will be rotated to match OBB orientation)
     rotation_angle = angle * (-1)
 
     # rotating current image to match current obb angle
-    rotated_image = rotate_image(image=first_crop,
+    rotated_image = rotate_image(image=image,
                                  angle=rotation_angle,
-                                 pivot=(cx, cy))
+                                 pivot=(cx, cy),
+                                 roi_box_width=major_axis)
 
     # getting new cx, cy values
     rotated_image_shape = rotated_image.shape
     cx = rotated_image_shape[0] / 2
     cy = rotated_image_shape[1] / 2
-    cx = int(cx)
-    cy = int(cy)
 
-    # getting crop coords
-    crop_coords = get_crop_coordinates(cx=cx,
-                                       cy=cy,
-                                       width=width,
-                                       height=height)
+    # getting margins
+    top = cy - (height / 2)
+    bottom = cy + (height / 2)
+    left = cx - (width / 2)
+    right = cx + (width / 2)
 
-    # extracting crop coords
-    left, right, top, bottom = crop_coords
+    # converting margins to integers
+    top = int(top)
+    bottom = int(bottom)
+    left = int(left)
+    right = int(right)
 
     # cropping image (using numpy slicing)
     image_crop = rotated_image[left:right, top:bottom]
@@ -597,7 +577,7 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
         current_image_array = imread(current_image_path,
                                      -1)  # reads image as is (independent on input format)
 
-        # converting image to RGB
+        # converting image to grayscale
         current_image_array = cvtColor(current_image_array, COLOR_GRAY2RGB)
 
         # converting image to cupy array
