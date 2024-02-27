@@ -10,9 +10,7 @@ print('initializing...')  # noqa
 
 print('importing required libraries...')  # noqa
 from time import sleep
-from cv2 import imread
 from cv2 import imwrite
-from cv2 import cvtColor
 from os.path import join
 from cupy import ndarray
 from cupy import asnumpy
@@ -21,7 +19,6 @@ from pandas import concat
 from os.path import exists
 from pandas import read_csv
 from pandas import DataFrame
-from cv2 import COLOR_GRAY2RGB
 from cupy import pad as np_pad
 from argparse import ArgumentParser
 from cv2 import resize as cv_resize
