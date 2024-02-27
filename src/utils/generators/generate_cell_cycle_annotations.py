@@ -18,6 +18,7 @@ from argparse import ArgumentParser
 from src.utils.aux_funcs import get_crops_df
 from src.utils.aux_funcs import get_crop_pixels
 from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import get_pixel_intensity
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
@@ -79,6 +80,24 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
+def get_cell_cycle(red_intensity: float,
+                   green_intensity: float
+                   ) -> str:
+    """
+    Given a nucleus red/green intensities,
+    returns given nucleus cell cycle.
+    """
+    # TODO: maybe change this function by more complex one in aux_funcs module
+    # defining placeholder value for cell cycle
+    cell_cycle = None
+
+    # updating cell cycle
+    cell_cycle = 'red' if red_intensity > green_intensity else 'green'
+
+    # returning cell cycle
+    return cell_cycle
+
+
 def add_cell_cycle_col(df: DataFrame,
                        red_folder: str,
                        green_folder: str,
@@ -89,8 +108,55 @@ def add_cell_cycle_col(df: DataFrame,
     red/green crops, adds cell cycle col
     based on red/green pixel intensities.
     """
-    print(df)
-    exit()
+    # defining col name
+    col_name = 'class'
+
+    # emptying class col
+    df[col_name] = None
+
+    # getting rows num
+    rows_num = len(df)
+
+    # getting df rows
+    df_rows = df.iterrows()
+
+    # defining starter for current row index
+    current_row_index = 1
+
+    # iterating over df rows
+    for row_index, row_data in df_rows:
+
+        # printing progress message
+        base_string = 'adding cell cycle col to row #INDEX# of #TOTAL#'
+        print_progress_message(base_string=base_string,
+                               index=current_row_index,
+                               total=rows_num)
+
+        # getting current row crop name
+        crop_name = row_data['crop_name']
+
+        # getting current row crop name with extension
+        crop_name_w_extension = f'{crop_name}{images_extension}'
+
+        # getting current row crop paths
+        red_path = join(red_folder, crop_name_w_extension)
+        green_path = join(green_folder, crop_name_w_extension)
+
+        # getting current crop red/green pixel intensity values
+        red_intensity = get_pixel_intensity(file_path=red_path,
+                                            calc='mean')
+        green_intensity = get_pixel_intensity(file_path=green_path,
+                                              calc='mean')
+
+        # getting current crop cell cycle
+        current_cell_cycle = get_cell_cycle(red_intensity=red_intensity,
+                                            green_intensity=green_intensity)
+
+        # updating current row data
+        df.at[row_index, col_name] = current_cell_cycle
+
+        # updating current row index
+        current_row_index += 1
 
 
 def generate_cell_cycle_annotations(crops_file: str,
