@@ -26,6 +26,7 @@ from cupy import pad as np_pad
 from argparse import ArgumentParser
 from cv2 import resize as cv_resize
 from src.utils.aux_funcs import get_etc
+from src.utils.aux_funcs import load_bgr_img
 from src.utils.aux_funcs import get_time_str
 from src.utils.aux_funcs import flush_or_print
 from src.utils.aux_funcs import print_gpu_usage
@@ -527,11 +528,7 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
             continue
 
         # reading current image with cv2
-        current_image_array = imread(current_image_path,
-                                     -1)  # reads image as is (independent on input format)
-
-        # converting image to grayscale
-        #current_image_array = cvtColor(current_image_array, COLOR_GRAY2RGB)
+        current_image_array = load_bgr_img(image_path=current_image_path)
 
         # converting image to cupy array
         current_image_array = asarray(current_image_array)
