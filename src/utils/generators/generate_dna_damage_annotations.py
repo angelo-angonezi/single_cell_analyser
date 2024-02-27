@@ -16,6 +16,7 @@ from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
 from src.utils.aux_funcs import get_crops_df
+from src.utils.aux_funcs import get_contours_df
 from src.utils.aux_funcs import get_crop_pixels
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
@@ -86,6 +87,66 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
+def add_dna_damage_col(df: DataFrame,
+                       foci_masks_folder: str,
+                       images_extension: str,
+                       foci_min_area: str
+                       ) -> None:
+    """
+    Given a crops info df, and paths to
+    foci masks, adds dna damage col, based
+    on foci count/area.
+    """
+    # defining col name
+    col_name = 'class'
+
+    # emptying class col
+    df[col_name] = None
+
+    # getting rows num
+    rows_num = len(df)
+
+    # getting df rows
+    df_rows = df.iterrows()
+
+    # defining starter for current row index
+    current_row_index = 1
+
+    # iterating over df rows
+    for row_index, row_data in df_rows:
+
+        # printing progress message
+        base_string = 'adding dna damage col to row #INDEX# of #TOTAL#'
+        print_progress_message(base_string=base_string,
+                               index=current_row_index,
+                               total=rows_num)
+
+        # getting current row crop name
+        crop_name = row_data['crop_name']
+
+        # getting current row crop name with extension
+        crop_name_w_extension = f'{crop_name}{images_extension}'
+
+        # getting current row crop paths
+        foci_mask_path = join(foci_masks_folder, crop_name_w_extension)
+
+        # getting current foci df
+        foci_df = get_contours_df(image_name=crop_name,
+                                  image_path=foci_mask_path,
+                                  contour_type='foci')
+
+        print(foci_df)
+        exit()
+
+        # getting current dna damage level
+        current_class = None
+
+        # updating current row data
+        df.at[row_index, col_name] = current_class
+
+        # updating current row index
+        current_row_index += 1
+
 def generate_dna_damage_annotations(crops_file: str,
                                     foci_masks_folder: str,
                                     images_extension: str,
@@ -100,11 +161,16 @@ def generate_dna_damage_annotations(crops_file: str,
     """
     # reading crops info df
     crops_info_df = read_csv(crops_file)
-    print(crops_info_df)
 
-    # saving crops pixels df
-    # crops_pixels_df.to_csv(output_path,
-    #                        index=False)
+    # updating class col
+    add_dna_damage_col(df=crops_info_df,
+                       foci_masks_folder=foci_masks_folder,
+                       images_extension=images_extension,
+                       foci_min_area=foci_min_area)
+
+    # saving updated crops info df
+    crops_info_df.to_csv(output_path,
+                         index=False)
 
     # printing execution message
     print(f'output saved to {output_path}')

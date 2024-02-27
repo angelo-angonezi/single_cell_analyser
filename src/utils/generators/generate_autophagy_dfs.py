@@ -10,7 +10,6 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-from cv2 import imread
 from cv2 import imwrite
 from cv2 import putText
 from os.path import join
@@ -18,17 +17,15 @@ from pandas import concat
 from pandas import Series
 from numpy import ndarray
 from cv2 import contourArea
-from cv2 import boundingRect
 from cv2 import drawContours
 from pandas import DataFrame
-from cv2 import findContours
-from cv2 import RETR_EXTERNAL
 from cv2 import pointPolygonTest
-from cv2 import CHAIN_APPROX_NONE
 from argparse import ArgumentParser
 from cv2 import FONT_HERSHEY_SIMPLEX
 from src.utils.aux_funcs import load_bgr_img
+from src.utils.aux_funcs import get_contours_df
 from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import get_contour_centroid
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
@@ -103,82 +100,6 @@ def get_args_dict() -> dict:
 
 ######################################################################
 # defining auxiliary functions
-
-
-def get_contour_centroid(contour: ndarray) -> tuple:
-    """
-    Given a contour, returns
-    center coordinates in a tuple
-    of following structure:
-    (cx, cy)
-    """
-    # getting contour coords
-    contour_coords = boundingRect(contour)
-
-    # extracting features from coords tuple
-    corner_x, corner_y, width, height = contour_coords
-
-    # getting current center points
-    cx = corner_x + (width / 2)
-    cy = corner_y + (height / 2)
-
-    # converting cx/cy to ints
-    cx = int(cx)
-    cy = int(cy)
-
-    # assembling coords tuple
-    coords_tuple = (cx, cy)
-
-    # returning coords tuple
-    return coords_tuple
-
-
-def get_contours_df(image_name: str,
-                    image_path: str,
-                    contour_type: str
-                    ) -> DataFrame:
-    """
-    Given a path to a binary image,
-    finds contours and returns data
-    frame containing contours coords.
-    """
-    # reading image
-    image = imread(image_path,
-                   -1)
-
-    # finding contours in image
-    contours, _ = findContours(image, RETR_EXTERNAL, CHAIN_APPROX_NONE)
-
-    # getting number of contours found in image
-    contours_num = len(contours)
-    contours_num_range = range(contours_num)
-
-    # getting current contours indices
-    contours_indices = [f for f in contours_num_range]
-
-    # getting current contours coords
-    contours_coords = [get_contour_centroid(contour) for contour in contours]
-
-    # getting current contours areas
-    contours_areas = [contourArea(contour) for contour in contours]
-
-    # getting current image col lists
-    image_names = [image_name for _ in contours_num_range]
-    contour_types = [contour_type for _ in contours_num_range]
-
-    # assembling contours dict
-    contours_dict = {'image_name': image_names,
-                     'contour_index': contours_indices,
-                     'contour': contours,
-                     'contour_type': contour_types,
-                     'coords': contours_coords,
-                     'area': contours_areas}
-
-    # assembling contours df
-    contours_df = DataFrame(contours_dict)
-
-    # returning contours df
-    return contours_df
 
 
 def get_autophagy_df(cell_masks_folder: str,

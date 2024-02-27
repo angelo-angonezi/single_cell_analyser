@@ -149,11 +149,11 @@ def add_cell_cycle_col(df: DataFrame,
                                               calc='mean')
 
         # getting current crop cell cycle
-        current_cell_cycle = get_cell_cycle(red_intensity=red_intensity,
-                                            green_intensity=green_intensity)
+        current_class = get_cell_cycle(red_intensity=red_intensity,
+                                       green_intensity=green_intensity)
 
         # updating current row data
-        df.at[row_index, col_name] = current_cell_cycle
+        df.at[row_index, col_name] = current_class
 
         # updating current row index
         current_row_index += 1
@@ -174,7 +174,7 @@ def generate_cell_cycle_annotations(crops_file: str,
     # reading crops info df
     crops_info_df = read_csv(crops_file)
 
-    # adding cell cycle col
+    # updating class col
     add_cell_cycle_col(df=crops_info_df,
                        red_folder=red_folder,
                        green_folder=green_folder,
