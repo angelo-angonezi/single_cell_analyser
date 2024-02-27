@@ -13,7 +13,6 @@ print('importing required libraries...')  # noqa
 from cv2 import imread
 from cv2 import imwrite
 from cv2 import putText
-from cv2 import cvtColor
 from os.path import join
 from pandas import concat
 from pandas import Series
@@ -24,7 +23,6 @@ from cv2 import drawContours
 from pandas import DataFrame
 from cv2 import findContours
 from cv2 import RETR_EXTERNAL
-from cv2 import COLOR_GRAY2BGR
 from cv2 import pointPolygonTest
 from cv2 import CHAIN_APPROX_NONE
 from argparse import ArgumentParser

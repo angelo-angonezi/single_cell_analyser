@@ -2104,5 +2104,31 @@ def load_bgr_img(image_path: str) -> ndarray:
     # returning image
     return current_image
 
+
+def get_crops_df(crops_file: str) -> DataFrame:
+    """
+    Given a path to a crops info csv,
+    returns crops data frame.
+    :param crops_file: String. Represents a path to a file.
+    :return: DataFrame. Represents crops info data frame.
+    """
+    # defining col types
+    col_types = {'img_name': str,
+                 'crop_index': int,
+                 'crop_name': str,
+                 'cx': int,
+                 'cy': int,
+                 'width': int,
+                 'height': int,
+                 'angle': float,
+                 'class': str}
+
+    # reading crops file
+    crops_df = read_csv(crops_file,
+                        dtype=col_types)
+
+    # returning crops df
+    return crops_df
+
 ######################################################################
 # end of current module

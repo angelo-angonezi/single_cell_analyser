@@ -12,9 +12,9 @@ print('initializing...')  # noqa
 print('importing required libraries...')  # noqa
 from os.path import join
 from pandas import concat
-from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
+from src.utils.aux_funcs import get_crops_df
 from src.utils.aux_funcs import get_crop_pixels
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
@@ -42,13 +42,13 @@ def get_args_dict() -> dict:
     parser.add_argument('-r', '--red-folder',
                         dest='red_folder',
                         required=True,
-                        help='defines red input folder (folder containing crops in fluorescence channel)')
+                        help='defines red input folder (folder containing red crops)')
 
     # green folder param
     parser.add_argument('-g', '--green-folder',
                         dest='green_folder',
                         required=True,
-                        help='defines green input folder (folder containing crops in fluorescence channel)')
+                        help='defines green input folder (folder containing green crops)')
 
     # images extension param
     parser.add_argument('-x', '--images-extension',
@@ -77,32 +77,6 @@ def get_args_dict() -> dict:
 
 ######################################################################
 # defining auxiliary functions
-
-
-def get_crops_df(crops_file: str) -> DataFrame:
-    """
-    Given a path to a crops info csv,
-    returns crops data frame.
-    :param crops_file: String. Represents a path to a file.
-    :return: DataFrame. Represents crops info data frame.
-    """
-    # defining col types
-    col_types = {'img_name': str,
-                 'crop_index': int,
-                 'crop_name': str,
-                 'cx': int,
-                 'cy': int,
-                 'width': int,
-                 'height': int,
-                 'angle': float,
-                 'class': str}
-
-    # reading crops file
-    crops_df = read_csv(crops_file,
-                        dtype=col_types)
-
-    # returning crops df
-    return crops_df
 
 
 def get_crops_pixels_df(red_folder: str,
