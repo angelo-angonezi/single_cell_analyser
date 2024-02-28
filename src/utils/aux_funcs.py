@@ -1665,6 +1665,8 @@ def add_file_path_col(df: DataFrame,
 
 def get_autophagy_level(foci_count: int,
                         foci_area_mean: float,
+                        foci_count_threshold: int,
+                        foci_area_mean_threshold: float
                         ) -> str:
     """
     Given parameters for determining
@@ -1672,7 +1674,23 @@ def get_autophagy_level(foci_count: int,
     and returns autophagy level string.
     """
     # defining placeholder value for autophagy level
-    autophagy_level = None
+    autophagy_level = 'undefined'
+
+    # getting conditional bools
+    many_small = True if (foci_count >= foci_count_threshold and foci_area_mean < foci_area_mean_threshold)
+    few_big = True if (foci_count < foci_count_threshold and foci_area_mean >= foci_area_mean_threshold)
+
+    # checking conditionals
+
+    if many_small:
+
+        # updating autophagy level string
+        autophagy_level = 'many_small'
+
+    elif few_big:
+
+        # updating autophagy level string
+        autophagy_level = 'few_big'
 
     # returning autophagy level
     return autophagy_level
@@ -1687,7 +1705,7 @@ def get_dna_damage_level(foci_count: int,
     and returns dna damage level string.
     """
     # defining placeholder value for dna damage level
-    dna_damage_level = None
+    dna_damage_level = 'undefined'
 
     # returning dna damage level
     return dna_damage_level

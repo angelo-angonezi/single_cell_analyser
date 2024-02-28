@@ -17,7 +17,9 @@ from pandas import DataFrame
 from argparse import ArgumentParser
 from src.utils.aux_funcs import get_crops_df
 from src.utils.aux_funcs import get_crop_pixels
+from src.utils.aux_funcs import get_contours_df
 from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import get_autophagy_level
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
@@ -25,8 +27,8 @@ print('all required libraries successfully imported.')  # noqa
 #####################################################################
 # defining global variables
 
-MEAN_FOCI_AREA_THRESHOLD = 5.5
 FOCI_COUNT_THRESHOLD = 5
+FOCI_AREA_MEAN_THRESHOLD = 5.5
 
 #####################################################################
 # argument parsing related functions
@@ -86,6 +88,76 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
+def add_autophagy_col(df: DataFrame,
+                      foci_masks_folder: str,
+                      images_extension: str,
+                      foci_min_area: int
+                      ) -> None:
+    """
+    Given a crops info df, and paths to
+    foci masks, adds autophagy col
+    based on foci count/area.
+    """
+    # defining col name
+    col_name = 'class'
+
+    # emptying class col
+    df[col_name] = None
+
+    # getting rows num
+    rows_num = len(df)
+
+    # getting df rows
+    df_rows = df.iterrows()
+
+    # defining starter for current row index
+    current_row_index = 1
+
+    # iterating over df rows
+    for row_index, row_data in df_rows:
+
+        # printing progress message
+        base_string = 'adding autophagy col to row #INDEX# of #TOTAL#'
+        print_progress_message(base_string=base_string,
+                               index=current_row_index,
+                               total=rows_num)
+
+        # getting current row crop name
+        crop_name = row_data['crop_name']
+
+        # getting current row crop name with extension
+        crop_name_w_extension = f'{crop_name}{images_extension}'
+
+        # getting current row crop foci mask path
+        foci_mask_path = join(foci_masks_folder,
+                              crop_name_w_extension)
+
+        # getting current crop contours df
+        contours_df = get_contours_df(image_name=crop_name,
+                                      image_path=foci_mask_path,
+                                      contour_type='lc3_foci')
+
+        # filtering df by min foci area
+        contours_df = contours_df[contours_df['area'] >= foci_min_area]
+
+        # getting current crop foci count/area
+        foci_count = len(contours_df)
+        foci_area_col = contours_df['area']
+        foci_area_mean = foci_area_col.mean()
+
+        # getting current crop autophagy level
+        current_class = get_autophagy_level(foci_count=foci_count,
+                                            foci_area_mean=foci_area_mean,
+                                            foci_count_threshold=FOCI_COUNT_THRESHOLD,
+                                            foci_area_mean_threshold=FOCI_AREA_MEAN_THRESHOLD)
+
+        # updating current row data
+        df.at[row_index, col_name] = current_class
+
+        # updating current row index
+        current_row_index += 1
+
+
 def generate_autophagy_annotations(crops_file: str,
                                    foci_masks_folder: str,
                                    images_extension: str,
@@ -100,11 +172,16 @@ def generate_autophagy_annotations(crops_file: str,
     """
     # reading crops info df
     crops_info_df = read_csv(crops_file)
-    print(crops_info_df)
+
+    # updating class col
+    add_autophagy_col(df=crops_info_df,
+                      foci_masks_folder=foci_masks_folder,
+                      images_extension=images_extension,
+                      foci_min_area=foci_min_area)
 
     # saving crops pixels df
-    # crops_pixels_df.to_csv(output_path,
-    #                        index=False)
+    crops_info_df.to_csv(output_path,
+                         index=False)
 
     # printing execution message
     print(f'output saved to {output_path}')
