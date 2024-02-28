@@ -1663,6 +1663,36 @@ def add_file_path_col(df: DataFrame,
         current_row_index += 1
 
 
+def get_autophagy_level(foci_count: int,
+                        foci_area_mean: float,
+                        ) -> str:
+    """
+    Given parameters for determining
+    autophagy levels, calculates it
+    and returns autophagy level string.
+    """
+    # defining placeholder value for autophagy level
+    autophagy_level = None
+
+    # returning autophagy level
+    return autophagy_level
+
+
+def get_dna_damage_level(foci_count: int,
+                         foci_area_mean: float,
+                         ) -> str:
+    """
+    Given parameters for determining
+    dna damage levels, calculates it
+    and returns dna damage level string.
+    """
+    # defining placeholder value for dna damage level
+    dna_damage_level = None
+
+    # returning dna damage level
+    return dna_damage_level
+
+
 def get_cell_cycle(red_value: float,
                    green_value: float,
                    min_red_value: float,
