@@ -11,17 +11,23 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 from os.path import join
-from pandas import concat
 from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
-from src.utils.aux_funcs import get_crops_df
-from src.utils.aux_funcs import get_crop_pixels
+from src.utils.aux_funcs import get_cell_cycle
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import get_pixel_intensity
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
+
+######################################################################
+# defining global variables
+
+MIN_RED_VALUE = 0.15
+MIN_GREEN_VALUE = 0.15
+RATIO_LOWER_THRESHOLD = 0.8
+RATIO_UPPER_THRESHOLD = 1.2
 
 #####################################################################
 # argument parsing related functions
@@ -80,24 +86,6 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_cell_cycle(red_intensity: float,
-                   green_intensity: float
-                   ) -> str:
-    """
-    Given a nucleus red/green intensities,
-    returns given nucleus cell cycle.
-    """
-    # TODO: maybe change this function by more complex one in aux_funcs module
-    # defining placeholder value for cell cycle
-    cell_cycle = None
-
-    # updating cell cycle
-    cell_cycle = 'red' if red_intensity > green_intensity else 'green'
-
-    # returning cell cycle
-    return cell_cycle
-
-
 def add_cell_cycle_col(df: DataFrame,
                        red_folder: str,
                        green_folder: str,
@@ -148,9 +136,17 @@ def add_cell_cycle_col(df: DataFrame,
         green_intensity = get_pixel_intensity(file_path=green_path,
                                               calc='mean')
 
+        # normalizing values
+        red_intensity = red_intensity / 255
+        green_intensity = green_intensity / 255
+
         # getting current crop cell cycle
-        current_class = get_cell_cycle(red_intensity=red_intensity,
-                                       green_intensity=green_intensity)
+        current_class = get_cell_cycle(red_value=red_intensity,
+                                       green_value=green_intensity,
+                                       min_red_value=MIN_RED_VALUE,
+                                       min_green_value=MIN_GREEN_VALUE,
+                                       ratio_lower_threshold=RATIO_LOWER_THRESHOLD,
+                                       ratio_upper_threshold=RATIO_UPPER_THRESHOLD)
 
         # updating current row data
         df.at[row_index, col_name] = current_class
