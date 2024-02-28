@@ -19,6 +19,7 @@ from src.utils.aux_funcs import get_crops_df
 from src.utils.aux_funcs import get_contours_df
 from src.utils.aux_funcs import get_crop_pixels
 from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import get_dna_damage_level
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
@@ -26,8 +27,8 @@ print('all required libraries successfully imported.')  # noqa
 #####################################################################
 # defining global variables
 
-MEAN_FOCI_AREA_THRESHOLD = 5.5
 FOCI_COUNT_THRESHOLD = 5
+FOCI_AREA_MEAN_THRESHOLD = 5.5
 
 #####################################################################
 # argument parsing related functions
@@ -127,19 +128,28 @@ def add_dna_damage_col(df: DataFrame,
         # getting current row crop name with extension
         crop_name_w_extension = f'{crop_name}{images_extension}'
 
-        # getting current row crop paths
-        foci_mask_path = join(foci_masks_folder, crop_name_w_extension)
+        # getting current row crop foci mask path
+        foci_mask_path = join(foci_masks_folder,
+                              crop_name_w_extension)
 
-        # getting current foci df
-        foci_df = get_contours_df(image_name=crop_name,
-                                  image_path=foci_mask_path,
-                                  contour_type='foci')
+        # getting current crop contours df
+        contours_df = get_contours_df(image_name=crop_name,
+                                      image_path=foci_mask_path,
+                                      contour_type='53bp1_foci')
 
-        print(foci_df)
-        exit()
+        # filtering df by min foci area
+        contours_df = contours_df[contours_df['area'] >= foci_min_area]
 
-        # getting current dna damage level
-        current_class = None
+        # getting current crop foci count/area
+        foci_count = len(contours_df)
+        foci_area_col = contours_df['area']
+        foci_area_mean = foci_area_col.mean()
+
+        # getting current crop autophagy level
+        current_class = get_dna_damage_level(foci_count=foci_count,
+                                             foci_area_mean=foci_area_mean,
+                                             foci_count_threshold=FOCI_COUNT_THRESHOLD,
+                                             foci_area_mean_threshold=FOCI_AREA_MEAN_THRESHOLD)
 
         # updating current row data
         df.at[row_index, col_name] = current_class

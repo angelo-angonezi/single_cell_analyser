@@ -1712,12 +1712,15 @@ def get_autophagy_level(foci_count: int,
 
 def get_dna_damage_level(foci_count: int,
                          foci_area_mean: float,
+                         foci_count_threshold: int,
+                         foci_area_mean_threshold: float
                          ) -> str:
     """
     Given parameters for determining
     dna damage levels, calculates it
     and returns dna damage level string.
     """
+    # TODO: update here!
     # defining placeholder value for dna damage level
     dna_damage_level = 'undefined'
 
