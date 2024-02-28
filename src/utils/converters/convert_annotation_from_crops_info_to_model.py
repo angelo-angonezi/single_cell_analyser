@@ -1,7 +1,5 @@
 # annotation format converter (crops info csv to model csv)
 
-# TODO: UPDATE THIS CODE!
-
 # annotation format conversion module (from crops info to model)
 # Code destined to converting annotation formats for ML applications.
 
@@ -24,13 +22,6 @@ from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
-# defining global variables
-
-IMAGE_NAME_COL = 'Image_name_merge'
-RED_MEAN_COL = 'Mean_red'
-GREEN_MEAN_COL = 'Mean_green'
-
-#####################################################################
 # argument parsing related functions
 
 
@@ -40,7 +31,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = "convert annotations from crops info to fornma"
+    description = "convert annotations from crops info to model"
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
@@ -53,29 +44,11 @@ def get_args_dict() -> dict:
                         required=True,
                         help='defines path to crops info df (.csv) file')
 
-    # red folder param
-    parser.add_argument('-r', '--red-folder',
-                        dest='red_folder',
-                        required=True,
-                        help='defines red input folder (folder containing crops in fluorescence channel)')
-
-    # green folder param
-    parser.add_argument('-g', '--green-folder',
-                        dest='green_folder',
-                        required=True,
-                        help='defines green input folder (folder containing crops in fluorescence channel)')
-
-    # images extension param
-    parser.add_argument('-x', '--images-extension',
-                        dest='images_extension',
-                        required=True,
-                        help='defines extension (.tif, .png, .jpg) of images in input folders')
-
     # output path param
     parser.add_argument('-o', '--output-path',
                         dest='output_path',
                         required=True,
-                        help='defines path to output fornma format (.csv) file')
+                        help='defines path to output model format (.csv) file')
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -88,9 +61,6 @@ def get_args_dict() -> dict:
 
 
 def convert_single_file(input_csv_file_path: str,
-                        red_folder: str,
-                        green_folder: str,
-                        images_extension: str,
                         output_path: str
                         ) -> None:
     """
@@ -124,53 +94,24 @@ def convert_single_file(input_csv_file_path: str,
                                total=rows_num)
 
         # getting current row cols
-        current_img_name = row_data['img_name']
-        current_img_min = row_data['img_min']
-        current_img_max = row_data['img_max']
-        current_crop_index = row_data['crop_index']
-        current_crop_name = row_data['crop_name']
-        current_cx = row_data['cx']
-        current_cy = row_data['cy']
-        current_width = row_data['width']
-        current_height = row_data['height']
-
-        # adding extension to crop name
-        current_crop_name_w_extension = f'{current_crop_name}{images_extension}'
-
-        # getting current crop channel paths
-        current_red_path = join(red_folder,
-                                current_crop_name_w_extension)
-        current_green_path = join(green_folder,
-                                  current_crop_name_w_extension)
-
-        # getting current crop mean pixel intensities
-        # TODO: check whether to use mean or median here
-        red_mean = get_pixel_intensity(file_path=current_red_path,
-                                       calc='mean')
-        green_mean = get_pixel_intensity(file_path=current_green_path,
-                                         calc='mean')
-
-        # normalizing intensities
-        red_mean_normalized = (red_mean - current_img_min) / current_img_max
-        green_mean_normalized = (green_mean - current_img_min) / current_img_max
-
-        # getting current crop area
-        current_area = get_mask_area(row_data=row_data,
-                                     style='ellipse')
-
-        # getting current crop NII
-        current_nii = get_axis_ratio(width=current_width,
-                                     height=current_height)
+        img_file_name = row_data['img_name']
+        cx = row_data['cx']
+        cy = row_data['cy']
+        width = row_data['width']
+        height = row_data['height']
+        angle = row_data['angle']
+        current_class = row_data['class']
+        detection_threshold = 1.0
 
         # creating current obb dict
-        current_obb_dict = {'Cell': current_crop_index,
-                            'X': current_cx,
-                            'Y': current_cy,
-                            'Area': current_area,
-                            'NII': current_nii,
-                            'Image_name_merge': current_img_name,
-                            'Mean_red': red_mean_normalized,
-                            'Mean_green': green_mean_normalized}
+        current_obb_dict = {'img_file_name': img_file_name,
+                            'detection_threshold': detection_threshold,
+                            'cx': cx,
+                            'cy': cy,
+                            'width': width,
+                            'height': height,
+                            'angle': angle,
+                            'class': current_class}
 
         # creating current obb df
         current_obb_df = DataFrame(current_obb_dict,
@@ -208,15 +149,6 @@ def main():
     # getting input file
     input_file = args_dict['input_file']
 
-    # getting red folder
-    red_folder = args_dict['red_folder']
-
-    # getting green folder
-    green_folder = args_dict['green_folder']
-
-    # getting image extension
-    images_extension = args_dict['images_extension']
-
     # getting output path
     output_path = args_dict['output_path']
 
@@ -228,9 +160,6 @@ def main():
 
     # running converter function
     convert_single_file(input_csv_file_path=input_file,
-                        red_folder=red_folder,
-                        green_folder=green_folder,
-                        images_extension=images_extension,
                         output_path=output_path)
 
 ######################################################################

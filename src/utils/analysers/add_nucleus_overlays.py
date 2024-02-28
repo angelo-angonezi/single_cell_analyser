@@ -231,7 +231,7 @@ def add_single_overlay(open_img: ndarray,
             current_label,
             (int(cx), int(cy)),
             FONT_HERSHEY_SIMPLEX,
-            0.5,
+            0.9,
             text_color,
             text_thickness)
 
