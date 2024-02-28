@@ -1677,8 +1677,8 @@ def get_autophagy_level(foci_count: int,
     autophagy_level = 'undefined'
 
     # getting conditional bools
-    many_small = True if (foci_count >= foci_count_threshold and foci_area_mean < foci_area_mean_threshold)
-    few_big = True if (foci_count < foci_count_threshold and foci_area_mean >= foci_area_mean_threshold)
+    many_small = (foci_count >= foci_count_threshold and foci_area_mean < foci_area_mean_threshold)
+    few_big = (foci_count < foci_count_threshold and foci_area_mean >= foci_area_mean_threshold)
 
     # checking conditionals
 
