@@ -160,7 +160,7 @@ def print_global_progress():
 
     # defining progress string
     progress_string = f'generating crops for image {CURRENT_IMAGE} of {IMAGES_TOTAL}... '
-    #progress_string += f'| crop: {CURRENT_CROP}/{CROPS_TOTAL} '
+    # progress_string += f'| crop: {CURRENT_CROP}/{CROPS_TOTAL} '
     progress_string += f'| crop: {CURRENT_ITERATION}/{ITERATIONS_TOTAL} '
     progress_string += f'| progress: {progress_percentage:02.2f}% '
     progress_string += f'| time elapsed: {time_elapsed_str} '
@@ -207,6 +207,7 @@ def black_pixels_in_crop(crop: ndarray) -> bool:
     # returning boolean
     return black_pixels_in_array
 
+
 def get_crop_coordinates(cx: int,
                          cy: int,
                          width: float,
@@ -244,10 +245,6 @@ def rotate_image(image: ndarray,
     """
     Given an image, and angle and coordinates
     to pivot, returns rotated image.
-    :param image: Array. Represents an open image.
-    :param angle: Float. Represents rotation angle.
-    :param pivot: Float. Represents pivot coordinates (cx, cy).
-    :return: Array. Represents rotated image.
     """
     # defining image pads
     pad_x = [image.shape[1] - pivot[0], pivot[0]]
@@ -270,7 +267,7 @@ def rotate_image(image: ndarray,
     left, right, top, bottom = crop_coords
 
     # cropping ROI (optimized code since rotation is costly)
-    #cropped_image = padded_image[left:right, top:bottom]
+    # cropped_image = padded_image[left:right, top:bottom]
     cropped_image = padded_image[top:bottom, left:right]
 
     # rotating image
