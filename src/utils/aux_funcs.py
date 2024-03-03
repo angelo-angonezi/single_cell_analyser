@@ -14,11 +14,13 @@ from cv2 import flip
 from time import time
 from cv2 import rotate
 from cv2 import circle
+from cv2 import imshow
 from numpy import intp
 from os import listdir
 from os import environ
 from cv2 import imread
 from sys import stdout
+from cv2 import waitKey
 from cv2 import imwrite
 from cv2 import ellipse
 from os.path import join
@@ -43,8 +45,10 @@ from cv2 import convertScaleAbs
 from numpy import add as np_add
 from numpy import count_nonzero
 from cv2 import IMREAD_GRAYSCALE
+from cv2 import destroyAllWindows
 from cv2 import CHAIN_APPROX_NONE
 from shutil import copy as sh_copy
+from numpy import where as np_where
 from cv2 import resize as cv_resize
 from matplotlib import pyplot as plt
 from numpy import zeros as np_zeroes
@@ -844,8 +848,7 @@ def get_crop_pixels(crop_path: str) -> ndarray:
     :return: ndarray. Represents a crop's pixels.
     """
     # opening image
-    open_crop = imread(crop_path,
-                       IMREAD_GRAYSCALE)
+    open_crop = load_grayscale_img(image_path=crop_path)
 
     # linearizing pixels
     linearized_pixels = open_crop.flatten()
@@ -914,7 +917,7 @@ def draw_ellipse(open_img: ndarray,
                  width: float,
                  height: float,
                  angle: float,
-                 color: tuple,
+                 color: tuple or int,
                  thickness: int
                  ) -> ndarray:
     """
@@ -1738,9 +1741,47 @@ def get_erk_ratio(crop_path: str,
     coordinates for respective nucleus,
     returns nucleus/cytoplasm ratio
     """
-    # reading image
+    # reading image as grayscale
     image = imread(crop_path,
                    -1)
+
+    # getting image shape/dimensions
+    image_shape = image.shape
+    image_width = image_shape[1]
+    image_height = image_shape[0]
+
+    # getting cx/cy values
+    cx = image_width / 2
+    cy = image_height / 2
+    cx = int(cx)
+    cy = int(cy)
+
+    # creating blank image (which will hold contour mask)
+    blank_image = get_blank_image(width=image_width,
+                                  height=image_height)
+
+    # drawing contour in blank image
+    print(blank_image.shape)
+    draw_ellipse(open_img=blank_image,
+                 cx=cx,
+                 cy=cy,
+                 width=height,
+                 height=width,
+                 angle=0.0,
+                 color=1,
+                 thickness=-1)
+    print(blank_image.shape)
+    exit()
+
+    # getting pixel coordinates matching contour color
+    contour_pixel_coords = np_where(blank_image == 1)
+
+    # getting respective pixels in base image
+    pixels_in_contour = blank_image[contour_pixel_coords[0], contour_pixel_coords[1]]
+
+    show_image(image=blank_image)
+    print(pixels_in_contour)
+    exit()
 
     # TODO: add erk ring expansion logic here
 
@@ -2222,6 +2263,19 @@ def load_bgr_img(image_path: str) -> ndarray:
     return current_image
 
 
+def load_grayscale_img(image_path: str) -> ndarray:
+    """
+    Given a path to an image,
+    returns image as grayscale ndarray.
+    """
+    # opening current image
+    current_image = imread(image_path,
+                           IMREAD_GRAYSCALE)
+
+    # returning image
+    return current_image
+
+
 def get_crops_df(crops_file: str) -> DataFrame:
     """
     Given a path to a crops info csv,
@@ -2322,6 +2376,24 @@ def get_contours_df(image_name: str,
 
     # returning contours df
     return contours_df
+
+
+def show_image(image: ndarray,
+               window_name: str = 'test_window'
+               ) -> None:
+    """
+    Given a numpy array, show it
+    in screen, using given window
+    name as title.
+    """
+    # showing image
+    imshow(window_name, image)
+
+    # waiting fow user input (required for cv2.imshow to work)
+    waitKey(0)
+
+    # closing windows
+    destroyAllWindows()
 
 ######################################################################
 # end of current module
