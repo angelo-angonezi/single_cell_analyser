@@ -1728,6 +1728,30 @@ def get_dna_damage_level(foci_count: int,
     return dna_damage_level
 
 
+def get_erk_ratio(crop_path: str) -> float:
+    """
+    Given a path to a crop, and
+    coordinates for respective nucleus,
+    returns nucleus/cytoplasm ratio
+    """
+    # TODO: write this function
+    pass
+
+
+def get_erk_level(nucleus_cytoplasm_ratio: float) -> str:
+    """
+    Given parameters for determining
+    erk levels, calculates it and
+    returns erk level string.
+    """
+    # TODO: update here!
+    # defining placeholder value for erk level
+    erk_level = 'undefined'
+
+    # returning erk level
+    return erk_level
+
+
 def get_cell_cycle(red_value: float,
                    green_value: float,
                    min_red_value: float,

@@ -1,9 +1,9 @@
-# generate cell cycle annotations module
+# generate erk annotations module
 
 print('initializing...')  # noqa
 
-# Code destined to generating cell
-# cycle annotations file.
+# Code destined to generating
+# erk annotations file.
 
 ######################################################################
 # imports
@@ -14,20 +14,16 @@ from os.path import join
 from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
-from src.utils.aux_funcs import get_cell_cycle
+from src.utils.aux_funcs import get_erk_level
 from src.utils.aux_funcs import enter_to_continue
-from src.utils.aux_funcs import get_pixel_intensity
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
 
-######################################################################
+#####################################################################
 # defining global variables
 
-MIN_RED_VALUE = 0.15
-MIN_GREEN_VALUE = 0.15
-RATIO_LOWER_THRESHOLD = 0.8
-RATIO_UPPER_THRESHOLD = 1.2
+RATIO_THRESHOLD = 1.0
 
 #####################################################################
 # argument parsing related functions
@@ -39,7 +35,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'generate cell cycle annotations module'
+    description = 'generate erk annotations module'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
@@ -50,19 +46,13 @@ def get_args_dict() -> dict:
     parser.add_argument('-c', '--crops-file',
                         dest='crops_file',
                         required=True,
-                        help='defines path to crops file (containing crops info)')
+                        help='defines path to crops file (crops_info.csv file)')
 
-    # red folder param
-    parser.add_argument('-r', '--red-folder',
-                        dest='red_folder',
+    # images folder param
+    parser.add_argument('-i', '--images-folder',
+                        dest='images_folder',
                         required=True,
-                        help='defines red input folder (folder containing red crops)')
-
-    # green folder param
-    parser.add_argument('-g', '--green-folder',
-                        dest='green_folder',
-                        required=True,
-                        help='defines green input folder (folder containing green crops)')
+                        help='defines path to folder containing fluorescent channel crops')
 
     # images extension param
     parser.add_argument('-x', '--images-extension',
@@ -76,6 +66,13 @@ def get_args_dict() -> dict:
                         required=True,
                         help='defines path to output file (.csv)')
 
+    # ring expansion param
+    parser.add_argument('-r', '--ring-expansion',
+                        dest='ring_expansion',
+                        required=False,
+                        default=1.2,
+                        help='defines expansion ratio to be applied on cytoplasm ring')
+
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
 
@@ -86,15 +83,16 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def add_cell_cycle_col(df: DataFrame,
-                       red_folder: str,
-                       green_folder: str,
-                       images_extension: str
-                       ) -> None:
+def add_erk_col(df: DataFrame,
+                images_folder: str,
+                images_extension: str,
+                ring_expansion: float
+                ) -> None:
     """
-    Given a crops info df, and paths to
-    red/green crops, adds cell cycle col
-    based on red/green pixel intensities.
+    Given a crops info df, and
+    a path to crops in fluorescence
+    channel, adds erk col based on
+    nucleus/cytoplasm pixel intensities.
     """
     # defining col name
     col_name = 'class'
@@ -115,7 +113,7 @@ def add_cell_cycle_col(df: DataFrame,
     for row_index, row_data in df_rows:
 
         # printing progress message
-        base_string = 'adding cell cycle col to row #INDEX# of #TOTAL#'
+        base_string = 'adding erk col to row #INDEX# of #TOTAL#'
         print_progress_message(base_string=base_string,
                                index=current_row_index,
                                total=rows_num)
@@ -126,27 +124,13 @@ def add_cell_cycle_col(df: DataFrame,
         # getting current row crop name with extension
         crop_name_w_extension = f'{crop_name}{images_extension}'
 
-        # getting current row crop paths
-        red_path = join(red_folder, crop_name_w_extension)
-        green_path = join(green_folder, crop_name_w_extension)
+        # getting current row crop path
+        crop_path = join(images_folder,
+                         crop_name_w_extension)
 
-        # getting current crop red/green pixel intensity values
-        red_intensity = get_pixel_intensity(file_path=red_path,
-                                            calc='median')
-        green_intensity = get_pixel_intensity(file_path=green_path,
-                                              calc='median')
-
-        # normalizing values
-        red_intensity = red_intensity / 255
-        green_intensity = green_intensity / 255
-
-        # getting current crop cell cycle
-        current_class = get_cell_cycle(red_value=red_intensity,
-                                       green_value=green_intensity,
-                                       min_red_value=MIN_RED_VALUE,
-                                       min_green_value=MIN_GREEN_VALUE,
-                                       ratio_lower_threshold=RATIO_LOWER_THRESHOLD,
-                                       ratio_upper_threshold=RATIO_UPPER_THRESHOLD)
+        # getting current crop erk level
+        # current_class = get_erk_level()
+        current_class = 'aaa'
 
         # updating current row data
         df.at[row_index, col_name] = current_class
@@ -155,28 +139,25 @@ def add_cell_cycle_col(df: DataFrame,
         current_row_index += 1
 
 
-def generate_cell_cycle_annotations(crops_file: str,
-                                    red_folder: str,
-                                    green_folder: str,
-                                    images_extension: str,
-                                    output_path: str,
-                                    ) -> None:
+def generate_erk_annotations(crops_file: str,
+                             images_folder: str,
+                             images_extension: str,
+                             output_path: str,
+                             ring_expansion: float
+                             ) -> None:
     """
-    Given a path to a folder containing crops,
-    and a path to a file containing crops info,
-    generates cell cycle annotations, and saves
-    it to given output path.
+    Given a path to a folder containing foci
+    masks, and a path to a file containing crops
+    info, generates erk annotations, and
+    saves it to given output path.
     """
     # reading crops info df
     crops_info_df = read_csv(crops_file)
 
     # updating class col
-    add_cell_cycle_col(df=crops_info_df,
-                       red_folder=red_folder,
-                       green_folder=green_folder,
-                       images_extension=images_extension)
+    add_erk_col(df=crops_info_df)
 
-    # saving updated crops info df
+    # saving crops pixels df
     crops_info_df.to_csv(output_path,
                          index=False)
 
@@ -196,11 +177,8 @@ def main():
     # getting crops file
     crops_file = args_dict['crops_file']
 
-    # getting red folder
-    red_folder = args_dict['red_folder']
-
-    # getting green folder
-    green_folder = args_dict['green_folder']
+    # getting images folder
+    images_folder = args_dict['images_folder']
 
     # getting image extension
     images_extension = args_dict['images_extension']
@@ -208,18 +186,18 @@ def main():
     # getting output path
     output_path = args_dict['output_path']
 
+    # getting ring expansion
+    ring_expansion = args_dict['ring_expansion']
+    ring_expansion = float(ring_expansion)
+
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
     enter_to_continue()
 
-    # running generate_cell_cycle_annotations function
-    generate_cell_cycle_annotations(crops_file=crops_file,
-                                    red_folder=red_folder,
-                                    green_folder=green_folder,
-                                    images_extension=images_extension,
-                                    output_path=output_path)
+    # running generate_erk_annotations function
+    generate_erk_annotations(crops_file=crops_file)
 
 ######################################################################
 # running main function

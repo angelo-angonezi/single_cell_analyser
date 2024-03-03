@@ -11,13 +11,10 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 from os.path import join
-from pandas import concat
 from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
-from src.utils.aux_funcs import get_crops_df
 from src.utils.aux_funcs import get_contours_df
-from src.utils.aux_funcs import get_crop_pixels
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import get_dna_damage_level
 from src.utils.aux_funcs import print_progress_message
