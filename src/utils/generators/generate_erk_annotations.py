@@ -14,16 +14,12 @@ from os.path import join
 from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
+from src.utils.aux_funcs import get_erk_ratio
 from src.utils.aux_funcs import get_erk_level
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
-
-#####################################################################
-# defining global variables
-
-RATIO_THRESHOLD = 1.0
 
 #####################################################################
 # argument parsing related functions
@@ -121,6 +117,10 @@ def add_erk_col(df: DataFrame,
         # getting current row crop name
         crop_name = row_data['crop_name']
 
+        # getting current row crop coords
+        width = row_data['width']
+        height = row_data['height']
+
         # getting current row crop name with extension
         crop_name_w_extension = f'{crop_name}{images_extension}'
 
@@ -128,9 +128,14 @@ def add_erk_col(df: DataFrame,
         crop_path = join(images_folder,
                          crop_name_w_extension)
 
+        # getting current crop ratio
+        current_ratio = get_erk_ratio(crop_path=crop_path,
+                                      width=width,
+                                      height=height,
+                                      ring_expansion=ring_expansion)
+
         # getting current crop erk level
-        # current_class = get_erk_level()
-        current_class = 'aaa'
+        current_class = get_erk_level(nucleus_cytoplasm_ratio=current_ratio)
 
         # updating current row data
         df.at[row_index, col_name] = current_class

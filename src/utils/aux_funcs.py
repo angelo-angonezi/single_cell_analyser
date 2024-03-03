@@ -1728,14 +1728,27 @@ def get_dna_damage_level(foci_count: int,
     return dna_damage_level
 
 
-def get_erk_ratio(crop_path: str) -> float:
+def get_erk_ratio(crop_path: str,
+                  width: float,
+                  height: float,
+                  ring_expansion: float
+                  ) -> float:
     """
     Given a path to a crop, and
     coordinates for respective nucleus,
     returns nucleus/cytoplasm ratio
     """
-    # TODO: write this function
-    pass
+    # reading image
+    image = imread(crop_path,
+                   -1)
+
+    # TODO: add erk ring expansion logic here
+
+    # getting current crop erk ratio
+    erk_ratio = 0.0
+
+    # returning crop ratio
+    return erk_ratio
 
 
 def get_erk_level(nucleus_cytoplasm_ratio: float) -> str:
@@ -1744,9 +1757,19 @@ def get_erk_level(nucleus_cytoplasm_ratio: float) -> str:
     erk levels, calculates it and
     returns erk level string.
     """
-    # TODO: update here!
     # defining placeholder value for erk level
     erk_level = 'undefined'
+
+    # checking nucleus/cytoplasm ratio
+    if nucleus_cytoplasm_ratio > 1.0:
+
+        # updating erk level string
+        erk_level = 'Inactive'
+
+    else:
+
+        # updating erk level string
+        erk_level = 'Active'
 
     # returning erk level
     return erk_level
