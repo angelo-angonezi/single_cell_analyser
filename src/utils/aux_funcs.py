@@ -2085,8 +2085,9 @@ def get_pixel_intensity(file_path: str,
     based on given calc method (mean, min, max).
     """
     # loading image
-    img = imread(file_path,
-                 -1)
+    img = load_grayscale_img(image_path=file_path)
+
+    # TODO: Add get nucleus pixels here (this way, only pixels inside ellipse will be considered)
 
     # defining placeholder value for current intensity value
     pixel_intensity = None

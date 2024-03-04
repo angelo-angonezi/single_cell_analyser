@@ -35,9 +35,9 @@ print('all required libraries successfully imported.')  # noqa
 #####################################################################
 # defining global variables
 
-# LABEL = False
+LABEL = False
 # LABEL = 'cell_index'  # adds indices to cells (facilitates comparison to data frame info)
-LABEL = 'phenotype'  # retrieves info from 'class' col
+# LABEL = 'phenotype'  # retrieves info from 'class' col
 COLOR_DICT = {'model': (0, 102, 204),
               'fornma': (0, 204, 102),
               'DT': (255, 153, 102),
