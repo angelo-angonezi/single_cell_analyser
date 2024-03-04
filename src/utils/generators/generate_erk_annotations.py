@@ -108,11 +108,6 @@ def add_erk_col(df: DataFrame,
     # iterating over df rows
     for row_index, row_data in df_rows:
 
-        # TODO: remove debug skip
-        if current_row_index != 3:
-            current_row_index += 1
-            continue
-
         # printing progress message
         base_string = 'adding erk col to row #INDEX# of #TOTAL#'
         print_progress_message(base_string=base_string,
@@ -169,9 +164,6 @@ def generate_erk_annotations(crops_file: str,
                 images_folder=images_folder,
                 images_extension=images_extension,
                 ring_expansion=ring_expansion)
-
-    print(crops_info_df)
-    exit()
 
     # saving crops pixels df
     crops_info_df.to_csv(output_path,

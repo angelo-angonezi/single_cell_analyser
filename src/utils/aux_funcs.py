@@ -1853,15 +1853,19 @@ def get_erk_ratio(crop_path: str,
     expanded_width = width * ring_expansion
     expanded_height = height * ring_expansion
 
-    # getting nucleus+ring pixels
+    # getting ring pixels
     nucleus_ring_pixels = get_pixels_in_ring(image=image,
                                              nucleus_width=width,
                                              nucleus_height=height,
                                              expanded_width=expanded_width,
                                              expanded_height=expanded_height)
 
+    # getting pixels mean intensities
+    nucleus_mean = nucleus_pixels.mean()
+    ring_mean = nucleus_ring_pixels.mean()
+
     # getting current crop erk ratio
-    erk_ratio = 0.0
+    erk_ratio = nucleus_mean / ring_mean
 
     # returning crop ratio
     return erk_ratio
@@ -1877,12 +1881,12 @@ def get_erk_level(nucleus_cytoplasm_ratio: float) -> str:
     erk_level = 'undefined'
 
     # checking nucleus/cytoplasm ratio
-    if nucleus_cytoplasm_ratio > 1.0:
+    if nucleus_cytoplasm_ratio > 1.0:  # nucleus is brighter
 
         # updating erk level string
         erk_level = 'Inactive'
 
-    else:
+    else:  # cytoplasm is brighter
 
         # updating erk level string
         erk_level = 'Active'
