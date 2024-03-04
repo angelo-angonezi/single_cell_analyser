@@ -107,7 +107,7 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_regression_model(learning_rate: float) -> Sequential:
+def get_age_model(learning_rate: float) -> Sequential:
     """
     Given a model base and a learning rate,
     returns compiled model.
@@ -155,6 +155,10 @@ def get_regression_model(learning_rate: float) -> Sequential:
     return model
 
 
+def get_new_model():
+    pass
+
+
 def regression_train(splits_folder: str,
                      extension: str,
                      dataset_file: str,
@@ -185,7 +189,7 @@ def regression_train(splits_folder: str,
                                          batch_size=batch_size)
 
     # getting model
-    model = get_regression_model(learning_rate=learning_rate)
+    model = get_age_model(learning_rate=learning_rate)
 
     # defining callback
     tensorboard_callback = TensorBoard(log_dir=logs_folder)

@@ -1731,20 +1731,15 @@ def get_dna_damage_level(foci_count: int,
     return dna_damage_level
 
 
-def get_erk_ratio(crop_path: str,
-                  width: float,
-                  height: float,
-                  ring_expansion: float
-                  ) -> float:
+def get_pixels_in_nucleus(image: ndarray,
+                          width: float,
+                          height: float
+                          ) -> ndarray:
     """
-    Given a path to a crop, and
-    coordinates for respective nucleus,
-    returns nucleus/cytoplasm ratio
+    Given an image, and coordinates
+    for nucleus, returns pixels values
+    inside it.
     """
-    # reading image as grayscale
-    image = imread(crop_path,
-                   -1)
-
     # getting image shape/dimensions
     image_shape = image.shape
     image_width = image_shape[1]
@@ -1761,7 +1756,6 @@ def get_erk_ratio(crop_path: str,
                                   height=image_height)
 
     # drawing contour in blank image
-    print(blank_image.shape)
     draw_ellipse(open_img=blank_image,
                  cx=cx,
                  cy=cy,
@@ -1770,20 +1764,101 @@ def get_erk_ratio(crop_path: str,
                  angle=0.0,
                  color=1,
                  thickness=-1)
-    print(blank_image.shape)
-    exit()
 
     # getting pixel coordinates matching contour color
     contour_pixel_coords = np_where(blank_image == 1)
 
     # getting respective pixels in base image
-    pixels_in_contour = blank_image[contour_pixel_coords[0], contour_pixel_coords[1]]
+    pixels_in_contour = image[contour_pixel_coords[0], contour_pixel_coords[1]]
 
-    show_image(image=blank_image)
-    print(pixels_in_contour)
-    exit()
+    # returning respective pixels
+    return pixels_in_contour
 
-    # TODO: add erk ring expansion logic here
+
+def get_pixels_in_ring(image: ndarray,
+                       nucleus_width: float,
+                       nucleus_height: float,
+                       expanded_width: float,
+                       expanded_height: float
+                       ) -> ndarray:
+    """
+    Given an image, and coordinates
+    for nucleus/cytoplasm ring, returns
+    pixels inside ring.
+    """
+    # getting image shape/dimensions
+    image_shape = image.shape
+    image_width = image_shape[1]
+    image_height = image_shape[0]
+
+    # getting cx/cy values
+    cx = image_width / 2
+    cy = image_height / 2
+    cx = int(cx)
+    cy = int(cy)
+
+    # creating blank image (which will hold contour mask)
+    blank_image = get_blank_image(width=image_width,
+                                  height=image_height)
+
+    # drawing expanded nucleus contour in blank image
+    draw_ellipse(open_img=blank_image,
+                 cx=cx,
+                 cy=cy,
+                 width=expanded_height,
+                 height=expanded_width,
+                 angle=0.0,
+                 color=1,
+                 thickness=-1)
+
+    # drawing nucleus contour in blank image (removing nucleus)
+    draw_ellipse(open_img=blank_image,
+                 cx=cx,
+                 cy=cy,
+                 width=nucleus_height,
+                 height=nucleus_width,
+                 angle=0.0,
+                 color=0,
+                 thickness=-1)
+
+    # getting pixel coordinates matching contour color
+    contour_pixel_coords = np_where(blank_image == 1)
+
+    # getting respective pixels in base image
+    pixels_in_contour = image[contour_pixel_coords[0], contour_pixel_coords[1]]
+
+    # returning respective pixels
+    return pixels_in_contour
+
+
+def get_erk_ratio(crop_path: str,
+                  width: float,
+                  height: float,
+                  ring_expansion: float
+                  ) -> float:
+    """
+    Given a path to a crop, and
+    coordinates for respective nucleus,
+    returns nucleus/cytoplasm ratio
+    """
+    # reading image as grayscale
+    image = load_grayscale_img(image_path=crop_path)
+
+    # getting nucleus pixels
+    nucleus_pixels = get_pixels_in_nucleus(image=image,
+                                           width=width,
+                                           height=height)
+
+    # getting ring expansion dimensions
+    expanded_width = width * ring_expansion
+    expanded_height = height * ring_expansion
+
+    # getting nucleus+ring pixels
+    nucleus_ring_pixels = get_pixels_in_ring(image=image,
+                                             nucleus_width=width,
+                                             nucleus_height=height,
+                                             expanded_width=expanded_width,
+                                             expanded_height=expanded_height)
 
     # getting current crop erk ratio
     erk_ratio = 0.0
