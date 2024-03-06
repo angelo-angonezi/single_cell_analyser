@@ -160,7 +160,8 @@ def print_global_progress():
 
     # defining progress string
     progress_string = f'generating crops for image {CURRENT_IMAGE} of {IMAGES_TOTAL}... '
-    progress_string += f'| crop: {CURRENT_CROP}/{CROPS_TOTAL} '
+    # progress_string += f'| crop: {CURRENT_CROP}/{CROPS_TOTAL} '
+    progress_string += f'| crop: {CURRENT_ITERATION}/{ITERATIONS_TOTAL} '
     progress_string += f'| progress: {progress_percentage:02.2f}% '
     progress_string += f'| time elapsed: {time_elapsed_str} '
     progress_string += f'| ETC: {etc_str}'
@@ -207,17 +208,43 @@ def black_pixels_in_crop(crop: ndarray) -> bool:
     return black_pixels_in_array
 
 
+def get_crop_coordinates(cx: int,
+                         cy: int,
+                         width: float,
+                         height: float
+                         ) -> tuple:
+    """
+    Given a set of coords and dims,
+    returns crop coordinates:
+    (left, right, top, bottom)
+    """
+    # getting margins
+    top = cy - (height / 2)
+    bottom = cy + (height / 2)
+    left = cx - (width / 2)
+    right = cx + (width / 2)
+
+    # converting margins to integers
+    top = int(top)
+    bottom = int(bottom)
+    left = int(left)
+    right = int(right)
+
+    # assembling coords tuple
+    coords_tuple = (left, right, top, bottom)
+
+    # returning coords tuple
+    return coords_tuple
+
+
 def rotate_image(image: ndarray,
                  angle: float,
-                 pivot: tuple
+                 pivot: tuple,
+                 roi_box_width: float
                  ) -> ndarray:
     """
     Given an image, and angle and coordinates
     to pivot, returns rotated image.
-    :param image: Array. Represents an open image.
-    :param angle: Float. Represents rotation angle.
-    :param pivot: Float. Represents pivot coordinates (cx, cy).
-    :return: Array. Represents rotated image.
     """
     # defining image pads
     pad_x = [image.shape[1] - pivot[0], pivot[0]]
@@ -225,13 +252,26 @@ def rotate_image(image: ndarray,
 
     # padding image
     padded_image = np_pad(array=image,
-                          pad_width=[pad_y,  # tuple defining above-below padding
-                                     pad_x,  # tuple defining left-right padding
+                          pad_width=[pad_y,    # tuple defining above-below padding
+                                     pad_x,    # tuple defining left-right padding
                                      [0, 0]],  # tuple defining z-dim padding
-                          mode='constant')
+                          mode='constant')     # fills background with zeroes
+
+    # getting ROI crop coords
+    padded_image_shape = padded_image.shape
+    cx = padded_image_shape[1] / 2
+    cy = padded_image_shape[0] / 2
+    cx = int(cx)
+    cy = int(cy)
+    crop_coords = get_crop_coordinates(cx=cx, cy=cy, width=roi_box_width, height=roi_box_width)
+    left, right, top, bottom = crop_coords
+
+    # cropping ROI (optimized code since rotation is costly)
+    # cropped_image = padded_image[left:right, top:bottom]
+    cropped_image = padded_image[top:bottom, left:right]
 
     # rotating image
-    rotated_image = scp_rotate(padded_image, angle, reshape=False)
+    rotated_image = scp_rotate(cropped_image, angle, reshape=False)
 
     # returning rotated image
     return rotated_image
@@ -258,6 +298,10 @@ def crop_single_obb(image: ndarray,
     width = width * expansion_ratio
     height = height * expansion_ratio
 
+    # getting major axis
+    major_axis = width if width > height else height
+    major_axis = major_axis * 2
+
     # getting rotation angle (opposite to OBB angle, since the image
     # will be rotated to match OBB orientation)
     rotation_angle = angle * (-1)
@@ -265,7 +309,8 @@ def crop_single_obb(image: ndarray,
     # rotating current image to match current obb angle
     rotated_image = rotate_image(image=image,
                                  angle=rotation_angle,
-                                 pivot=(cx, cy))
+                                 pivot=(cx, cy),
+                                 roi_box_width=major_axis)
 
     # getting new cx, cy values
     rotated_image_shape = rotated_image.shape
