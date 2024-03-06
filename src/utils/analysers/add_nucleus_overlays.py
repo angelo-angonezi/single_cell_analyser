@@ -35,9 +35,6 @@ print('all required libraries successfully imported.')  # noqa
 #####################################################################
 # defining global variables
 
-# LABEL = False
-# LABEL = 'cell_index'  # adds indices to cells (facilitates comparison to data frame info)
-LABEL = 'phenotype'  # retrieves info from 'class' col
 COLOR_DICT = {'model': (0, 102, 204),
               'fornma': (0, 204, 102),
               'DT': (255, 153, 102),
@@ -113,6 +110,14 @@ def get_args_dict() -> dict:
                         default='ellipse',
                         help=style_help)
 
+    # label param
+    label_help = 'defines label (None/index/phenotype)'
+    parser.add_argument('-l', '--label',
+                        dest='label',
+                        required=False,
+                        default='None',
+                        help=label_help)
+
     # expansion ratio param
     expansion_help = 'defines ratio of expansion of width/height to generate larger-than-orig-nucleus crops'
     parser.add_argument('-er', '--expansion-ratio',
@@ -136,7 +141,8 @@ def add_single_overlay(open_img: ndarray,
                        color_dict: dict,
                        expansion_ratio: float,
                        cell_index: int,
-                       style: str = 'rectangle'
+                       style: str = 'rectangle',
+                       label: str = 'None'
                        ) -> None:
     """
     Given an open image and respective obb row
@@ -148,6 +154,7 @@ def add_single_overlay(open_img: ndarray,
     :param cell_index: Integer. Represents cell id to be added as text in overlay.
     :param expansion_ratio: Float. Represents a ratio to expand width/height.
     :param style: String. Represents overlays style (rectangle/circle/ellipse).
+    :param label: String. Represents overlays label (None/index/phenotype).
     :return: None.
     """
     # getting current row bounding box info
@@ -216,12 +223,12 @@ def add_single_overlay(open_img: ndarray,
     current_label = ''
 
     # checking global variables
-    if LABEL == 'cell_index':
+    if label == 'index':
 
         # updating current label
         current_label = cell_index_text
 
-    elif LABEL == 'phenotype':
+    elif label == 'phenotype':
 
         # updating current label
         current_label = det_class
@@ -240,7 +247,8 @@ def add_multiple_overlays(open_img: ndarray,
                           current_image_df: DataFrame,
                           color_dict: dict,
                           expansion_ratio: float,
-                          style: str = 'rectangle'
+                          style: str = 'rectangle',
+                          label: str = 'None'
                           ) -> None:
     """
     Given an open image and current image data frame,
@@ -250,6 +258,7 @@ def add_multiple_overlays(open_img: ndarray,
     :param color_dict: Dictionary. Represents colors to be used in overlays.
     :param expansion_ratio: Float. Represents a ratio to expand width/height.
     :param style: String. Represents overlays style (rectangle/circle/ellipse).
+    :param label: String. Represents overlays label (None/index/phenotype).
     :return: None.
     """
     # sorting df by cx (ensures that different codes follow the same order)
@@ -270,7 +279,8 @@ def add_multiple_overlays(open_img: ndarray,
                            color_dict=color_dict,
                            expansion_ratio=expansion_ratio,
                            cell_index=current_cell_index,
-                           style=style)
+                           style=style,
+                           label=label)
 
         # updating current cell index
         current_cell_index += 1
@@ -283,7 +293,8 @@ def add_overlays_to_single_image(image_name: str,
                                  output_path: str,
                                  color_dict: dict,
                                  expansion_ratio: float,
-                                 style: str = 'rectangle'
+                                 style: str = 'rectangle',
+                                 label: str = 'None'
                                  ) -> None:
     """
     Given an image name and path, and a merged
@@ -297,6 +308,7 @@ def add_overlays_to_single_image(image_name: str,
     :param color_dict: Dictionary. Represents colors to be used in overlays.
     :param expansion_ratio: Float. Represents a ratio to expand width/height.
     :param style: String. Represents overlays style (rectangle/circle/ellipse).
+    :param label: String. Represents overlays label (None/index/phenotype).
     :return: None.
     """
     # opening image
@@ -348,7 +360,8 @@ def add_overlays_to_single_image(image_name: str,
                           current_image_df=current_image_df,
                           color_dict=color_dict,
                           expansion_ratio=expansion_ratio,
-                          style=style)
+                          style=style,
+                          label=label)
 
     # saving image in output path
     open_img = cvtColor(open_img, COLOR_RGB2BGR)
@@ -363,6 +376,7 @@ def add_overlays_to_multiple_images(input_folder: str,
                                     detection_threshold: float,
                                     color_dict: dict,
                                     style: str,
+                                    label: str,
                                     expansion_ratio: float
                                     ) -> None:
     """
@@ -380,6 +394,7 @@ def add_overlays_to_multiple_images(input_folder: str,
     :param detection_threshold: Float. Represents detection threshold to be applied as filter.
     :param color_dict: Dictionary. Represents colors to be used in overlays.
     :param style: String. Represents overlays style (rectangle/circle/ellipse).
+    :param label: String. Represents overlays label (None/index/phenotype).
     :param expansion_ratio: Float. Represents a ratio to expand width/height.
     :return: None.
     """
@@ -427,6 +442,7 @@ def add_overlays_to_multiple_images(input_folder: str,
                                      output_path=output_path,
                                      color_dict=color_dict,
                                      style=style,
+                                     label=label,
                                      expansion_ratio=expansion_ratio)
 
     # printing execution message
@@ -460,6 +476,9 @@ def main():
     # getting overlays style
     overlays_style = args_dict['overlays_style']
 
+    # getting label
+    label = args_dict['label']
+
     # getting expansion ratio
     expansion_ratio = args_dict['expansion_ratio']
     expansion_ratio = float(expansion_ratio)
@@ -483,6 +502,7 @@ def main():
                                     detection_threshold=detection_threshold,
                                     color_dict=COLOR_DICT,
                                     style=overlays_style,
+                                    label=label,
                                     expansion_ratio=expansion_ratio)
 
 ######################################################################
