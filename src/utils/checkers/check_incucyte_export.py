@@ -52,29 +52,31 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def phase_matches_red(phase_images_folder: str,
-                      red_images_folder: str
-                      ) -> bool:
+def files_match(folder_one: str,
+                folder_two: str,
+                extension_one: str,
+                extension_two: str
+                ) -> bool:
     """
-    Given a path to phase/red folders, returns True
-    if all images contained in folders match, and
+    Given a path to two folders, returns True
+    if all files contained in folders match, and
     False otherwise.
     """
-    # getting images in phase folder
-    phase_images = get_specific_files_in_folder(path_to_folder=phase_images_folder,
-                                                extension='.tif')
+    # getting files in folder one
+    files_one = get_specific_files_in_folder(path_to_folder=folder_one,
+                                             extension=extension_one)
+    # TODO: update this code to be more generic
+    # getting files in folder two
+    files_two = get_specific_files_in_folder(path_to_folder=folder_two,
+                                             extension=extension_two)
 
-    # getting images in red folder
-    red_images = get_specific_files_in_folder(path_to_folder=red_images_folder,
-                                              extension='.tif')
+    # getting file names
+    names_one = [f.replace(extension_one, '') for f in files_one]
+    names_two = [f.replace(extension_two, '') for f in files_two]
 
-    # getting image names
-    phase_image_names = [f.replace('.tif', '') for f in phase_images]
-    red_image_names = [f.replace('.tif', '') for f in red_images]
-
-    # getting image numbers
-    phase_images_num = len(phase_image_names)
-    red_images_num = len(red_image_names)
+    # getting file numbers
+    phase_images_num = len(names_one)
+    red_images_num = len(names_two)
 
     # printing execution message
     f_string = f'{phase_images_num} images [.jpg] found in phase folder.\n'
@@ -83,25 +85,24 @@ def phase_matches_red(phase_images_folder: str,
     print(f_string)
 
     # checking whether image names match
-    match_bool = (phase_image_names == red_image_names)
+    match_bool = (names_one == names_two)
 
     # returning boolean value
     return match_bool
 
 
-def check_incucyte_export(input_folder: str) -> None:
+def check_incucyte_export(input_folder_one: str,
+                          input_folder_two: str
+                          ) -> None:
     """
-    Given a path to a folder containing phase/red subfolders,
-    checks whether all images have respective equivalents in
-    each folder, printing execution message as output.
+    Given a path to two folders containing images, and
+    respective images extensions, checks whether all
+    images have respective equivalents in each folder,
+    printing execution message as output.
     """
-    # getting phase/red subfolder
-    phase_images_folder = join(input_folder, 'phase')
-    red_images_folder = join(input_folder, 'red')
-
     # getting match bool
-    images_match = phase_matches_red(phase_images_folder=phase_images_folder,
-                                     red_images_folder=red_images_folder)
+    images_match = files_match(folder_one=input_folder_one,
+                               folder_two=input_folder_two)
 
     # checking whether images match
     if images_match:
