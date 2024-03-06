@@ -62,14 +62,14 @@ def phase_matches_red(phase_images_folder: str,
     """
     # getting images in phase folder
     phase_images = get_specific_files_in_folder(path_to_folder=phase_images_folder,
-                                                extension='.jpg')
+                                                extension='.tif')
 
     # getting images in red folder
     red_images = get_specific_files_in_folder(path_to_folder=red_images_folder,
                                               extension='.tif')
 
     # getting image names
-    phase_image_names = [f.replace('.jpg', '') for f in phase_images]
+    phase_image_names = [f.replace('.tif', '') for f in phase_images]
     red_image_names = [f.replace('.tif', '') for f in red_images]
 
     # getting image numbers
