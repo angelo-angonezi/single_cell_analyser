@@ -1770,6 +1770,8 @@ def get_pixels_in_nucleus(image: ndarray,
 
     # getting respective pixels in base image
     pixels_in_contour = image[contour_pixel_coords[0], contour_pixel_coords[1]]
+    print(pixels_in_contour)
+    exit()
 
     # returning respective pixels
     return pixels_in_contour
@@ -1895,6 +1897,35 @@ def get_erk_level(nucleus_cytoplasm_ratio: float) -> str:
     return erk_level
 
 
+def get_cell_cycle_simple(red_value: float,
+                          green_value: float
+                          ) -> str:
+    """
+    Given red and green channels' pixel values,
+    returns cell cycle, based on 0-1 scale
+    for pixels intensity and given min values.
+    """
+    # defining placeholder value for cell cycle
+    cell_cycle = None
+
+    # getting red/green ratio
+    red_green_ratio = red_value / green_value
+
+    # checking ratio
+    if red_green_ratio >= 1.0:
+
+        # then, cell cycle must be 'G1' (red)
+        cell_cycle = 'G1'
+
+    else:
+
+        # then, cell cycle must be 'G2' (green)
+        cell_cycle = 'G2'
+
+    # returning cell cycle
+    return cell_cycle
+
+
 def get_cell_cycle(red_value: float,
                    green_value: float,
                    min_red_value: float,
@@ -1903,7 +1934,7 @@ def get_cell_cycle(red_value: float,
                    ratio_upper_threshold: float
                    ) -> str:
     """
-    Given red and green channels' means,
+    Given red and green channels' pixel values,
     returns cell cycle, based on 0-1 scale
     for pixels intensity and given min values.
     """
@@ -2087,8 +2118,6 @@ def get_pixel_intensity(file_path: str,
     # loading image
     img = load_grayscale_img(image_path=file_path)
 
-    # TODO: Add get nucleus pixels here (this way, only pixels inside ellipse will be considered)
-
     # defining placeholder value for current intensity value
     pixel_intensity = None
 
@@ -2106,10 +2135,6 @@ def get_pixel_intensity(file_path: str,
     elif calc == 'mean':
         pixel_intensity = img.mean()
 
-    # calculating median intensity
-    elif calc == 'median':
-        pixel_intensity = img.median()
-
     # calculating intensities ratio ('het')
     elif calc == 'het_mean':
         pixel_max = img.max()
@@ -2119,8 +2144,59 @@ def get_pixel_intensity(file_path: str,
     # calculating intensities ratio ('het')
     elif calc == 'het_median':
         pixel_max = img.max()
-        pixel_median = img.median()
+        pixel_median = img.mean()
         pixel_intensity = pixel_max / pixel_median
+
+    else:
+
+        # printing execution message
+        f_string = f'calc mode {calc} not specified.\n'
+        f_string += f'Please, check and try again.'
+        print(f_string)
+
+        # quitting
+        exit()
+
+    # converting pixel intensity to float
+    pixel_intensity = float(pixel_intensity)
+
+    # returning pixel intensity value
+    return pixel_intensity
+
+
+def get_nucleus_pixel_intensity(crop_path: str,
+                                nucleus_width: float,
+                                nucleus_height: float,
+                                calc: str
+                                ) -> float:
+    """
+    Given a path to a crop, loads image
+    and returns pixel intensity value,
+    based on given calc method (mean, min, max).
+    """
+    # defining placeholder value for pixel intensity
+    pixel_intensity = None
+
+    # loading image
+    img = load_grayscale_img(image_path=crop_path)
+
+    # getting pixels in nucleus
+    nucleus_pixels = get_pixels_in_nucleus(image=img,
+                                           width=nucleus_width,
+                                           height=nucleus_height)
+
+    # checking calc mode
+    if calc == 'mean':
+
+        # updating pixel intensity
+        pixel_intensity = nucleus_pixels.mean()
+
+    # checking calc mode
+    elif calc == 'median':
+
+        # updating pixel intensity
+        # TODO: update here
+        pixel_intensity = nucleus_pixels.mean()
 
     else:
 

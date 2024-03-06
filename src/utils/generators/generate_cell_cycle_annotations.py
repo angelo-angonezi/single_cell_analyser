@@ -16,9 +16,10 @@ from pandas import DataFrame
 from argparse import ArgumentParser
 from src.utils.aux_funcs import get_cell_cycle
 from src.utils.aux_funcs import enter_to_continue
-from src.utils.aux_funcs import get_pixel_intensity
+from src.utils.aux_funcs import get_cell_cycle_simple
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
+from src.utils.aux_funcs import get_nucleus_pixel_intensity
 print('all required libraries successfully imported.')  # noqa
 
 ######################################################################
@@ -123,6 +124,10 @@ def add_cell_cycle_col(df: DataFrame,
         # getting current row crop name
         crop_name = row_data['crop_name']
 
+        # getting current row crop dimensions
+        nucleus_width = row_data['width']
+        nucleus_height = row_data['height']
+
         # getting current row crop name with extension
         crop_name_w_extension = f'{crop_name}{images_extension}'
 
@@ -131,22 +136,28 @@ def add_cell_cycle_col(df: DataFrame,
         green_path = join(green_folder, crop_name_w_extension)
 
         # getting current crop red/green pixel intensity values
-        red_intensity = get_pixel_intensity(file_path=red_path,
-                                            calc='median')
-        green_intensity = get_pixel_intensity(file_path=green_path,
-                                              calc='median')
+        red_intensity = get_nucleus_pixel_intensity(crop_path=red_path,
+                                                    nucleus_width=nucleus_width,
+                                                    nucleus_height=nucleus_height,
+                                                    calc='median')
+        green_intensity = get_nucleus_pixel_intensity(crop_path=green_path,
+                                                      nucleus_width=nucleus_width,
+                                                      nucleus_height=nucleus_height,
+                                                      calc='median')
 
         # normalizing values
         red_intensity = red_intensity / 255
         green_intensity = green_intensity / 255
 
         # getting current crop cell cycle
-        current_class = get_cell_cycle(red_value=red_intensity,
-                                       green_value=green_intensity,
-                                       min_red_value=MIN_RED_VALUE,
-                                       min_green_value=MIN_GREEN_VALUE,
-                                       ratio_lower_threshold=RATIO_LOWER_THRESHOLD,
-                                       ratio_upper_threshold=RATIO_UPPER_THRESHOLD)
+        # current_class = get_cell_cycle(red_value=red_intensity,
+        #                                green_value=green_intensity,
+        #                                min_red_value=MIN_RED_VALUE,
+        #                                min_green_value=MIN_GREEN_VALUE,
+        #                                ratio_lower_threshold=RATIO_LOWER_THRESHOLD,
+        #                                ratio_upper_threshold=RATIO_UPPER_THRESHOLD)
+        current_class = get_cell_cycle_simple(red_value=red_intensity,
+                                              green_value=green_intensity)
 
         # updating current row data
         df.at[row_index, col_name] = current_class
