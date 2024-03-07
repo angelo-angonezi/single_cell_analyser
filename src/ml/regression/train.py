@@ -26,6 +26,12 @@ from src.utils.aux_funcs import get_data_split_regression
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
 
+######################################################################
+# defining global variables
+
+IMG_HEIGHT, IMG_WIDTH = IMAGE_SIZE
+INPUT_SHAPE = (IMG_HEIGHT, IMG_WIDTH, 3)  # 3 because it is an RGB image
+
 #####################################################################
 # argument parsing related functions
 
@@ -112,17 +118,12 @@ def get_age_model(learning_rate: float) -> Sequential:
     Given a model base and a learning rate,
     returns compiled model.
     """
-    # defining model input
-    image_height, image_width = IMAGE_SIZE
-    input_shape = (image_height, image_width, 3)  # 3 because it is an RGB image
-
     # defining placeholder value for model
     model = None
 
     # getting model
-    # TODO: change model here!
     print('getting model...')
-    inputs = tf.keras.Input(shape=input_shape)
+    inputs = tf.keras.Input(shape=INPUT_SHAPE)
     x = tf.keras.layers.Conv2D(filters=16, kernel_size=(3, 3), activation='relu')(inputs)
     x = tf.keras.layers.MaxPool2D()(x)
     x = tf.keras.layers.Conv2D(filters=32, kernel_size=(3, 3), activation='relu')(x)
@@ -147,16 +148,44 @@ def get_age_model(learning_rate: float) -> Sequential:
     model.compile(optimizer=optimizer,
                   loss=loss)
 
-    # printing model summary
-    print('printing model summary...')
-    model.summary()
-
     # returning model
     return model
 
 
-def get_new_model():
-    pass
+def get_new_model(learning_rate: float) -> Sequential:
+    """
+    Given a model base and a learning rate,
+    returns compiled model.
+    """
+    # defining placeholder value for model
+    model = None
+
+    # getting model
+    print('getting model...')
+    model = tf.keras.Sequential([
+        tf.keras.layers.Conv2D(64, (3, 3), activation='relu', input_shape=INPUT_SHAPE),
+        tf.keras.layers.MaxPooling2D((2, 2)),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(units=1, activation=None)
+    ])
+
+    # defining optimizer
+    optimizer = Adam(learning_rate=learning_rate)
+
+    # defining loss function
+    loss = tf.keras.losses.MeanSquaredError()
+
+    # defining metrics
+    metrics = [tf.keras.metrics.RootMeanSquaredError()]
+
+    # compiling model
+    print('compiling model...')
+    model.compile(optimizer=optimizer,
+                  loss=loss,
+                  metrics=metrics)
+
+    # returning model
+    return model
 
 
 def regression_train(splits_folder: str,
@@ -189,7 +218,14 @@ def regression_train(splits_folder: str,
                                          batch_size=batch_size)
 
     # getting model
-    model = get_age_model(learning_rate=learning_rate)
+    if model_type == 'age':
+        model = get_age_model(learning_rate=learning_rate)
+    else:
+        model = get_new_model(learning_rate=learning_rate)
+
+    # printing model summary
+    print('printing model summary...')
+    model.summary()
 
     # defining callback
     tensorboard_callback = TensorBoard(log_dir=logs_folder)

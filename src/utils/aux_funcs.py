@@ -70,7 +70,7 @@ environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 IMAGE_WIDTH = 1408
 IMAGE_HEIGHT = 1040
 IMAGE_AREA = IMAGE_WIDTH * IMAGE_HEIGHT
-IMAGE_SIZE = (120, 120)
+IMAGE_SIZE = (100, 100)
 
 ######################################################################
 # defining auxiliary functions
@@ -1734,7 +1734,7 @@ def get_dna_damage_level(foci_count: int,
 def get_pixels_in_nucleus(image: ndarray,
                           width: float,
                           height: float
-                          ) -> ndarray:
+                          ) -> Series:
     """
     Given an image, and coordinates
     for nucleus, returns pixels values
@@ -1770,8 +1770,9 @@ def get_pixels_in_nucleus(image: ndarray,
 
     # getting respective pixels in base image
     pixels_in_contour = image[contour_pixel_coords[0], contour_pixel_coords[1]]
-    print(pixels_in_contour)
-    exit()
+
+    # converting pixels to Series object
+    pixels_in_contour = Series(pixels_in_contour)
 
     # returning respective pixels
     return pixels_in_contour
@@ -2195,8 +2196,7 @@ def get_nucleus_pixel_intensity(crop_path: str,
     elif calc == 'median':
 
         # updating pixel intensity
-        # TODO: update here
-        pixel_intensity = nucleus_pixels.mean()
+        pixel_intensity = nucleus_pixels.median()
 
     else:
 
