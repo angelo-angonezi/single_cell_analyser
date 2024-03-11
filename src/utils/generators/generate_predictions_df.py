@@ -69,7 +69,7 @@ def get_args_dict() -> dict:
                         dest='phenotype',
                         required=True,
                         default='nii',
-                        help='defines phenotype (nii/cell_cycle/dna_damage/autophagy)')
+                        help='defines phenotype (nii/cell_cycle/dna_damage/autophagy/erk)')
 
     # output path param
     parser.add_argument('-o', '--output-path',
@@ -157,8 +157,6 @@ def add_prediction_col(df: DataFrame,
 
         # converting prediction to numpy
         current_prediction = current_tensor.numpy()
-        print(type(current_prediction))
-        exit()
 
         # converting prediction to respective phenotype
         current_prediction = get_prediction(prediction=current_prediction,

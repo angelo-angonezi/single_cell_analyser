@@ -2566,49 +2566,54 @@ def show_image(image: ndarray,
 
 def get_prediction(prediction: float,
                    phenotype: str
-                   ) -> float:
+                   ) -> float or str:
     """
-    Given a prediction value (float/ndarray
+    Given a prediction value (float/ndarray),
+    and a phenotype, returns respective phenotype
+    string (or float in case of nii).
     """
+    # defining placeholder value for current prediction
+    current_prediction = None
 
-    # defining placeholder value for current intensity value
-    pixel_intensity = None
+    # getting current prediction value based on given phenotype
 
-    # getting current intensity value based on given calc str
+    if phenotype == 'nii':
 
-    # calculating min intensity
-    if calc == 'min':
-        pixel_intensity = img.min()
+        # converting prediction to float
+        current_prediction = float(current_prediction)
 
-    # calculating max intensity
-    elif calc == 'max':
-        pixel_intensity = img.max()
+    elif phenotype == 'dna_damage':
 
-    # calculating mean intensity
-    elif calc == 'mean':
-        pixel_intensity = img.mean()
+        # converting prediction to string
+        current_prediction = 'HighDamage' if prediction >= 0.5 else 'LowDamage'
 
-    # calculating intensities ratio ('het')
-    elif calc == 'het_mean':
-        pixel_max = img.max()
-        pixel_mean = img.mean()
-        pixel_intensity = pixel_max / pixel_mean
+    elif phenotype == 'autophagy':
 
-    # calculating intensities ratio ('het')
-    elif calc == 'het_median':
-        pixel_max = img.max()
-        pixel_median = img.mean()
-        pixel_intensity = pixel_max / pixel_median
+        # converting prediction to string
+        current_prediction = 'HighAutophagy' if prediction >= 0.5 else 'LowAutophagy'
+
+    elif phenotype == 'erk':
+
+        # converting prediction to string
+        current_prediction = 'Active' if prediction >= 0.5 else 'Inactive'
+
+    elif phenotype == 'cell_cycle':
+
+        # converting prediction to string
+        current_prediction = 'G1' if prediction >= 0.5 else 'G2'
 
     else:
 
         # printing execution message
-        f_string = f'calc mode {calc} not specified.\n'
+        f_string = f'phenotype {phenotype} not specified.\n'
         f_string += f'Please, check and try again.'
         print(f_string)
 
         # quitting
         exit()
+
+    # returning prediction value
+    return current_prediction
 
 ######################################################################
 # end of current module
