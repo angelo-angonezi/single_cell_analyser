@@ -173,7 +173,8 @@ def add_single_overlay(open_img: ndarray,
 
     # defining color for overlay/text
     overlay_color = color_dict[evaluator]
-    text_color = color_dict['text']
+    # text_color = color_dict['text']
+    text_color = color_dict[evaluator]
 
     # defining thickness
     overlays_thickness = 2
