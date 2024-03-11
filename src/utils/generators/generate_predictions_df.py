@@ -21,8 +21,8 @@ from src.utils.aux_funcs import get_base_df
 from src.utils.aux_funcs import load_bgr_img
 from src.utils.aux_funcs import is_using_gpu
 from src.utils.aux_funcs import resize_image
-from keras.engine.functional import Functional
 from keras.engine.sequential import Sequential
+from src.utils.aux_funcs import get_prediction
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
@@ -64,6 +64,13 @@ def get_args_dict() -> dict:
                         required=True,
                         help='defines path to trained model (.h5 file)')
 
+    # phenotype param
+    parser.add_argument('-p', '--phenotype',
+                        dest='phenotype',
+                        required=True,
+                        default='nii',
+                        help='defines phenotype (nii/cell_cycle/dna_damage/autophagy)')
+
     # output path param
     parser.add_argument('-o', '--output-path',
                         dest='output_path',
@@ -81,9 +88,10 @@ def get_args_dict() -> dict:
 
 
 def add_prediction_col(df: DataFrame,
-                       model: Sequential or Functional,
+                       model: Sequential,
                        input_folder: str,
-                       extension: str
+                       extension: str,
+                       phenotype: str
                        ) -> None:
     """
     Given a base df, and a loaded
@@ -146,13 +154,15 @@ def add_prediction_col(df: DataFrame,
 
         # extracting current prediction from Tensor
         current_tensor = current_prediction_list[0][0]
-        print(image_path)
-        print(current_tensor)
-        input()
 
-        # converting prediction to float
-        # TODO: adapt this part to check if prediction will be converted to string-like in classification networks
+        # converting prediction to numpy
         current_prediction = current_tensor.numpy()
+        print(type(current_prediction))
+        exit()
+
+        # converting prediction to respective phenotype
+        current_prediction = get_prediction(prediction=current_prediction,
+                                            phenotype=phenotype)
 
         # updating current row value
         df.at[row_index, col_name] = current_prediction
@@ -164,6 +174,7 @@ def add_prediction_col(df: DataFrame,
 def get_predictions_df(model_path: str,
                        images_folder: str,
                        extension: str,
+                       phenotype: str,
                        ) -> DataFrame:
     """
     Given a path to a trained model, and a path
@@ -206,7 +217,8 @@ def get_predictions_df(model_path: str,
     add_prediction_col(df=predictions_df,
                        input_folder=images_folder,
                        extension=extension,
-                       model=model)
+                       model=model,
+                       phenotype=phenotype)
 
     # returning predictions df
     return predictions_df
@@ -215,13 +227,15 @@ def get_predictions_df(model_path: str,
 def generate_predictions_df(images_folder: str,
                             extension: str,
                             model_path: str,
+                            phenotype: str,
                             output_path: str
                             ) -> None:
     # getting predictions df
     print('getting predictions df...')
     predictions_df = get_predictions_df(model_path=model_path,
                                         images_folder=images_folder,
-                                        extension=extension)
+                                        extension=extension,
+                                        phenotype=phenotype)
 
     # saving predictions df
     print('saving predictions df...')
@@ -250,6 +264,9 @@ def main():
     # getting model path param
     model_path = args_dict['model_path']
 
+    # getting phenotype param
+    phenotype = args_dict['phenotype']
+
     # getting output path param
     output_path = args_dict['output_path']
 
@@ -268,6 +285,7 @@ def main():
     generate_predictions_df(images_folder=images_folder,
                             extension=extension,
                             model_path=model_path,
+                            phenotype=phenotype,
                             output_path=output_path)
 
 ######################################################################
