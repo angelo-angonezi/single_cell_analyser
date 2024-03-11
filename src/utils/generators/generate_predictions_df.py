@@ -117,7 +117,7 @@ def add_prediction_col(df: DataFrame,
     for row_index, row_data in df_rows:
 
         # printing execution message
-        base_string = f'adding {col_name} col to row #INDEX# #TOTAL#'
+        base_string = f'adding {col_name} col to row #INDEX# of #TOTAL#'
         print_progress_message(base_string=base_string,
                                index=current_row_index,
                                total=rows_num)
