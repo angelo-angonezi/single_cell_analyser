@@ -39,7 +39,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'predict classes module'
+    description = 'generate predictions df module'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
@@ -94,7 +94,7 @@ def add_prediction_col(df: DataFrame,
     col_name = 'prediction'
 
     # defining placeholder value for prediction col
-    df[col_name] = 0.0
+    df[col_name] = None
 
     # getting df rows
     df_rows = df.iterrows()
@@ -146,6 +146,9 @@ def add_prediction_col(df: DataFrame,
 
         # extracting current prediction from Tensor
         current_tensor = current_prediction_list[0][0]
+        print(image_path)
+        print(current_tensor)
+        input()
 
         # converting prediction to float
         # TODO: adapt this part to check if prediction will be converted to string-like in classification networks
