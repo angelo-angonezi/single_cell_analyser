@@ -15,8 +15,6 @@ from pandas import read_csv
 from keras.layers import Dense
 from keras.layers import Conv2D
 from keras.layers import Flatten
-from keras.metrics import RootMeanSquaredError
-from keras.metrics import MeanSquaredError
 from keras.optimizers import Adam
 from argparse import ArgumentParser
 from keras.layers import MaxPooling2D
@@ -225,10 +223,10 @@ def get_regression_model(input_shape: tuple,
     optimizer = Adam(learning_rate=learning_rate)
 
     # defining loss function
-    loss = MeanSquaredError()
+    loss = tf.keras.losses.MeanSquaredError()
 
     # defining metrics
-    metrics = [RootMeanSquaredError()]
+    metrics = [tf.keras.metrics.RootMeanSquaredError()]
 
     # compiling model
     print('compiling model...')
