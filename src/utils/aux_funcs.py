@@ -2580,7 +2580,7 @@ def get_prediction(prediction: float,
     if phenotype == 'nii':
 
         # converting prediction to float
-        current_prediction = float(current_prediction)
+        current_prediction = float(prediction)
 
     elif phenotype == 'dna_damage':
 
