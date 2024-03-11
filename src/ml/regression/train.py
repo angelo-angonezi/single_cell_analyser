@@ -15,6 +15,8 @@ from pandas import read_csv
 from keras.layers import Dense
 from keras.layers import Conv2D
 from keras.layers import Flatten
+from keras.metrics import RootMeanSquaredError
+from keras.metrics import MeanSquaredError
 from keras.optimizers import Adam
 from argparse import ArgumentParser
 from keras.layers import MaxPooling2D
@@ -211,8 +213,8 @@ def get_regression_model(input_shape: tuple,
 
     elif model_type == 'age':
 
-        # getting inception layers
-        models = get_age_model(input_shape=input_shape)
+        # getting age layers
+        model = get_age_model(input_shape=input_shape)
 
     else:
 
@@ -223,15 +225,17 @@ def get_regression_model(input_shape: tuple,
     optimizer = Adam(learning_rate=learning_rate)
 
     # defining loss function
-    loss = tf.keras.losses.MeanSquaredError()
+    # loss = MeanSquaredError()
+    loss = RootMeanSquaredError()
 
     # defining metrics
-    metrics = [tf.keras.metrics.RootMeanSquaredError()]
+    metrics = [RootMeanSquaredError()]
 
     # compiling model
     print('compiling model...')
     model.compile(optimizer=optimizer,
-                  loss=loss)
+                  loss=loss,
+                  metrics=metrics)
 
     # printing model summary
     print('printing model summary...')
