@@ -225,8 +225,7 @@ def get_regression_model(input_shape: tuple,
     optimizer = Adam(learning_rate=learning_rate)
 
     # defining loss function
-    # loss = MeanSquaredError()
-    loss = RootMeanSquaredError()
+    loss = MeanSquaredError()
 
     # defining metrics
     metrics = [RootMeanSquaredError()]
