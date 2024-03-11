@@ -20,6 +20,7 @@ from argparse import ArgumentParser
 from keras.layers import MaxPooling2D
 from keras.applications import ResNet50
 from keras.callbacks import TensorBoard
+from keras.losses import MeanSquaredError
 from src.utils.aux_funcs import INPUT_SHAPE
 from src.utils.aux_funcs import train_model
 from src.utils.aux_funcs import is_using_gpu
@@ -223,9 +224,6 @@ def get_regression_model(input_shape: tuple,
     optimizer = Adam(learning_rate=learning_rate)
 
     # defining loss function
-    # from tf.keras.losses import MeanSquaredError
-    from keras.losses import MeanSquaredError
-    # loss = tf.keras.losses.MeanSquaredError()
     loss = MeanSquaredError()
 
     # defining metrics
