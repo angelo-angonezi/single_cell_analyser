@@ -149,8 +149,8 @@ def add_prediction_col(df: DataFrame,
         # current_prediction_list = model.predict(expanded_image,
         #                                         verbose=0)
         current_prediction_list = model(expanded_image,  # calling directly on image avoids
-                                        training=False)  # creation of generator, masking it
-                                                         # run faster on small datasets!                   # noqa
+                                        training=False)       # creation of generator, masking it
+                                                              # run faster on small datasets!       # noqa
 
         # extracting current prediction from Tensor
         current_tensor = current_prediction_list[0][0]
