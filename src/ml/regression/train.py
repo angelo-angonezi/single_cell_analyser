@@ -223,7 +223,10 @@ def get_regression_model(input_shape: tuple,
     optimizer = Adam(learning_rate=learning_rate)
 
     # defining loss function
-    loss = tf.keras.losses.MeanSquaredError()
+    # from tf.keras.losses import MeanSquaredError
+    from keras.losses import MeanSquaredError
+    # loss = tf.keras.losses.MeanSquaredError()
+    loss = MeanSquaredError()
 
     # defining metrics
     metrics = [tf.keras.metrics.RootMeanSquaredError()]
