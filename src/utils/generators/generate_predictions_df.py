@@ -135,12 +135,12 @@ def add_prediction_col(df: DataFrame,
         normalized_image = current_image / 255
 
         # expending dims (required to enter Sequential model)
-        expanded_image = expand_dims(normalized_image, 0)
+        # expanded_image = expand_dims(normalized_image, 0)
 
         # getting current image prediction
         # current_prediction_list = model.predict(expanded_image,
         #                                         verbose=0)
-        current_prediction_list = model(expanded_image,  # calling directly on image avoids
+        current_prediction_list = model(normalized_image,  # calling directly on image avoids
                                         training=False)  # creation of generator, masking it
                                                          # run faster on small datasets!                   # noqa
 
