@@ -115,6 +115,10 @@ def get_rmse(test_df: DataFrame,
     joined_df['error'] = joined_df['class'] - joined_df['prediction']
     joined_df['squared_error'] = joined_df['error'] * joined_df['error']
 
+    # printing execution message
+    print('printing df...')
+    print(joined_df)
+
     # getting mean squared error
     mse = joined_df['squared_error'].mean()
 

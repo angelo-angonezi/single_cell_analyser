@@ -73,6 +73,8 @@ IMAGE_AREA = IMAGE_WIDTH * IMAGE_HEIGHT
 IMAGE_SIZE = (50, 50)
 # IMAGE_SIZE = (100, 100)
 # IMAGE_SIZE = (512, 512)
+IMG_HEIGHT, IMG_WIDTH = IMAGE_SIZE
+INPUT_SHAPE = (IMG_HEIGHT, IMG_WIDTH, 3)  # 3 because it is an RGB image
 
 ######################################################################
 # defining auxiliary functions

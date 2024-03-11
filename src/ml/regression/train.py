@@ -12,10 +12,15 @@ print('initializing...')  # noqa
 print('importing required libraries...')  # noqa
 import tensorflow as tf
 from pandas import read_csv
+from keras.layers import Dense
+from keras.layers import Conv2D
+from keras.layers import Flatten
 from keras.optimizers import Adam
 from argparse import ArgumentParser
+from keras.layers import MaxPooling2D
+from keras.applications import ResNet50
 from keras.callbacks import TensorBoard
-from src.utils.aux_funcs import IMAGE_SIZE
+from src.utils.aux_funcs import INPUT_SHAPE
 from src.utils.aux_funcs import train_model
 from src.utils.aux_funcs import is_using_gpu
 from src.utils.aux_funcs import get_history_df
@@ -25,12 +30,6 @@ from src.utils.aux_funcs import generate_history_plot
 from src.utils.aux_funcs import get_data_split_regression
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
-
-######################################################################
-# defining global variables
-
-IMG_HEIGHT, IMG_WIDTH = IMAGE_SIZE
-INPUT_SHAPE = (IMG_HEIGHT, IMG_WIDTH, 3)  # 3 because it is an RGB image
 
 #####################################################################
 # argument parsing related functions
@@ -113,7 +112,7 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_age_model(learning_rate: float) -> Sequential:
+def get_age_model(input_shape: tuple) -> Sequential:
     """
     Given a model base and a learning rate,
     returns compiled model.
@@ -123,7 +122,7 @@ def get_age_model(learning_rate: float) -> Sequential:
 
     # getting model
     print('getting model...')
-    inputs = tf.keras.Input(shape=INPUT_SHAPE)
+    inputs = tf.keras.Input(shape=input_shape)
     x = tf.keras.layers.Conv2D(filters=16, kernel_size=(3, 3), activation='relu')(inputs)
     x = tf.keras.layers.MaxPool2D()(x)
     x = tf.keras.layers.Conv2D(filters=32, kernel_size=(3, 3), activation='relu')(x)
@@ -133,6 +132,92 @@ def get_age_model(learning_rate: float) -> Sequential:
     x = tf.keras.layers.Dense(64, activation='relu')(x)
     outputs = tf.keras.layers.Dense(1, activation='linear')(x)
     model = tf.keras.Model(inputs=inputs, outputs=outputs)
+
+    # returning model
+    return model
+
+
+def get_resnet_model(input_shape: tuple) -> Sequential:
+    """
+    Given an input shape, returns
+    resnet-based model.
+    """
+    # defining base model
+    model = Sequential()
+
+    # getting resnet base layers
+    base_layers = ResNet50(include_top=False,
+                           input_shape=input_shape,
+                           pooling='max',
+                           weights='imagenet')
+
+    # setting resnet layers as untrainable
+    for layer in base_layers.layers:
+        layer.trainable = False
+
+    # adding resnet layers
+    model.add(base_layers)
+
+    # final dense layer
+    model.add(Dense(1, activation='linear'))
+
+    # returning model
+    return model
+
+
+def get_new_model(input_shape: tuple) -> Sequential:
+    """
+    Given a model base and a learning rate,
+    returns compiled model.
+    """
+    # defining base model
+    model = Sequential()
+
+    # defining CNN layers
+
+    # first convolution + pooling (input layer)
+
+    # getting model
+
+    model = tf.keras.Sequential([
+        tf.keras.layers.Conv2D(16, (3, 3), activation=None, input_shape=input_shape),
+        tf.keras.layers.MaxPooling2D((2, 2)),
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(units=1, activation='linear')
+    ])
+
+    # returning model
+    return model
+
+
+def get_regression_model(input_shape: tuple,
+                         learning_rate: float,
+                         model_type: str
+                         ) -> Sequential:
+    """
+    Given a model base and a learning rate,
+    returns compiled model.
+    """
+    # defining placeholder value for model
+    model = None
+
+    # getting base layers
+    print('getting base layers...')
+
+    if model_type == 'resnet':
+
+        # getting resnet layers
+        model = get_resnet_model(input_shape=input_shape)
+
+    elif model_type == 'age':
+
+        # getting inception layers
+        models = get_age_model(input_shape=input_shape)
+
+    else:
+
+        # getting new layers
+        model = get_new_model(input_shape=input_shape)
 
     # defining optimizer
     optimizer = Adam(learning_rate=learning_rate)
@@ -148,41 +233,9 @@ def get_age_model(learning_rate: float) -> Sequential:
     model.compile(optimizer=optimizer,
                   loss=loss)
 
-    # returning model
-    return model
-
-
-def get_new_model(learning_rate: float) -> Sequential:
-    """
-    Given a model base and a learning rate,
-    returns compiled model.
-    """
-    # defining placeholder value for model
-    model = None
-
-    # getting model
-    print('getting model...')
-    model = tf.keras.Sequential([
-        tf.keras.layers.Conv2D(16, (3, 3), activation=None, input_shape=INPUT_SHAPE),
-        tf.keras.layers.MaxPooling2D((2, 2)),
-        tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(units=1, activation='linear')
-    ])
-
-    # defining optimizer
-    optimizer = Adam(learning_rate=learning_rate)
-
-    # defining loss function
-    loss = tf.keras.losses.MeanSquaredError()
-
-    # defining metrics
-    metrics = [tf.keras.metrics.RootMeanSquaredError()]
-
-    # compiling model
-    print('compiling model...')
-    model.compile(optimizer=optimizer,
-                  loss=loss,
-                  metrics=metrics)
+    # printing model summary
+    print('printing model summary...')
+    model.summary()
 
     # returning model
     return model
@@ -196,7 +249,8 @@ def regression_train(splits_folder: str,
                      learning_rate: float,
                      epochs: int,
                      batch_size: int,
-                     model_type: str
+                     model_type: str,
+                     input_shape: tuple
                      ) -> None:
     """
     Trains regression model.
@@ -218,14 +272,9 @@ def regression_train(splits_folder: str,
                                          batch_size=batch_size)
 
     # getting model
-    if model_type == 'age':
-        model = get_age_model(learning_rate=learning_rate)
-    else:
-        model = get_new_model(learning_rate=learning_rate)
-
-    # printing model summary
-    print('printing model summary...')
-    model.summary()
+    model = get_regression_model(input_shape=input_shape,
+                                 learning_rate=learning_rate,
+                                 model_type=model_type)
 
     # defining callback
     tensorboard_callback = TensorBoard(log_dir=logs_folder)
@@ -308,7 +357,8 @@ def main():
                      learning_rate=learning_rate,
                      epochs=epochs,
                      batch_size=batch_size,
-                     model_type=model_type)
+                     model_type=model_type,
+                     input_shape=INPUT_SHAPE)
 
 ######################################################################
 # running main function

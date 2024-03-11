@@ -20,12 +20,11 @@ from argparse import ArgumentParser
 from keras.layers import MaxPooling2D
 from keras.callbacks import TensorBoard
 from keras.applications import ResNet50
-from src.utils.aux_funcs import IMAGE_SIZE
+from src.utils.aux_funcs import INPUT_SHAPE
 from src.utils.aux_funcs import train_model
 from src.utils.aux_funcs import is_using_gpu
 from keras.engine.sequential import Sequential
 from src.utils.aux_funcs import get_history_df
-from src.utils.aux_funcs import normalize_data
 from keras.applications import InceptionResNetV2
 from keras.callbacks import LearningRateScheduler
 from src.utils.aux_funcs import enter_to_continue
@@ -44,7 +43,7 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'ImagesFilter train module'
+    description = 'binary classification train module'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
@@ -197,33 +196,29 @@ def get_new_model(input_shape: tuple) -> Sequential:
     return model
 
 
-def get_classification_model(learning_rate: float,
-                             base_layers: str
+def get_classification_model(input_shape: tuple,
+                             learning_rate: float,
+                             model_type: str
                              ) -> Sequential:
     """
     Given a model base and a learning rate,
     returns compiled model.
     """
-    # defining model input
-    image_height, image_width = IMAGE_SIZE
-    input_shape = (image_height, image_width, 3)  # 3 because it is an RGB image
-
-    # getting model
-    print('getting model...')
-
     # defining placeholder value for model
     model = None
 
     # getting base layers
-    if base_layers == 'resnet':
+    print('getting base layers...')
+
+    if model_type == 'resnet':
 
         # getting resnet layers
         model = get_resnet_model(input_shape=input_shape)
 
-    elif base_layers == 'inception':
+    elif model_type == 'inception':
 
         # getting inception layers
-        models = get_inception_model(input_shape=input_shape)
+        model = get_inception_model(input_shape=input_shape)
 
     else:
 
@@ -266,14 +261,15 @@ def scheduler(epoch: int,
         return lr * tf.math.exp(-0.1)
 
 
-def image_filter_train(splits_folder: str,
-                       logs_folder: str,
-                       model_path: str,
-                       learning_rate: float,
-                       epochs: int,
-                       batch_size: int,
-                       model_type: str
-                       ) -> None:
+def binary_classification_train(splits_folder: str,
+                                logs_folder: str,
+                                model_path: str,
+                                learning_rate: float,
+                                epochs: int,
+                                batch_size: int,
+                                model_type: str,
+                                input_shape: tuple
+                                ) -> None:
     """
     Trains image filter model.
     """
@@ -290,11 +286,12 @@ def image_filter_train(splits_folder: str,
     print(classes_str)
 
     # getting model
-    model = get_classification_model(learning_rate=learning_rate,
-                                     base_layers=model_type)
+    model = get_classification_model(input_shape=input_shape,
+                                     learning_rate=learning_rate,
+                                     model_type=model_type)
 
     # defining callback
-    tensorboard_callback = TensorBoard(log_dir=logs_folder)
+    # tensorboard_callback = TensorBoard(log_dir=logs_folder)
     lr_callback = LearningRateScheduler(scheduler)
 
     # training model (and saving history)
@@ -360,13 +357,14 @@ def main():
     enter_to_continue()
 
     # running image_filter_train function
-    image_filter_train(splits_folder=splits_folder,
-                       logs_folder=logs_folder,
-                       model_path=model_path,
-                       learning_rate=learning_rate,
-                       epochs=epochs,
-                       batch_size=batch_size,
-                       model_type=model_type)
+    binary_classification_train(splits_folder=splits_folder,
+                                logs_folder=logs_folder,
+                                model_path=model_path,
+                                learning_rate=learning_rate,
+                                epochs=epochs,
+                                batch_size=batch_size,
+                                model_type=model_type,
+                                input_shape=INPUT_SHAPE)
 
 ######################################################################
 # running main function
