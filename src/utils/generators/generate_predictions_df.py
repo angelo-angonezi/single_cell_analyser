@@ -53,10 +53,10 @@ def get_args_dict() -> dict:
                         help='defines path to folder containing images to be predicted.')
 
     # images extension param
-    parser.add_argument('-e', '--extension',
-                        dest='extension',
+    parser.add_argument('-x', '--images-extension',
+                        dest='images_extension',
                         required=True,
-                        help='defines images extension (.png, .jpg, .tif).')
+                        help='defines extension (.tif, .png, .jpg) of images in input folders')
 
     # model path param
     parser.add_argument('-m', '--model-path',
@@ -135,12 +135,12 @@ def add_prediction_col(df: DataFrame,
         normalized_image = current_image / 255
 
         # expending dims (required to enter Sequential model)
-        # expanded_image = expand_dims(normalized_image, 0)
+        expanded_image = expand_dims(normalized_image, 0)
 
         # getting current image prediction
         # current_prediction_list = model.predict(expanded_image,
         #                                         verbose=0)
-        current_prediction_list = model(normalized_image,  # calling directly on image avoids
+        current_prediction_list = model(expanded_image,  # calling directly on image avoids
                                         training=False)  # creation of generator, masking it
                                                          # run faster on small datasets!                   # noqa
 
@@ -245,7 +245,7 @@ def main():
     images_folder = args_dict['images_folder']
 
     # getting images extension param
-    extension = args_dict['extension']
+    extension = args_dict['images_extension']
 
     # getting model path param
     model_path = args_dict['model_path']
