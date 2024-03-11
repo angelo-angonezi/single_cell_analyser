@@ -27,9 +27,9 @@ IMAGE_NAME_COL = 'Image_name_merge'
 
 # phenotype selection
 # PHENOTYPE = 'dna_damage'
-# PHENOTYPE = 'cell_cycle'
+PHENOTYPE = 'cell_cycle'
 # PHENOTYPE = 'autophagy'
-PHENOTYPE = 'nii'
+# PHENOTYPE = 'nii'
 
 # dna damage parameters
 BP1_FOCI_THRESHOLD = 3
