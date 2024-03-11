@@ -24,6 +24,7 @@ from keras.losses import MeanSquaredError
 from src.utils.aux_funcs import INPUT_SHAPE
 from src.utils.aux_funcs import train_model
 from src.utils.aux_funcs import is_using_gpu
+from keras.metrics import RootMeanSquaredError
 from src.utils.aux_funcs import get_history_df
 from keras.engine.sequential import Sequential
 from src.utils.aux_funcs import enter_to_continue
@@ -227,7 +228,7 @@ def get_regression_model(input_shape: tuple,
     loss = MeanSquaredError()
 
     # defining metrics
-    metrics = [tf.keras.metrics.RootMeanSquaredError()]
+    metrics = [RootMeanSquaredError()]
 
     # compiling model
     print('compiling model...')
