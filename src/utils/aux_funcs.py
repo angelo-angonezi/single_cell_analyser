@@ -1948,6 +1948,11 @@ def get_cell_cycle(red_value: float,
     # defining placeholder value for cell cycle
     cell_cycle = None
 
+    # TODO: remove once test completed
+    cell_cycle = get_cell_cycle_simple(red_value=red_value,
+                                       green_value=green_value)
+    return cell_cycle
+
     # getting min values bool
     just_red = (red_value >= min_red_value) and (green_value < min_green_value)
     just_green = (red_value < min_red_value) and (green_value >= min_green_value)
