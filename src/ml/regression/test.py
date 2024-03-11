@@ -109,6 +109,7 @@ def get_rmse(test_df: DataFrame,
     joined_df = merge(left=test_df,
                       right=predictions_df,
                       on='crop_name')
+    print(joined_df)
 
     # adding rmse cols
     print('adding rmse cols...')
