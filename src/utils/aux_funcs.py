@@ -70,7 +70,8 @@ environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 IMAGE_WIDTH = 1408
 IMAGE_HEIGHT = 1040
 IMAGE_AREA = IMAGE_WIDTH * IMAGE_HEIGHT
-IMAGE_SIZE = (100, 100)
+IMAGE_SIZE = (50, 50)
+# IMAGE_SIZE = (100, 100)
 # IMAGE_SIZE = (512, 512)
 
 ######################################################################
