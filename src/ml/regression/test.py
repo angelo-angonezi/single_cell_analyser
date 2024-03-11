@@ -121,6 +121,7 @@ def get_rmse(test_df: DataFrame,
 
     # getting mean squared error
     mse = joined_df['squared_error'].mean()
+    print(mse)
 
     # getting root mean squared error
     rmse = sqrt(mse)
