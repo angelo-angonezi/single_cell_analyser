@@ -157,8 +157,6 @@ def add_prediction_col(df: DataFrame,
 
         # converting prediction to numpy
         current_prediction = current_tensor.numpy()
-        print(current_prediction)
-        exit()
 
         # converting prediction to respective phenotype
         current_prediction = get_prediction(prediction=current_prediction,
