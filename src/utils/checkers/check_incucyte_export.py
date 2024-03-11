@@ -10,7 +10,6 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-from os.path import join
 from argparse import ArgumentParser
 from src.utils.aux_funcs import spacer
 from src.utils.aux_funcs import enter_to_continue
@@ -28,18 +27,35 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = 'check incucyte export (if phase/red images match)'
+    description = 'check incucyte export (checks if images match)'
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
 
     # adding arguments to parser
 
-    # input folder param
-    parser.add_argument('-i', '--input-folder',
-                        dest='input_folder',
+    parser.add_argument('-fone', '--input-folder-one',
+                        dest='input_folder_one',
                         type=str,
-                        help='defines path to folder containing phase/red subfolders',
+                        help='defines path to folder containing files one',
+                        required=True)
+
+    parser.add_argument('-ftwo', '--input-folder-two',
+                        dest='input_folder_two',
+                        type=str,
+                        help='defines path to folder containing files two',
+                        required=True)
+
+    parser.add_argument('-xone', '--extension-one',
+                        dest='extension_one',
+                        type=str,
+                        help='defines extension for files in folder one',
+                        required=True)
+
+    parser.add_argument('-xtwo', '--extension-two',
+                        dest='extension_two',
+                        type=str,
+                        help='defines extension for files in folder two',
                         required=True)
 
     # creating arguments dictionary
@@ -65,7 +81,7 @@ def files_match(folder_one: str,
     # getting files in folder one
     files_one = get_specific_files_in_folder(path_to_folder=folder_one,
                                              extension=extension_one)
-    # TODO: update this code to be more generic
+
     # getting files in folder two
     files_two = get_specific_files_in_folder(path_to_folder=folder_two,
                                              extension=extension_two)
@@ -75,12 +91,12 @@ def files_match(folder_one: str,
     names_two = [f.replace(extension_two, '') for f in files_two]
 
     # getting file numbers
-    phase_images_num = len(names_one)
-    red_images_num = len(names_two)
+    files_num_one = len(names_one)
+    files_num_two = len(names_two)
 
     # printing execution message
-    f_string = f'{phase_images_num} images [.jpg] found in phase folder.\n'
-    f_string += f'{red_images_num} images [.tif] found in red folder.'
+    f_string = f'{files_num_one} files [{extension_one}] found in folder one.\n'
+    f_string += f'{files_num_two} files [{extension_two}] found in folder two.'
     spacer()
     print(f_string)
 
@@ -92,7 +108,9 @@ def files_match(folder_one: str,
 
 
 def check_incucyte_export(input_folder_one: str,
-                          input_folder_two: str
+                          input_folder_two: str,
+                          extension_one: str,
+                          extension_two: str
                           ) -> None:
     """
     Given a path to two folders containing images, and
@@ -102,7 +120,9 @@ def check_incucyte_export(input_folder_one: str,
     """
     # getting match bool
     images_match = files_match(folder_one=input_folder_one,
-                               folder_two=input_folder_two)
+                               folder_two=input_folder_two,
+                               extension_one=extension_one,
+                               extension_two=extension_two)
 
     # checking whether images match
     if images_match:
@@ -130,8 +150,17 @@ def main():
     # getting data from Argument Parser
     args_dict = get_args_dict()
 
-    # getting input folder param
-    input_folder = args_dict['input_folder']
+    # getting input folder one param
+    input_folder_one = args_dict['input_folder_one']
+
+    # getting input folder two param
+    input_folder_two = args_dict['input_folder_two']
+
+    # getting extension one param
+    extension_one = args_dict['extension_one']
+
+    # getting extension two param
+    extension_two = args_dict['extension_two']
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
@@ -140,7 +169,10 @@ def main():
     enter_to_continue()
 
     # running check_incucyte_export function
-    check_incucyte_export(input_folder=input_folder)
+    check_incucyte_export(input_folder_one=input_folder_one,
+                          input_folder_two=input_folder_two,
+                          extension_one=extension_one,
+                          extension_two=extension_two)
 
 ######################################################################
 # running main function
