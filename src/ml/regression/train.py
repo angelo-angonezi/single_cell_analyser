@@ -178,15 +178,28 @@ def get_new_model(input_shape: tuple) -> Sequential:
     # defining CNN layers
 
     # first convolution + pooling (input layer)
+    model.add(Conv2D(filters=32,
+                     kernel_size=(5, 5),
+                     strides=1,
+                     activation='relu',
+                     input_shape=input_shape))
+    model.add(MaxPooling2D())
 
-    # getting model
+    # second convolution + pooling
+    model.add(Conv2D(filters=16,
+                     kernel_size=(3, 3),
+                     strides=1,
+                     activation='relu'))
+    model.add(MaxPooling2D())
 
-    model = tf.keras.Sequential([
-        tf.keras.layers.Conv2D(16, (3, 3), activation=None, input_shape=input_shape),
-        tf.keras.layers.MaxPooling2D((2, 2)),
-        tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(units=1, activation='linear')
-    ])
+    # flattening layer
+    model.add(Flatten())
+
+    # mid-dense layers
+    model.add(Dense(32, activation='relu'))
+
+    # final dense layer
+    model.add(Dense(1, activation='linear'))
 
     # returning model
     return model
