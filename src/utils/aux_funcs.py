@@ -61,7 +61,7 @@ from keras.preprocessing.image import ImageDataGenerator
 pd.options.mode.chained_assignment = None  # default='warn'
 
 # setting tensorflow warnings off
-# environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 ######################################################################
 # defining global variables
