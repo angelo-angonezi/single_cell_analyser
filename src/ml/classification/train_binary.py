@@ -16,10 +16,12 @@ from keras.layers import Dense
 from keras.layers import Conv2D
 from keras.layers import Flatten
 from keras.optimizers import Adam
+from keras.metrics import Accuracy
 from argparse import ArgumentParser
 from keras.layers import MaxPooling2D
 from keras.callbacks import TensorBoard
 from keras.applications import ResNet50
+from keras.losses import BinaryCrossentropy
 from src.utils.aux_funcs import INPUT_SHAPE
 from src.utils.aux_funcs import train_model
 from src.utils.aux_funcs import is_using_gpu
@@ -229,10 +231,10 @@ def get_classification_model(input_shape: tuple,
     optimizer = Adam(learning_rate=learning_rate)
 
     # defining loss function
-    loss = 'binary_crossentropy'
+    loss = BinaryCrossentropy()
 
     # defining metrics
-    metrics = ['accuracy']
+    metrics = [Accuracy()]
 
     # compiling model
     print('compiling model...')
