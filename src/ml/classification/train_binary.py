@@ -321,7 +321,7 @@ def binary_classification_train(splits_folder: str,
                                 train_data=train_data,
                                 val_data=val_data,
                                 epochs=epochs,
-                                callback=lr_callback)
+                                callback=tensorboard_callback)
 
     # saving model
     print('saving model...')
