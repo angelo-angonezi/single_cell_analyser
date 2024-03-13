@@ -311,7 +311,8 @@ def binary_classification_train(splits_folder: str,
     print(train_data)
     print(type(train_data))
     print(train_data[0])
-    print(train_data[1])
+    print(train_data[0][0])
+    print(train_data[0][1])
     exit()
 
     # printing found classes
