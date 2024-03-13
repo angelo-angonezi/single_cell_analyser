@@ -56,10 +56,10 @@ def get_args_dict() -> dict:
     parser.add_argument('-i', '--images-folder',
                         dest='images_folder',
                         required=True,
-                        help='defines path to folder containing source images.')
+                        help='defines path to folder containing phase crops.')
 
     # images extension param
-    parser.add_argument('-e', '--extension',
+    parser.add_argument('-x', '--extension',
                         dest='extension',
                         required=True,
                         help='defines images extension (.png, .jpg, .tif).')
