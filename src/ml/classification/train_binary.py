@@ -11,6 +11,7 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 import tensorflow as tf
+from pandas import read_csv
 from tensorflow import Tensor
 from keras.layers import Dense
 from keras.layers import Conv2D
@@ -31,9 +32,9 @@ from keras.applications import InceptionResNetV2
 from keras.callbacks import LearningRateScheduler
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import generate_history_plot
-from src.utils.aux_funcs import get_data_split_regression
+from src.utils.aux_funcs import get_data_split_from_df
 from src.utils.aux_funcs import print_execution_parameters
-from src.utils.aux_funcs import get_data_split_classification
+from src.utils.aux_funcs import get_data_split_from_folder
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -53,11 +54,23 @@ def get_args_dict() -> dict:
 
     # adding arguments to parser
 
+    # dataset file param
+    parser.add_argument('-d', '--dataset-file',
+                        dest='dataset_file',
+                        required=True,
+                        help='defines path to dataset df (.csv) file')
+
     # splits folder param
     parser.add_argument('-s', '--splits-folder',
                         dest='splits_folder',
                         required=True,
                         help='defines splits folder name (contains "train", "val" and "test" subfolders).')
+
+    # images extension param
+    parser.add_argument('-x', '--images-extension',
+                        dest='images_extension',
+                        required=True,
+                        help='defines extension (.tif, .png, .jpg) of images in input folder')
 
     # logs folder param
     parser.add_argument('-l', '--logs-folder',
@@ -265,6 +278,8 @@ def scheduler(epoch: int,
 
 
 def binary_classification_train(splits_folder: str,
+                                extension: str,
+                                dataset_file: str,
                                 logs_folder: str,
                                 model_path: str,
                                 learning_rate: float,
@@ -276,22 +291,26 @@ def binary_classification_train(splits_folder: str,
     """
     Trains image filter model.
     """
+    # reading dataset df
+    print('reading dataset df...')
+    dataset_df = read_csv(dataset_file)
+
     # getting data splits
-    # TODO: update to get data from df
-    # train_data = get_data_split_classification(splits_folder=splits_folder,
-    #                                            split='train',
-    #                                            batch_size=batch_size)
-    # val_data = get_data_split_classification(splits_folder=splits_folder,
-    #                                          split='val',
-    #                                          batch_size=batch_size)
-    train_data = get_data_split_regression(splits_folder=splits_folder)
-    val_data = get_data_split_classification(splits_folder=splits_folder,
-                                             split='val',
-                                             batch_size=batch_size)
+    train_data = get_data_split_from_df(splits_folder=splits_folder,
+                                        extension=extension,
+                                        dataset_df=dataset_df,
+                                        split='train',
+                                        batch_size=batch_size)
+    val_data = get_data_split_from_df(splits_folder=splits_folder,
+                                      extension=extension,
+                                      dataset_df=dataset_df,
+                                      split='val',
+                                      batch_size=batch_size)
 
     # printing found classes
     classes_str = f'Classes: {train_data.class_names}'
     print(classes_str)
+    exit()
 
     # getting model
     model = get_classification_model(input_shape=input_shape,
@@ -334,6 +353,12 @@ def main():
 
     # getting splits folder param
     splits_folder = args_dict['splits_folder']
+
+    # getting images extension param
+    extension = args_dict['images_extension']
+
+    # getting dataset file param
+    dataset_file = args_dict['dataset_file']
 
     # getting logs folder param
     logs_folder = args_dict['logs_folder']

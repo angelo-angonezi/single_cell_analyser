@@ -16,7 +16,7 @@ from src.utils.aux_funcs import is_using_gpu
 from src.utils.aux_funcs import normalize_data
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_execution_parameters
-from src.utils.aux_funcs import get_data_split_classification
+from src.utils.aux_funcs import get_data_split_from_folder
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -139,9 +139,9 @@ def image_filter_test(splits_folder: str,
                       ) -> None:
     # getting data splits
     print('getting test data...')
-    test_data = get_data_split_classification(splits_folder=splits_folder,
-                                              split='test',
-                                              batch_size=batch_size)
+    test_data = get_data_split_from_folder(splits_folder=splits_folder,
+                                           split='test',
+                                           batch_size=batch_size)
 
     # normalizing data to 0-1 scale
     print('normalizing data...')

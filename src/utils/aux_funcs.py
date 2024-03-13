@@ -1402,12 +1402,12 @@ def get_image_confluence(df: DataFrame,
     return confluence
 
 
-def get_data_split_regression(splits_folder: str,
-                              extension: str,
-                              dataset_df: DataFrame,
-                              split: str,
-                              batch_size: int
-                              ):
+def get_data_split_from_df(splits_folder: str,
+                           extension: str,
+                           dataset_df: DataFrame,
+                           split: str,
+                           batch_size: int
+                           ):
     """
     Given a path to a folder and a split name,
     returns given data split as tensorflow
@@ -1459,10 +1459,10 @@ def get_data_split_regression(splits_folder: str,
     return split_data
 
 
-def get_data_split_classification(splits_folder: str,
-                                  split: str,
-                                  batch_size: int
-                                  ):
+def get_data_split_from_folder(splits_folder: str,
+                               split: str,
+                               batch_size: int
+                               ):
     """
     Given a path to a folder and a split name,
     returns given data split as tensorflow

@@ -29,7 +29,7 @@ from src.utils.aux_funcs import get_history_df
 from keras.engine.sequential import Sequential
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import generate_history_plot
-from src.utils.aux_funcs import get_data_split_regression
+from src.utils.aux_funcs import get_data_split_from_df
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
 
@@ -50,6 +50,12 @@ def get_args_dict() -> dict:
 
     # adding arguments to parser
 
+    # dataset file param
+    parser.add_argument('-d', '--dataset-file',
+                        dest='dataset_file',
+                        required=True,
+                        help='defines path to dataset df (.csv) file')
+
     # splits folder param
     parser.add_argument('-s', '--splits-folder',
                         dest='splits_folder',
@@ -61,12 +67,6 @@ def get_args_dict() -> dict:
                         dest='images_extension',
                         required=True,
                         help='defines extension (.tif, .png, .jpg) of images in input folder')
-
-    # dataset file param
-    parser.add_argument('-d', '--dataset-file',
-                        dest='dataset_file',
-                        required=True,
-                        help='defines path to dataset df (.csv) file')
 
     # logs folder param
     parser.add_argument('-l', '--logs-folder',
@@ -276,16 +276,16 @@ def regression_train(splits_folder: str,
     dataset_df = read_csv(dataset_file)
 
     # getting data splits
-    train_data = get_data_split_regression(splits_folder=splits_folder,
-                                           extension=extension,
-                                           dataset_df=dataset_df,
-                                           split='train',
-                                           batch_size=batch_size)
-    val_data = get_data_split_regression(splits_folder=splits_folder,
-                                         extension=extension,
-                                         dataset_df=dataset_df,
-                                         split='val',
-                                         batch_size=batch_size)
+    train_data = get_data_split_from_df(splits_folder=splits_folder,
+                                        extension=extension,
+                                        dataset_df=dataset_df,
+                                        split='train',
+                                        batch_size=batch_size)
+    val_data = get_data_split_from_df(splits_folder=splits_folder,
+                                      extension=extension,
+                                      dataset_df=dataset_df,
+                                      split='val',
+                                      batch_size=batch_size)
 
     # getting model
     model = get_regression_model(input_shape=input_shape,
