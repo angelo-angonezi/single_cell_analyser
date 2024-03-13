@@ -307,11 +307,13 @@ def binary_classification_train(splits_folder: str,
                                       split='val',
                                       batch_size=batch_size)
 
+    print(dataset_df)
+    print(type(train_data))
+    exit()
+
     # printing found classes
     classes_str = f'Classes: {train_data.class_names}'
-    print(dataset_df)
     print(classes_str)
-    exit()
 
     # getting model
     model = get_classification_model(input_shape=input_shape,
