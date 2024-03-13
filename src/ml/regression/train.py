@@ -287,6 +287,14 @@ def regression_train(splits_folder: str,
                                       split='val',
                                       batch_size=batch_size)
 
+    print(dataset_df)
+    print(train_data)
+    print(type(train_data))
+    print(train_data[0])
+    print(train_data[0][0])
+    print(train_data[0][1])
+    exit()
+
     # getting model
     model = get_regression_model(input_shape=input_shape,
                                  learning_rate=learning_rate,
