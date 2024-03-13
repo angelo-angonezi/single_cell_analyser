@@ -307,26 +307,14 @@ def binary_classification_train(splits_folder: str,
                                       split='val',
                                       batch_size=batch_size)
 
-    print(dataset_df)
-    print(train_data)
-    print(type(train_data))
-    print(train_data[0])
-    print(train_data[0][0])
-    print(train_data[0][1])
-    exit()
-
-    # printing found classes
-    classes_str = f'Classes: {train_data.class_names}'
-    print(classes_str)
-
     # getting model
     model = get_classification_model(input_shape=input_shape,
                                      learning_rate=learning_rate,
                                      model_type=model_type)
 
     # defining callback
-    # tensorboard_callback = TensorBoard(log_dir=logs_folder)
-    lr_callback = LearningRateScheduler(scheduler)
+    tensorboard_callback = TensorBoard(log_dir=logs_folder)
+    # lr_callback = LearningRateScheduler(scheduler)
 
     # training model (and saving history)
     train_history = train_model(model=model,

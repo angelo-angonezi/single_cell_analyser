@@ -23,6 +23,7 @@ from keras.callbacks import TensorBoard
 from keras.losses import MeanSquaredError
 from src.utils.aux_funcs import INPUT_SHAPE
 from src.utils.aux_funcs import train_model
+from keras.metrics import MeanRelativeError
 from src.utils.aux_funcs import is_using_gpu
 from keras.metrics import RootMeanSquaredError
 from src.utils.aux_funcs import get_history_df
@@ -241,7 +242,8 @@ def get_regression_model(input_shape: tuple,
     loss = MeanSquaredError()
 
     # defining metrics
-    metrics = [RootMeanSquaredError()]
+    # metrics = [RootMeanSquaredError()]
+    metrics = [MeanRelativeError()]
 
     # compiling model
     print('compiling model...')
@@ -286,14 +288,6 @@ def regression_train(splits_folder: str,
                                       dataset_df=dataset_df,
                                       split='val',
                                       batch_size=batch_size)
-
-    print(dataset_df)
-    print(train_data)
-    print(type(train_data))
-    print(train_data[0])
-    print(train_data[0][0])
-    print(train_data[0][1])
-    exit()
 
     # getting model
     model = get_regression_model(input_shape=input_shape,
