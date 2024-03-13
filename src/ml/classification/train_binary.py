@@ -289,7 +289,7 @@ def binary_classification_train(splits_folder: str,
                                 input_shape: tuple
                                 ) -> None:
     """
-    Trains image filter model.
+    Trains binary classification model.
     """
     # reading dataset df
     print('reading dataset df...')
@@ -308,10 +308,8 @@ def binary_classification_train(splits_folder: str,
                                       batch_size=batch_size)
 
     print(dataset_df)
+    print(train_data)
     print(type(train_data))
-    a, b = train_data
-    print(a)
-    print(b)
     exit()
 
     # printing found classes
