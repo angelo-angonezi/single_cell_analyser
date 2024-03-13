@@ -309,6 +309,7 @@ def binary_classification_train(splits_folder: str,
 
     # printing found classes
     classes_str = f'Classes: {train_data.class_names}'
+    print(dataset_df)
     print(classes_str)
     exit()
 
@@ -391,6 +392,8 @@ def main():
 
     # running image_filter_train function
     binary_classification_train(splits_folder=splits_folder,
+                                extension=extension,
+                                dataset_file=dataset_file,
                                 logs_folder=logs_folder,
                                 model_path=model_path,
                                 learning_rate=learning_rate,
