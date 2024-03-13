@@ -15,12 +15,10 @@ from os.path import join
 from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
-from random import seed as set_seed
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import copy_multiple_files
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
-from src.utils.aux_funcs import get_specific_files_in_folder
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -30,9 +28,6 @@ TRAIN_SPLIT = 0.6
 VAL_SPLIT = 0.1
 TEST_SPLIT = 0.3
 SEED = 53
-
-# setting seed (so that all executions result in same sample)
-set_seed(SEED)
 
 #####################################################################
 # argument parsing related functions
@@ -129,10 +124,12 @@ def add_dataset_col(df: DataFrame,
         base_string += f'| row: #INDEX# of #TOTAL#'
 
         # randomly splitting current group rows
-        current_test_split = df_group.sample(frac=test_size)
+        current_test_split = df_group.sample(frac=test_size,
+                                             random_state=SEED)
         rest_df = df_group.drop(current_test_split.index)
         val_frac = val_size / (train_size + val_size)
-        current_val_split = rest_df.sample(frac=val_frac)
+        current_val_split = rest_df.sample(frac=val_frac,
+                                           random_state=SEED)
         current_train_split = rest_df.drop(current_val_split.index)
 
         # getting train/test indices
