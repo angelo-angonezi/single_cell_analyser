@@ -299,10 +299,14 @@ def binary_classification_train(splits_folder: str,
     classes_col = dataset_df['class']
 
     # getting classes dict
-    print(classes_col)
-    exit()
+    classes_set = classes_col.unique()
+    classes_dict = {key: value for value, key in enumerate(classes_set)}
 
     # updating class col
+    dataset_df['class'].replace(classes_dict)
+
+    print(classes_dict)
+    exit()
 
     # getting data splits
     train_data = get_data_split_from_df(splits_folder=splits_folder,
