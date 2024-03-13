@@ -50,7 +50,7 @@ def get_args_dict() -> dict:
     parser.add_argument('-c', '--crops-info-file',
                         dest='crops_info_file',
                         required=True,
-                        help='defines path to crops info df (.csv) file')
+                        help='defines path to annotated crops info df (.csv) file')
 
     # images folder param
     parser.add_argument('-i', '--images-folder',
