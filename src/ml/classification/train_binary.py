@@ -295,6 +295,8 @@ def binary_classification_train(splits_folder: str,
     print('reading dataset df...')
     dataset_df = read_csv(dataset_file)
 
+    # TODO: update class col to be number!!!
+
     # getting data splits
     train_data = get_data_split_from_df(splits_folder=splits_folder,
                                         extension=extension,
