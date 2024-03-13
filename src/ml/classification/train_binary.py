@@ -309,6 +309,9 @@ def binary_classification_train(splits_folder: str,
 
     print(dataset_df)
     print(type(train_data))
+    a, b = train_data
+    print(a)
+    print(b)
     exit()
 
     # printing found classes
