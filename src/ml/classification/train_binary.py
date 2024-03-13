@@ -31,6 +31,7 @@ from keras.applications import InceptionResNetV2
 from keras.callbacks import LearningRateScheduler
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import generate_history_plot
+from src.utils.aux_funcs import get_data_split_regression
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_data_split_classification
 print('all required libraries successfully imported.')  # noqa
@@ -276,9 +277,14 @@ def binary_classification_train(splits_folder: str,
     Trains image filter model.
     """
     # getting data splits
-    train_data = get_data_split_classification(splits_folder=splits_folder,
-                                               split='train',
-                                               batch_size=batch_size)
+    # TODO: update to get data from df
+    # train_data = get_data_split_classification(splits_folder=splits_folder,
+    #                                            split='train',
+    #                                            batch_size=batch_size)
+    # val_data = get_data_split_classification(splits_folder=splits_folder,
+    #                                          split='val',
+    #                                          batch_size=batch_size)
+    train_data = get_data_split_regression(splits_folder=splits_folder)
     val_data = get_data_split_classification(splits_folder=splits_folder,
                                              split='val',
                                              batch_size=batch_size)
