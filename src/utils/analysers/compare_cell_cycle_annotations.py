@@ -297,7 +297,7 @@ def get_image_metrics(images_folder: str,
     style, of following structure:
     (true_positives, true_negatives, false_positives, false_negatives)
     """
-    # defining placeholder values for tp, fp, fn, area_errors
+    # defining placeholder values for tp, tn, fp, fn
     true_positives = 0
     true_negatives = 0
     false_positives = 0
