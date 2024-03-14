@@ -402,7 +402,7 @@ def main():
     print(using_gpu_str)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running image_filter_train function
     binary_classification_train(splits_folder=splits_folder,
