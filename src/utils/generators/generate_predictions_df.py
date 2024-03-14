@@ -70,13 +70,7 @@ def get_args_dict() -> dict:
                         dest='phenotype',
                         required=True,
                         default='nii',
-                        help='defines phenotype type (nii/categorical)')
-
-    # classes dict param
-    parser.add_argument('-cl', '--classes-dict',
-                        dest='classes_dict',
-                        help='defines path to file containing classes info (e.g G1=0, G2=1)',
-                        required=False)
+                        help='defines phenotype type (nii/cell_cycle/autophagy/erk)')
 
     # output path param
     parser.add_argument('-o', '--output-path',
@@ -98,8 +92,7 @@ def add_prediction_col(df: DataFrame,
                        model: Sequential,
                        input_folder: str,
                        extension: str,
-                       phenotype: str,
-                       classes_dict: dict
+                       phenotype: str
                        ) -> None:
     """
     Given a base df, and a loaded
@@ -168,8 +161,7 @@ def add_prediction_col(df: DataFrame,
 
         # converting prediction to respective phenotype
         current_prediction = get_prediction(prediction=current_prediction,
-                                            phenotype=phenotype,
-                                            classes_dict=classes_dict)
+                                            phenotype=phenotype)
 
         # updating current row value
         df.at[row_index, col_name] = current_prediction
@@ -181,8 +173,7 @@ def add_prediction_col(df: DataFrame,
 def get_predictions_df(model_path: str,
                        images_folder: str,
                        extension: str,
-                       phenotype: str,
-                       classes_dict: dict
+                       phenotype: str
                        ) -> DataFrame:
     """
     Given a path to a trained model, and a path
@@ -226,8 +217,7 @@ def get_predictions_df(model_path: str,
                        input_folder=images_folder,
                        extension=extension,
                        model=model,
-                       phenotype=phenotype,
-                       classes_dict=classes_dict)
+                       phenotype=phenotype)
 
     # returning predictions df
     return predictions_df
@@ -237,7 +227,6 @@ def generate_predictions_df(images_folder: str,
                             extension: str,
                             model_path: str,
                             phenotype: str,
-                            classes_dict: str,
                             output_path: str
                             ) -> None:
     """
@@ -246,17 +235,12 @@ def generate_predictions_df(images_folder: str,
     saving inference in given output
     folder.
     """
-    # getting classes dict
-    print('getting classes dict...')
-    classes_dict = get_treatment_dict(treatment_file=classes_dict)
-
     # getting predictions df
     print('getting predictions df...')
     predictions_df = get_predictions_df(model_path=model_path,
                                         images_folder=images_folder,
                                         extension=extension,
-                                        phenotype=phenotype,
-                                        classes_dict=classes_dict)
+                                        phenotype=phenotype)
 
     # saving predictions df
     print('saving predictions df...')
@@ -288,9 +272,6 @@ def main():
     # getting phenotype param
     phenotype = args_dict['phenotype']
 
-    # getting classes dict param
-    classes_dict = args_dict['classes_dict']
-
     # getting output path param
     output_path = args_dict['output_path']
 
@@ -310,7 +291,6 @@ def main():
                             extension=extension,
                             model_path=model_path,
                             phenotype=phenotype,
-                            classes_dict=classes_dict,
                             output_path=output_path)
 
 ######################################################################

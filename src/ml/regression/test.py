@@ -119,7 +119,7 @@ def get_errors_df(test_df: DataFrame,
     return joined_df
 
 
-def nii_regression_test(dataset_file: str,
+def regression_test(dataset_file: str,
                         predictions_file: str
                         ) -> None:
     """
@@ -191,9 +191,9 @@ def main():
     # waiting for user input
     enter_to_continue()
 
-    # running nii_regression_test function
-    nii_regression_test(dataset_file=dataset_file,
-                        predictions_file=predictions_file)
+    # running regression_test function
+    regression_test(dataset_file=dataset_file,
+                    predictions_file=predictions_file)
 
 ######################################################################
 # running main function

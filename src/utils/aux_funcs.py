@@ -2578,8 +2578,7 @@ def show_image(image: ndarray,
 
 
 def get_prediction(prediction: float,
-                   phenotype: str,
-                   classes_dict: dict
+                   phenotype: str
                    ) -> float or str:
     """
     Given a prediction value (float/ndarray),
@@ -2589,23 +2588,39 @@ def get_prediction(prediction: float,
     # defining placeholder value for current prediction
     current_prediction = None
 
-    # inverting classes dict (int to string)
-    classes_dict = {int(v): k for k, v in classes_dict.items()}
-
     # getting current prediction value based on given phenotype
+    # always follows alphanumeric, just as train_data.class_indices
+    # in training module.
 
     if phenotype == 'nii':
 
         # converting prediction to float
         current_prediction = float(prediction)
 
-    else:
-
-        # rounding prediction to 0/1
-        current_prediction = 0 if prediction < 0.5 else 1
+    elif phenotype == 'cell_cycle':
 
         # converting prediction to string
-        current_prediction = classes_dict[current_prediction]
+        current_prediction = 'G1' if prediction < 0.5 else 'G2'
+
+    elif phenotype == 'autophagy':
+
+        # converting prediction to string
+        current_prediction = 'HighAutophagy' if prediction < 0.5 else 'LowAutophagy'
+
+    elif phenotype == 'erk':
+
+        # converting prediction to string
+        current_prediction = 'Active' if prediction < 0.5 else 'Inactive'
+
+    else:
+
+        # printing execution message
+        f_string = f'phenotype {phenotype} not specified.\n'
+        f_string += f'Please, check and try again.'
+        print(f_string)
+
+        # quitting
+        exit()
 
     # returning prediction value
     return current_prediction

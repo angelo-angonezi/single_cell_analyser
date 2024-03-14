@@ -10,13 +10,14 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-from keras.models import load_model
+from math import sqrt
+from pandas import merge
+from pandas import read_csv
+from pandas import DataFrame
 from argparse import ArgumentParser
 from src.utils.aux_funcs import is_using_gpu
-from src.utils.aux_funcs import normalize_data
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_execution_parameters
-from src.utils.aux_funcs import get_data_split_from_folder
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -36,25 +37,17 @@ def get_args_dict() -> dict:
 
     # adding arguments to parser
 
-    # TODO: update argparser and code to be more like regression test module
-
-    # splits folder param
-    parser.add_argument('-s', '--splits-folder',
-                        dest='splits_folder',
+    # dataset file param
+    parser.add_argument('-d', '--dataset-file',
+                        dest='dataset_file',
                         required=True,
-                        help='defines splits folder name (contains "train", "val" and "test" subfolders).')
+                        help='defines path to dataset df (.csv) file')
 
-    # batch size param
-    parser.add_argument('-b', '--batch-size',
-                        dest='batch_size',
+    # predictions file param
+    parser.add_argument('-p', '--predictions-file',
+                        dest='predictions_file',
                         required=True,
-                        help='defines batch size.')
-
-    # model path param
-    parser.add_argument('-m', '--model-path',
-                        dest='model_path',
-                        required=True,
-                        help='defines path to trained model (.h5 file)')
+                        help='defines path to prediction df (.csv) file')
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -66,95 +59,111 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def test_model(model,
-               test_data,
-               ):
-    # defining placeholder values for gts/predictions list
-    gts_list = []
-    predictions_list = []
+def get_test_df(dataset_file: str) -> DataFrame:
+    """
+    Given a path to a dataset file,
+    returns filtered df containing
+    only test data and required cols
+    for analysis.
+    """
+    # reading dataset df
+    dataset_df = read_csv(dataset_file)
 
-    # getting test batches
-    test_batches = test_data.as_numpy_iterator()
+    # filtering df by test data
+    filtered_df = dataset_df[dataset_df['split'] == 'test']
 
-    # iterating over batches in test data set
-    for batch in test_batches:
+    # defining cols to keep
+    cols_to_keep = ['crop_name',
+                    'class']
 
-        # getting current gts and predictions
-        current_inputs, current_gts = batch
-        current_predictions = model.predict(current_inputs)
+    # dropping unrequired cols
+    filtered_df = filtered_df[cols_to_keep]
 
-        # unpacking values
-        gts = [f[0] for f in current_gts]
-        predictions = [f[0] for f in current_predictions]
+    # returning filtered df
+    return filtered_df
 
-        # appending gts/predictions to respective lists
-        for gt in gts:
-            gts_list.append(gt)
-        for prediction in predictions:
-            predictions_list.append(prediction)
 
-    # defining placeholder values for tps, tns, fps, fns
-    tps = 0
-    tns = 0
-    fps = 0
-    fns = 0
+def get_predictions_df(predictions_file: str) -> DataFrame:
+    """
+    Given a path to a predictions file,
+    returns loaded df filtered by cols
+    related to test analysis.
+    """
+    # reading predictions df
+    predictions_df = read_csv(predictions_file)
 
-    # converting values to respective classes (string format)
-    gts_list_str = ['excluded' if gt < 0.5 else 'included' for gt in gts_list]
-    predictions_list_str = ['excluded' if prediction < 0.5 else 'included' for prediction in predictions_list]
+    # returning predictions df
+    return predictions_df
 
-    # zipping lists
-    a = zip(gts_list_str, predictions_list_str)
-    for i in a:
-        gt, prediction = i
-        if gt == 'included':
-            if prediction == 'included':
-                tps += 1
-            else:
-                fns += 1
-        elif gt == 'excluded':
-            if prediction == 'excluded':
-                tns += 1
-            else:
-                fps += 1
+
+def get_errors_df(test_df: DataFrame,
+                  predictions_df: DataFrame
+                  ) -> DataFrame:
+    """
+    Given a test and predictions
+    dfs, calculates metrics and
+    returns errors df.
+    """
+    # joining dfs by crop_name
+    joined_df = merge(left=test_df,
+                      right=predictions_df,
+                      on='crop_name')
+
+    # adding error cols
+    joined_df['error'] = joined_df['prediction'] - joined_df['class']
+    joined_df['squared_error'] = joined_df['error'] * joined_df['error']
+    joined_df['absolute_error'] = joined_df['error'].abs()
+    joined_df['relative_error'] = joined_df['absolute_error'] / joined_df['class']
+
+    # returning errors df
+    return joined_df
+
+
+def nii_classification_test(dataset_file: str,
+                        predictions_file: str
+                        ) -> None:
+    """
+    Given a path to dataset df, and
+    a path to a file containing test
+    data predictions, prints metrics
+    on console.
+    """
+    # getting test df
+    print('getting test df...')
+    test_df = get_test_df(dataset_file=dataset_file)
+
+    # getting images num
+    images_num = len(test_df)
+
+    # getting predictions df
+    print('getting predictions df...')
+    predictions_df = get_predictions_df(predictions_file=predictions_file)
+
+    # getting errors df
+    print('getting errors df...')
+    errors_df = get_errors_df(test_df=test_df,
+                              predictions_df=predictions_df)
+    print(errors_df)
 
     # calculating metrics
-    accuracy = (tps + tns) / (tps + tns + fps + fns)
-    precision = tps / (tps + fps)
-    recall = tps / (tps + fns)
-    f1_score = 2 * ((precision * recall) / (precision + recall))
+    print('calculating metrics...')
+    mae = errors_df['absolute_error'].mean()
+    mre = errors_df['relative_error'].mean()
+    mse = errors_df['squared_error'].mean()
+    rmse = sqrt(mse)
 
-    # printing results
-    f_string = '--Metrics results--\n'
-    f_string += f'Accuracy:  {accuracy}\n'
-    f_string += f'Precision: {precision}\n'
-    f_string += f'Recall:    {recall}\n'
-    f_string += f'F1-Score:  {f1_score}'
+    # printing metrics on console
+    print('printing metrics...')
+    f_string = f'---Metrics Results---\n'
+    f_string += f'Test images num: {images_num}\n'
+    f_string += f'MAE: {mae}\n'
+    f_string += f'MRE: {mre}\n'
+    f_string += f'MSE: {mse}\n'
+    f_string += f'RMSE: {rmse}'
     print(f_string)
 
-
-def image_filter_test(splits_folder: str,
-                      batch_size: int,
-                      model_path: str
-                      ) -> None:
-    # getting data splits
-    print('getting test data...')
-    test_data = get_data_split_from_folder(splits_folder=splits_folder,
-                                           split='test',
-                                           batch_size=batch_size)
-
-    # normalizing data to 0-1 scale
-    print('normalizing data...')
-    test_data = normalize_data(data=test_data)
-
-    # loading model
-    print('loading model...')
-    model = load_model(model_path)
-
-    # testing model on test split
-    print('testing model...')
-    test_model(model=model,
-               test_data=test_data)
+    # printing execution message
+    print('analysis complete!')
 
 ######################################################################
 # defining main function
@@ -165,14 +174,11 @@ def main():
     # getting args dict
     args_dict = get_args_dict()
 
-    # getting splits folder param
-    splits_folder = args_dict['splits_folder']
+    # getting dataset file param
+    dataset_file = args_dict['dataset_file']
 
-    # getting batch size param
-    batch_size = int(args_dict['batch_size'])
-
-    # getting model path param
-    model_path = args_dict['model_path']
+    # predictions file param
+    predictions_file = args_dict['predictions_file']
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
@@ -185,10 +191,9 @@ def main():
     # waiting for user input
     enter_to_continue()
 
-    # running image_filter_test function
-    image_filter_test(splits_folder=splits_folder,
-                      batch_size=batch_size,
-                      model_path=model_path)
+    # running classification_test function
+    classification_test(dataset_file=dataset_file,
+                        predictions_file=predictions_file)
 
 ######################################################################
 # running main function
