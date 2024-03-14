@@ -283,12 +283,14 @@ def regression_train(splits_folder: str,
                                         extension=extension,
                                         dataset_df=dataset_df,
                                         split='train',
-                                        batch_size=batch_size)
+                                        batch_size=batch_size,
+                                        class_mode='raw')
     val_data = get_data_split_from_df(splits_folder=splits_folder,
                                       extension=extension,
                                       dataset_df=dataset_df,
                                       split='val',
-                                      batch_size=batch_size)
+                                      batch_size=batch_size,
+                                      class_mode='raw')
 
     # getting model
     print('getting model...')

@@ -96,37 +96,27 @@ def get_predictions_df(predictions_file: str) -> DataFrame:
     return predictions_df
 
 
-def get_rmse(test_df: DataFrame,
-             predictions_df: DataFrame
-             ) -> float:
+def get_errors_df(test_df: DataFrame,
+                  predictions_df: DataFrame
+                  ) -> DataFrame:
     """
     Given a test and predictions
     dfs, calculates metrics and
-    returns RMSE.
+    returns errors df.
     """
     # joining dfs by crop_name
-    print('joining dfs...')
     joined_df = merge(left=test_df,
                       right=predictions_df,
                       on='crop_name')
 
-    # adding rmse cols
-    print('adding rmse cols...')
-    joined_df['error'] = joined_df['class'] - joined_df['prediction']
+    # adding error cols
+    joined_df['error'] = joined_df['prediction'] - joined_df['class']
     joined_df['squared_error'] = joined_df['error'] * joined_df['error']
+    joined_df['absolute_error'] = joined_df['error'].abs()
+    joined_df['relative_error'] = joined_df['absolute_error'] / joined_df['class']
 
-    # printing execution message
-    print('printing df...')
-    print(joined_df)
-
-    # getting mean squared error
-    mse = joined_df['squared_error'].mean()
-
-    # getting root mean squared error
-    rmse = sqrt(mse)
-
-    # returning rmse
-    return rmse
+    # returning errors df
+    return joined_df
 
 
 def nii_regression_test(dataset_file: str,
@@ -149,15 +139,26 @@ def nii_regression_test(dataset_file: str,
     print('getting predictions df...')
     predictions_df = get_predictions_df(predictions_file=predictions_file)
 
-    # getting metrics df
-    print('getting metrics df...')
-    rmse = get_rmse(test_df=test_df,
-                    predictions_df=predictions_df)
+    # getting errors df
+    print('getting errors df...')
+    errors_df = get_errors_df(test_df=test_df,
+                              predictions_df=predictions_df)
+    print(errors_df)
+
+    # calculating metrics
+    print('calculating metrics...')
+    mae = errors_df['absolute_error'].mean()
+    mre = errors_df['relative_error'].mean()
+    mse = errors_df['squared_error'].mean()
+    rmse = sqrt(mse)
 
     # printing metrics on console
     print('printing metrics...')
     f_string = f'---Metrics Results---\n'
     f_string += f'Test images num: {images_num}\n'
+    f_string += f'MAE: {mae}\n'
+    f_string += f'MRE: {mre}\n'
+    f_string += f'MSE: {mse}\n'
     f_string += f'RMSE: {rmse}'
     print(f_string)
 

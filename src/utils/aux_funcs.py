@@ -70,8 +70,8 @@ environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 IMAGE_WIDTH = 1408
 IMAGE_HEIGHT = 1040
 IMAGE_AREA = IMAGE_WIDTH * IMAGE_HEIGHT
-IMAGE_SIZE = (50, 50)
-# IMAGE_SIZE = (100, 100)
+# IMAGE_SIZE = (50, 50)
+IMAGE_SIZE = (100, 100)
 # IMAGE_SIZE = (512, 512)
 IMG_HEIGHT, IMG_WIDTH = IMAGE_SIZE
 INPUT_SHAPE = (IMG_HEIGHT, IMG_WIDTH, 3)  # 3 because it is an RGB image
@@ -1415,7 +1415,8 @@ def get_data_split_from_df(splits_folder: str,
                            extension: str,
                            dataset_df: DataFrame,
                            split: str,
-                           batch_size: int
+                           batch_size: int,
+                           class_mode: str
                            ):
     """
     Given a path to a folder and a split name,
@@ -1446,8 +1447,8 @@ def get_data_split_from_df(splits_folder: str,
     # dropping unrequired columns
     cols_to_keep = ['crop_path', 'class']
     filtered_df = filtered_df[cols_to_keep]
-    a = filtered_df.iloc[0]['crop_path']
-    # https://rosenfelder.ai/keras-regression-efficient-net/
+
+    # creating image data generator object (and defining normalization)
     image_generator = ImageDataGenerator(rescale=1.0 / 255)
 
     # loading data
@@ -1457,7 +1458,7 @@ def get_data_split_from_df(splits_folder: str,
                                                      y_col='class',
                                                      target_size=IMAGE_SIZE,
                                                      color_mode='rgb',
-                                                     class_mode='raw',
+                                                     class_mode=class_mode,  # 'raw' for regression, 'binary' for binary classification and 'categorical' for multi-label classification  # noqa
                                                      batch_size=batch_size,
                                                      shuffle=True)
 

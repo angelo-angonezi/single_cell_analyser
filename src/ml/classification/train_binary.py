@@ -10,7 +10,6 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-import tensorflow as tf
 from pandas import read_csv
 from tensorflow import Tensor
 from keras.layers import Dense
@@ -20,8 +19,11 @@ from keras.optimizers import Adam
 from keras.metrics import Accuracy
 from argparse import ArgumentParser
 from keras.layers import MaxPooling2D
+from tensorflow import int8 as tf_int
+from keras.utils import to_categorical
 from keras.callbacks import TensorBoard
 from keras.applications import ResNet50
+from tensorflow.math import exp as tf_exp
 from keras.losses import BinaryCrossentropy
 from src.utils.aux_funcs import INPUT_SHAPE
 from src.utils.aux_funcs import train_model
@@ -280,7 +282,7 @@ def scheduler(epoch: int,
     if epoch < 20:
         return lr
     else:
-        return lr * tf.math.exp(-0.1)
+        return lr * tf_exp(-0.1)
 
 
 def binary_classification_train(splits_folder: str,
@@ -311,7 +313,7 @@ def binary_classification_train(splits_folder: str,
     dataset_df['class'] = dataset_df['class'].replace(classes_dict)
 
     # updating class type
-    dataset_df['class'] = dataset_df['class'].astype(int)
+    # dataset_df['class'] = dataset_df['class'].astype(int)
 
     # getting data splits
     print('getting data splits...')
@@ -319,12 +321,18 @@ def binary_classification_train(splits_folder: str,
                                         extension=extension,
                                         dataset_df=dataset_df,
                                         split='train',
-                                        batch_size=batch_size)
+                                        batch_size=batch_size,
+                                        class_mode='binary')
+    a = train_data[0][1][0]
+    print(a)
+    print(type(a))
+    exit()
     val_data = get_data_split_from_df(splits_folder=splits_folder,
                                       extension=extension,
                                       dataset_df=dataset_df,
                                       split='val',
-                                      batch_size=batch_size)
+                                      batch_size=batch_size,
+                                      class_mode='binary')
 
     # getting model
     print('getting model...')
