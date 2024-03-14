@@ -145,8 +145,8 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
     model.add(base_layers)
     
     # adding other layers
-    model.add(Dense(512, activation='relu'))
-    model.add(Dropout(0.5))
+    # model.add(Dense(512, activation='relu'))
+    # model.add(Dropout(0.5))
     model.add(Dense(256, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(128, activation='relu'))
