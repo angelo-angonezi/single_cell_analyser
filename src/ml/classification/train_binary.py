@@ -86,12 +86,6 @@ def get_args_dict() -> dict:
                         required=True,
                         help='defines path to save model (.h5 file)')
 
-    # classes dict param
-    parser.add_argument('-cl', '--classes-dict',
-                        dest='classes_dict',
-                        help='defines path to file containing classes info (e.g G1=0, G2=1)',
-                        required=True)
-
     # learning rate param
     parser.add_argument('-lr', '--learning-rate',
                         dest='learning_rate',
@@ -290,7 +284,6 @@ def binary_classification_train(splits_folder: str,
                                 dataset_file: str,
                                 logs_folder: str,
                                 model_path: str,
-                                classes_dict: str,
                                 learning_rate: float,
                                 epochs: int,
                                 batch_size: int,
@@ -304,17 +297,6 @@ def binary_classification_train(splits_folder: str,
     print('reading dataset df...')
     dataset_df = read_csv(dataset_file)
 
-    # getting classes dict
-    print('getting classes dict...')
-    # classes_dict = get_treatment_dict(treatment_file=classes_dict)
-
-    # updating class col
-    print('converting classes type (string to int)...')
-    # dataset_df['class'] = dataset_df['class'].replace(classes_dict)
-
-    # updating class type
-    # dataset_df['class'] = dataset_df['class'].astype(int)
-
     # getting data splits
     print('getting data splits...')
     train_data = get_data_split_from_df(splits_folder=splits_folder,
@@ -322,13 +304,15 @@ def binary_classification_train(splits_folder: str,
                                         dataset_df=dataset_df,
                                         split='train',
                                         batch_size=batch_size,
-                                        class_mode='categorical')
+                                        class_mode='binary')
+    print(train_data.class_indices)
+    exit()
     val_data = get_data_split_from_df(splits_folder=splits_folder,
                                       extension=extension,
                                       dataset_df=dataset_df,
                                       split='val',
                                       batch_size=batch_size,
-                                      class_mode='categorical')
+                                      class_mode='binary')
 
     # getting model
     print('getting model...')
@@ -385,9 +369,6 @@ def main():
     # getting model path param
     model_path = args_dict['model_path']
 
-    # getting classes dict param
-    classes_dict = args_dict['classes_dict']
-
     # getting output path param
     learning_rate = float(args_dict['learning_rate'])
 
@@ -417,7 +398,6 @@ def main():
                                 dataset_file=dataset_file,
                                 logs_folder=logs_folder,
                                 model_path=model_path,
-                                classes_dict=classes_dict,
                                 learning_rate=learning_rate,
                                 epochs=epochs,
                                 batch_size=batch_size,
