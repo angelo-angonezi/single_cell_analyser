@@ -1051,6 +1051,15 @@ def get_treatment_dict(treatment_file: str) -> dict:
     # defining placeholder value for treatment dict
     treatment_dict = {}
 
+    # checking if treatment file exists
+    treatment_file_exists = exists(treatment_file)
+
+    # if it does not exist
+    if not treatment_file_exists:
+
+        # returning empty dict
+        return treatment_dict
+
     # reading input file
     with open(treatment_file, 'r') as open_file:
 
@@ -2568,7 +2577,8 @@ def show_image(image: ndarray,
 
 
 def get_prediction(prediction: float,
-                   phenotype: str
+                   phenotype: str,
+                   classes_dict: dict
                    ) -> float or str:
     """
     Given a prediction value (float/ndarray),
@@ -2578,6 +2588,9 @@ def get_prediction(prediction: float,
     # defining placeholder value for current prediction
     current_prediction = None
 
+    # inverting classes dict (int to string)
+    classes_dict = {int(v): k for k, v in classes_dict.items()}
+
     # getting current prediction value based on given phenotype
 
     if phenotype == 'nii':
@@ -2585,35 +2598,13 @@ def get_prediction(prediction: float,
         # converting prediction to float
         current_prediction = float(prediction)
 
-    elif phenotype == 'dna_damage':
-
-        # converting prediction to string
-        current_prediction = 'HighDamage' if prediction >= 0.5 else 'LowDamage'
-
-    elif phenotype == 'autophagy':
-
-        # converting prediction to string
-        current_prediction = 'HighAutophagy' if prediction >= 0.5 else 'LowAutophagy'
-
-    elif phenotype == 'erk':
-
-        # converting prediction to string
-        current_prediction = 'Active' if prediction >= 0.5 else 'Inactive'
-
-    elif phenotype == 'cell_cycle':
-
-        # converting prediction to string
-        current_prediction = 'G1' if prediction >= 0.5 else 'G2'
-
     else:
 
-        # printing execution message
-        f_string = f'phenotype {phenotype} not specified.\n'
-        f_string += f'Please, check and try again.'
-        print(f_string)
+        # rounding prediction
+        current_prediction = round(prediction)
 
-        # quitting
-        exit()
+        # converting prediction to string
+        current_prediction = classes_dict[current_prediction]
 
     # returning prediction value
     return current_prediction

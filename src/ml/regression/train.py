@@ -278,6 +278,7 @@ def regression_train(splits_folder: str,
     dataset_df = read_csv(dataset_file)
 
     # getting data splits
+    print('getting data splits...')
     train_data = get_data_split_from_df(splits_folder=splits_folder,
                                         extension=extension,
                                         dataset_df=dataset_df,
@@ -290,6 +291,7 @@ def regression_train(splits_folder: str,
                                       batch_size=batch_size)
 
     # getting model
+    print('getting model...')
     model = get_regression_model(input_shape=input_shape,
                                  learning_rate=learning_rate,
                                  model_type=model_type)
