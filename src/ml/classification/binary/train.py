@@ -23,6 +23,7 @@ from tensorflow import int8 as tf_int
 from keras.utils import to_categorical
 from keras.callbacks import TensorBoard
 from keras.applications import ResNet50
+from keras.metrics import BinaryAccuracy
 from tensorflow.math import exp as tf_exp
 from keras.losses import BinaryCrossentropy
 from src.utils.aux_funcs import INPUT_SHAPE
@@ -250,7 +251,7 @@ def get_classification_model(input_shape: tuple,
     loss = BinaryCrossentropy()
 
     # defining metrics
-    metrics = [Accuracy()]
+    metrics = [BinaryAccuracy()]
 
     # compiling model
     print('compiling model...')
@@ -305,8 +306,6 @@ def binary_classification_train(splits_folder: str,
                                         split='train',
                                         batch_size=batch_size,
                                         class_mode='binary')
-    print(train_data.class_indices)
-    exit()
     val_data = get_data_split_from_df(splits_folder=splits_folder,
                                       extension=extension,
                                       dataset_df=dataset_df,
