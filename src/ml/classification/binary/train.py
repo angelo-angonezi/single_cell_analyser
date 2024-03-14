@@ -15,6 +15,7 @@ from tensorflow import Tensor
 from keras.layers import Dense
 from keras.layers import Conv2D
 from keras.layers import Flatten
+from keras.layers import Dropout
 from keras.optimizers import Adam
 from keras.metrics import Accuracy
 from argparse import ArgumentParser
@@ -31,6 +32,7 @@ from src.utils.aux_funcs import train_model
 from src.utils.aux_funcs import is_using_gpu
 from keras.engine.sequential import Sequential
 from src.utils.aux_funcs import get_history_df
+from keras.layers import GlobalAveragePooling2D
 from keras.applications import InceptionResNetV2
 from keras.callbacks import LearningRateScheduler
 from src.utils.aux_funcs import enter_to_continue
@@ -141,6 +143,16 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
 
     # adding resnet layers
     model.add(base_layers)
+    
+    # adding other layers
+    model.add(Dense(512, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(256, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(128, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(64, activation='relu'))
+    model.add(Dropout(0.5))
 
     # final dense layer
     model.add(Dense(1, activation='sigmoid'))
@@ -342,6 +354,7 @@ def binary_classification_train(splits_folder: str,
                           df=history_df)
 
     # printing execution message
+    print(f'model saved to "{model_path}".')
     print(f'plot/logs saved to "{logs_folder}".')
 
 ######################################################################
