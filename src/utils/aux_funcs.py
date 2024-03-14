@@ -2612,6 +2612,11 @@ def get_prediction(prediction: float,
         # converting prediction to string
         current_prediction = 'Active' if prediction < 0.5 else 'Inactive'
 
+    elif phenotype == 'dna_damage':
+
+        # converting prediction to string
+        current_prediction = 'HighDamage' if prediction < 0.5 else 'LowDamage'
+
     else:
 
         # printing execution message

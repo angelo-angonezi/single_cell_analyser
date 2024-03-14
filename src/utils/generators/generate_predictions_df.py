@@ -70,7 +70,7 @@ def get_args_dict() -> dict:
                         dest='phenotype',
                         required=True,
                         default='nii',
-                        help='defines phenotype type (nii/cell_cycle/autophagy/erk)')
+                        help='defines phenotype type (nii/cell_cycle/autophagy/erk/dna_damage)')
 
     # output path param
     parser.add_argument('-o', '--output-path',
