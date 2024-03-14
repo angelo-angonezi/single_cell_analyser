@@ -712,7 +712,7 @@ def main():
     print_gpu_usage()
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running single cell cropper function
     single_cell_cropper(input_folder=input_folder,

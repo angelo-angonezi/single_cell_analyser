@@ -31,10 +31,10 @@ from src.utils.aux_funcs import get_history_df
 from keras.applications import InceptionResNetV2
 from keras.callbacks import LearningRateScheduler
 from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import get_treatment_dict
 from src.utils.aux_funcs import generate_history_plot
 from src.utils.aux_funcs import get_data_split_from_df
 from src.utils.aux_funcs import print_execution_parameters
-from src.utils.aux_funcs import get_data_split_from_folder
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -83,6 +83,12 @@ def get_args_dict() -> dict:
                         dest='model_path',
                         required=True,
                         help='defines path to save model (.h5 file)')
+
+    # classes dict param
+    parser.add_argument('-cl', '--classes-dict',
+                        dest='classes_dict',
+                        help='defines path to file containing classes info (e.g G1=0, G2=1)',
+                        required=True)
 
     # learning rate param
     parser.add_argument('-lr', '--learning-rate',
@@ -282,6 +288,7 @@ def binary_classification_train(splits_folder: str,
                                 dataset_file: str,
                                 logs_folder: str,
                                 model_path: str,
+                                classes_dict: str,
                                 learning_rate: float,
                                 epochs: int,
                                 batch_size: int,
@@ -299,8 +306,7 @@ def binary_classification_train(splits_folder: str,
     classes_col = dataset_df['class']
 
     # getting classes dict
-    classes_set = classes_col.unique()
-    classes_dict = {key: value for value, key in enumerate(classes_set)}
+    classes_dict = get_treatment_dict(treatment_file=classes_dict)
 
     # updating class col
     dataset_df['class'].replace(classes_dict)
@@ -374,6 +380,9 @@ def main():
     # getting model path param
     model_path = args_dict['model_path']
 
+    # getting classes dict param
+    classes_dict = args_dict['classes_dict']
+
     # getting output path param
     learning_rate = float(args_dict['learning_rate'])
 
@@ -403,6 +412,7 @@ def main():
                                 dataset_file=dataset_file,
                                 logs_folder=logs_folder,
                                 model_path=model_path,
+                                classes_dict=classes_dict,
                                 learning_rate=learning_rate,
                                 epochs=epochs,
                                 batch_size=batch_size,
