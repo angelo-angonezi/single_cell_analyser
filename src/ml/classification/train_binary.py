@@ -306,11 +306,11 @@ def binary_classification_train(splits_folder: str,
 
     # getting classes dict
     print('getting classes dict...')
-    classes_dict = get_treatment_dict(treatment_file=classes_dict)
+    # classes_dict = get_treatment_dict(treatment_file=classes_dict)
 
     # updating class col
     print('converting classes type (string to int)...')
-    dataset_df['class'] = dataset_df['class'].replace(classes_dict)
+    # dataset_df['class'] = dataset_df['class'].replace(classes_dict)
 
     # updating class type
     # dataset_df['class'] = dataset_df['class'].astype(int)
@@ -322,17 +322,13 @@ def binary_classification_train(splits_folder: str,
                                         dataset_df=dataset_df,
                                         split='train',
                                         batch_size=batch_size,
-                                        class_mode='binary')
-    a = train_data[0][1][0]
-    print(a)
-    print(type(a))
-    exit()
+                                        class_mode='categorical')
     val_data = get_data_split_from_df(splits_folder=splits_folder,
                                       extension=extension,
                                       dataset_df=dataset_df,
                                       split='val',
                                       batch_size=batch_size,
-                                      class_mode='binary')
+                                      class_mode='categorical')
 
     # getting model
     print('getting model...')

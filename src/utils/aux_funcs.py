@@ -2601,8 +2601,8 @@ def get_prediction(prediction: float,
 
     else:
 
-        # rounding prediction
-        current_prediction = round(prediction)
+        # rounding prediction to 0/1
+        current_prediction = 0 if prediction < 0.5 else 1
 
         # converting prediction to string
         current_prediction = classes_dict[current_prediction]
