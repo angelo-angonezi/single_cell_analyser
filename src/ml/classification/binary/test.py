@@ -122,8 +122,8 @@ def get_metrics(test_df: DataFrame,
 
     # printing classes legend
     f_string = '--Classes legend--\n'
-    f_string += f'"True" class: {possible_classes[0]}\n'
-    f_string += f'"False" class: {possible_classes[1]}'
+    f_string += f'"Positive" class: {possible_classes[0]}\n'
+    f_string += f'"Negative" class: {possible_classes[1]}'
     print(f_string)
 
     # defining placeholder values for tp, tn, fp, fn
