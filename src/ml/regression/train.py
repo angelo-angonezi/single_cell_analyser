@@ -149,6 +149,7 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
     model = Sequential()
 
     # getting resnet base layers
+    # TODO: conferir preprocess input de cada modelo
     base_layers = ResNet50(include_top=False,
                            input_shape=input_shape,
                            pooling='max',

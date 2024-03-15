@@ -24,6 +24,7 @@ from tensorflow import int8 as tf_int
 from keras.utils import to_categorical
 from keras.callbacks import TensorBoard
 from keras.applications import ResNet50
+# from keras.applications import
 from keras.metrics import BinaryAccuracy
 from tensorflow.math import exp as tf_exp
 from keras.losses import BinaryCrossentropy
@@ -145,13 +146,13 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
     model.add(base_layers)
     
     # adding other layers
-    # model.add(Dense(512, activation='relu'))
-    # model.add(Dropout(0.5))
+    model.add(Dense(512, activation='relu'))
+    model.add(Dropout(0.5))
     model.add(Dense(256, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(128, activation='relu'))
     model.add(Dropout(0.5))
-    model.add(Dense(64, activation='relu'))
+    model.add(Dense(64, activation='linear'))
     model.add(Dropout(0.5))
 
     # final dense layer
@@ -218,7 +219,7 @@ def get_new_model(input_shape: tuple) -> Sequential:
     model.add(Flatten())
 
     # mid-dense layers
-    model.add(Dense(32, activation='relu'))
+    model.add(Dense(32, activation='linear'))
 
     # final dense layer
     model.add(Dense(1, activation='sigmoid'))
@@ -332,6 +333,7 @@ def binary_classification_train(splits_folder: str,
                                      model_type=model_type)
 
     # defining callback
+    # TODO: add ReduceLR on plateau
     tensorboard_callback = TensorBoard(log_dir=logs_folder)
     # lr_callback = LearningRateScheduler(scheduler)
 
