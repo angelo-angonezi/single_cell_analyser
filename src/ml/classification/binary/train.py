@@ -219,6 +219,7 @@ def get_new_model(input_shape: tuple) -> Sequential:
 
     # flattening layer
     # model.add(Flatten())
+    model.add(GlobalAveragePooling2D())
 
     # mid-dense + dropout layers
     model.add(Dense(units=32, activation='relu'))
