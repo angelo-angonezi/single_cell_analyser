@@ -138,6 +138,10 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
     for layer in base_layers.layers:
         layer.trainable = False
 
+    print(base_layers[-1])
+    print(base_layers[-2])
+    exit()
+
     # adding resnet layers
     model.add(base_layers)
 
