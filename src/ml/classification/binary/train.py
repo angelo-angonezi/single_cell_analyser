@@ -218,12 +218,13 @@ def get_new_model(input_shape: tuple) -> Sequential:
     model.add(MaxPooling2D())
 
     # flattening layer
-    # model.add(Flatten())
-    model.add(GlobalAveragePooling2D())
+    model.add(Flatten())
 
     # mid-dense + dropout layers
     model.add(Dense(units=32, activation='relu'))
+    model.add(Dropout(rate=0.5))
     model.add(Dense(units=16, activation='linear'))
+    model.add(Dropout(rate=0.5))
 
     # final dense layer
     model.add(Dense(1, activation='sigmoid'))
