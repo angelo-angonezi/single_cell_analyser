@@ -134,16 +134,14 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
                            pooling='max',
                            weights='imagenet')
 
-    # setting resnet layers as untrainable
+    # iterating over base layers
     for layer in base_layers.layers:
+
+        # setting layer as untrainable
         layer.trainable = False
 
-    print(base_layers[-1])
-    print(base_layers[-2])
-    exit()
-
-    # adding resnet layers
-    model.add(base_layers)
+        # adding layer
+        model.add(layer)
 
     # adding dense layer
     model.add(Dense(units=32, activation='linear'))
