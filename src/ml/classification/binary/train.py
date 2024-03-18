@@ -140,16 +140,21 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
         # setting layer as untrainable
         layer.trainable = False
 
-    print(base_layers.summary())
-    exit()
-
     # adding resnet base layers
     model.add(base_layers)
 
-    # adding dense layer
-    model.add(Dense(units=32, activation='linear'))
-
-    # adding dropout layer
+    # adding dense/dropout layers
+    model.add(Dense(units=1024, activation='relu'))
+    model.add(Dropout(rate=0.5))
+    model.add(Dense(units=512, activation='relu'))
+    model.add(Dropout(rate=0.5))
+    model.add(Dense(units=256, activation='relu'))
+    model.add(Dropout(rate=0.5))
+    model.add(Dense(units=64, activation='relu'))
+    model.add(Dropout(rate=0.5))
+    model.add(Dense(units=32, activation='relu'))
+    model.add(Dropout(rate=0.5))
+    model.add(Dense(units=16, activation='linear'))
     model.add(Dropout(rate=0.5))
 
     # final dense layer
