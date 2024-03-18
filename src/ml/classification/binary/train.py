@@ -218,9 +218,9 @@ def get_new_model(input_shape: tuple) -> Sequential:
     model.add(MaxPooling2D())
 
     # flattening layer
-    model.add(Flatten())
+    # model.add(Flatten())
 
-    # mid-dense layers
+    # mid-dense + dropout layers
     model.add(Dense(units=32, activation='relu'))
     model.add(Dense(units=16, activation='linear'))
 
