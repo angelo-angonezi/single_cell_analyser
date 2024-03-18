@@ -227,7 +227,7 @@ def get_new_model(input_shape: tuple) -> Sequential:
     model.add(Dropout(rate=0.5))
 
     # final dense layer
-    model.add(Dense(1, activation='sigmoid'))
+    model.add(Dense(units=1, activation='sigmoid'))
 
     # returning model
     return model
