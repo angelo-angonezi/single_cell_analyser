@@ -140,12 +140,9 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
 
     # adding resnet layers
     model.add(base_layers)
-    
-    # adding pooling layers
-    model.add(GlobalAveragePooling2D())
 
     # adding dense layers
-    model.add(Dense(units=32, activation= 'linear'))
+    model.add(Dense(units=32, activation='linear'))
 
     # final dense layer
     model.add(Dense(units=1, activation='sigmoid'))
