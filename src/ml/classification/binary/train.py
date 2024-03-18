@@ -24,7 +24,7 @@ from tensorflow import int8 as tf_int
 from keras.utils import to_categorical
 from keras.callbacks import TensorBoard
 from keras.applications import ResNet50
-# from keras.applications import
+# from keras.applications import convnext
 from keras.metrics import BinaryAccuracy
 from tensorflow.math import exp as tf_exp
 from keras.losses import BinaryCrossentropy
@@ -41,6 +41,7 @@ from src.utils.aux_funcs import get_treatment_dict
 from src.utils.aux_funcs import generate_history_plot
 from src.utils.aux_funcs import get_data_split_from_df
 from src.utils.aux_funcs import print_execution_parameters
+from keras.applications.resnet import preprocess_input as resnet_preprocess_input
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -323,6 +324,14 @@ def binary_classification_train(splits_folder: str,
                                       split='val',
                                       batch_size=batch_size,
                                       class_mode='binary')
+
+    # preprocessing input
+    print('preprocessing input...')
+    print(train_data)
+    train_data = resnet_preprocess_input(train_data)
+    val_data = resnet_preprocess_input(val_data)
+    print(train_data)
+    exit()
 
     # getting model
     print('getting model...')
