@@ -140,8 +140,11 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
         # setting layer as untrainable
         layer.trainable = False
 
-        # adding layer
-        model.add(layer)
+    print(base_layers)
+    exit()
+
+    # adding resnet base layers
+    model.add(base_layers)
 
     # adding dense layer
     model.add(Dense(units=32, activation='linear'))
