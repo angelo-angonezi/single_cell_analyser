@@ -17,11 +17,8 @@ from keras.layers import Conv2D
 from keras.layers import Flatten
 from keras.layers import Dropout
 from keras.optimizers import Adam
-from keras.metrics import Accuracy
 from argparse import ArgumentParser
 from keras.layers import MaxPooling2D
-from tensorflow import int8 as tf_int
-from keras.utils import to_categorical
 from keras.callbacks import TensorBoard
 from keras.applications import ResNet50
 # from keras.applications import convnext
@@ -37,11 +34,9 @@ from keras.layers import GlobalAveragePooling2D
 from keras.applications import InceptionResNetV2
 from keras.callbacks import LearningRateScheduler
 from src.utils.aux_funcs import enter_to_continue
-from src.utils.aux_funcs import get_treatment_dict
 from src.utils.aux_funcs import generate_history_plot
 from src.utils.aux_funcs import get_data_split_from_df
 from src.utils.aux_funcs import print_execution_parameters
-from keras.applications.resnet import preprocess_input as resnet_preprocess_input
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -146,16 +141,14 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
     # adding resnet layers
     model.add(base_layers)
     
-    # adding other layers
-    model.add(Dense(1024, activation='relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(512, activation='relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(256, activation='linear'))
-    model.add(Dropout(0.5))
+    # adding pooling layers
+    model.add(GlobalAveragePooling2D())
+
+    # adding dense layers
+    model.add(Dense(units=32, activation= 'linear'))
 
     # final dense layer
-    model.add(Dense(1, activation='sigmoid'))
+    model.add(Dense(units=1, activation='sigmoid'))
 
     # returning model
     return model
@@ -324,14 +317,6 @@ def binary_classification_train(splits_folder: str,
                                       split='val',
                                       batch_size=batch_size,
                                       class_mode='binary')
-
-    # preprocessing input
-    print('preprocessing input...')
-    print(train_data)
-    train_data = resnet_preprocess_input(train_data)
-    val_data = resnet_preprocess_input(val_data)
-    print(train_data)
-    exit()
 
     # getting model
     print('getting model...')
