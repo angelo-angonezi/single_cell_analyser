@@ -107,6 +107,13 @@ def get_args_dict() -> dict:
                         required=False,
                         default=1.0)
 
+    parser.add_argument('-f', '--fixed-size',
+                        dest='fixed_size_toggle',
+                        action='store_true',
+                        help='ignores crops original dimensions and crops them according to IMAGE_SIZE in aux_funcs.py',
+                        required=False,
+                        default=False)
+
     parser.add_argument('-r', '--resize',
                         dest='resize_toggle',
                         action='store_true',

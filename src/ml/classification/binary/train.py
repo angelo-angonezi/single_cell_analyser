@@ -248,7 +248,7 @@ def get_new_model(input_shape: tuple) -> Sequential:
     model.add(MaxPooling2D())
 
     # first convolution + pooling (input layer)
-    model.add(Conv2D(filters=16,
+    model.add(Conv2D(filters=32,
                      kernel_size=(3, 3),
                      strides=1,
                      activation='relu',
@@ -266,7 +266,7 @@ def get_new_model(input_shape: tuple) -> Sequential:
     model.add(Flatten())
 
     # mid-dense + dropout layers
-    model.add(Dense(units=6272, activation='relu'))
+    model.add(Dense(units=28224, activation='relu'))
     model.add(Dropout(rate=0.5))
     model.add(Dense(units=16, activation='relu'))
 
