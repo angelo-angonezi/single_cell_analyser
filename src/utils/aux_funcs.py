@@ -71,8 +71,8 @@ IMAGE_WIDTH = 1408
 IMAGE_HEIGHT = 1040
 IMAGE_AREA = IMAGE_WIDTH * IMAGE_HEIGHT
 # IMAGE_SIZE = (50, 50)
-IMAGE_SIZE = (64, 64)
-# IMAGE_SIZE = (100, 100)
+# IMAGE_SIZE = (64, 64)
+IMAGE_SIZE = (100, 100)
 # IMAGE_SIZE = (512, 512)
 IMG_HEIGHT, IMG_WIDTH = IMAGE_SIZE
 INPUT_SHAPE = (IMG_HEIGHT, IMG_WIDTH, 3)  # 3 because it is an RGB image
@@ -1450,6 +1450,7 @@ def get_data_split_from_df(splits_folder: str,
     filtered_df = filtered_df[cols_to_keep]
 
     # creating image data generator object (and defining normalization)
+    # TODO: check preprocess input
     image_generator = ImageDataGenerator(rescale=1.0 / 255)
 
     # loading data

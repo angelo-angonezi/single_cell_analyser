@@ -16,8 +16,10 @@ from keras.layers import Dense
 from keras.layers import Conv2D
 from keras.layers import Flatten
 from keras.layers import Dropout
+from keras.optimizers import SGD
 from keras.optimizers import Adam
 from argparse import ArgumentParser
+from keras.applications import VGG16
 from keras.layers import MaxPooling2D
 from keras.callbacks import TensorBoard
 from keras.applications import ResNet50
@@ -164,6 +166,41 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
     return model
 
 
+def get_vgg16_model(input_shape: tuple) -> Sequential:
+    """
+    Given an input shape, returns
+    vgg16-based model.
+    """
+    # defining base model
+    model = Sequential()
+
+    # getting resnet base layers
+    base_layers = VGG16(include_top=False,
+                        input_shape=input_shape,
+                        pooling='max',
+                        weights='imagenet')
+
+    # setting resnet layers as untrainable
+    for layer in base_layers.layers:
+        layer.trainable = False
+
+    # adding resnet layers
+    model.add(base_layers)
+
+    # mid-dense + dropout layers
+    model.add(Dense(units=512, activation='relu'))
+    model.add(Dropout(rate=0.5))
+    model.add(Dense(units=128, activation='relu'))
+    model.add(Dropout(rate=0.5))
+    model.add(Dense(units=64, activation='relu'))
+
+    # final dense layer
+    model.add(Dense(units=1, activation='sigmoid'))
+
+    # returning model
+    return model
+
+
 def get_inception_model(input_shape: tuple) -> Sequential:
     """
     Given an input shape, returns
@@ -203,7 +240,15 @@ def get_new_model(input_shape: tuple) -> Sequential:
     # defining CNN layers
 
     # first convolution + pooling (input layer)
-    model.add(Conv2D(filters=32,
+    model.add(Conv2D(filters=16,
+                     kernel_size=(3, 3),
+                     strides=1,
+                     activation='relu',
+                     input_shape=input_shape))
+    model.add(MaxPooling2D())
+
+    # first convolution + pooling (input layer)
+    model.add(Conv2D(filters=16,
                      kernel_size=(3, 3),
                      strides=1,
                      activation='relu',
@@ -211,20 +256,19 @@ def get_new_model(input_shape: tuple) -> Sequential:
     model.add(MaxPooling2D())
 
     # second convolution + pooling
-    model.add(Conv2D(filters=16,
+    model.add(Conv2D(filters=32,
                      kernel_size=(3, 3),
                      strides=1,
                      activation='relu'))
-    model.add(MaxPooling2D())
+    # model.add(MaxPooling2D())
 
     # flattening layer
     model.add(Flatten())
 
     # mid-dense + dropout layers
-    model.add(Dense(units=32, activation='relu'))
+    model.add(Dense(units=6272, activation='relu'))
     model.add(Dropout(rate=0.5))
-    model.add(Dense(units=16, activation='linear'))
-    model.add(Dropout(rate=0.5))
+    model.add(Dense(units=16, activation='relu'))
 
     # final dense layer
     model.add(Dense(units=1, activation='sigmoid'))
@@ -257,6 +301,11 @@ def get_classification_model(input_shape: tuple,
         # getting inception layers
         model = get_inception_model(input_shape=input_shape)
 
+    elif model_type == 'vgg':
+
+        # getting vgg16 layers
+        model = get_vgg16_model(input_shape=input_shape)
+
     else:
 
         # getting new layers
@@ -264,6 +313,7 @@ def get_classification_model(input_shape: tuple,
 
     # defining optimizer
     optimizer = Adam(learning_rate=learning_rate)
+    # optimizer = SGD(learning_rate=learning_rate)
 
     # defining loss function
     loss = BinaryCrossentropy()
