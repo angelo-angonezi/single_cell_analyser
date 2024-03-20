@@ -130,20 +130,23 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
     # defining base model
     model = Sequential()
 
-    # getting resnet base layers
-    base_layers = ResNet50(include_top=False,
-                           input_shape=input_shape,
-                           pooling='max',
-                           weights='imagenet')
+    # getting base model
+    base_model = ResNet50(include_top=False,
+                          input_shape=input_shape,
+                          pooling='max',
+                          weights='imagenet')
 
-    # iterating over base layers
-    for layer in base_layers.layers:
+    # getting base layers
+    base_layers = base_model.layers
 
-        # setting layer as untrainable
+    # iterating over layers
+    for layer in base_layers:
+
+        # freezing layer
         layer.trainable = False
 
-    # adding resnet base layers
-    model.add(base_layers)
+        # adding layer to model
+        model.add(layer)
 
     # adding dense/dropout layers
     model.add(Dense(units=1024, activation='relu'))
@@ -174,25 +177,30 @@ def get_vgg16_model(input_shape: tuple) -> Sequential:
     # defining base model
     model = Sequential()
 
-    # getting resnet base layers
-    base_layers = VGG16(include_top=False,
-                        input_shape=input_shape,
-                        pooling='max',
-                        weights='imagenet')
+    # getting base model
+    base_model = VGG16(include_top=False,
+                       input_shape=input_shape,
+                       pooling='max',
+                       weights='imagenet')
 
-    # setting resnet layers as untrainable
-    for layer in base_layers.layers:
+    # getting base layers
+    base_layers = base_model.layers
+
+    # iterating over layers
+    for layer in base_layers:
+
+        # freezing layer
         layer.trainable = False
 
-    # adding resnet layers
-    model.add(base_layers)
+        # adding layer to model
+        model.add(layer)
 
     # mid-dense + dropout layers
     model.add(Dense(units=512, activation='relu'))
     model.add(Dropout(rate=0.5))
     model.add(Dense(units=128, activation='relu'))
     model.add(Dropout(rate=0.5))
-    model.add(Dense(units=64, activation='relu'))
+    model.add(Dense(units=32, activation='relu'))
 
     # final dense layer
     model.add(Dense(units=1, activation='sigmoid'))
@@ -209,21 +217,33 @@ def get_inception_model(input_shape: tuple) -> Sequential:
     # defining base model
     model = Sequential()
 
-    # getting resnet base layers
-    base_layers = InceptionResNetV2(include_top=False,
-                                    input_shape=input_shape,
-                                    pooling='max',
-                                    weights='imagenet')
+    # getting base model
+    base_model = InceptionResNetV2(include_top=False,
+                                   input_shape=input_shape,
+                                   pooling='max',
+                                   weights='imagenet')
 
-    # setting resnet layers as untrainable
-    for layer in base_layers.layers:
+    # getting base layers
+    base_layers = base_model.layers
+
+    # iterating over layers
+    for layer in base_layers:
+
+        # freezing layer
         layer.trainable = False
 
-    # adding resnet layers
-    model.add(base_layers)
+        # adding layer to model
+        model.add(layer)
+
+    # mid-dense + dropout layers
+    model.add(Dense(units=512, activation='relu'))
+    model.add(Dropout(rate=0.5))
+    model.add(Dense(units=128, activation='relu'))
+    model.add(Dropout(rate=0.5))
+    model.add(Dense(units=32, activation='relu'))
 
     # final dense layer
-    model.add(Dense(1, activation='sigmoid'))
+    model.add(Dense(units=1, activation='sigmoid'))
 
     # returning model
     return model
