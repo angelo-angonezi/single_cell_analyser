@@ -23,6 +23,7 @@ from cupy import pad as np_pad
 from argparse import ArgumentParser
 from cv2 import resize as cv_resize
 from src.utils.aux_funcs import get_etc
+from src.utils.aux_funcs import IMAGE_SIZE
 from src.utils.aux_funcs import load_bgr_img
 from src.utils.aux_funcs import get_time_str
 from src.utils.aux_funcs import flush_or_print
@@ -286,6 +287,7 @@ def rotate_image(image: ndarray,
 
 def crop_single_obb(image: ndarray,
                     obb: tuple,
+                    fixed_size_toggle: bool,
                     expansion_ratio: float = 1.0
                     ) -> ndarray:
     """
@@ -293,10 +295,6 @@ def crop_single_obb(image: ndarray,
     and a tuple containing obb's info,
     returns given obb crop, rotated to
     be aligned to x-axis.
-    :param image: Array. Represents an open image.
-    :param obb: Tuple. Represents obb's info.
-    :param expansion_ratio: Float. Represents a ratio to expand width/height.
-    :return: Array. Represents obb crop from image.
     """
     # getting current obb info
     cx, cy, width, height, angle, cell_class = obb
@@ -304,6 +302,12 @@ def crop_single_obb(image: ndarray,
     # expanding with/height
     width = width * expansion_ratio
     height = height * expansion_ratio
+
+    # checking fixed size toggle
+    if fixed_size_toggle:
+
+        # redefining width/height based on aux_funcs param
+        width, height = IMAGE_SIZE
 
     # getting major axis
     major_axis = width if width > height else height
@@ -348,6 +352,7 @@ def crop_multiple_obbs(image: ndarray,
                        obbs_list: list,
                        output_folder: str,
                        expansion_ratio: float,
+                       fixed_size_toggle: bool,
                        resize_toggle: bool
                        ) -> DataFrame:
     """
@@ -357,13 +362,6 @@ def crop_multiple_obbs(image: ndarray,
     saving cropped images and info file
     in given output folder, returning
     a data frame with crops info.
-    :param image: Array. Represents an open image.
-    :param image_name: String. Represents an image name.
-    :param obbs_list: List. Represents a list of obbs.
-    :param output_folder: String. Represents a path to a folder.
-    :param expansion_ratio: Float. Represents a ratio to expand width/height.
-    :param resize_toggle: Boolean. Represents a toggle.
-    :return: Data Frame. Represents crops info.
     """
     # getting global parameters
     global ITERATIONS_TOTAL, CURRENT_ITERATION
@@ -437,6 +435,7 @@ def crop_multiple_obbs(image: ndarray,
         # getting current obb crop
         current_obb_crop = crop_single_obb(image=image,
                                            obb=obb,
+                                           fixed_size_toggle=fixed_size_toggle,
                                            expansion_ratio=expansion_ratio)
 
         # checking resize toggle
@@ -469,6 +468,7 @@ def get_single_image_crops(image: ndarray,
                            image_group: DataFrame,
                            output_folder: str,
                            expansion_ratio: float,
+                           fixed_size_toggle: bool,
                            resize_toggle: bool
                            ) -> DataFrame:
     """
@@ -497,6 +497,7 @@ def get_single_image_crops(image: ndarray,
                                   obbs_list=current_image_obbs,
                                   output_folder=output_folder,
                                   expansion_ratio=expansion_ratio,
+                                  fixed_size_toggle=fixed_size_toggle,
                                   resize_toggle=resize_toggle)
 
     # returning crops df
@@ -508,6 +509,7 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
                              images_extension: str,
                              output_folder: str,
                              expansion_ratio: float,
+                             fixed_size_toggle: bool,
                              resize_toggle: bool
                              ) -> DataFrame:
     """
@@ -588,6 +590,7 @@ def get_multiple_image_crops(consolidated_df: DataFrame,
                                           image_group=image_group,
                                           output_folder=output_folder,
                                           expansion_ratio=expansion_ratio,
+                                          fixed_size_toggle=fixed_size_toggle,
                                           resize_toggle=resize_toggle)
 
         # appending current image crops df to dfs list
@@ -616,6 +619,7 @@ def single_cell_cropper(input_folder: str,
                         treatment_file: str,
                         expansion_ratio: float,
                         output_folder: str,
+                        fixed_size_toggle: bool,
                         resize_toggle: bool
                         ) -> None:
     """
@@ -649,6 +653,7 @@ def single_cell_cropper(input_folder: str,
                                         images_extension=images_extension,
                                         output_folder=output_folder,
                                         expansion_ratio=expansion_ratio,
+                                        fixed_size_toggle=fixed_size_toggle,
                                         resize_toggle=resize_toggle)
     print(f'image crops saved at "{output_folder}".')
 
@@ -709,6 +714,9 @@ def main():
     expansion_ratio = args_dict['expansion_ratio']
     expansion_ratio = float(expansion_ratio)
 
+    # getting fixed size toggle
+    fixed_size_toggle = args_dict['fixed_size_toggle']
+
     # getting resize toggle
     resize_toggle = args_dict['resize_toggle']
 
@@ -729,6 +737,7 @@ def main():
                         treatment_file=treatment_file,
                         expansion_ratio=expansion_ratio,
                         output_folder=output_folder,
+                        fixed_size_toggle=fixed_size_toggle,
                         resize_toggle=resize_toggle)
 
 ######################################################################

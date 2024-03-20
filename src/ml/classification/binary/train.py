@@ -260,15 +260,19 @@ def get_new_model(input_shape: tuple) -> Sequential:
                      kernel_size=(3, 3),
                      strides=1,
                      activation='relu'))
-    # model.add(MaxPooling2D())
+    model.add(MaxPooling2D())
 
     # flattening layer
     model.add(Flatten())
 
     # mid-dense + dropout layers
-    model.add(Dense(units=28224, activation='relu'))
+    model.add(Dense(units=3200, activation='relu'))
     model.add(Dropout(rate=0.5))
-    model.add(Dense(units=16, activation='relu'))
+    model.add(Dense(units=1600, activation='relu'))
+    model.add(Dropout(rate=0.5))
+    model.add(Dense(units=800, activation='relu'))
+    model.add(Dropout(rate=0.5))
+    model.add(Dense(units=400, activation='relu'))
 
     # final dense layer
     model.add(Dense(units=1, activation='sigmoid'))
@@ -330,6 +334,9 @@ def get_classification_model(input_shape: tuple,
     # printing model summary
     print('printing model summary...')
     model.summary()
+
+    # waiting for user input
+    enter_to_continue()
 
     # returning model
     return model
