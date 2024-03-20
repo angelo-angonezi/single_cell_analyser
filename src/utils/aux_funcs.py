@@ -2390,7 +2390,8 @@ def get_history_df(history_dict):
 
 
 def generate_history_plot(df: DataFrame,
-                          logs_folder: str
+                          logs_folder: str,
+                          epochs_num: int
                           ) -> None:
     """
     Given a train history df,
@@ -2409,14 +2410,25 @@ def generate_history_plot(df: DataFrame,
              y='value',
              hue='variable')
 
+    # defining axis lims
+    y_min, y_max = (0.0, 1.0)
+    x_min, x_max = (0, epochs_num)
+
+    # setting axis lims
+    plt.xlim(x_min, x_max)
+    plt.ylim(y_min, y_max)
+
     # setting x ticks
-    epochs = df['epoch'].unique()
-    x_ticks = [e + 1 for e in epochs]
+    epochs_range = range(epochs_num)
+    x_ticks = [e for e in epochs_range]
     plt.xticks(x_ticks)
 
     # setting plot title
     title = 'Train History'
     plt.title(title)
+
+    # adjusting plot layout
+    plt.tight_layout()
 
     # saving figure
     fig_path = join(save_path)
