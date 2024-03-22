@@ -26,6 +26,7 @@ from keras.applications import ResNet50
 # from keras.applications import convnext
 from keras.metrics import BinaryAccuracy
 from tensorflow.math import exp as tf_exp
+from keras.applications import ConvNeXtTiny
 from keras.losses import BinaryCrossentropy
 from src.utils.aux_funcs import INPUT_SHAPE
 from src.utils.aux_funcs import train_model
@@ -190,7 +191,7 @@ def get_vgg16_model(input_shape: tuple) -> Sequential:
     for layer_index, layer in enumerate(base_layers):
 
         # checking layer index
-        if layer_index < 17:
+        if layer_index < 20:
 
             # freezing layer
             layer.trainable = False
@@ -199,13 +200,59 @@ def get_vgg16_model(input_shape: tuple) -> Sequential:
         model.add(layer)
 
     # mid-dense + dropout layers
-    model.add(Dense(units=512, activation='relu'))
-    model.add(Dropout(rate=0.5))
+    # model.add(Dense(units=512, activation='relu'))
+    # model.add(Dropout(rate=0.5))
     model.add(Dense(units=256, activation='relu'))
     model.add(Dropout(rate=0.5))
-    model.add(Dense(units=128, activation='relu'))
-    model.add(Dropout(rate=0.5))
-    model.add(Dense(units=64, activation='relu'))
+    # model.add(Dense(units=128, activation='relu'))
+    # model.add(Dropout(rate=0.5))
+    # model.add(Dense(units=64, activation='relu'))
+
+    # final dense layer
+    model.add(Dense(units=1, activation='sigmoid'))
+
+    # returning model
+    return model
+
+
+def get_convnext_model(input_shape: tuple) -> Sequential:
+    """
+    Given an input shape, returns
+    convnext-based model.
+    """
+    # defining base model
+    model = Sequential()
+
+    # getting base model
+    base_model = ConvNeXtTiny(include_top=False,
+                              input_shape=input_shape,
+                              include_preprocessing=False,
+                              pooling='max',
+                              weights='imagenet')
+
+    # getting base layers
+    base_layers = base_model.layers
+
+    # iterating over layers
+    for layer_index, layer in enumerate(base_layers):
+
+        # checking layer index
+        if layer_index < 15:
+
+            # freezing layer
+            layer.trainable = False
+
+        # adding layer to model
+        model.add(layer)
+
+    # mid-dense + dropout layers
+    # model.add(Dense(units=512, activation='relu'))
+    # model.add(Dropout(rate=0.5))
+    # model.add(Dense(units=256, activation='relu'))
+    # model.add(Dropout(rate=0.5))
+    # model.add(Dense(units=128, activation='relu'))
+    # model.add(Dropout(rate=0.5))
+    # model.add(Dense(units=64, activation='relu'))
 
     # final dense layer
     model.add(Dense(units=1, activation='sigmoid'))
@@ -265,39 +312,33 @@ def get_new_model(input_shape: tuple) -> Sequential:
     # defining CNN layers
 
     # first convolution + pooling (input layer)
-    model.add(Conv2D(filters=16,
+    model.add(Conv2D(filters=32,
                      kernel_size=(3, 3),
                      strides=1,
                      activation='relu',
                      input_shape=input_shape))
-    model.add(MaxPooling2D())
+    model.add(MaxPooling2D(pool_size=(2, 2)))
 
     # first convolution + pooling (input layer)
-    model.add(Conv2D(filters=32,
-                     kernel_size=(3, 3),
-                     strides=1,
-                     activation='relu',
-                     input_shape=input_shape))
-    model.add(MaxPooling2D())
-
-    # second convolution + pooling
-    model.add(Conv2D(filters=32,
+    model.add(Conv2D(filters=64,
                      kernel_size=(3, 3),
                      strides=1,
                      activation='relu'))
-    model.add(MaxPooling2D())
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+
+    # second convolution + pooling
+    model.add(Conv2D(filters=128,
+                     kernel_size=(3, 3),
+                     strides=1,
+                     activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
 
     # flattening layer
     model.add(Flatten())
 
     # mid-dense + dropout layers
-    model.add(Dense(units=3200, activation='relu'))
+    model.add(Dense(units=128, activation='relu'))
     model.add(Dropout(rate=0.5))
-    model.add(Dense(units=1600, activation='relu'))
-    model.add(Dropout(rate=0.5))
-    model.add(Dense(units=800, activation='relu'))
-    model.add(Dropout(rate=0.5))
-    model.add(Dense(units=400, activation='relu'))
 
     # final dense layer
     model.add(Dense(units=1, activation='sigmoid'))
@@ -334,6 +375,11 @@ def get_classification_model(input_shape: tuple,
 
         # getting vgg16 layers
         model = get_vgg16_model(input_shape=input_shape)
+
+    elif model_type == 'convnext':
+
+        # getting vgg16 layers
+        model = get_convnext_model(input_shape=input_shape)
 
     else:
 
