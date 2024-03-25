@@ -125,7 +125,16 @@ def get_r_squared(df: DataFrame) -> float:
     Given an errors data frame,
     returns r2 score.
     """
-    pass
+    # getting real/prediction cols
+    real_col = df['class']
+    pred_col = df['prediction']
+
+    # calculating r2 score
+    r2_value = r2_score(y_true=real_col,
+                        y_pred=pred_col)
+
+    # returning r2 value
+    return r2_value
 
 
 def get_error_mean(df: DataFrame,
@@ -174,14 +183,12 @@ def regression_test(dataset_file: str,
 
     # calculating metrics
     print('calculating metrics...')
-    # TODO: add R2 calc here!
     r_squared = get_r_squared(df=errors_df)
     mae = get_error_mean(df=errors_df,
                          error_col='absolute_error')
     print(mae)
     mae = errors_df['absolute_error'].mean()
     print(mae)
-    exit()
     mre = errors_df['relative_error'].mean()
     mse = errors_df['squared_error'].mean()
     rmse = sqrt(mse)
@@ -189,12 +196,12 @@ def regression_test(dataset_file: str,
     # printing metrics on console
     print('printing metrics...')
     f_string = f'---Metrics Results---\n'
-    # TODO: add R2 plot here!
     f_string += f'Test images num: {images_num}\n'
     f_string += f'MAE: {mae}\n'
     f_string += f'MRE: {mre}\n'
     f_string += f'MSE: {mse}\n'
     f_string += f'RMSE: {rmse}'
+    f_string += f'R2: {r_squared}'
     print(f_string)
 
     # printing execution message
