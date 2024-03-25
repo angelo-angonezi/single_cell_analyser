@@ -16,9 +16,9 @@ from keras.layers import Dense
 from keras.layers import Conv2D
 from keras.layers import Flatten
 from keras.layers import Dropout
-from keras.optimizers import SGD
 from keras.optimizers import Adam
 from argparse import ArgumentParser
+from keras.optimizers import RMSprop
 from keras.applications import VGG16
 from keras.layers import MaxPooling2D
 from keras.callbacks import TensorBoard
@@ -198,13 +198,13 @@ def get_vgg16_model(input_shape: tuple) -> Sequential:
         model.add(layer)
 
     # mid-dense + dropout layers
-    model.add(Dense(units=512, activation='relu'))
-    model.add(Dropout(rate=0.5))
+    # model.add(Dense(units=512, activation='relu'))
+    # model.add(Dropout(rate=0.5))
     model.add(Dense(units=256, activation='relu'))
     model.add(Dropout(rate=0.5))
-    model.add(Dense(units=128, activation='relu'))
-    model.add(Dropout(rate=0.5))
-    model.add(Dense(units=64, activation='relu'))
+    # model.add(Dense(units=128, activation='relu'))
+    # model.add(Dropout(rate=0.5))
+    # model.add(Dense(units=64, activation='relu'))
 
     # final dense layer
     model.add(Dense(units=1, activation='sigmoid'))
@@ -340,8 +340,8 @@ def get_classification_model(input_shape: tuple,
         model = get_new_model(input_shape=input_shape)
 
     # defining optimizer
-    optimizer = Adam(learning_rate=learning_rate)
-    # optimizer = SGD(learning_rate=learning_rate)
+    # optimizer = Adam(learning_rate=learning_rate)
+    optimizer = RMSprop(learning_rate=learning_rate)
 
     # defining loss function
     loss = BinaryCrossentropy()
