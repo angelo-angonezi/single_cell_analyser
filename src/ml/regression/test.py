@@ -200,7 +200,7 @@ def regression_test(dataset_file: str,
     f_string += f'MAE: {mae}\n'
     f_string += f'MRE: {mre}\n'
     f_string += f'MSE: {mse}\n'
-    f_string += f'RMSE: {rmse}'
+    f_string += f'RMSE: {rmse}\n'
     f_string += f'R2: {r_squared}'
     print(f_string)
 
