@@ -14,8 +14,10 @@ from math import sqrt
 from pandas import merge
 from pandas import read_csv
 from pandas import DataFrame
+from seaborn import scatterplot
 from argparse import ArgumentParser
 from sklearn.metrics import r2_score
+from matplotlib import pyplot as plt
 from src.utils.aux_funcs import is_using_gpu
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_execution_parameters
@@ -155,6 +157,36 @@ def get_error_mean(df: DataFrame,
     return col_mean
 
 
+def plot_correlations(df: DataFrame,
+                      x_col: str,
+                      y_col: str,
+                      r_squared: float
+                      ) -> None:
+    """
+    Given an errors data frame,
+    and parameters for plotting
+    correlations, displays plot
+    on screen.
+    """
+    # plotting scatterplot
+    scatterplot(data=df,
+                x=x_col,
+                y=y_col)
+
+    # setting plot title
+    title = f'Correlation plot (class/pred R2: {r_squared})'
+    plt.title(title)
+
+    # adjusting layout
+    plt.tight_layout()
+
+    # showing plot
+    plt.show()
+
+    # closing plot
+    plt.close()
+
+
 def regression_test(dataset_file: str,
                     predictions_file: str
                     ) -> None:
@@ -202,6 +234,12 @@ def regression_test(dataset_file: str,
     f_string += f'RMSE: {rmse}\n'
     f_string += f'R2: {r_squared}'
     print(f_string)
+
+    # plotting correlations plot
+    plot_correlations(df=errors_df,
+                      x_col='class',
+                      y_col='mean_relative_error',
+                      r_squared=r_squared)
 
     # printing execution message
     print('analysis complete!')
