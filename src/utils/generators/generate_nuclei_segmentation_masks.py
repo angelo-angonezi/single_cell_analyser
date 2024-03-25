@@ -119,10 +119,10 @@ def create_segmentation_masks(df: DataFrame,
         current_img_index += 1
 
 
-def generate_segmentation_masks(detections_file: str,
-                                output_folder: str,
-                                expansion_ratio: float
-                                ) -> None:
+def generate_nuclei_segmentation_masks(detections_file: str,
+                                       output_folder: str,
+                                       expansion_ratio: float
+                                       ) -> None:
     """
     Given paths to model detections file,
     creates segmentation masks based on
@@ -168,9 +168,9 @@ def main():
     enter_to_continue()
 
     # running generate_autophagy_dfs function
-    generate_segmentation_masks(detections_file=detections_file,
-                                output_folder=output_folder,
-                                expansion_ratio=expansion_ratio)
+    generate_nuclei_segmentation_masks(detections_file=detections_file,
+                                       output_folder=output_folder,
+                                       expansion_ratio=expansion_ratio)
 
 ######################################################################
 # running main function
