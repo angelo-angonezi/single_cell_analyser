@@ -238,7 +238,7 @@ def regression_test(dataset_file: str,
     # plotting correlations plot
     plot_correlations(df=errors_df,
                       x_col='class',
-                      y_col='mean_relative_error',
+                      y_col='prediction',
                       r_squared=r_squared)
 
     # printing execution message
