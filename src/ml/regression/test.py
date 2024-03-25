@@ -183,15 +183,14 @@ def regression_test(dataset_file: str,
 
     # calculating metrics
     print('calculating metrics...')
-    r_squared = get_r_squared(df=errors_df)
     mae = get_error_mean(df=errors_df,
                          error_col='absolute_error')
-    print(mae)
-    mae = errors_df['absolute_error'].mean()
-    print(mae)
-    mre = errors_df['relative_error'].mean()
-    mse = errors_df['squared_error'].mean()
+    mre = get_error_mean(df=errors_df,
+                         error_col='relative_error')
+    mse = get_error_mean(df=errors_df,
+                         error_col='squared_error')
     rmse = sqrt(mse)
+    r_squared = get_r_squared(df=errors_df)
 
     # printing metrics on console
     print('printing metrics...')
