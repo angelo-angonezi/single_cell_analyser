@@ -15,6 +15,7 @@ from pandas import merge
 from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
+from sklearn.metrics import r2_score
 from src.utils.aux_funcs import is_using_gpu
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_execution_parameters
@@ -119,6 +120,32 @@ def get_errors_df(test_df: DataFrame,
     return joined_df
 
 
+def get_r_squared(df: DataFrame) -> float:
+    """
+    Given an errors data frame,
+    returns r2 score.
+    """
+    pass
+
+
+def get_error_mean(df: DataFrame,
+                   error_col: str
+                   ) -> float:
+    """
+    Given an errors data frame,
+    and an error col, returns respective
+    column mean value.
+    """
+    # getting current error col values
+    error_col_values = df[error_col]
+
+    # getting current col mean
+    col_mean = error_col_values.mean()
+
+    # returning mean value
+    return col_mean
+
+
 def regression_test(dataset_file: str,
                     predictions_file: str
                     ) -> None:
@@ -148,7 +175,13 @@ def regression_test(dataset_file: str,
     # calculating metrics
     print('calculating metrics...')
     # TODO: add R2 calc here!
+    r_squared = get_r_squared(df=errors_df)
+    mae = get_error_mean(df=errors_df,
+                         error_col='absolute_error')
+    print(mae)
     mae = errors_df['absolute_error'].mean()
+    print(mae)
+    exit()
     mre = errors_df['relative_error'].mean()
     mse = errors_df['squared_error'].mean()
     rmse = sqrt(mse)
