@@ -2631,6 +2631,11 @@ def get_prediction(prediction: float,
         # converting prediction to string
         current_prediction = 'HighDamage' if prediction < 0.5 else 'LowDamage'
 
+    elif phenotype == 'cats_dogs':
+
+        # converting prediction to string
+        current_prediction = 'Cat' if prediction < 0.5 else 'Dog'
+
     else:
 
         # printing execution message
