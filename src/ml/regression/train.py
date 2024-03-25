@@ -287,8 +287,7 @@ def get_regression_model(input_shape: tuple,
     loss = MeanSquaredError()
 
     # defining metrics
-    # metrics = [RootMeanSquaredError()]
-    metrics = [MeanRelativeError()]
+    metrics = [RootMeanSquaredError()]
 
     # compiling model
     print('compiling model...')
