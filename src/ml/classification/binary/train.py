@@ -23,7 +23,6 @@ from keras.applications import VGG16
 from keras.layers import MaxPooling2D
 from keras.callbacks import TensorBoard
 from keras.applications import ResNet50
-# from keras.applications import convnext
 from keras.metrics import BinaryAccuracy
 from tensorflow.math import exp as tf_exp
 from keras.applications import ConvNeXtTiny
