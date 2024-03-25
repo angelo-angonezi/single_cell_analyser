@@ -299,6 +299,9 @@ def get_regression_model(input_shape: tuple,
     print('printing model summary...')
     model.summary()
 
+    # waiting for user input
+    enter_to_continue()
+
     # returning model
     return model
 
