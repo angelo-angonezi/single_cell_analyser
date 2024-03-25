@@ -275,6 +275,11 @@ def get_regression_model(input_shape: tuple,
         # getting age layers
         model = get_age_model(input_shape=input_shape)
 
+    elif model_type == 'vgg':
+
+        # getting vgg16 layers
+        model = get_vgg16_model(input_shape=input_shape)
+
     else:
 
         # getting new layers
