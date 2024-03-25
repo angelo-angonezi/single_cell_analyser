@@ -15,8 +15,10 @@ from pandas import read_csv
 from keras.layers import Dense
 from keras.layers import Conv2D
 from keras.layers import Flatten
+from keras.layers import Dropout
 from keras.optimizers import Adam
 from argparse import ArgumentParser
+from keras.applications import VGG16
 from keras.layers import MaxPooling2D
 from keras.applications import ResNet50
 from keras.callbacks import TensorBoard
@@ -164,6 +166,48 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
 
     # final dense layer
     model.add(Dense(1, activation='linear'))
+
+    # returning model
+    return model
+
+
+def get_vgg16_model(input_shape: tuple) -> Sequential:
+    """
+    Given an input shape, returns
+    vgg16-based model.
+    """
+    # defining base model
+    model = Sequential()
+
+    # getting base model
+    base_model = VGG16(include_top=False,
+                       input_shape=input_shape,
+                       pooling='max',
+                       weights='imagenet')
+
+    # getting base layers
+    base_layers = base_model.layers
+
+    # iterating over layers
+    for layer_index, layer in enumerate(base_layers):
+
+        # checking layer index
+        if layer_index < 20:
+
+            # freezing layer
+            layer.trainable = False
+
+        # adding layer to model
+        model.add(layer)
+
+    # mid-dense + dropout layers
+    model.add(Dense(units=512, activation='relu'))
+    model.add(Dropout(rate=0.5))
+    model.add(Dense(units=256, activation='relu'))
+    model.add(Dropout(rate=0.5))
+
+    # final dense layer
+    model.add(Dense(units=1, activation='linear'))
 
     # returning model
     return model
