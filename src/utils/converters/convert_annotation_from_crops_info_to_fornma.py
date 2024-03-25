@@ -54,19 +54,19 @@ def get_args_dict() -> dict:
     # red folder param
     parser.add_argument('-r', '--red-folder',
                         dest='red_folder',
-                        required=True,
+                        required=False,
                         help='defines red input folder (folder containing crops in fluorescence channel)')
 
     # green folder param
     parser.add_argument('-g', '--green-folder',
                         dest='green_folder',
-                        required=True,
+                        required=False,
                         help='defines green input folder (folder containing crops in fluorescence channel)')
 
     # images extension param
     parser.add_argument('-x', '--images-extension',
                         dest='images_extension',
-                        required=True,
+                        required=False,
                         help='defines extension (.tif, .png, .jpg) of images in input folders')
 
     # output path param
@@ -135,22 +135,25 @@ def convert_single_file(input_csv_file_path: str,
         # adding extension to crop name
         current_crop_name_w_extension = f'{current_crop_name}{images_extension}'
 
-        # getting current crop channel paths
-        current_red_path = join(red_folder,
-                                current_crop_name_w_extension)
-        current_green_path = join(green_folder,
-                                  current_crop_name_w_extension)
+        # checking whether user passed images to get min/max
+        if red_folder is not None:
 
-        # getting current crop mean pixel intensities
-        # TODO: check whether to use mean or median here
-        red_mean = get_pixel_intensity(file_path=current_red_path,
-                                       calc='mean')
-        green_mean = get_pixel_intensity(file_path=current_green_path,
-                                         calc='mean')
+            # getting current crop channel paths
+            current_red_path = join(red_folder,
+                                    current_crop_name_w_extension)
+            current_green_path = join(green_folder,
+                                      current_crop_name_w_extension)
 
-        # normalizing intensities
-        red_mean_normalized = (red_mean - current_img_min) / current_img_max
-        green_mean_normalized = (green_mean - current_img_min) / current_img_max
+            # getting current crop mean pixel intensities
+            # TODO: check whether to use mean or median here
+            red_mean = get_pixel_intensity(file_path=current_red_path,
+                                           calc='mean')
+            green_mean = get_pixel_intensity(file_path=current_green_path,
+                                             calc='mean')
+
+            # normalizing intensities
+            red_mean_normalized = (red_mean - current_img_min) / current_img_max
+            green_mean_normalized = (green_mean - current_img_min) / current_img_max
 
         # getting current crop area
         current_area = get_mask_area(row_data=row_data,
@@ -160,15 +163,28 @@ def convert_single_file(input_csv_file_path: str,
         current_nii = get_axis_ratio(width=current_width,
                                      height=current_height)
 
-        # creating current obb dict
-        current_obb_dict = {'Cell': current_crop_index,
-                            'X': current_cx,
-                            'Y': current_cy,
-                            'Area': current_area,
-                            'NII': current_nii,
-                            'Image_name_merge': current_img_name,
-                            'Mean_red': red_mean_normalized,
-                            'Mean_green': green_mean_normalized}
+        # checking whether user passed images to get min/max
+        if red_folder is not None:
+
+            # creating current obb dict
+            current_obb_dict = {'Cell': current_crop_index,
+                                'X': current_cx,
+                                'Y': current_cy,
+                                'Area': current_area,
+                                'NII': current_nii,
+                                'Image_name_merge': current_img_name,
+                                'Mean_red': red_mean_normalized,
+                                'Mean_green': green_mean_normalized}
+
+        else:
+
+            # creating current obb dict
+            current_obb_dict = {'Cell': current_crop_index,
+                                'X': current_cx,
+                                'Y': current_cy,
+                                'Area': current_area,
+                                'NII': current_nii,
+                                'Image_name_merge': current_img_name}
 
         # creating current obb df
         current_obb_df = DataFrame(current_obb_dict,
