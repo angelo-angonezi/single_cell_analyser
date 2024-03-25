@@ -120,8 +120,8 @@ def get_errors_df(test_df: DataFrame,
 
 
 def regression_test(dataset_file: str,
-                        predictions_file: str
-                        ) -> None:
+                    predictions_file: str
+                    ) -> None:
     """
     Given a path to dataset df, and
     a path to a file containing test
@@ -147,6 +147,7 @@ def regression_test(dataset_file: str,
 
     # calculating metrics
     print('calculating metrics...')
+    # TODO: add R2 calc here!
     mae = errors_df['absolute_error'].mean()
     mre = errors_df['relative_error'].mean()
     mse = errors_df['squared_error'].mean()
@@ -155,6 +156,7 @@ def regression_test(dataset_file: str,
     # printing metrics on console
     print('printing metrics...')
     f_string = f'---Metrics Results---\n'
+    # TODO: add R2 plot here!
     f_string += f'Test images num: {images_num}\n'
     f_string += f'MAE: {mae}\n'
     f_string += f'MRE: {mre}\n'
