@@ -370,7 +370,8 @@ def regression_train(splits_folder: str,
 
     # generating history plot
     generate_history_plot(logs_folder=logs_folder,
-                          df=history_df)
+                          df=history_df,
+                          epochs_num=epochs)
 
     # printing execution message
     print(f'plot/logs saved to "{logs_folder}".')
