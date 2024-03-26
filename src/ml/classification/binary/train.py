@@ -173,30 +173,30 @@ def get_vgg16_model(input_shape: tuple) -> Sequential:
     Given an input shape, returns
     vgg16-based model.
     """
-    inputs = keras.Input(shape=img_size + (3,))
-    x = data_augmentation(inputs)
-    x = keras.applications.vgg16.preprocess_input(x)
-    x = vgg16_base(x)
-    x = layers.Flatten()(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Dense(256, activation='softplus')(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Dropout(0.5)(x)
-    x = layers.Dense(256, activation='softplus')(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Dropout(0.5)(x)
-    x = layers.Dense(256, activation='softplus')(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Dropout(0.5)(x)
-    x = layers.Dense(256, activation='softplus')(x)
-    x = layers.BatchNormalization()(x)
-    x = layers.Dropout(0.5)(x)
-    outputs = layers.Dense(2, activation="softmax")(x)
-    vgg16_model = keras.Model(inputs, outputs)
-    vgg16_model.compile(optimizer="adam",
-                        loss="sparse_categorical_crossentropy",
-                        metrics=["accuracy"])
-    vgg16_model.summary()
+    # inputs = keras.Input(shape=img_size + (3,))
+    # x = data_augmentation(inputs)
+    # x = keras.applications.vgg16.preprocess_input(x)
+    # x = vgg16_base(x)
+    # x = layers.Flatten()(x)
+    # x = layers.BatchNormalization()(x)
+    # x = layers.Dense(256, activation='softplus')(x)
+    # x = layers.BatchNormalization()(x)
+    # x = layers.Dropout(0.5)(x)
+    # x = layers.Dense(256, activation='softplus')(x)
+    # x = layers.BatchNormalization()(x)
+    # x = layers.Dropout(0.5)(x)
+    # x = layers.Dense(256, activation='softplus')(x)
+    # x = layers.BatchNormalization()(x)
+    # x = layers.Dropout(0.5)(x)
+    # x = layers.Dense(256, activation='softplus')(x)
+    # x = layers.BatchNormalization()(x)
+    # x = layers.Dropout(0.5)(x)
+    # outputs = layers.Dense(2, activation="softmax")(x)
+    # vgg16_model = keras.Model(inputs, outputs)
+    # vgg16_model.compile(optimizer="adam",
+    #                     loss="sparse_categorical_crossentropy",
+    #                     metrics=["accuracy"])
+    # vgg16_model.summary()
 
     # defining base model
     model = Sequential()
@@ -214,7 +214,7 @@ def get_vgg16_model(input_shape: tuple) -> Sequential:
     for layer_index, layer in enumerate(base_layers):
 
         # checking layer index
-        if layer_index < 20:
+        if layer_index < 15:
 
             # freezing layer
             layer.trainable = False
