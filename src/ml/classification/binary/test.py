@@ -221,6 +221,8 @@ def classification_test(dataset_file: str,
 
     # calculating other metrics
     accuracy = (tp + tn) / (tp + tn + fp + fn)
+    precision = tp / (tp + fp)
+    recall = tp / (tp + fn)
 
     # printing metrics on console
     print('printing metrics...')
@@ -231,6 +233,8 @@ def classification_test(dataset_file: str,
     f_string += f'FP: {fp}\n'
     f_string += f'FN: {fn}\n'
     f_string += f'Accuracy: {accuracy}'
+    f_string += f'Precision: {accuracy}'
+    f_string += f'Recall: {accuracy}'
     print(f_string)
 
     # printing execution message
