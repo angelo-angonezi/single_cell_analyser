@@ -110,6 +110,9 @@ def get_metrics(test_df: DataFrame,
                       right=predictions_df,
                       on='crop_name')
 
+    # getting instances count
+    df_len = len(joined_df)
+
     # adding placeholder value for prediction type col (TP, TN, FP, FN)
     joined_df['prediction_type'] = None
 
@@ -120,10 +123,25 @@ def get_metrics(test_df: DataFrame,
     classes_list = list(classes_set)
     possible_classes = sorted(classes_list)
 
+    # getting classes df/num/proportions
+    negative_class = possible_classes[0]
+    positive_class = possible_classes[1]
+    negative_class_df = joined_df[joined_df['class'] == negative_class]
+    positive_class_df = joined_df[joined_df['class'] == positive_class]
+    negative_class_num = len(negative_class_df)
+    positive_class_num = len(positive_class_df)
+    negative_class_ratio = negative_class_num / df_len
+    positive_class_ratio = positive_class_num / df_len
+    negative_class_percentage = negative_class_ratio * 100
+    positive_class_percentage = positive_class_ratio * 100
+    negative_class_percentage_round = round(negative_class_percentage)
+    positive_class_percentage_round = round(positive_class_percentage)
+
     # printing classes legend
     f_string = '--Classes legend--\n'
-    f_string += f'"Positive" class: {possible_classes[0]}\n'
-    f_string += f'"Negative" class: {possible_classes[1]}'
+    f_string += f'"Negative" class: {negative_class} ({negative_class_percentage_round}%)\n'
+    f_string += f'"Positive" class: {positive_class} ({positive_class_percentage_round}%)\n'
+    f_string += '------------------'
     print(f_string)
 
     # defining placeholder values for tp, tn, fp, fn
@@ -187,7 +205,9 @@ def get_metrics(test_df: DataFrame,
     metrics_tuple = (true_positives,
                      true_negatives,
                      false_positives,
-                     false_negatives)
+                     false_negatives,
+                     negative_class_ratio,
+                     positive_class_ratio)
 
     # returning final tuple
     return metrics_tuple
@@ -217,7 +237,7 @@ def classification_test(dataset_file: str,
     print('getting metrics...')
     metrics = get_metrics(test_df=test_df,
                           predictions_df=predictions_df)
-    tp, tn, fp, fn = metrics
+    tp, tn, fp, fn, negative_ratio, positive_ratio = metrics
 
     # calculating other metrics
     tpr = tp / (tp + fn)
@@ -229,6 +249,8 @@ def classification_test(dataset_file: str,
     precision_plus_recall = precision + recall
     precision_times_recall = precision * recall
     f1_score = 2 * (precision_times_recall / precision_plus_recall)
+    sensitivity = tp / (tp + fn)
+    specificity = tn / (fp + tn)
 
     # rounding values
     tpr = round(tpr, 2)
@@ -238,6 +260,8 @@ def classification_test(dataset_file: str,
     precision = round(precision, 2)
     recall = round(recall, 2)
     f1_score = round(f1_score, 2)
+    sensitivity = round(sensitivity, 2)
+    specificity = round(specificity, 2)
 
     # printing metrics on console
     print('printing metrics...')
@@ -250,10 +274,12 @@ def classification_test(dataset_file: str,
     f_string += f'TPR: {tpr}\n'
     f_string += f'TNR: {tnr}\n'
     f_string += f'Accuracy: {accuracy}\n'
+    f_string += f'Balanced Accuracy: {balanced_accuracy}\n'
     f_string += f'Precision: {precision}\n'
     f_string += f'Recall: {recall}\n'
     f_string += f'F1-Score: {f1_score}\n'
-    f_string += f'Balanced Accuracy: {balanced_accuracy}\n'
+    f_string += f'Sensitivity: {sensitivity}\n'
+    f_string += f'Specificity: {specificity}\n'
     f_string += '---------end---------'
     print(f_string)
 
