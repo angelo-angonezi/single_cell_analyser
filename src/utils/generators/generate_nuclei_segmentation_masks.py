@@ -133,6 +133,9 @@ def generate_nuclei_segmentation_masks(detections_file: str,
     print('reading detections file...')
     detections_df = read_csv(detections_file)
 
+    # filtering detections df by detection threshold
+    detections_df = detections_df[detections_df['detection_threshold'] >= 0.5]
+
     # generating segmentation masks
     create_segmentation_masks(df=detections_df,
                               output_folder=output_folder,
