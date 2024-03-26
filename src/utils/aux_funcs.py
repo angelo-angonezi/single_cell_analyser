@@ -1695,6 +1695,10 @@ def get_autophagy_level(foci_count: int,
     # defining placeholder value for autophagy level
     autophagy_level = 'undefined'
 
+    # TODO: remove once test completed
+    autophagy_level = 'LowAutophagy' if foci_count == 0 else 'HighAutophagy'
+    return autophagy_level
+
     # getting conditional bools
     no_foci = foci_count == 0
     many = foci_count >= foci_count_threshold
