@@ -236,6 +236,7 @@ def classification_test(dataset_file: str,
     accuracy = round(accuracy, 2)
     balanced_accuracy = round(balanced_accuracy, 2)
     precision = round(precision, 2)
+    recall = round(recall, 2)
     f1_score = round(f1_score, 2)
 
     # printing metrics on console
