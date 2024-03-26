@@ -2,6 +2,7 @@
 
 print('initializing...')  # noqa
 
+# TODO: check if this code will really be necessary and update it!
 # Code destined to generating segmentation
 # masks based on nuclei crops.
 
