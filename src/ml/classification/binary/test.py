@@ -124,8 +124,8 @@ def get_metrics(test_df: DataFrame,
     possible_classes = sorted(classes_list)
 
     # getting classes df/num/proportions
-    negative_class = possible_classes[0]
-    positive_class = possible_classes[1]
+    negative_class = possible_classes[1]
+    positive_class = possible_classes[0]
     negative_class_df = joined_df[joined_df['class'] == negative_class]
     positive_class_df = joined_df[joined_df['class'] == positive_class]
     negative_class_num = len(negative_class_df)
