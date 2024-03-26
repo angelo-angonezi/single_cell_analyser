@@ -100,7 +100,8 @@ def get_args_dict() -> dict:
     parser.add_argument('-tr', '--treatment-file',
                         dest='treatment_file',
                         help='defines path to file containing treatment info',
-                        required=True)
+                        required=False,
+                        default=None)
 
     parser.add_argument('-er', '--expansion-ratio',
                         dest='expansion_ratio',
@@ -616,7 +617,7 @@ def single_cell_cropper(input_folder: str,
                         images_extension: str,
                         detections_df_path: str,
                         detection_threshold: float,
-                        treatment_file: str,
+                        treatment_file: str or None,
                         expansion_ratio: float,
                         output_folder: str,
                         fixed_size_toggle: bool,
@@ -660,16 +661,19 @@ def single_cell_cropper(input_folder: str,
     # adding cols to crops df
     print('adding analysis cols to crops df...')
 
-    # getting treatment dict
-    treatment_dict = get_treatment_dict(treatment_file=treatment_file)
-
     # adding experiment cols
     add_experiment_cols(df=crops_df,
                         file_name_col='img_name')
 
-    # adding treatment col
-    add_treatment_col(df=crops_df,
-                      treatment_dict=treatment_dict)
+    # checking if treatment file is not None
+    if treatment_file is not None:
+
+        # getting treatment dict
+        treatment_dict = get_treatment_dict(treatment_file=treatment_file)
+
+        # adding treatment col
+        add_treatment_col(df=crops_df,
+                          treatment_dict=treatment_dict)
 
     # saving final crops df in output folder
     print('saving crops info df...')

@@ -158,20 +158,18 @@ def get_error_mean(df: DataFrame,
 
 
 def plot_correlations(df: DataFrame,
-                      x_col: str,
-                      y_col: str,
                       r_squared: float
                       ) -> None:
     """
     Given an errors data frame,
-    and parameters for plotting
-    correlations, displays plot
-    on screen.
+    and r-squared value, displays
+    plot on screen.
     """
     # plotting scatterplot
     scatterplot(data=df,
-                x=x_col,
-                y=y_col)
+                x='class',
+                y='prediction',
+                hue='relative_error')
 
     # setting plot title
     title = f'Correlation plot (class/pred R2: {r_squared})'
@@ -212,6 +210,8 @@ def regression_test(dataset_file: str,
     errors_df = get_errors_df(test_df=test_df,
                               predictions_df=predictions_df)
     print(errors_df)
+    errors_df = errors_df[errors_df['class'] <= 20]
+    print(errors_df)
 
     # calculating metrics
     print('calculating metrics...')
@@ -237,8 +237,6 @@ def regression_test(dataset_file: str,
 
     # plotting correlations plot
     plot_correlations(df=errors_df,
-                      x_col='class',
-                      y_col='prediction',
                       r_squared=r_squared)
 
     # printing execution message
