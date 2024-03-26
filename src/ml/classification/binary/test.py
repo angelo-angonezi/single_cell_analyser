@@ -220,9 +220,15 @@ def classification_test(dataset_file: str,
     tp, tn, fp, fn = metrics
 
     # calculating other metrics
+    tpr = tp / (tp + fn)
+    tnr = tn / (tn + fp)
     accuracy = (tp + tn) / (tp + tn + fp + fn)
+    balanced_accuracy = (tpr + tnr) / 2
     precision = tp / (tp + fp)
     recall = tp / (tp + fn)
+    precision_plus_recall = precision + recall
+    precision_times_recall = precision * recall
+    f1_score = 2 * (precision_times_recall / precision_plus_recall)
 
     # printing metrics on console
     print('printing metrics...')
@@ -232,9 +238,13 @@ def classification_test(dataset_file: str,
     f_string += f'TN: {tn}\n'
     f_string += f'FP: {fp}\n'
     f_string += f'FN: {fn}\n'
+    f_string += f'TPR: {tpr}'
+    f_string += f'TNR: {tnr}'
     f_string += f'Accuracy: {accuracy}'
-    f_string += f'Precision: {accuracy}'
-    f_string += f'Recall: {accuracy}'
+    f_string += f'Precision: {precision}'
+    f_string += f'Recall: {recall}'
+    f_string += f'F1-Score: {f1_score}'
+    f_string += f'Balanced Accuracy: {balanced_accuracy}'
     print(f_string)
 
     # printing execution message
