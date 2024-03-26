@@ -254,7 +254,7 @@ def classification_test(dataset_file: str,
     f_string += f'Recall: {recall}\n'
     f_string += f'F1-Score: {f1_score}\n'
     f_string += f'Balanced Accuracy: {balanced_accuracy}\n'
-    f_string += '------'
+    f_string += '---------end---------'
     print(f_string)
 
     # printing execution message
