@@ -139,8 +139,8 @@ def get_metrics(test_df: DataFrame,
 
     # printing classes legend
     f_string = '--Classes legend--\n'
-    f_string += f'"Negative" class: {negative_class} ({negative_class_percentage_round}%)\n'
-    f_string += f'"Positive" class: {positive_class} ({positive_class_percentage_round}%)\n'
+    f_string += f'"Negative" class: {negative_class} ({negative_class_num} | {negative_class_percentage_round}%)\n'
+    f_string += f'"Positive" class: {positive_class} ({positive_class_num} | {positive_class_percentage_round}%)\n'
     f_string += '------------------'
     print(f_string)
 
@@ -174,26 +174,26 @@ def get_metrics(test_df: DataFrame,
 
         # checking if class/prediction match
 
-        # if both belong to first class
-        if current_class == possible_classes[0] and current_prediction == possible_classes[0]:
+        # if both belong to positive class
+        if current_class == positive_class and current_prediction == positive_class:
 
             # updating true positives
             true_positives += 1
 
-        # if both belong to second class
-        if current_class == possible_classes[1] and current_prediction == possible_classes[1]:
+        # if both belong to negative class
+        if current_class == negative_class and current_prediction == negative_class:
 
             # updating true negatives
             true_negatives += 1
 
-        # if class is first, and prediction is second
-        if current_class == possible_classes[0] and current_prediction == possible_classes[1]:
+        # if class is positive, and prediction is negative
+        if current_class == positive_class and current_prediction == negative_class:
 
             # updating false negatives
             false_negatives += 1
 
-        # if class is second, and prediction is first
-        if current_class == possible_classes[1] and current_prediction == possible_classes[0]:
+        # if class is negative, and prediction is positive
+        if current_class == negative_class and current_prediction == positive_class:
 
             # updating false positives
             false_positives += 1
@@ -205,9 +205,7 @@ def get_metrics(test_df: DataFrame,
     metrics_tuple = (true_positives,
                      true_negatives,
                      false_positives,
-                     false_negatives,
-                     negative_class_ratio,
-                     positive_class_ratio)
+                     false_negatives)
 
     # returning final tuple
     return metrics_tuple
@@ -237,11 +235,13 @@ def classification_test(dataset_file: str,
     print('getting metrics...')
     metrics = get_metrics(test_df=test_df,
                           predictions_df=predictions_df)
-    tp, tn, fp, fn, negative_ratio, positive_ratio = metrics
+    tp, tn, fp, fn = metrics
 
     # calculating other metrics
     tpr = tp / (tp + fn)
     tnr = tn / (tn + fp)
+    fpr = fp / (tn + fp)
+    fnr = fn / (tp + fn)
     accuracy = (tp + tn) / (tp + tn + fp + fn)
     balanced_accuracy = (tpr + tnr) / 2
     precision = tp / (tp + fp)
@@ -255,6 +255,8 @@ def classification_test(dataset_file: str,
     # rounding values
     tpr = round(tpr, 2)
     tnr = round(tnr, 2)
+    fpr = round(fpr, 2)
+    fnr = round(fnr, 2)
     accuracy = round(accuracy, 2)
     balanced_accuracy = round(balanced_accuracy, 2)
     precision = round(precision, 2)
@@ -273,6 +275,8 @@ def classification_test(dataset_file: str,
     f_string += f'FN: {fn}\n'
     f_string += f'TPR: {tpr}\n'
     f_string += f'TNR: {tnr}\n'
+    f_string += f'FPR: {fpr}\n'
+    f_string += f'FNR: {fnr}\n'
     f_string += f'Accuracy: {accuracy}\n'
     f_string += f'Balanced Accuracy: {balanced_accuracy}\n'
     f_string += f'Precision: {precision}\n'
