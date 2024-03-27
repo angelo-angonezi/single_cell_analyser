@@ -250,7 +250,7 @@ def classification_test(dataset_file: str,
     precision_times_recall = precision * recall
     f1_score = 2 * (precision_times_recall / precision_plus_recall)
     sensitivity = tp / (tp + fn)
-    specificity = tn / (fp + tn)
+    specificity = tn / (tn + fp)
 
     # rounding values
     tpr = round(tpr, 2)
