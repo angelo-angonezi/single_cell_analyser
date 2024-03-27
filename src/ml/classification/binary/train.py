@@ -173,6 +173,7 @@ def get_vgg16_model(input_shape: tuple) -> Sequential:
     Given an input shape, returns
     vgg16-based model.
     """
+    # TODO: test this alternative architecture
     # inputs = keras.Input(shape=img_size + (3,))
     # x = data_augmentation(inputs)
     # x = keras.applications.vgg16.preprocess_input(x)
@@ -214,7 +215,7 @@ def get_vgg16_model(input_shape: tuple) -> Sequential:
     for layer_index, layer in enumerate(base_layers):
 
         # checking layer index
-        if layer_index < 15:
+        if layer_index < 20:
 
             # freezing layer
             layer.trainable = False
@@ -227,9 +228,6 @@ def get_vgg16_model(input_shape: tuple) -> Sequential:
     model.add(Dropout(rate=0.5))
     model.add(Dense(units=256, activation='relu'))
     model.add(Dropout(rate=0.5))
-    # model.add(Dense(units=128, activation='relu'))
-    # model.add(Dropout(rate=0.5))
-    # model.add(Dense(units=64, activation='relu'))
 
     # final dense layer
     model.add(Dense(units=1, activation='sigmoid'))
@@ -365,8 +363,8 @@ def get_classification_model(input_shape: tuple,
         model = get_new_model(input_shape=input_shape)
 
     # defining optimizer
-    # optimizer = Adam(learning_rate=learning_rate)
-    optimizer = RMSprop(learning_rate=learning_rate)
+    optimizer = Adam(learning_rate=learning_rate)
+    # optimizer = RMSprop(learning_rate=learning_rate)
 
     # defining loss function
     loss = BinaryCrossentropy()
