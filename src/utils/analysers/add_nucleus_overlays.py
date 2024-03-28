@@ -72,7 +72,7 @@ def get_args_dict() -> dict:
                         help=output_help)
 
     # detection file param
-    detection_help = 'defines path to csv file containing model detections'
+    detection_help = 'defines path to csv file containing model detections '
     detection_help += '(if none is passed, adds only fornma annotations)'
     parser.add_argument('-d', '--detection_file',
                         dest='detection_file',
@@ -80,7 +80,7 @@ def get_args_dict() -> dict:
                         help=detection_help)
 
     # gt file param
-    gt_help = 'defines path to csv file containing ground-truth annotations'
+    gt_help = 'defines path to csv file containing ground-truth annotations '
     gt_help += '(if none is passed, adds only model detections)'
     parser.add_argument('-g', '--ground-truth-file',
                         dest='ground_truth_file',
@@ -411,6 +411,10 @@ def add_overlays_to_multiple_images(input_folder: str,
                     for image_name
                     in images]
 
+    # filtering images list for images present in df
+    images_in_df = merged_df['img_file_name'].to_list()
+    images_names = [image_name for image_name in images_names if image_name in images_in_df]
+
     # iterating over images_names
     for image_index, image_name in enumerate(images_names, 1):
 
@@ -427,11 +431,6 @@ def add_overlays_to_multiple_images(input_folder: str,
         image_path = join(input_folder, image_name_w_extension)
 
         # getting output path
-        # try:
-        #     detection_origin = detection_file_path.split('/')[-1].replace('.csv', '')
-        # except AttributeError:
-        #     detection_origin = ground_truth_file_path.split('/')[-1].replace('.csv', '')
-        # output_name = f'{image_name}_overlays_{detection_origin}.png'
         output_name = f'{image_name}.png'
         output_path = join(output_folder, output_name)
 

@@ -150,9 +150,11 @@ def join_predictions_df(crops_info_file: str,
     joined data frame.
     """
     # reading crops info file
+    print('reading crops info file...')
     crops_info_df = read_csv(crops_info_file)
 
     # merging prediction dfs
+    print('merging prediction dfs...')
     predictions_df = merge_predictions_df(base_df=crops_info_df,
                                           predictions_file=autophagy_predictions_file,
                                           phenotype='autophagy')
