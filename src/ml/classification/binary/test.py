@@ -1,8 +1,8 @@
-# classification test module
+# binary classification test module
 
 print('initializing...')  # noqa
 
-# Code destined to testing
+# Code destined to testing binary
 # classification neural network.
 
 ######################################################################
@@ -10,7 +10,6 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
-from math import sqrt
 from pandas import merge
 from pandas import read_csv
 from pandas import DataFrame
