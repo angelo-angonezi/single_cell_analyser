@@ -207,7 +207,8 @@ def get_vgg16_model(input_shape: tuple) -> Sequential:
     model.add(Dropout(rate=0.5))
 
     # final dense layer
-    model.add(Dense(units=1, activation='linear'))
+    # model.add(Dense(units=1, activation='linear'))
+    model.add(Dense(units=1, activation='relu'))
 
     # returning model
     return model
@@ -278,6 +279,7 @@ def get_regression_model(input_shape: tuple,
     elif model_type == 'vgg':
 
         # getting vgg16 layers
+        # TODO: try convnext
         model = get_vgg16_model(input_shape=input_shape)
 
     else:
@@ -289,6 +291,8 @@ def get_regression_model(input_shape: tuple,
     optimizer = Adam(learning_rate=learning_rate)
 
     # defining loss function
+    # TODO: change to relative/absolute error
+    #  check margin loss
     loss = MeanSquaredError()
 
     # defining metrics
