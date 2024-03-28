@@ -188,7 +188,7 @@ def main():
     # getting images folder
     images_folder = args_dict['images_folder']
 
-    # getting image extension
+    # getting images extension
     images_extension = args_dict['images_extension']
 
     # getting output path

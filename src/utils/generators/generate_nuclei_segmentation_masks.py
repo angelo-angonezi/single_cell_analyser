@@ -1,9 +1,9 @@
-# generate segmentation masks module
+# generate nuclei segmentation masks module
 
 print('initializing...')  # noqa
 
-# Code destined to generating segmentation
-# masks based on BRAIND detections.
+# Code destined to generating cell
+# segmentation masks based on BRAIND detections.
 
 ######################################################################
 # imports

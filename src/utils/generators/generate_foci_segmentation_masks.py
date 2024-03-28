@@ -3,8 +3,8 @@
 print('initializing...')  # noqa
 
 # TODO: check if this code will really be necessary and update it!
-# Code destined to generating segmentation
-# masks based on nuclei crops.
+# Code destined to generating foci
+# segmentation masks based on nuclei crops.
 
 ######################################################################
 # imports
@@ -13,14 +13,15 @@ print('initializing...')  # noqa
 print('importing required libraries...')  # noqa
 from cv2 import imwrite
 from os.path import join
-from pandas import read_csv
 from pandas import DataFrame
 from numpy import uint8 as np_uint8
 from argparse import ArgumentParser
 from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import load_grayscale_img
 from src.utils.aux_funcs import get_segmentation_mask
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
+from src.utils.aux_funcs import get_specific_files_in_folder
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -40,11 +41,17 @@ def get_args_dict() -> dict:
 
     # adding arguments to parser
 
-    # detection file param
-    parser.add_argument('-d', '--detection_file',
-                        dest='detection_file',
+    # input folder param
+    parser.add_argument('-i', '--input-folder',
+                        dest='input_folder',
                         required=True,
-                        help='defines path to csv file containing model detections')
+                        help='defines path to folder containing fluorescent crops')
+
+    # images extension param
+    parser.add_argument('-x', '--images-extension',
+                        dest='images_extension',
+                        required=True,
+                        help='defines extension (.tif, .png, .jpg) of images in input folders')
 
     # output folder param
     parser.add_argument('-o', '--output-folder',
@@ -52,12 +59,11 @@ def get_args_dict() -> dict:
                         required=True,
                         help='defines path to output folder')
 
-    # expansion ratio param
-    parser.add_argument('-er', '--expansion-ratio',
-                        dest='expansion_ratio',
-                        help='defines ratio of expansion of width/height to generate larger-than-orig-nucleus crops',
-                        required=False,
-                        default=1.0)
+    # pixel intensity param
+    parser.add_argument('-p', '--min-pixel-intensity',
+                        dest='min_pixel_intensity',
+                        required=True,
+                        help='defines pixel intensity threshold to be used (int)')
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -69,75 +75,74 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def create_segmentation_masks(df: DataFrame,
-                              output_folder: str,
-                              expansion_ratio: float
-                              ) -> None:
+def generate_foci_segmentation_mask(input_path: str,
+                                    output_path: str,
+                                    min_pixel_intensity: int
+                                    ) -> None:
     """
-    Given a detections data frame,
-    creates segmentation masks, and
-    saves them in given output folder.
+    Given a path to a fluorescence crop,
+    creates segmentation mask based on
+    given min pixel intensity, saving
+    binary image to given output path.
     """
-    # grouping df by image
-    image_groups = df.groupby('img_file_name')
+    # reading image as grayscale
+    segmentation_mask = load_grayscale_img(image_path=input_path)
 
-    # getting number of images
-    images_num = len(image_groups)
+    # normalizing scale
+    img_min = segmentation_mask.min()
+    img_max = segmentation_mask.max()
+    segmentation_mask = segmentation_mask - img_min
+    segmentation_mask = segmentation_mask / img_max
+    segmentation_mask = segmentation_mask * 255
 
-    # defining starter for current_img_index
-    current_img_index = 1
+    # converting image to binary
+    segmentation_mask[segmentation_mask < min_pixel_intensity] = 0
+    segmentation_mask[segmentation_mask >= min_pixel_intensity] = 255
 
-    # iterating over image groups
-    for image_name, image_group in image_groups:
+    # converting int type
+    segmentation_mask = segmentation_mask.astype(np_uint8)
 
-        # printing execution message
-        base_string = 'creating segmentation mask for image #INDEX# of #TOTAL#'
-        print_progress_message(base_string=base_string,
-                               index=current_img_index,
-                               total=images_num)
-
-        # defining current image save name/path
-        save_name = f'{image_name}.tif'
-        save_path = join(output_folder,
-                         save_name)
-
-        # generating segmentation mask for current image
-        segmentation_mask = get_segmentation_mask(df=image_group,
-                                                  style='ellipse',
-                                                  expansion_ratio=expansion_ratio)
-
-        # converting image to binary
-        segmentation_mask[segmentation_mask > 0] = 255
-
-        # converting int type
-        segmentation_mask = segmentation_mask.astype(np_uint8)
-
-        # saving current segmentation mask
-        imwrite(save_path,
-                segmentation_mask)
-
-        # updating current_img_index
-        current_img_index += 1
+    # saving current segmentation mask
+    imwrite(output_path,
+            segmentation_mask)
 
 
-def generate_foci_segmentation_masks(detections_file: str,
+def generate_foci_segmentation_masks(input_folder: str,
+                                     images_extension: str,
                                      output_folder: str,
-                                     expansion_ratio: float
+                                     min_pixel_intensity: int
                                      ) -> None:
     """
-    Given paths to model detections file,
-    creates segmentation masks based on
-    OBBs info, saving results in given
-    output folder.
+    Given a path to a folder containing
+    fluorescent single nucleus crops,
+    generates foci segmentation masks,
+    based on given min pixel intensity
+    value, saving results to output folder.
     """
-    # reading detections file
-    print('reading detections file...')
-    detections_df = read_csv(detections_file)
+    # getting files in input folder
+    files = get_specific_files_in_folder(path_to_folder=input_folder,
+                                         extension=images_extension)
+    files_num = len(files)
 
-    # generating segmentation masks
-    create_segmentation_masks(df=detections_df,
-                              output_folder=output_folder,
-                              expansion_ratio=expansion_ratio)
+    # iterating over files
+    for file_index, file in enumerate(files, 1):
+
+        # printing progress message
+        base_string = 'generating segmentation mask for crop #INDEX# of #TOTAL#'
+        print_progress_message(base_string=base_string,
+                               index=file_index,
+                               total=files_num)
+
+        # getting current image input/output paths
+        input_path = join(input_folder,
+                          file)
+        output_path = join(output_folder,
+                           file)
+
+        # generating current image foci segmentation mask
+        generate_foci_segmentation_mask(input_path=input_path,
+                                        output_path=output_path,
+                                        min_pixel_intensity=min_pixel_intensity)
 
     # printing execution message
     print(f'output saved to {output_folder}')
@@ -152,15 +157,17 @@ def main():
     # getting args dict
     args_dict = get_args_dict()
 
-    # getting detections file
-    detections_file = args_dict['detection_file']
+    # getting input folder
+    input_folder = args_dict['input_folder']
+
+    # getting images extension
+    images_extension = args_dict['images_extension']
 
     # getting output folder
     output_folder = args_dict['output_folder']
 
-    # getting expansion ratio
-    expansion_ratio = args_dict['expansion_ratio']
-    expansion_ratio = float(expansion_ratio)
+    # getting min pixel intensity
+    min_pixel_intensity = int(args_dict['min_pixel_intensity'])
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
@@ -169,9 +176,10 @@ def main():
     enter_to_continue()
 
     # running generate_autophagy_dfs function
-    generate_foci_segmentation_masks(detections_file=detections_file,
+    generate_foci_segmentation_masks(input_folder=input_folder,
+                                     images_extension=images_extension,
                                      output_folder=output_folder,
-                                     expansion_ratio=expansion_ratio)
+                                     min_pixel_intensity=min_pixel_intensity)
 
 ######################################################################
 # running main function
