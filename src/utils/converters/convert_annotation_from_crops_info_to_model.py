@@ -44,6 +44,12 @@ def get_args_dict() -> dict:
                         required=True,
                         help='defines path to crops info df (.csv) file')
 
+    # class col param
+    parser.add_argument('-c', '--class-col',
+                        dest='class_col',
+                        required=True,
+                        help='defines column to be used as "class" column')
+
     # output path param
     parser.add_argument('-o', '--output-path',
                         dest='output_path',
@@ -61,6 +67,7 @@ def get_args_dict() -> dict:
 
 
 def convert_single_file(input_csv_file_path: str,
+                        class_col: str,
                         output_path: str
                         ) -> None:
     """
@@ -100,7 +107,7 @@ def convert_single_file(input_csv_file_path: str,
         width = row_data['width']
         height = row_data['height']
         angle = row_data['angle']
-        current_class = row_data['class']
+        current_class = row_data[class_col]
         detection_threshold = 1.0
 
         # creating current obb dict
@@ -149,6 +156,9 @@ def main():
     # getting input file
     input_file = args_dict['input_file']
 
+    # getting class col
+    class_col = args_dict['class_col']
+
     # getting output path
     output_path = args_dict['output_path']
 
@@ -160,6 +170,7 @@ def main():
 
     # running converter function
     convert_single_file(input_csv_file_path=input_file,
+                        class_col=class_col,
                         output_path=output_path)
 
 ######################################################################

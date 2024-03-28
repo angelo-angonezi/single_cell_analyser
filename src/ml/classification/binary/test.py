@@ -104,19 +104,19 @@ def get_metrics(test_df: DataFrame,
     dfs, calculates metrics and
     returns metrics.
     """
-    # joining dfs by crop_name
-    joined_df = merge(left=test_df,
+    # merging dfs by crop_name
+    merged_df = merge(left=test_df,
                       right=predictions_df,
                       on='crop_name')
 
     # getting instances count
-    df_len = len(joined_df)
+    df_len = len(merged_df)
 
     # adding placeholder value for prediction type col (TP, TN, FP, FN)
-    joined_df['prediction_type'] = None
+    merged_df['prediction_type'] = None
 
     # getting possible classes
-    classes_col = joined_df['class']
+    classes_col = merged_df['class']
     classes_col_list = classes_col.to_list()
     classes_set = set(classes_col_list)
     classes_list = list(classes_set)
@@ -125,8 +125,8 @@ def get_metrics(test_df: DataFrame,
     # getting classes df/num/proportions
     negative_class = possible_classes[1]
     positive_class = possible_classes[0]
-    negative_class_df = joined_df[joined_df['class'] == negative_class]
-    positive_class_df = joined_df[joined_df['class'] == positive_class]
+    negative_class_df = merged_df[merged_df['class'] == negative_class]
+    positive_class_df = merged_df[merged_df['class'] == positive_class]
     negative_class_num = len(negative_class_df)
     positive_class_num = len(positive_class_df)
     negative_class_ratio = negative_class_num / df_len
@@ -150,10 +150,10 @@ def get_metrics(test_df: DataFrame,
     false_negatives = 0
 
     # getting rows num
-    rows_num = len(joined_df)
+    rows_num = len(merged_df)
 
     # getting df rows
-    df_rows = joined_df.iterrows()
+    df_rows = merged_df.iterrows()
 
     # defining starter for current_row_index
     current_row_index = 1
