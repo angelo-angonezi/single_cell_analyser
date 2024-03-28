@@ -26,6 +26,7 @@ from keras.losses import MeanSquaredError
 from src.utils.aux_funcs import INPUT_SHAPE
 from src.utils.aux_funcs import train_model
 from keras.metrics import MeanRelativeError
+from keras.metrics import MeanAbsoluteError
 from src.utils.aux_funcs import is_using_gpu
 from keras.metrics import RootMeanSquaredError
 from src.utils.aux_funcs import get_history_df
@@ -192,7 +193,7 @@ def get_vgg16_model(input_shape: tuple) -> Sequential:
     for layer_index, layer in enumerate(base_layers):
 
         # checking layer index
-        if layer_index < 15:
+        if layer_index < 17:
 
             # freezing layer
             layer.trainable = False
@@ -294,6 +295,7 @@ def get_regression_model(input_shape: tuple,
     # TODO: change to relative/absolute error
     #  check margin loss
     loss = MeanSquaredError()
+    # loss = MeanAbsoluteError()
 
     # defining metrics
     metrics = [RootMeanSquaredError()]
