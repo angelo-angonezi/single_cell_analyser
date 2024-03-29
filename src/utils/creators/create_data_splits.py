@@ -97,18 +97,19 @@ def add_dataset_col(df: DataFrame,
     # adding placeholder "split" col
     df[split_col_name] = None
 
-    # defining group col
-    group_col = 'class_group'
+    # defining group cols
+    # TODO: add treatment/image cols here!
+    group_cols = ['class_group']
 
     # grouping df
-    df_groups = df.groupby(group_col)
+    df_groups = df.groupby(group_cols)
 
     # getting groups/rows num
     groups_num = len(df_groups)
     rows_num = len(df)
 
     # printing execution message
-    f_string = f'{groups_num} groups were found based on: {group_col}'
+    f_string = f'{groups_num} groups were found based on: {group_cols}'
     print(f_string)
 
     # defining starter for indices
