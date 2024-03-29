@@ -14,6 +14,7 @@ from os.path import join
 from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
+from src.utils.aux_funcs import get_erk_ratio
 from src.utils.aux_funcs import get_contours_df
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import get_autophagy_level
@@ -50,6 +51,12 @@ def get_args_dict() -> dict:
                         required=True,
                         help='defines path to crops file (crops_info.csv file)')
 
+    # images folder param
+    parser.add_argument('-i', '--images-folder',
+                        dest='images_folder',
+                        required=True,
+                        help='defines path to folder containing fluorescent channel crops')
+
     # foci masks folder param
     parser.add_argument('-f', '--foci-masks-folder',
                         dest='foci_masks_folder',
@@ -75,6 +82,13 @@ def get_args_dict() -> dict:
                         default=2,
                         help='defines minimum area for a foci (in pixels)')
 
+    # ring expansion param
+    parser.add_argument('-r', '--ring-expansion',
+                        dest='ring_expansion',
+                        required=False,
+                        default=1.2,
+                        help='defines expansion ratio to be applied on cytoplasm ring')
+
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
 
@@ -86,9 +100,11 @@ def get_args_dict() -> dict:
 
 
 def add_autophagy_col(df: DataFrame,
+                      images_folder: str,
                       foci_masks_folder: str,
                       images_extension: str,
-                      foci_min_area: int
+                      foci_min_area: int,
+                      ring_expansion: float
                       ) -> None:
     """
     Given a crops info df, and paths to
@@ -119,15 +135,25 @@ def add_autophagy_col(df: DataFrame,
                                index=current_row_index,
                                total=rows_num)
 
-        # getting current row crop name
+        # getting current row crop info
         crop_name = row_data['crop_name']
+        width = row_data['width']
+        height = row_data['height']
 
         # getting current row crop name with extension
         crop_name_w_extension = f'{crop_name}{images_extension}'
 
-        # getting current row crop foci mask path
+        # getting current row crop image/foci mask path
+        crop_path = join(images_folder,
+                         crop_name_w_extension)
         foci_mask_path = join(foci_masks_folder,
                               crop_name_w_extension)
+
+        # getting current crop ratio
+        current_ratio = get_erk_ratio(crop_path=crop_path,
+                                      width=width,
+                                      height=height,
+                                      ring_expansion=ring_expansion)
 
         # getting current crop contours df
         contours_df = get_contours_df(image_name=crop_name,
@@ -143,10 +169,13 @@ def add_autophagy_col(df: DataFrame,
         foci_area_mean = foci_area_col.mean()
 
         # getting current crop autophagy level
-        current_class = get_autophagy_level(foci_count=foci_count,
-                                            foci_area_mean=foci_area_mean,
-                                            foci_count_threshold=FOCI_COUNT_THRESHOLD,
-                                            foci_area_mean_threshold=FOCI_AREA_MEAN_THRESHOLD)
+        # current_class = get_autophagy_level(foci_count=foci_count,
+        #                                     foci_area_mean=foci_area_mean,
+        #                                     foci_count_threshold=FOCI_COUNT_THRESHOLD,
+        #                                     foci_area_mean_threshold=FOCI_AREA_MEAN_THRESHOLD)
+        # TODO: remove once test completed!
+        current_ratio = '>1' if current_ratio >= 1 else '<1'
+        current_class = f'{foci_count}_{current_ratio}'
 
         # updating current row data
         df.at[row_index, col_name] = current_class
@@ -156,10 +185,12 @@ def add_autophagy_col(df: DataFrame,
 
 
 def generate_autophagy_annotations(crops_file: str,
+                                   images_folder: str,
                                    foci_masks_folder: str,
                                    images_extension: str,
                                    output_path: str,
-                                   foci_min_area: int
+                                   foci_min_area: int,
+                                   ring_expansion: float
                                    ) -> None:
     """
     Given a path to a folder containing foci
@@ -172,9 +203,11 @@ def generate_autophagy_annotations(crops_file: str,
 
     # updating class col
     add_autophagy_col(df=crops_info_df,
+                      images_folder=images_folder,
                       foci_masks_folder=foci_masks_folder,
                       images_extension=images_extension,
-                      foci_min_area=foci_min_area)
+                      foci_min_area=foci_min_area,
+                      ring_expansion=ring_expansion)
 
     # saving crops pixels df
     crops_info_df.to_csv(output_path,
@@ -196,6 +229,9 @@ def main():
     # getting crops file
     crops_file = args_dict['crops_file']
 
+    # getting images folder
+    images_folder = args_dict['images_folder']
+
     # getting foci folder path
     foci_masks_folder = args_dict['foci_masks_folder']
 
@@ -209,6 +245,10 @@ def main():
     foci_min_area = args_dict['foci_min_area']
     foci_min_area = int(foci_min_area)
 
+    # getting ring expansion
+    ring_expansion = args_dict['ring_expansion']
+    ring_expansion = float(ring_expansion)
+
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
@@ -217,10 +257,12 @@ def main():
 
     # running generate_autophagy_annotations function
     generate_autophagy_annotations(crops_file=crops_file,
+                                   images_folder=images_folder,
                                    foci_masks_folder=foci_masks_folder,
                                    images_extension=images_extension,
                                    output_path=output_path,
-                                   foci_min_area=foci_min_area)
+                                   foci_min_area=foci_min_area,
+                                   ring_expansion=ring_expansion)
 
 ######################################################################
 # running main function

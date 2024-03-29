@@ -210,9 +210,9 @@ def get_metrics(test_df: DataFrame,
     return metrics_tuple
 
 
-def classification_test(dataset_file: str,
-                        predictions_file: str
-                        ) -> None:
+def binary_classification_test(dataset_file: str,
+                               predictions_file: str
+                               ) -> None:
     """
     Given a path to dataset df, and
     a path to a file containing test
@@ -231,12 +231,13 @@ def classification_test(dataset_file: str,
     predictions_df = get_predictions_df(predictions_file=predictions_file)
 
     # getting metrics
-    print('getting metrics...')
+    print('getting base metrics...')
     metrics = get_metrics(test_df=test_df,
                           predictions_df=predictions_df)
     tp, tn, fp, fn = metrics
 
     # calculating other metrics
+    print('calculating other metrics...')
     tpr = tp / (tp + fn)
     tnr = tn / (tn + fp)
     fpr = fp / (tn + fp)
@@ -252,6 +253,7 @@ def classification_test(dataset_file: str,
     specificity = tn / (tn + fp)
 
     # rounding values
+    print('rounding values...')
     tpr = round(tpr, 2)
     tnr = round(tnr, 2)
     fpr = round(fpr, 2)
@@ -315,9 +317,9 @@ def main():
     # waiting for user input
     enter_to_continue()
 
-    # running classification_test function
-    classification_test(dataset_file=dataset_file,
-                        predictions_file=predictions_file)
+    # running binary_classification_test function
+    binary_classification_test(dataset_file=dataset_file,
+                               predictions_file=predictions_file)
 
 ######################################################################
 # running main function
