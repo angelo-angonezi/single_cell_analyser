@@ -224,6 +224,7 @@ def create_data_splits(crops_info_file: str,
     # dropping unrequired columns
     print('dropping unrequired columns...')
     cols_to_keep = ['crop_name',
+                    'treatment',
                     'class']
     crops_df = crops_df[cols_to_keep]
 
