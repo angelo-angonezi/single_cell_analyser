@@ -98,8 +98,8 @@ def add_dataset_col(df: DataFrame,
     df[split_col_name] = None
 
     # defining group cols
-    # TODO: add treatment/image cols here!
-    group_cols = ['class_group']
+    group_cols = ['treatment',
+                  'class_group']
 
     # grouping df
     df_groups = df.groupby(group_cols)
