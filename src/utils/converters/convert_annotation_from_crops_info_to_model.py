@@ -89,6 +89,8 @@ def convert_single_file(input_csv_file_path: str,
     rows = crops_df.iterrows()
 
     # defining starter for current_row_index
+    # TODO: think of a way to integrate all predictions in a single string to
+    #  allow for overlays to be more informative on multiple phenotypes simultaneously
     current_row_index = 1
 
     # iterating over fornma df rows
