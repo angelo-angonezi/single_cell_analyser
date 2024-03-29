@@ -10,6 +10,7 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
+from os import environ
 from pandas import read_csv
 from tensorflow import Tensor
 from keras.layers import Dense
@@ -39,6 +40,9 @@ from src.utils.aux_funcs import generate_history_plot
 from src.utils.aux_funcs import get_data_split_from_df
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
+
+# setting tensorflow warnings off
+environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 #####################################################################
 # argument parsing related functions

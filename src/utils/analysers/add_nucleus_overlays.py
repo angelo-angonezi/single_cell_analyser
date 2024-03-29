@@ -11,6 +11,7 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 from cv2 import imread
+from os import environ
 from cv2 import imwrite
 from cv2 import putText
 from cv2 import cvtColor
@@ -31,6 +32,9 @@ from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
 from src.utils.aux_funcs import get_merged_detection_annotation_df
 print('all required libraries successfully imported.')  # noqa
+
+# setting tensorflow warnings off
+environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 #####################################################################
 # defining global variables

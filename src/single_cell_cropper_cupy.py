@@ -10,6 +10,7 @@ print('initializing...')  # noqa
 
 print('importing required libraries...')  # noqa
 from time import sleep
+from os import environ
 from cv2 import imwrite
 from os.path import join
 from cupy import ndarray
@@ -53,6 +54,9 @@ CURRENT_IMAGE = 1
 CROPS_TOTAL = 0
 CURRENT_CROP = 1
 START_TIME = 0
+
+# setting tensorflow warnings off
+environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 #####################################################################
 # argument parsing related functions
@@ -680,8 +684,8 @@ def single_cell_cropper(input_folder: str,
     save_name = 'crops_info.csv'
     save_path = join(output_folder,
                      save_name)
-    # crops_df.to_csv(save_path,
-    #                 index=False)
+    crops_df.to_csv(save_path,
+                    index=False)
     print(f'crops info df saved at "{save_path}".')
 
 ######################################################################
@@ -731,7 +735,7 @@ def main():
     print_gpu_usage()
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running single cell cropper function
     single_cell_cropper(input_folder=input_folder,

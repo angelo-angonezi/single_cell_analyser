@@ -10,6 +10,7 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
+from os import environ
 from pandas import merge
 from pandas import read_csv
 from pandas import DataFrame
@@ -19,6 +20,9 @@ from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
+
+# setting tensorflow warnings off
+environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 #####################################################################
 # argument parsing related functions
