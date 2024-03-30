@@ -219,7 +219,7 @@ def get_vgg16_model(input_shape: tuple) -> Sequential:
     for layer_index, layer in enumerate(base_layers):
 
         # checking layer index
-        if layer_index < 15:
+        if layer_index < 20:
 
             # freezing layer
             layer.trainable = False
