@@ -482,13 +482,6 @@ def get_single_image_crops(image: ndarray,
     image obbs detections, saves crops
     of obbs in given output folder, returning
     a data frame with crops info.
-    :param image: Array. Represents an open image.
-    :param image_name: String. Represents an image name.
-    :param image_group: DataFrame. Represents current image obbs.
-    :param output_folder: String. Represents a path to a folder.
-    :param expansion_ratio: Float. Represents a ratio to expand width/height.
-    :param resize_toggle: Boolean. Represents a toggle.
-    :return: Data Frame. Represents crops info.
     """
     # sorting df by cx (ensures that different codes follow the same order)
     image_group = image_group.sort_values(by='cx')

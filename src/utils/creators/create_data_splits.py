@@ -46,11 +46,11 @@ def get_args_dict() -> dict:
 
     # adding arguments to parser
 
-    # crops info file param
-    parser.add_argument('-c', '--crops-info-file',
-                        dest='crops_info_file',
+    # annotations file param
+    parser.add_argument('-a', '--annotations-file',
+                        dest='annotations_file',
                         required=True,
-                        help='defines path to annotated crops info df (.csv) file')
+                        help='defines path to ANNOTATED crops info df (.csv) file')
 
     # images folder param
     parser.add_argument('-i', '--images-folder',
@@ -188,10 +188,9 @@ def add_dataset_col(df: DataFrame,
 
 def add_class_group_col(df: DataFrame) -> None:
     """
-    Given a crops info df,
-    adds class group col,
-    adapting it should it be
-    a number.
+    Given an annotated crops info df,
+    adds class group col, adapting it
+    should it be a number.
     """
     # getting first element info
     first_row = df.iloc[0]
@@ -212,14 +211,14 @@ def add_class_group_col(df: DataFrame) -> None:
         df['class_group'] = df['class'].astype(str)
 
 
-def create_data_splits(crops_info_file: str,
+def create_data_splits(annotations_file: str,
                        images_folder: str,
                        extension: str,
                        output_folder: str
                        ) -> None:
-    # reading crops info file
-    print('reading crops info file...')
-    crops_df = read_csv(crops_info_file)
+    # reading annotations file
+    print('reading annotations file...')
+    crops_df = read_csv(annotations_file)
 
     # dropping unrequired columns
     print('dropping unrequired columns...')
@@ -328,8 +327,8 @@ def main():
     # getting args dict
     args_dict = get_args_dict()
 
-    # getting crops info file param
-    crops_info_file = args_dict['crops_info_file']
+    # getting annotations file param
+    annotations_file = args_dict['annotations_file']
 
     # getting images folder param
     images_folder = args_dict['images_folder']
@@ -347,7 +346,7 @@ def main():
     enter_to_continue()
 
     # splitting data
-    create_data_splits(crops_info_file=crops_info_file,
+    create_data_splits(annotations_file=annotations_file,
                        images_folder=images_folder,
                        extension=extension,
                        output_folder=output_folder)
