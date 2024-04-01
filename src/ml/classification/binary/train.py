@@ -18,6 +18,7 @@ from keras.layers import Conv2D
 from keras.layers import Flatten
 from keras.layers import Dropout
 from keras.optimizers import Adam
+from keras.layers import MaxPool2D
 from argparse import ArgumentParser
 from keras.optimizers import RMSprop
 from keras.applications import VGG16
@@ -279,7 +280,7 @@ def get_inception_model(input_shape: tuple) -> Sequential:
     return model
 
 
-def get_new_model(input_shape: tuple) -> Sequential:
+def get_simple_model(input_shape: tuple) -> Sequential:
     """
     Given an input shape, returns
     new self-made model.
@@ -329,6 +330,49 @@ def get_new_model(input_shape: tuple) -> Sequential:
 
     # returning model
     return model
+
+
+def get_new_model(input_shape: tuple) -> Sequential:
+    """
+    Given an input shape, returns
+    new self-made model.
+    """
+    model1 = Sequential([
+        Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1), input_shape=input_shape, activation="relu",
+               padding="same"),
+        MaxPool2D(pool_size=(2, 2)),
+        BatchNormalization(),
+
+        Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1), padding="valid"),
+        MaxPool2D(pool_size=(2, 2)),
+        BatchNormalization(),
+
+        Conv2D(filters=128, kernel_size=(3, 3), strides=(1, 1), padding="valid"),
+        MaxPool2D(pool_size=(2, 2)),
+        BatchNormalization(),
+
+        Conv2D(filters=128, kernel_size=(3, 3), strides=(1, 1), padding="valid"),
+        MaxPool2D(pool_size=(2, 2)),
+        BatchNormalization(),
+
+        Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding="valid"),
+        MaxPool2D(pool_size=(2, 2)),
+        BatchNormalization(),
+
+        Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding="valid"),
+        MaxPool2D(pool_size=(2, 2)),
+        BatchNormalization(),
+
+        Flatten(),
+        Dense(4096, activation="relu"),
+        Dropout(0.5),
+        Dense(256),
+        Dropout(0.25),
+        Dense(3, activation="softmax")
+    ])
+
+    # returning model
+    return model1
 
 
 def get_classification_model(input_shape: tuple,
