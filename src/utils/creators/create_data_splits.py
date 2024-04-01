@@ -339,6 +339,10 @@ def main():
     # getting output folder param
     output_folder = args_dict['output_folder']
 
+    # getting balance data param
+    # TODO: add logic to this in this code
+    balance_data = args_dict['balance_data']
+
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 

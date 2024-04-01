@@ -4,6 +4,7 @@
 # imports
 
 # importing required libraries
+print('importing required libraries...')  # noqa
 from cv2 import imread
 from cv2 import imwrite
 from os.path import join
@@ -14,6 +15,7 @@ from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
+print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
 # argument parsing related functions

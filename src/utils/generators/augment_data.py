@@ -52,10 +52,10 @@ def get_args_dict() -> dict:
                         help='defines path to folder containing train/val subfolders.')
 
     # images extension param
-    parser.add_argument('-e', '--extension',
-                        dest='extension',
+    parser.add_argument('-x', '--images-extension',
+                        dest='images_extension',
                         required=True,
-                        help='defines images extension (.png, .jpg, .tif).')
+                        help='defines extension (.tif, .png, .jpg) of images in input folder')
 
     # output folder param
     parser.add_argument('-o', '--output-folder',
@@ -225,7 +225,7 @@ def get_augmented_df(df: DataFrame) -> DataFrame:
 
 def augment_data(dataset_file: str,
                  input_folder: str,
-                 extension: str,
+                 images_extension: str,
                  output_folder: str,
                  resize: bool
                  ) -> None:
@@ -242,7 +242,7 @@ def augment_data(dataset_file: str,
     augment_data_split(df=dataset_df,
                        split='train',
                        input_folder=input_folder,
-                       extension=extension,
+                       extension=images_extension,
                        output_folder=output_folder,
                        resize=resize)
 
@@ -251,7 +251,7 @@ def augment_data(dataset_file: str,
     augment_data_split(df=dataset_df,
                        split='val',
                        input_folder=input_folder,
-                       extension=extension,
+                       extension=images_extension,
                        output_folder=output_folder,
                        resize=resize)
 
@@ -290,7 +290,7 @@ def main():
     input_folder = args_dict['input_folder']
 
     # getting images extension param
-    extension = args_dict['extension']
+    images_extension = args_dict['images_extension']
 
     # getting output folder param
     output_folder = args_dict['output_folder']
@@ -307,7 +307,7 @@ def main():
     # running augment_data function
     augment_data(dataset_file=dataset_file,
                  input_folder=input_folder,
-                 extension=extension,
+                 images_extension=images_extension,
                  output_folder=output_folder,
                  resize=resize)
 

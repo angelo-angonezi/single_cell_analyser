@@ -26,6 +26,7 @@ from keras.callbacks import TensorBoard
 from keras.applications import ResNet50
 from keras.metrics import BinaryAccuracy
 from tensorflow.math import exp as tf_exp
+from keras.layers import BatchNormalization
 from keras.losses import BinaryCrossentropy
 from src.utils.aux_funcs import INPUT_SHAPE
 from src.utils.aux_funcs import train_model
@@ -219,7 +220,7 @@ def get_vgg16_model(input_shape: tuple) -> Sequential:
     for layer_index, layer in enumerate(base_layers):
 
         # checking layer index
-        if layer_index < 17:
+        if layer_index < 20:
 
             # freezing layer
             layer.trainable = False
@@ -228,8 +229,6 @@ def get_vgg16_model(input_shape: tuple) -> Sequential:
         model.add(layer)
 
     # mid-dense + dropout layers
-    model.add(Dense(units=512, activation='relu'))
-    model.add(Dropout(rate=0.5))
     model.add(Dense(units=256, activation='relu'))
     model.add(Dropout(rate=0.5))
 
