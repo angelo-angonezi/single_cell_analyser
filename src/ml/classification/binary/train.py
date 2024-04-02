@@ -332,7 +332,7 @@ def get_simple_model(input_shape: tuple) -> Sequential:
     return model
 
 
-def get_new_model(input_shape: tuple) -> Sequential:
+def get_alexnet_model(input_shape: tuple) -> Sequential:
     """
     Given an input shape, returns
     new self-made model.
@@ -342,40 +342,40 @@ def get_new_model(input_shape: tuple) -> Sequential:
 
     # defining CNN layers
 
-    # first convolution + pooling (input layer)
-    model.add(Conv2D(filters=16,
-                     kernel_size=(3, 3),
-                     strides=1,
+    # Layer 1: Convolutional layer with 64 filters of size 11x11x3
+    model.add(Conv2D(filters=64,
+                     kernel_size=(11, 11),
+                     strides=(4, 4),
+                     padding='valid',
                      activation='relu',
                      input_shape=input_shape))
-    model.add(MaxPooling2D())
 
-    # first convolution + pooling (input layer)
-    model.add(Conv2D(filters=32,
-                     kernel_size=(3, 3),
-                     strides=1,
-                     activation='relu',
-                     input_shape=input_shape))
-    model.add(MaxPooling2D())
+    # Layer 2: Max pooling layer with pool size of 3x3
+    model.add(MaxPooling2D(pool_size=(3, 3),
+                           strides=(2, 2)))
 
-    # second convolution + pooling
-    model.add(Conv2D(filters=32,
-                     kernel_size=(3, 3),
-                     strides=1,
+    # Layer 3-5: 3 more convolutional layers with similar structure as Layer 1
+    model.add(Conv2D(filters=192,
+                     kernel_size=(5, 5),
+                     padding='same',
                      activation='relu'))
-    model.add(MaxPooling2D())
+    model.add(MaxPooling2D(pool_size=(3, 3),
+                           strides=(2, 2)))
+    model.add(Conv2D(filters=384, kernel_size=(3, 3),
+                     padding='same',
+                     activation='relu'))
+    model.add(Conv2D(filters=256, kernel_size=(3, 3),
+                     padding='same',
+                     activation='relu'))
+    model.add(MaxPooling2D(pool_size=(3, 3),
+                           strides=(2, 2)))
 
-    # flattening layer
+    # Layer 6: Fully connected layer with 4096 neurons
     model.add(Flatten())
+    model.add(Dense(4096, activation='relu'))
 
-    # mid-dense + dropout layers
-    model.add(Dense(units=3200, activation='relu'))
-    model.add(Dropout(rate=0.5))
-    model.add(Dense(units=1600, activation='relu'))
-    model.add(Dropout(rate=0.5))
-    model.add(Dense(units=800, activation='relu'))
-    model.add(Dropout(rate=0.5))
-    model.add(Dense(units=400, activation='relu'))
+    # Layer 7: Fully connected layer with 4096 neurons
+    model.add(Dense(4096, activation='relu'))
 
     # final dense layer
     model.add(Dense(units=1, activation='sigmoid'))
@@ -416,7 +416,7 @@ def get_classification_model(input_shape: tuple,
     else:
 
         # getting new layers
-        model = get_new_model(input_shape=input_shape)
+        model = get_alexnet_model(input_shape=input_shape)
 
     # defining optimizer
     optimizer = Adam(learning_rate=learning_rate)
