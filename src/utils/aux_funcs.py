@@ -1936,26 +1936,28 @@ def get_cell_cycle_simple(red_value: float,
     # defining placeholder value for cell cycle
     cell_cycle = None
 
-    # getting check bools
-    both_zero = (red_value == 0 and green_value == 0)
-
     # checking if red/green values are both zero
-    if both_zero:
+    if green_value > red_value:
 
         # then, no cell cycle attributed
-        cell_cycle = '-'
+        cell_cycle = 'G2'
 
     # if red value higher than green
-    elif red_value >= green_value:
+    elif red_value > green_value:
 
         # then, cell cycle must be 'G1' (red)
         cell_cycle = 'G1'
 
-    # if green value higher than red
+    elif red_value == green_value:
+
+        # then, cell cycle must be S, unlikely
+        cell_cycle = 'S'
+
+    # if none is bigger/relevant
     else:
 
-        # then, cell cycle must be 'G2' (green)
-        cell_cycle = 'G2'
+        # then,
+        cell_cycle = '-'
 
     # returning cell cycle
     return cell_cycle
@@ -2236,6 +2238,12 @@ def get_nucleus_pixel_intensity(crop_path: str,
 
         # updating pixel intensity
         pixel_intensity = nucleus_pixels.median()
+
+    # checking calc mode
+    elif calc == 'sum':
+
+        # updating pixel intensity
+        pixel_intensity = nucleus_pixels.sum()
 
     else:
 

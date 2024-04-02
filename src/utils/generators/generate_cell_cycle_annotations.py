@@ -139,15 +139,15 @@ def add_cell_cycle_col(df: DataFrame,
         red_intensity = get_nucleus_pixel_intensity(crop_path=red_path,
                                                     nucleus_width=nucleus_width,
                                                     nucleus_height=nucleus_height,
-                                                    calc='median')
+                                                    calc='sum')
         green_intensity = get_nucleus_pixel_intensity(crop_path=green_path,
                                                       nucleus_width=nucleus_width,
                                                       nucleus_height=nucleus_height,
-                                                      calc='median')
+                                                      calc='sum')
 
         # normalizing values
-        red_intensity = red_intensity / 255
-        green_intensity = green_intensity / 255
+        # red_intensity = red_intensity / 255
+        # green_intensity = green_intensity / 255
 
         # getting current crop cell cycle
         # current_class = get_cell_cycle(red_value=red_intensity,
