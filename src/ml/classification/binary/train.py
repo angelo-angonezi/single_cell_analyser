@@ -413,6 +413,11 @@ def get_classification_model(input_shape: tuple,
         # getting vgg16 layers
         model = get_vgg16_model(input_shape=input_shape)
 
+    elif model_type == 'alexnet':
+
+        # getting alexnet layers
+        model = get_alexnet_model(input_shape=input_shape)
+
     else:
 
         # getting new layers
