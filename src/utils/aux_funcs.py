@@ -1936,15 +1936,22 @@ def get_cell_cycle_simple(red_value: float,
     # defining placeholder value for cell cycle
     cell_cycle = None
 
-    # getting red/green ratio
-    red_green_ratio = red_value / green_value
+    # getting check bools
+    both_zero = (red_value == 0 and green_value == 0)
 
-    # checking ratio
-    if red_green_ratio >= 1.0:
+    # checking if red/green values are both zero
+    if both_zero:
+
+        # then, no cell cycle attributed
+        cell_cycle = '-'
+
+    # if red value higher than green
+    elif red_value >= green_value:
 
         # then, cell cycle must be 'G1' (red)
         cell_cycle = 'G1'
 
+    # if green value higher than red
     else:
 
         # then, cell cycle must be 'G2' (green)
