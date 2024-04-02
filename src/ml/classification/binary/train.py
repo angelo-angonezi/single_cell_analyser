@@ -337,42 +337,51 @@ def get_new_model(input_shape: tuple) -> Sequential:
     Given an input shape, returns
     new self-made model.
     """
-    model1 = Sequential([
-        Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1), input_shape=input_shape, activation="relu",
-               padding="same"),
-        MaxPool2D(pool_size=(2, 2)),
-        BatchNormalization(),
+    # defining base model
+    model = Sequential()
 
-        Conv2D(filters=64, kernel_size=(3, 3), strides=(1, 1), padding="valid"),
-        MaxPool2D(pool_size=(2, 2)),
-        BatchNormalization(),
+    # defining CNN layers
 
-        Conv2D(filters=128, kernel_size=(3, 3), strides=(1, 1), padding="valid"),
-        MaxPool2D(pool_size=(2, 2)),
-        BatchNormalization(),
+    # first convolution + pooling (input layer)
+    model.add(Conv2D(filters=16,
+                     kernel_size=(3, 3),
+                     strides=1,
+                     activation='relu',
+                     input_shape=input_shape))
+    model.add(MaxPooling2D())
 
-        Conv2D(filters=128, kernel_size=(3, 3), strides=(1, 1), padding="valid"),
-        MaxPool2D(pool_size=(2, 2)),
-        BatchNormalization(),
+    # first convolution + pooling (input layer)
+    model.add(Conv2D(filters=32,
+                     kernel_size=(3, 3),
+                     strides=1,
+                     activation='relu',
+                     input_shape=input_shape))
+    model.add(MaxPooling2D())
 
-        Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding="valid"),
-        MaxPool2D(pool_size=(2, 2)),
-        BatchNormalization(),
+    # second convolution + pooling
+    model.add(Conv2D(filters=32,
+                     kernel_size=(3, 3),
+                     strides=1,
+                     activation='relu'))
+    model.add(MaxPooling2D())
 
-        Conv2D(filters=256, kernel_size=(3, 3), strides=(1, 1), padding="valid"),
-        MaxPool2D(pool_size=(2, 2)),
-        BatchNormalization(),
+    # flattening layer
+    model.add(Flatten())
 
-        Flatten(),
-        Dense(4096, activation="relu"),
-        Dropout(0.5),
-        Dense(256),
-        Dropout(0.25),
-        Dense(3, activation="softmax")
-    ])
+    # mid-dense + dropout layers
+    model.add(Dense(units=3200, activation='relu'))
+    model.add(Dropout(rate=0.5))
+    model.add(Dense(units=1600, activation='relu'))
+    model.add(Dropout(rate=0.5))
+    model.add(Dense(units=800, activation='relu'))
+    model.add(Dropout(rate=0.5))
+    model.add(Dense(units=400, activation='relu'))
+
+    # final dense layer
+    model.add(Dense(units=1, activation='sigmoid'))
 
     # returning model
-    return model1
+    return model
 
 
 def get_classification_model(input_shape: tuple,
