@@ -24,7 +24,6 @@ from cv2 import COLOR_BGR2RGB
 from cv2 import COLOR_RGB2BGR
 from argparse import ArgumentParser
 from cv2 import FONT_HERSHEY_SIMPLEX
-from src.utils.aux_funcs import make_gif
 from src.utils.aux_funcs import draw_circle
 from src.utils.aux_funcs import draw_ellipse
 from src.utils.aux_funcs import draw_rectangle
