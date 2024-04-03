@@ -11,6 +11,7 @@ from os import sep
 import pandas as pd
 from os import mkdir
 from cv2 import flip
+from PIL import Image
 from time import time
 from cv2 import rotate
 from cv2 import circle
