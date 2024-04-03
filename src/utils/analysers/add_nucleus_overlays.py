@@ -424,7 +424,7 @@ def add_overlays_to_multiple_images(input_folder: str,
     images_names = [image_name.replace(images_extension, '')
                     for image_name
                     in images]
-    images_num = len(image_names)
+    images_num = len(images_names)
 
     # defining placeholder value for current image index
     current_image_index = 1
