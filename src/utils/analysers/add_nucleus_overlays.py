@@ -386,8 +386,7 @@ def add_overlays_to_multiple_images(input_folder: str,
                                     color_dict: dict,
                                     style: str,
                                     label: str,
-                                    expansion_ratio: float,
-                                    save_gif: bool
+                                    expansion_ratio: float
                                     ) -> None:
     """
     Given a path to a folder containing images,
@@ -464,26 +463,8 @@ def add_overlays_to_multiple_images(input_folder: str,
                                      label=label,
                                      expansion_ratio=expansion_ratio)
 
-    # checking save gif bool
-    if save_gif:
-
-        # saving image sequence as gif/mp4
-        print('saving gif/mp4...')
-        gif_name = 'output.gif'
-        gif_path = join(output_folder,
-                        gif_name)
-        mp4_path = gif_path.replace('.gif', '.mp4')
-        make_gif(input_folder=output_folder,
-                 output_path=gif_path,
-                 extension='.png')
-        # make_gif(input_folder=output_folder,
-        #          output_path=mp4_path,
-        #          extension='.png')
-
     # printing execution message
     f_string = f'overlays added to all {images_num} images!'
-    if save_gif:
-        f_string += f'sequence gif/mp4 saved to {gif_path}'
     print(f_string)
 
 ######################################################################
