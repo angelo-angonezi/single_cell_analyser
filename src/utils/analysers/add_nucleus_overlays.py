@@ -18,6 +18,7 @@ from cv2 import cvtColor
 from os.path import join
 from numpy import ndarray
 from pandas import Series
+from os.path import exists
 from pandas import DataFrame
 from cv2 import COLOR_BGR2RGB
 from cv2 import COLOR_RGB2BGR
@@ -438,6 +439,9 @@ def add_overlays_to_multiple_images(input_folder: str,
                                index=current_image_index,
                                total=images_num)
 
+        # updating current image index
+        current_image_index += 1
+
         # getting image path
         image_name_w_extension = f'{image_name}{images_extension}'
         image_path = join(input_folder, image_name_w_extension)
@@ -446,6 +450,15 @@ def add_overlays_to_multiple_images(input_folder: str,
         output_name = f'{image_name}.png'
         output_path = join(output_folder,
                            output_name)
+
+        # getting exists bool
+        current_image_exists = exists(output_path)
+
+        # checking if current image already exists
+        if current_image_exists:
+
+            # skipping current image
+            continue
 
         # adding overlays to current image
         add_overlays_to_single_image(image_name=image_name,
@@ -457,9 +470,6 @@ def add_overlays_to_multiple_images(input_folder: str,
                                      style=style,
                                      label=label,
                                      expansion_ratio=expansion_ratio)
-
-        # updating current image index
-        current_image_index += 1
 
     # checking save gif bool
     if save_gif:
