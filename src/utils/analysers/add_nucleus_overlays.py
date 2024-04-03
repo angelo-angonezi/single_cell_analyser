@@ -421,13 +421,16 @@ def add_overlays_to_multiple_images(input_folder: str,
     # getting images in input folder
     images = get_specific_files_in_folder(path_to_folder=input_folder,
                                           extension=images_extension)
-    images_num = len(images)
     images_names = [image_name.replace(images_extension, '')
                     for image_name
                     in images]
+    images_num = len(image_names)
+
+    # defining placeholder value for current image index
+    current_image_index = 1
 
     # iterating over images_names
-    for image_index, image_name in enumerate(images_names, 1):
+    for image_name in images_names:
 
         # printing execution message
         progress_base_string = f'adding overlays to image #INDEX# of #TOTAL#'
@@ -455,21 +458,29 @@ def add_overlays_to_multiple_images(input_folder: str,
                                      label=label,
                                      expansion_ratio=expansion_ratio)
 
-    # saving image sequence as gif/mp4
-    print('saving gif/mp4...')
-    gif_name = 'output.gif'
-    gif_path = join(output_folder,
-                    gif_name)
-    mp4_path = gif_path.replace('.gif', '.mp4')
-    make_gif(input_folder=output_folder,
-             output_path=gif_path,
-             extension='.png')
-    # make_gif(input_folder=output_folder,
-    #          output_path=mp4_path,
-    #          extension='.png')
+        # updating current image index
+        current_image_index += 1
+
+    # checking save gif bool
+    if save_gif:
+
+        # saving image sequence as gif/mp4
+        print('saving gif/mp4...')
+        gif_name = 'output.gif'
+        gif_path = join(output_folder,
+                        gif_name)
+        mp4_path = gif_path.replace('.gif', '.mp4')
+        make_gif(input_folder=output_folder,
+                 output_path=gif_path,
+                 extension='.png')
+        # make_gif(input_folder=output_folder,
+        #          output_path=mp4_path,
+        #          extension='.png')
 
     # printing execution message
     f_string = f'overlays added to all {images_num} images!'
+    if save_gif:
+        f_string += f'sequence gif/mp4 saved to {gif_path}'
     print(f_string)
 
 ######################################################################
