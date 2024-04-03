@@ -132,15 +132,6 @@ def get_args_dict() -> dict:
                         required=False,
                         default=1.0)
 
-    # save gif param
-    save_gif_help = 'defines whether to save gif/mp4 of overlays (useful for timelapse sequences)'
-    parser.add_argument('-sg', '--save-gif',
-                        dest='save_gif',
-                        action='store_true',
-                        help=save_gif_help,
-                        required=False,
-                        default=False)
-
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
 
@@ -534,9 +525,6 @@ def main():
     detection_threshold = args_dict['detection_threshold']
     detection_threshold = float(detection_threshold)
 
-    # getting save gif param
-    save_gif = args_dict['save_gif']
-
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
@@ -553,8 +541,7 @@ def main():
                                     color_dict=COLOR_DICT,
                                     style=overlays_style,
                                     label=label,
-                                    expansion_ratio=expansion_ratio,
-                                    save_gif=save_gif)
+                                    expansion_ratio=expansion_ratio)
 
 ######################################################################
 # running main function

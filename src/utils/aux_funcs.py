@@ -2670,33 +2670,5 @@ def get_prediction(prediction: float,
     # returning prediction value
     return current_prediction
 
-
-def make_gif(input_folder: str,
-             output_path: str,
-             extension: str
-             ) -> None:
-    """
-    Given a path to a folder containing images,
-    concatenates images into a gif, saving it
-    to given output path.
-    """
-    # getting files in input folder
-    image_names = get_specific_files_in_folder(path_to_folder=input_folder,
-                                               extension=extension)
-    image_paths = [join(input_folder,
-                        image_name)
-                   for image_name
-                   in image_names]
-
-    # opening images
-    image_list = [Image.open(file) for file in image_paths]
-
-    # saving images as gif
-    image_list[0].save(output_path,
-                       save_all=True,                 # save all images
-                       append_images=image_list[1:],  # append rest of the images
-                       duration=300,                  # in milliseconds
-                       loop=0)                        # if zero, loops
-
 ######################################################################
 # end of current module
