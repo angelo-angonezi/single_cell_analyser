@@ -23,6 +23,7 @@ from cv2 import COLOR_BGR2RGB
 from cv2 import COLOR_RGB2BGR
 from argparse import ArgumentParser
 from cv2 import FONT_HERSHEY_SIMPLEX
+from src.utils.aux_funcs import make_gif
 from src.utils.aux_funcs import draw_circle
 from src.utils.aux_funcs import draw_ellipse
 from src.utils.aux_funcs import draw_rectangle
@@ -129,6 +130,15 @@ def get_args_dict() -> dict:
                         help=expansion_help,
                         required=False,
                         default=1.0)
+
+    # save gif param
+    save_gif_help = 'defines whether to save gif/mp4 of overlays (useful for timelapse sequences)'
+    parser.add_argument('-sg', '--save-gif',
+                        dest='save_gif',
+                        action='store_true',
+                        help=save_gif_help,
+                        required=False,
+                        default=False)
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -382,7 +392,8 @@ def add_overlays_to_multiple_images(input_folder: str,
                                     color_dict: dict,
                                     style: str,
                                     label: str,
-                                    expansion_ratio: float
+                                    expansion_ratio: float,
+                                    save_gif: bool
                                     ) -> None:
     """
     Given a path to a folder containing images,
@@ -430,7 +441,8 @@ def add_overlays_to_multiple_images(input_folder: str,
 
         # getting output path
         output_name = f'{image_name}.png'
-        output_path = join(output_folder, output_name)
+        output_path = join(output_folder,
+                           output_name)
 
         # adding overlays to current image
         add_overlays_to_single_image(image_name=image_name,
@@ -442,6 +454,19 @@ def add_overlays_to_multiple_images(input_folder: str,
                                      style=style,
                                      label=label,
                                      expansion_ratio=expansion_ratio)
+
+    # saving image sequence as gif/mp4
+    print('saving gif/mp4...')
+    gif_name = 'output.gif'
+    gif_path = join(output_folder,
+                    gif_name)
+    mp4_path = gif_path.replace('.gif', '.mp4')
+    make_gif(input_folder=output_folder,
+             output_path=gif_path,
+             extension='.png')
+    # make_gif(input_folder=output_folder,
+    #          output_path=mp4_path,
+    #          extension='.png')
 
     # printing execution message
     f_string = f'overlays added to all {images_num} images!'
@@ -485,6 +510,9 @@ def main():
     detection_threshold = args_dict['detection_threshold']
     detection_threshold = float(detection_threshold)
 
+    # getting save gif param
+    save_gif = args_dict['save_gif']
+
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
@@ -501,7 +529,8 @@ def main():
                                     color_dict=COLOR_DICT,
                                     style=overlays_style,
                                     label=label,
-                                    expansion_ratio=expansion_ratio)
+                                    expansion_ratio=expansion_ratio,
+                                    save_gif=save_gif)
 
 ######################################################################
 # running main function
