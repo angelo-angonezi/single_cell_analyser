@@ -143,28 +143,26 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
 
     # getting base layers
     base_layers = base_model.layers
+    base_layers_num = len(base_layers)
+
+    # printing execution message
+    f_string = f'Num of layers in ResNet based architecture: {base_layers_num}'
+    print(f_string)
 
     # iterating over layers
-    for layer in base_layers:
+    for layer_index, layer in enumerate(base_layers):
 
-        # freezing layer
-        layer.trainable = False
+        # checking layer index
+        if layer_index < 20:
+
+            # freezing layer
+            layer.trainable = False
 
         # adding layer to model
         model.add(layer)
 
     # adding dense/dropout layers
     model.add(Dense(units=1024, activation='relu'))
-    model.add(Dropout(rate=0.5))
-    model.add(Dense(units=512, activation='relu'))
-    model.add(Dropout(rate=0.5))
-    model.add(Dense(units=256, activation='relu'))
-    model.add(Dropout(rate=0.5))
-    model.add(Dense(units=64, activation='relu'))
-    model.add(Dropout(rate=0.5))
-    model.add(Dense(units=32, activation='relu'))
-    model.add(Dropout(rate=0.5))
-    model.add(Dense(units=16, activation='linear'))
     model.add(Dropout(rate=0.5))
 
     # final dense layer
@@ -179,32 +177,6 @@ def get_vgg16_model(input_shape: tuple) -> Sequential:
     Given an input shape, returns
     vgg16-based model.
     """
-    # TODO: test this alternative architecture
-    # inputs = keras.Input(shape=img_size + (3,))
-    # x = data_augmentation(inputs)
-    # x = keras.applications.vgg16.preprocess_input(x)
-    # x = vgg16_base(x)
-    # x = layers.Flatten()(x)
-    # x = layers.BatchNormalization()(x)
-    # x = layers.Dense(256, activation='softplus')(x)
-    # x = layers.BatchNormalization()(x)
-    # x = layers.Dropout(0.5)(x)
-    # x = layers.Dense(256, activation='softplus')(x)
-    # x = layers.BatchNormalization()(x)
-    # x = layers.Dropout(0.5)(x)
-    # x = layers.Dense(256, activation='softplus')(x)
-    # x = layers.BatchNormalization()(x)
-    # x = layers.Dropout(0.5)(x)
-    # x = layers.Dense(256, activation='softplus')(x)
-    # x = layers.BatchNormalization()(x)
-    # x = layers.Dropout(0.5)(x)
-    # outputs = layers.Dense(2, activation="softmax")(x)
-    # vgg16_model = keras.Model(inputs, outputs)
-    # vgg16_model.compile(optimizer="adam",
-    #                     loss="sparse_categorical_crossentropy",
-    #                     metrics=["accuracy"])
-    # vgg16_model.summary()
-
     # defining base model
     model = Sequential()
 
@@ -216,6 +188,11 @@ def get_vgg16_model(input_shape: tuple) -> Sequential:
 
     # getting base layers
     base_layers = base_model.layers
+    base_layers_num = len(base_layers)
+
+    # printing execution message
+    f_string = f'Num of layers in VGG based architecture: {base_layers_num}'
+    print(f_string)
 
     # iterating over layers
     for layer_index, layer in enumerate(base_layers):
