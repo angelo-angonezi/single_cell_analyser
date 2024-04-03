@@ -435,7 +435,7 @@ def add_overlays_to_multiple_images(input_folder: str,
         # printing execution message
         progress_base_string = f'adding overlays to image #INDEX# of #TOTAL#'
         print_progress_message(base_string=progress_base_string,
-                               index=image_index,
+                               index=current_image_index,
                                total=images_num)
 
         # getting image path
