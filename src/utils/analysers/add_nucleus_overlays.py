@@ -415,14 +415,8 @@ def add_overlays_to_multiple_images(input_folder: str,
                     for image_name
                     in images]
 
-    # filtering images list for images present in df
-    images_in_df = merged_df['img_file_name'].to_list()
-    images_names = [image_name for image_name in images_names if image_name in images_in_df]
-
     # iterating over images_names
     for image_index, image_name in enumerate(images_names, 1):
-
-        # TODO: check image correspondence between different dfs!
 
         # printing execution message
         progress_base_string = f'adding overlays to image #INDEX# of #TOTAL#'
