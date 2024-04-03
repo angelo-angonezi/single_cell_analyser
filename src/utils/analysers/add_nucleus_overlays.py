@@ -249,6 +249,9 @@ def add_single_overlay(open_img: ndarray,
         # updating current label
         current_label = det_class
 
+        # getting just first two letters of label (better visualization)
+        current_label = current_label[0:2]
+
     # adding label text
     putText(open_img,
             current_label,
