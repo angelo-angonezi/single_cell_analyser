@@ -337,8 +337,8 @@ def add_overlays_to_single_image(image_name: str,
     annotation_count = len(annotations)
 
     # defining base texts
-    model_text = f'model: {detection_count}'
-    fornma_text = f'fornma: {annotation_count}'
+    model_text = f'Model: {detection_count}'
+    fornma_text = f'GT: {annotation_count}'
     threshold_text = f'DT: {detection_threshold}'
 
     # adding base texts to image corner

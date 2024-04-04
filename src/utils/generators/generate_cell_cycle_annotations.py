@@ -16,7 +16,7 @@ from pandas import DataFrame
 from argparse import ArgumentParser
 from src.utils.aux_funcs import get_cell_cycle
 from src.utils.aux_funcs import enter_to_continue
-from src.utils.aux_funcs import get_cell_cycle_simple
+from src.utils.aux_funcs import get_cell_cycle_binary
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_nucleus_pixel_intensity
@@ -139,11 +139,11 @@ def add_cell_cycle_col(df: DataFrame,
         red_intensity = get_nucleus_pixel_intensity(crop_path=red_path,
                                                     nucleus_width=nucleus_width,
                                                     nucleus_height=nucleus_height,
-                                                    calc='sum')
+                                                    calc='median')
         green_intensity = get_nucleus_pixel_intensity(crop_path=green_path,
                                                       nucleus_width=nucleus_width,
                                                       nucleus_height=nucleus_height,
-                                                      calc='sum')
+                                                      calc='median')
 
         # normalizing values
         # red_intensity = red_intensity / 255
@@ -156,7 +156,7 @@ def add_cell_cycle_col(df: DataFrame,
         #                                min_green_value=MIN_GREEN_VALUE,
         #                                ratio_lower_threshold=RATIO_LOWER_THRESHOLD,
         #                                ratio_upper_threshold=RATIO_UPPER_THRESHOLD)
-        current_class = get_cell_cycle_simple(red_value=red_intensity,
+        current_class = get_cell_cycle_binary(red_value=red_intensity,
                                               green_value=green_intensity)
 
         # updating current row data

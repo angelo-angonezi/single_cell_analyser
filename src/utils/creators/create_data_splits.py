@@ -341,7 +341,7 @@ def main():
 
     # getting balance data param
     # TODO: add logic to this in this code
-    balance_data = args_dict['balance_data']
+    # balance_data = args_dict['balance_data']
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)

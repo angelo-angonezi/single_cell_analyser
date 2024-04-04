@@ -1926,7 +1926,7 @@ def get_erk_level(nucleus_cytoplasm_ratio: float) -> str:
     return erk_level
 
 
-def get_cell_cycle_simple(red_value: float,
+def get_cell_cycle_binary(red_value: float,
                           green_value: float
                           ) -> str:
     """
@@ -1937,28 +1937,15 @@ def get_cell_cycle_simple(red_value: float,
     # defining placeholder value for cell cycle
     cell_cycle = None
 
-    # checking if red/green values are both zero
-    if green_value > red_value:
-
-        # then, no cell cycle attributed
-        cell_cycle = 'G2'
-
-    # if red value higher than green
-    elif red_value > green_value:
+    if red_value >= green_value:
 
         # then, cell cycle must be 'G1' (red)
         cell_cycle = 'G1'
 
-    elif red_value == green_value:
-
-        # then, cell cycle must be S, unlikely
-        cell_cycle = 'S'
-
-    # if none is bigger/relevant
     else:
 
-        # then,
-        cell_cycle = '-'
+        # then, cell cycle must be 'G2' (green)
+        cell_cycle = 'G2'
 
     # returning cell cycle
     return cell_cycle
@@ -1978,11 +1965,6 @@ def get_cell_cycle(red_value: float,
     """
     # defining placeholder value for cell cycle
     cell_cycle = None
-
-    # TODO: remove once test completed
-    cell_cycle = get_cell_cycle_simple(red_value=red_value,
-                                       green_value=green_value)
-    return cell_cycle
 
     # getting min values bool
     just_red = (red_value >= min_red_value) and (green_value < min_green_value)
