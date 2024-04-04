@@ -398,7 +398,7 @@ def get_classification_model(input_shape: tuple,
     else:
 
         # getting new layers
-        model = get_alexnet_model(input_shape=input_shape)
+        model = get_simple_model(input_shape=input_shape)
 
     # defining optimizer
     optimizer = Adam(learning_rate=learning_rate)
