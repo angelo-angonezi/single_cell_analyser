@@ -347,7 +347,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # splitting data
     create_data_splits(annotations_file=annotations_file,
