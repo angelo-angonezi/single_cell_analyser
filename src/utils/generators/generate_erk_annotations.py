@@ -135,7 +135,8 @@ def add_erk_col(df: DataFrame,
                                       ring_expansion=ring_expansion)
 
         # getting current crop erk level
-        current_class = get_erk_level(nucleus_cytoplasm_ratio=current_ratio)
+        # current_class = get_erk_level(nucleus_cytoplasm_ratio=current_ratio)
+        current_class = round(current_ratio, 2)
 
         # updating current row data
         df.at[row_index, col_name] = current_class
