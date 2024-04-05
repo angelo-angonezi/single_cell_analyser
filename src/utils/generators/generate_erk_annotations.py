@@ -171,7 +171,7 @@ def generate_erk_annotations(crops_file: str,
                          index=False)
 
     # printing execution message
-    print(f'output saved to {output_path}')
+    print(f'output saved to "{output_path}"')
     print('analysis complete!')
 
 ######################################################################
