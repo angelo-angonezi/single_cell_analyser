@@ -13,6 +13,7 @@ print('initializing...')  # noqa
 print('importing required libraries...')  # noqa
 from cv2 import imwrite
 from os.path import join
+from cv2 import convertScaleAbs
 from numpy import uint8 as np_uint8
 from argparse import ArgumentParser
 from src.utils.aux_funcs import enter_to_continue
@@ -87,7 +88,7 @@ def generate_foci_segmentation_mask(input_path: str,
     segmentation_mask = load_grayscale_img(image_path=input_path)
 
     # changing image contrast
-    # segmentation_mask =
+    segmentation_mask = convertScaleAbs()
 
     # normalizing scale
     img_min = segmentation_mask.min()

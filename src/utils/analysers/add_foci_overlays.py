@@ -104,26 +104,16 @@ def add_overlays_to_single_image(image_path: str,
     saving results to given output path.
     """
     # opening image/mask
-    image = load_bgr_img(image_path=image_path)
+    image = load_grayscale_img(image_path=image_path)
     mask = load_grayscale_img(image_path=mask_path)
 
-    # finding mask contours
-    contours, _ = findContours(mask, RETR_EXTERNAL, CHAIN_APPROX_NONE)
+    # updating output path
+    image_output_path = output_path.replace('.tif', '_image.tif')
+    mask_output_path = output_path.replace('.tif', '_mask.tif')
 
-    # defining contour parameters
-    thickness = 1
-    color = (0, 255, 0)
-
-    # drawing contours on image
-    drawContours(image,
-                 contours,
-                 -1,
-                 color,
-                 thickness)
-
-    # saving image
-    imwrite(output_path,
-            image)
+    # saving image/mask
+    imwrite(image_output_path, image)
+    imwrite(mask_output_path, mask)
 
 
 def add_overlays_to_multiple_images(input_folder: str,
