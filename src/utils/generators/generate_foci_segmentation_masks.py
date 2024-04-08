@@ -13,12 +13,10 @@ print('initializing...')  # noqa
 print('importing required libraries...')  # noqa
 from cv2 import imwrite
 from os.path import join
-from pandas import DataFrame
 from numpy import uint8 as np_uint8
 from argparse import ArgumentParser
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import load_grayscale_img
-from src.utils.aux_funcs import get_segmentation_mask
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import get_specific_files_in_folder
@@ -87,6 +85,9 @@ def generate_foci_segmentation_mask(input_path: str,
     """
     # reading image as grayscale
     segmentation_mask = load_grayscale_img(image_path=input_path)
+
+    # changing image contrast
+    # segmentation_mask =
 
     # normalizing scale
     img_min = segmentation_mask.min()
