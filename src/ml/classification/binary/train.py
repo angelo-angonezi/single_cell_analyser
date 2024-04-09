@@ -371,13 +371,29 @@ def get_new_model(input_shape: tuple) -> Sequential:
     # defining base model
     model = Sequential()
 
-    model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=input_shape))
-    model.add(Conv2D(64, (3, 3), activation='relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
+    # defining CNN layers
+
+    # first convolution + pooling (input layer)
+    model.add(Conv2D(filters=16,
+                     kernel_size=(3, 3),
+                     strides=1,
+                     activation='relu',
+                     input_shape=input_shape))
+    model.add(MaxPooling2D())
+
+    # first convolution + pooling (input layer)
+    model.add(Conv2D(filters=32,
+                     kernel_size=(3, 3),
+                     strides=1,
+                     activation='relu'))
+    model.add(MaxPooling2D())
+
+    # flattening layer
     model.add(Flatten())
-    model.add(Dense(128, activation='relu'))
-    model.add(Dropout(0.5))
+
+    # mid-dense + dropout layers
+    model.add(Dense(units=256, activation='relu'))
+    model.add(Dropout(rate=0.5))
 
     # final dense layer
     model.add(Dense(units=1, activation='sigmoid'))
