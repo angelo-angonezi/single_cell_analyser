@@ -385,7 +385,8 @@ def get_new_model(input_shape: tuple) -> Sequential:
     model.add(Conv2D(filters=32,
                      kernel_size=(3, 3),
                      strides=1,
-                     activation='relu'))
+                     activation='relu',
+                     input_shape=input_shape))
     model.add(MaxPooling2D())
 
     # flattening layer
