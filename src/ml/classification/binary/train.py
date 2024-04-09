@@ -207,6 +207,8 @@ def get_vgg16_model(input_shape: tuple) -> Sequential:
         model.add(layer)
 
     # mid-dense + dropout layers
+    model.add(Dense(units=512, activation='relu'))
+    model.add(Dropout(rate=0.5))
     model.add(Dense(units=256, activation='relu'))
     model.add(Dropout(rate=0.5))
 
