@@ -371,31 +371,13 @@ def get_new_model(input_shape: tuple) -> Sequential:
     # defining base model
     model = Sequential()
 
-    # convolutional layers
-    model.add(Conv2D(128, kernel_size=(3, 3), activation='relu', input_shape=input_shape))
+    model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=input_shape))
+    model.add(Conv2D(64, (3, 3), activation='relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.4))
-
-    model.add(Conv2D(256, kernel_size=(3, 3), activation='relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.4))
-
-    model.add(Conv2D(512, kernel_size=(3, 3), activation='relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.4))
-
-    model.add(Conv2D(512, kernel_size=(3, 3), activation='relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.4))
-
-    # flattening
+    model.add(Dropout(0.25))
     model.add(Flatten())
-
-    # fully connected layers
-    model.add(Dense(512, activation='relu'))
-    model.add(Dropout(0.4))
-    model.add(Dense(256, activation='relu'))
-    model.add(Dropout(0.3))
+    model.add(Dense(128, activation='relu'))
+    model.add(Dropout(0.5))
 
     # final dense layer
     model.add(Dense(units=1, activation='sigmoid'))
