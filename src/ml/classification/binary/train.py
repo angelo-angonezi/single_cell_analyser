@@ -314,7 +314,7 @@ def get_simple_model(input_shape: tuple) -> Sequential:
 def get_alexnet_model(input_shape: tuple) -> Sequential:
     """
     Given an input shape, returns
-    new self-made model.
+    alexnet-based model.
     """
     # defining base model
     model = Sequential()
@@ -363,6 +363,48 @@ def get_alexnet_model(input_shape: tuple) -> Sequential:
     return model
 
 
+def get_new_model(input_shape: tuple) -> Sequential:
+    """
+    Given an input shape, returns
+    new self-made model.
+    """
+    # defining base model
+    model = Sequential()
+
+    # convolutional layers
+    model.add(Conv2D(128, kernel_size=(3, 3), activation='relu', input_shape=input_shape))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.4))
+
+    model.add(Conv2D(256, kernel_size=(3, 3), activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.4))
+
+    model.add(Conv2D(512, kernel_size=(3, 3), activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.4))
+
+    model.add(Conv2D(512, kernel_size=(3, 3), activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.4))
+
+    # flattening
+    model.add(Flatten())
+
+    # fully connected layers
+    model.add(Dense(512, activation='relu'))
+    model.add(Dropout(0.4))
+    model.add(Dense(256, activation='relu'))
+    model.add(Dropout(0.3))
+
+    # final dense layer
+    model.add(Dense(units=1, activation='sigmoid'))
+
+    # returning model
+    return model
+
+
+
 def get_classification_model(input_shape: tuple,
                              learning_rate: float,
                              model_type: str
@@ -400,7 +442,7 @@ def get_classification_model(input_shape: tuple,
     else:
 
         # getting new layers
-        model = get_simple_model(input_shape=input_shape)
+        model = get_new_model(input_shape=input_shape)
 
     # defining optimizer
     optimizer = Adam(learning_rate=learning_rate)
