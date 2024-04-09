@@ -169,17 +169,12 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
     f_string = f'Num of layers in VGG based architecture: {base_layers_num}'
     print(f_string)
 
-    # iterating over layers
-    for layer_index, layer in enumerate(base_layers):
+    # setting layers as untrainable
+    for base_layer in base_layers:
+        base_layer.trainable = False
 
-        # checking layer index
-        if layer_index < 20:
-
-            # freezing layer
-            layer.trainable = False
-
-        # adding layer to model
-        model.add(layer)
+    # adding layers to model
+    model.add(base_layers)
 
     # mid-dense + dropout layers
     model.add(Dense(units=512, activation='relu'))
