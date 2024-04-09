@@ -156,18 +156,36 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
     model = Sequential()
 
     # getting resnet base layers
-    # TODO: conferir preprocess input de cada modelo
-    base_layers = ResNet50(include_top=False,
-                           input_shape=input_shape,
-                           pooling='max',
-                           weights='imagenet')
+    base_model = ResNet50(include_top=False,
+                          input_shape=input_shape,
+                          pooling='max',
+                          weights='imagenet')
 
-    # setting resnet layers as untrainable
-    for layer in base_layers.layers:
-        layer.trainable = False
+    # getting base layers
+    base_layers = base_model.layers
+    base_layers_num = len(base_layers)
 
-    # adding resnet layers
-    model.add(base_layers)
+    # printing execution message
+    f_string = f'Num of layers in VGG based architecture: {base_layers_num}'
+    print(f_string)
+
+    # iterating over layers
+    for layer_index, layer in enumerate(base_layers):
+
+        # checking layer index
+        if layer_index < 20:
+
+            # freezing layer
+            layer.trainable = False
+
+        # adding layer to model
+        model.add(layer)
+
+    # mid-dense + dropout layers
+    model.add(Dense(units=512, activation='relu'))
+    model.add(Dropout(rate=0.5))
+    model.add(Dense(units=256, activation='relu'))
+    model.add(Dropout(rate=0.5))
 
     # final dense layer
     model.add(Dense(1, activation='linear'))
