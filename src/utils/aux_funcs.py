@@ -2613,6 +2613,9 @@ def get_prediction(prediction: float,
         # converting prediction to float
         current_prediction = float(prediction)
 
+        # adjusting scale (based on training data normalizer)
+        current_prediction = current_prediction * 20
+
     elif phenotype == 'cell_cycle':
 
         # converting prediction to string
