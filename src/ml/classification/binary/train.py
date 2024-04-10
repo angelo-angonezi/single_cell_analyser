@@ -39,6 +39,7 @@ from keras.layers import GlobalAveragePooling2D
 from keras.applications import InceptionResNetV2
 from keras.callbacks import LearningRateScheduler
 from src.utils.aux_funcs import enter_to_continue
+from tensorflow.keras.callbacks import EarlyStopping
 from src.utils.aux_funcs import generate_history_plot
 from src.utils.aux_funcs import get_data_split_from_df
 from src.utils.aux_funcs import print_execution_parameters
@@ -313,11 +314,15 @@ def get_classification_model(input_shape: tuple,
     # defining metrics
     metrics = [BinaryAccuracy()]
 
+    # defining loss regularization
+    loss_regularization = 0.01
+
     # compiling model
     print('compiling model...')
     model.compile(optimizer=optimizer,
                   loss=loss,
-                  metrics=metrics)
+                  metrics=metrics,
+                  loss_regularization_strength=loss_regularization)
 
     # printing model summary
     print('printing model summary...')
@@ -384,15 +389,16 @@ def binary_classification_train(splits_folder: str,
 
     # defining callback
     # TODO: add ReduceLR on plateau
-    tensorboard_callback = TensorBoard(log_dir=logs_folder)
+    # tensorboard_callback = TensorBoard(log_dir=logs_folder)
     # lr_callback = LearningRateScheduler(scheduler)
+    early_stopping = EarlyStopping(monitor='val_accuracy', patience=3)
 
     # training model (and saving history)
     train_history = train_model(model=model,
                                 train_data=train_data,
                                 val_data=val_data,
                                 epochs=epochs,
-                                callback=tensorboard_callback)
+                                callback=early_stopping)
 
     # saving model
     print('saving model...')
