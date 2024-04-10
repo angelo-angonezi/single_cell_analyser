@@ -385,17 +385,17 @@ def binary_classification_train(splits_folder: str,
 
     # defining callback
     # TODO: add ReduceLR on plateau
-    # tensorboard_callback = TensorBoard(log_dir=logs_folder)
+    tensorboard_callback = TensorBoard(log_dir=logs_folder)
     # lr_callback = LearningRateScheduler(scheduler)
-    early_stopping = EarlyStopping(monitor='val_binary_accuracy',
-                                   patience=5)
+    # early_stopping = EarlyStopping(monitor='val_binary_accuracy',
+    #                                patience=5)
 
     # training model (and saving history)
     train_history = train_model(model=model,
                                 train_data=train_data,
                                 val_data=val_data,
                                 epochs=epochs,
-                                callback=early_stopping)
+                                callback=tensorboard_callback)
 
     # saving model
     print('saving model...')
