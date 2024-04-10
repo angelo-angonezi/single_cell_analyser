@@ -172,7 +172,7 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
     return model
 
 
-def get_vgg16_model(input_shape: tuple) -> Sequential:
+def get_vgg_model(input_shape: tuple) -> Sequential:
     """
     Given an input shape, returns
     vgg16-based model.
@@ -207,9 +207,9 @@ def get_vgg16_model(input_shape: tuple) -> Sequential:
         model.add(layer)
 
     # mid-dense + dropout layers
-    model.add(Dense(units=512, activation='relu'))
+    model.add(Dense(units=64, activation='relu'))
     model.add(Dropout(rate=0.5))
-    model.add(Dense(units=256, activation='relu'))
+    model.add(Dense(units=32, activation='relu'))
     model.add(Dropout(rate=0.5))
 
     # final dense layer
@@ -427,8 +427,8 @@ def get_classification_model(input_shape: tuple,
 
     elif model_type == 'vgg':
 
-        # getting vgg16 layers
-        model = get_vgg16_model(input_shape=input_shape)
+        # getting vgg layers
+        model = get_vgg_model(input_shape=input_shape)
 
     elif model_type == 'alexnet':
 
