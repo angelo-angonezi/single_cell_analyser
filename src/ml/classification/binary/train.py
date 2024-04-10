@@ -208,7 +208,7 @@ def get_vgg_model(input_shape: tuple) -> Sequential:
         model.add(layer)
 
     # defining regularizer
-    regularizer = l2(0.001)
+    regularizer = l2(0.0001)
 
     # mid-dense + dropout layers
     model.add(Dense(units=256,
@@ -223,47 +223,7 @@ def get_vgg_model(input_shape: tuple) -> Sequential:
     return model
 
 
-def get_inception_model(input_shape: tuple) -> Sequential:
-    """
-    Given an input shape, returns
-    inception-based model.
-    """
-    # defining base model
-    model = Sequential()
-
-    # getting base model
-    base_model = InceptionResNetV2(include_top=False,
-                                   input_shape=input_shape,
-                                   pooling='max',
-                                   weights='imagenet')
-
-    # getting base layers
-    base_layers = base_model.layers
-
-    # iterating over layers
-    for layer in base_layers:
-
-        # freezing layer
-        layer.trainable = False
-
-        # adding layer to model
-        model.add(layer)
-
-    # mid-dense + dropout layers
-    model.add(Dense(units=512, activation='relu'))
-    model.add(Dropout(rate=0.5))
-    model.add(Dense(units=128, activation='relu'))
-    model.add(Dropout(rate=0.5))
-    model.add(Dense(units=32, activation='relu'))
-
-    # final dense layer
-    model.add(Dense(units=1, activation='sigmoid'))
-
-    # returning model
-    return model
-
-
-def get_simple_model(input_shape: tuple) -> Sequential:
+def get_new_model(input_shape: tuple) -> Sequential:
     """
     Given an input shape, returns
     new self-made model.
@@ -315,87 +275,6 @@ def get_simple_model(input_shape: tuple) -> Sequential:
     return model
 
 
-def get_alexnet_model(input_shape: tuple) -> Sequential:
-    """
-    Given an input shape, returns
-    alexnet-based model.
-    """
-    # defining base model
-    model = Sequential()
-
-    # defining CNN layers
-
-    # Layer 1: Convolutional layer with 64 filters of size 11x11x3
-    model.add(Conv2D(filters=64,
-                     kernel_size=(11, 11),
-                     strides=(4, 4),
-                     padding='valid',
-                     activation='relu',
-                     input_shape=input_shape))
-
-    # Layer 2: Max pooling layer with pool size of 3x3
-    model.add(MaxPooling2D(pool_size=(3, 3),
-                           strides=(2, 2)))
-
-    # Layer 3-5: 3 more convolutional layers with similar structure as Layer 1
-    model.add(Conv2D(filters=192,
-                     kernel_size=(5, 5),
-                     padding='same',
-                     activation='relu'))
-    model.add(MaxPooling2D(pool_size=(3, 3),
-                           strides=(2, 2)))
-    model.add(Conv2D(filters=384, kernel_size=(3, 3),
-                     padding='same',
-                     activation='relu'))
-    model.add(Conv2D(filters=256, kernel_size=(3, 3),
-                     padding='same',
-                     activation='relu'))
-    model.add(MaxPooling2D(pool_size=(3, 3),
-                           strides=(2, 2)))
-    model.add(Flatten())
-
-    model.add(Dense(units=1024, activation='relu'))
-    model.add(Dropout(rate=0.5))
-    model.add(Dense(units=256, activation='relu'))
-    model.add(Dropout(rate=0.5))
-
-    # final dense layer
-    model.add(Dense(units=1, activation='sigmoid'))
-
-    # returning model
-    return model
-
-
-def get_new_model(input_shape: tuple) -> Sequential:
-    """
-    Given an input shape, returns
-    new self-made model.
-    """
-    # defining base model
-    model = Sequential()
-
-    # defining CNN layers
-
-    model.add(Conv2D(32, (3, 3), input_shape=input_shape, activation='relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-
-    model.add(Conv2D(32, (3, 3), activation='relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-
-    model.add(Conv2D(64, (3, 3), activation='relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-
-    model.add(Flatten())
-    model.add(Dense(64, activation='relu'))
-    model.add(Dropout(0.5))
-
-    # final dense layer
-    model.add(Dense(units=1, activation='sigmoid'))
-
-    # returning model
-    return model
-
-
 def get_classification_model(input_shape: tuple,
                              learning_rate: float,
                              model_type: str
@@ -415,20 +294,10 @@ def get_classification_model(input_shape: tuple,
         # getting resnet layers
         model = get_resnet_model(input_shape=input_shape)
 
-    elif model_type == 'inception':
-
-        # getting inception layers
-        model = get_inception_model(input_shape=input_shape)
-
     elif model_type == 'vgg':
 
         # getting vgg layers
         model = get_vgg_model(input_shape=input_shape)
-
-    elif model_type == 'alexnet':
-
-        # getting alexnet layers
-        model = get_alexnet_model(input_shape=input_shape)
 
     else:
 
@@ -437,7 +306,6 @@ def get_classification_model(input_shape: tuple,
 
     # defining optimizer
     optimizer = Adam(learning_rate=learning_rate)
-    # optimizer = RMSprop(learning_rate=learning_rate)
 
     # defining loss function
     loss = BinaryCrossentropy()
