@@ -348,13 +348,12 @@ def get_alexnet_model(input_shape: tuple) -> Sequential:
                      activation='relu'))
     model.add(MaxPooling2D(pool_size=(3, 3),
                            strides=(2, 2)))
-
-    # Layer 6: Fully connected layer with 4096 neurons
     model.add(Flatten())
-    model.add(Dense(4096, activation='relu'))
 
-    # Layer 7: Fully connected layer with 4096 neurons
-    model.add(Dense(4096, activation='relu'))
+    model.add(Dense(units=1024, activation='relu'))
+    model.add(Dropout(rate=0.5))
+    model.add(Dense(units=256, activation='relu'))
+    model.add(Dropout(rate=0.5))
 
     # final dense layer
     model.add(Dense(units=1, activation='sigmoid'))
@@ -400,7 +399,6 @@ def get_new_model(input_shape: tuple) -> Sequential:
 
     # returning model
     return model
-
 
 
 def get_classification_model(input_shape: tuple,
