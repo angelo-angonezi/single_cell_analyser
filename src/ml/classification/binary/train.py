@@ -314,15 +314,11 @@ def get_classification_model(input_shape: tuple,
     # defining metrics
     metrics = [BinaryAccuracy()]
 
-    # defining loss regularization
-    loss_regularization = 0.01
-
     # compiling model
     print('compiling model...')
     model.compile(optimizer=optimizer,
                   loss=loss,
-                  metrics=metrics,
-                  loss_regularization_strength=loss_regularization)
+                  metrics=metrics)
 
     # printing model summary
     print('printing model summary...')
