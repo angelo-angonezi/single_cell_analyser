@@ -90,13 +90,6 @@ def generate_foci_segmentation_mask(input_path: str,
     # changing image contrast
     # segmentation_mask = convertScaleAbs()
 
-    # normalizing scale
-    img_min = segmentation_mask.min()
-    img_max = segmentation_mask.max()
-    segmentation_mask = segmentation_mask - img_min
-    segmentation_mask = segmentation_mask / img_max
-    segmentation_mask = segmentation_mask * 255
-
     # converting image to binary
     segmentation_mask[segmentation_mask < min_pixel_intensity] = 0
     segmentation_mask[segmentation_mask >= min_pixel_intensity] = 255
