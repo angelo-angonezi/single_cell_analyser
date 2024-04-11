@@ -44,7 +44,7 @@ def get_args_dict() -> dict:
     parser.add_argument('-i', '--input-folder',
                         dest='input_folder',
                         required=True,
-                        help='defines path to folder containing fluorescent crops')
+                        help='defines path to folder containing fluorescent crops (8-bit)')
 
     # images extension param
     parser.add_argument('-x', '--images-extension',
@@ -62,7 +62,7 @@ def get_args_dict() -> dict:
     parser.add_argument('-p', '--min-pixel-intensity',
                         dest='min_pixel_intensity',
                         required=True,
-                        help='defines pixel intensity threshold to be used (int)')
+                        help='defines pixel intensity threshold to be used (int 0-255)')
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
