@@ -89,7 +89,7 @@ def generate_foci_segmentation_mask(input_path: str,
 
     # defining contrast parameters
     alpha = 1.1  # contrast control
-    beta = 5     # brightness control
+    beta = -5     # brightness control
 
     # changing image contrast
     segmentation_mask = convertScaleAbs(segmentation_mask,
