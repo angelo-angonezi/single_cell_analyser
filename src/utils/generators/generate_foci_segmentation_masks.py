@@ -87,8 +87,14 @@ def generate_foci_segmentation_mask(input_path: str,
     # reading image as grayscale
     segmentation_mask = load_grayscale_img(image_path=input_path)
 
+    # defining contrast parameters
+    alpha = 1.1  # contrast control
+    beta = 5     # brightness control
+
     # changing image contrast
-    # segmentation_mask = convertScaleAbs()
+    segmentation_mask = convertScaleAbs(segmentation_mask,
+                                        alpha=alpha,
+                                        beta=beta)
 
     # converting image to binary
     segmentation_mask[segmentation_mask < min_pixel_intensity] = 0
