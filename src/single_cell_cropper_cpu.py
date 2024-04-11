@@ -9,7 +9,6 @@ print('initializing...')  # noqa
 # importing required libraries
 
 print('importing required libraries...')  # noqa
-from time import sleep
 from cv2 import imwrite
 from os.path import join
 from numpy import ndarray
@@ -36,7 +35,6 @@ from src.utils.aux_funcs import add_experiment_cols
 from scipy.ndimage import rotate as scp_rotate
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
-sleep(0.8)
 
 #####################################################################
 # defining global variables

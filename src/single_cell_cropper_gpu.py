@@ -9,7 +9,6 @@ print('initializing...')  # noqa
 # importing required libraries
 
 print('importing required libraries...')  # noqa
-from time import sleep
 from os import environ
 from cv2 import imwrite
 from os.path import join
@@ -39,7 +38,6 @@ from src.utils.aux_funcs import add_experiment_cols
 from cupyx.scipy.ndimage import rotate as scp_rotate
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
-sleep(0.8)
 
 #####################################################################
 # defining global variables
@@ -728,7 +726,7 @@ def main():
     print_gpu_usage()
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running single cell cropper function
     single_cell_cropper(input_folder=input_folder,

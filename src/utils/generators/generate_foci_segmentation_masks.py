@@ -88,7 +88,7 @@ def generate_foci_segmentation_mask(input_path: str,
     segmentation_mask = load_grayscale_img(image_path=input_path)
 
     # changing image contrast
-    segmentation_mask = convertScaleAbs()
+    # segmentation_mask = convertScaleAbs()
 
     # normalizing scale
     img_min = segmentation_mask.min()
