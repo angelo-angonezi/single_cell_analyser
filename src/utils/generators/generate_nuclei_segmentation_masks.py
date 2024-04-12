@@ -105,9 +105,6 @@ def create_segmentation_masks(df: DataFrame,
                                                   style='ellipse',
                                                   expansion_ratio=expansion_ratio)
 
-        # converting image to binary
-        segmentation_mask[segmentation_mask > 0] = 255
-
         # converting int type
         segmentation_mask = segmentation_mask.astype(np_uint8)
 

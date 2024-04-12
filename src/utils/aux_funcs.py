@@ -1242,7 +1242,8 @@ def get_iou(mask_a: ndarray,
 
 def get_pixel_mask(row_data: Series,
                    style: str,
-                   expansion_ratio: float = 1.0
+                   expansion_ratio: float = 1.0,
+                   crop_index: int = 1
                    ) -> ndarray:
     """
     Given an open image, and coordinates for OBB,
@@ -1259,8 +1260,8 @@ def get_pixel_mask(row_data: Series,
     width = width * expansion_ratio
     height = height * expansion_ratio
 
-    # defining color (same for all styles)
-    color = (1,)
+    # defining color (based on crop index)
+    color = (crop_index,)
 
     # defining base image
     base_img = get_blank_image(width=IMAGE_WIDTH,
@@ -1376,16 +1377,23 @@ def get_segmentation_mask(df: DataFrame,
     # getting df rows
     df_rows = df.iterrows()
 
+    # defining starter for current_crop_index
+    current_crop_index = 1
+
     # iterating over df rows
     for row_index, row_data in df_rows:
 
         # getting current row pixel mask
         current_mask = get_pixel_mask(row_data=row_data,
                                       style=style,
-                                      expansion_ratio=expansion_ratio)
+                                      expansion_ratio=expansion_ratio,
+                                      crop_index=current_crop_index)
 
         # overlaying current mask on base img
         base_img = np_add(base_img, current_mask)
+
+        # updating current_crop_index
+        current_crop_index += 1
 
     # returning base img
     return base_img
