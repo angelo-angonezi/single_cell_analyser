@@ -1903,7 +1903,7 @@ def get_erk_ratio(crop_path: str,
     ring_mean = nucleus_ring_pixels.mean()
 
     # getting current crop erk ratio
-    erk_ratio = nucleus_mean / ring_mean
+    erk_ratio = ring_mean / nucleus_mean
 
     # returning crop ratio
     return erk_ratio
