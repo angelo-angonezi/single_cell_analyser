@@ -248,7 +248,8 @@ def get_balanced_df(df: DataFrame) -> DataFrame:
     for df_name, df_group in df_groups:
 
         # getting df group sample (applying undersampling)
-        current_sample = df_group.sample(n=min_group_len)
+        current_sample = df_group.sample(n=min_group_len,
+                                         random_state=SEED)
 
         # appending current sample to dfs list
         dfs_list.append(current_sample)
