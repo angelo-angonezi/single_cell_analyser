@@ -209,16 +209,17 @@ def get_vgg_model(input_shape: tuple) -> Sequential:
         model.add(layer)
 
     # defining regularizer
-    regularizer = l2(0.0001)
+    regularizer = l2(0.00001)
 
     # mid-dense + dropout layers
     model.add(Dense(units=512,
                     activation='relu',
                     kernel_regularizer=regularizer))
+    model.add(Dropout(rate=0.6))
     model.add(Dense(units=256,
                     activation='relu',
                     kernel_regularizer=regularizer))
-    model.add(Dropout(rate=0.5))
+    model.add(Dropout(rate=0.6))
 
     # final dense layer
     model.add(Dense(units=1, activation='sigmoid'))
@@ -390,7 +391,6 @@ def binary_classification_train(splits_folder: str,
                                      model_type=model_type)
 
     # defining callback
-    # TODO: add ReduceLR on plateau
     tensorboard_callback = TensorBoard(log_dir=logs_folder)
     # lr_callback = LearningRateScheduler(scheduler)
     # early_stopping = EarlyStopping(monitor='val_binary_accuracy',
