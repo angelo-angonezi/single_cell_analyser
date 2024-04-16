@@ -253,6 +253,12 @@ def get_balanced_df(df: DataFrame) -> DataFrame:
         # appending current sample to dfs list
         dfs_list.append(current_sample)
 
+        # printing execution message
+        current_group_len = len(df_group)
+        current_sample_len = len(current_sample)
+        f_string = f'group "{df_name}" had {current_group_len} instanced, now has {current_sample_len}'
+        print(f_string)
+
     # concatenating dfs in dfs list
     final_df = concat(dfs_list,
                       ignore_index=True)
