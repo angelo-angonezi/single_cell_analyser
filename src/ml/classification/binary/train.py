@@ -209,7 +209,7 @@ def get_vgg_model(input_shape: tuple) -> Sequential:
         model.add(layer)
 
     # defining regularizer
-    regularizer = l2(0.00001)
+    regularizer = l2(0.0001)
 
     # mid-dense + dropout layers
     model.add(Dense(units=512,
