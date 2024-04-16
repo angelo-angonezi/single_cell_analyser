@@ -209,12 +209,18 @@ def get_vgg_model(input_shape: tuple) -> Sequential:
         model.add(layer)
 
     # defining regularizer
-    regularizer = l2(0.0001)
+    # regularizer = l2(0.0001)
 
     # mid-dense + dropout layers
+    # model.add(Dense(units=256,
+    #                 activation='relu',
+    #                 kernel_regularizer=regularizer))
+    # model.add(Dropout(rate=0.5))
+    model.add(Dense(units=512,
+                    activation='relu'))
+    model.add(Dropout(rate=0.5))
     model.add(Dense(units=256,
-                    activation='relu',
-                    kernel_regularizer=regularizer))
+                    activation='relu'))
     model.add(Dropout(rate=0.5))
 
     # final dense layer
