@@ -380,6 +380,9 @@ def binary_classification_train(splits_folder: str,
                                       batch_size=batch_size,
                                       class_mode='binary')
 
+    # waiting for user input
+    enter_to_continue()
+
     # getting model
     print('getting model...')
     model = get_classification_model(input_shape=input_shape,

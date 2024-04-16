@@ -1458,9 +1458,11 @@ def get_data_split_from_df(splits_folder: str,
     cols_to_keep = ['crop_path', 'class']
     filtered_df = filtered_df[cols_to_keep]
 
+    # defining rescaler
+    rescaler = 1.0 / 255
+
     # creating image data generator object (and defining normalization)
-    # TODO: check preprocess input
-    image_generator = ImageDataGenerator(rescale=1.0 / 255)
+    image_generator = ImageDataGenerator(rescale=rescaler)
 
     # loading data
     print(f'loading data from folder "{current_split_folder}"...')
