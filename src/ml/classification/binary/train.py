@@ -215,9 +215,11 @@ def get_vgg_model(input_shape: tuple) -> Sequential:
     model.add(Dense(units=512,
                     activation='relu',
                     kernel_regularizer=regularizer))
+    model.add(Dropout(rate=0.4))
     model.add(Dense(units=256,
                     activation='relu',
                     kernel_regularizer=regularizer))
+    model.add(Dropout(rate=0.4))
 
     # final dense layer
     model.add(Dense(units=1, activation='sigmoid'))
