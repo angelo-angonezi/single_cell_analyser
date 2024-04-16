@@ -235,7 +235,7 @@ def get_balanced_df(df: DataFrame) -> DataFrame:
 
     # getting group lengths
     group_lengths = [len(current_df)
-                     for current_df
+                     for _, current_df
                      in df_groups]
 
     # defining placeholder value for min_group_len
