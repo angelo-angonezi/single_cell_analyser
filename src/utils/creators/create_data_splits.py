@@ -12,6 +12,7 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 from os.path import join
+from pandas import concat
 from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
@@ -69,6 +70,14 @@ def get_args_dict() -> dict:
                         dest='output_folder',
                         required=True,
                         help='defines path to folder containing train/val/test subfolders.')
+
+    # balance data param
+    parser.add_argument('-b', '--balance-data',
+                        dest='balance_data',
+                        action='store_true',
+                        required=False,
+                        default=False,
+                        help='defines whether to use undersampling to balance data.')
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -211,10 +220,52 @@ def add_class_group_col(df: DataFrame) -> None:
         df['class_group'] = df['class'].astype(str)
 
 
+def get_balanced_df(df: DataFrame) -> DataFrame:
+    """
+    Given a crops info / annotations df,
+    applies undersampling and returns
+    balanced df, according to class
+    group col.
+    """
+    # defining group col
+    group_col = 'class_group'
+
+    # checking class group lengths
+    df_groups = df.groupby(group_col)
+
+    # getting group lengths
+    group_lengths = [len(current_df)
+                     for current_df
+                     in df_groups]
+
+    # defining placeholder value for min_group_len
+    min_group_len = min(group_lengths)
+
+    # defining placeholder value for dfs list
+    dfs_list = []
+
+    # iterating over df groups
+    for df_name, df_group in df_groups:
+
+        # getting df group sample (applying undersampling)
+        current_sample = df_group.sample(n=min_group_len)
+
+        # appending current sample to dfs list
+        dfs_list.append(current_sample)
+
+    # concatenating dfs in dfs list
+    final_df = concat(dfs_list,
+                      ignore_index=True)
+
+    # returning balanced df
+    return final_df
+
+
 def create_data_splits(annotations_file: str,
                        images_folder: str,
                        extension: str,
-                       output_folder: str
+                       output_folder: str,
+                       balance_data: bool
                        ) -> None:
     # reading annotations file
     print('reading annotations file...')
@@ -230,6 +281,15 @@ def create_data_splits(annotations_file: str,
     # adding class_group col
     print('adding class group col...')
     add_class_group_col(df=crops_df)
+
+    # checking whether to balance data (apply undersampling)
+    if balance_data:
+
+        # printing execution message
+        print('balancing data...')
+
+        # getting balanced data df
+        crops_df = get_balanced_df(df=crops_df)
 
     # adding dataset col
     print('adding dataset col...')
@@ -340,20 +400,20 @@ def main():
     output_folder = args_dict['output_folder']
 
     # getting balance data param
-    # TODO: add logic to this in this code
-    # balance_data = args_dict['balance_data']
+    balance_data = args_dict['balance_data']
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # splitting data
     create_data_splits(annotations_file=annotations_file,
                        images_folder=images_folder,
                        extension=extension,
-                       output_folder=output_folder)
+                       output_folder=output_folder,
+                       balance_data=balance_data)
 
 ######################################################################
 # running main function
