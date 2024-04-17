@@ -28,6 +28,7 @@ from keras.callbacks import TensorBoard
 from keras.applications import ResNet50
 from keras.metrics import BinaryAccuracy
 from tensorflow.math import exp as tf_exp
+from keras.applications import ConvNeXtTiny
 from keras.layers import BatchNormalization
 from keras.losses import BinaryCrossentropy
 from src.utils.aux_funcs import INPUT_SHAPE
@@ -275,6 +276,55 @@ def get_new_model(input_shape: tuple) -> Sequential:
     return model
 
 
+def get_convnext_model(input_shape: tuple) -> Sequential:
+    """
+    Given an input shape, returns
+    convnext-based model.
+    """
+    # defining base model
+    model = Sequential()
+
+    # getting base model
+    base_model = ConvNeXtTiny(include_top=False,
+                              input_shape=input_shape,
+                              pooling='max',
+                              weights='imagenet')
+
+    # getting base layers
+    base_layers = base_model.layers
+    base_layers_num = len(base_layers)
+
+    # printing execution message
+    f_string = f'Num of layers in ConvNext based architecture: {base_layers_num}'
+    print(f_string)
+
+    # iterating over layers
+    for layer_index, layer in enumerate(base_layers):
+
+        # checking layer index
+        if layer_index < 17:
+
+            # freezing layer
+            layer.trainable = False
+
+        # adding layer to model
+        model.add(layer)
+
+    # mid-dense + dropout layers
+    model.add(Dense(units=512,
+                    activation='relu'))
+    model.add(Dropout(rate=0.5))
+    model.add(Dense(units=256,
+                    activation='relu'))
+    model.add(Dropout(rate=0.5))
+
+    # final dense layer
+    model.add(Dense(units=1, activation='sigmoid'))
+
+    # returning model
+    return model
+
+
 def get_classification_model(input_shape: tuple,
                              learning_rate: float,
                              model_type: str
@@ -293,6 +343,11 @@ def get_classification_model(input_shape: tuple,
 
         # getting resnet layers
         model = get_resnet_model(input_shape=input_shape)
+
+    elif model_type == 'convnext':
+
+        # getting convnext layers
+        model = get_convnext_model(input_shape=input_shape)
 
     elif model_type == 'vgg':
 
