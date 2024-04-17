@@ -100,7 +100,7 @@ def generate_foci_segmentation_mask(input_path: str,
     img_max = image.max()
 
     # getting current image pixel min threshold
-    min_cell_threshold = 30
+    min_cell_threshold = 60
     min_foci_threshold = min_pixel_intensity * img_max
 
     # converting image to binary
