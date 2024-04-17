@@ -86,14 +86,25 @@ def generate_foci_segmentation_mask(input_path: str,
     # reading image as grayscale
     image = load_grayscale_img(image_path=input_path)
 
+    # equalizing current image contrast
+    from src.utils.aux_funcs import enhance_contrast
+
     # # defining contrast parameters
-    # alpha = 1.8  # contrast control
-    # beta = 5     # brightness control
-    #
+    alpha = 5.0  # contrast control
+    beta = 4     # brightness control
+
     # # changing image contrast
-    # segmentation_mask = convertScaleAbs(segmentation_mask,
-    #                                     alpha=alpha,
-    #                                     beta=beta)
+    equalized_image = convertScaleAbs(image,
+                                      alpha=alpha,
+                                      beta=beta)
+    # equalized_image = enhance_contrast(image_matrix=image)
+    save_path = input_path.replace('er2', 'er2_contrast')
+    imwrite(save_path,
+            image)
+    save_path = save_path.replace('.tif', '_enhanced.tif')
+    imwrite(save_path,
+            equalized_image)
+    return None
 
     # getting current image min/max
     img_min = image.min()

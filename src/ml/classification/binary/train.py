@@ -289,15 +289,6 @@ def get_convnext_model(input_shape: tuple) -> Sequential:
                               input_shape=input_shape,
                               pooling='max',
                               weights='imagenet')
-    base_model = ConvNeXtTiny(model_name="convnext_tiny",
-                              include_top=True,
-                              include_preprocessing=True,
-                              weights="imagenet",
-                              input_tensor=None,
-                              input_shape=None,
-                              pooling=None,
-                              classes=1000,
-                              classifier_activation="softmax")
 
     # getting base layers
     base_layers = base_model.layers
@@ -311,7 +302,7 @@ def get_convnext_model(input_shape: tuple) -> Sequential:
     for layer_index, layer in enumerate(base_layers):
 
         # checking layer index
-        if layer_index < 17:
+        if layer_index < 0:
 
             # freezing layer
             layer.trainable = False

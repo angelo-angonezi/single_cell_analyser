@@ -52,7 +52,9 @@ from numpy import where as np_where
 from cv2 import resize as cv_resize
 from matplotlib import pyplot as plt
 from numpy import zeros as np_zeroes
+from numpy import cumsum as np_cumsum
 from tensorflow import test as tf_test
+from numpy import reshape as np_reshape
 from scipy.optimize import linear_sum_assignment
 from keras.utils import image_dataset_from_directory
 from keras.preprocessing.image import ImageDataGenerator
@@ -1563,6 +1565,32 @@ def print_gpu_usage() -> None:
 
     # printing string
     print(base_string)
+
+
+def enhance_contrast(image_matrix, bins=256):
+    import cv2
+    import numpy as np
+
+    img = image_matrix
+    # converting to LAB color space
+    lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
+    l_channel, a, b = cv2.split(lab)
+
+    # Applying CLAHE to L-channel
+    # feel free to try different values for the limit and grid size:
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    cl = clahe.apply(l_channel)
+
+    # merge the CLAHE enhanced L-channel with the a and b channel
+    limg = cv2.merge((cl, a, b))
+
+    # Converting image from LAB Color model to BGR color spcae
+    enhanced_img = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
+
+    # Stacking the original image with the enhanced image
+    result = np.hstack((img, enhanced_img))
+
+    return result
 
 
 def resize_image(open_image: ndarray,
