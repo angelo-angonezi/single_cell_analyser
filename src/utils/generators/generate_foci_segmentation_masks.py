@@ -90,8 +90,8 @@ def generate_foci_segmentation_mask(input_path: str,
     from src.utils.aux_funcs import enhance_contrast
 
     # # defining contrast parameters
-    alpha = 5.0  # contrast control
-    beta = 4     # brightness control
+    alpha = 0.4  # contrast control
+    beta = 0     # brightness control
 
     # # changing image contrast
     equalized_image = convertScaleAbs(image,
