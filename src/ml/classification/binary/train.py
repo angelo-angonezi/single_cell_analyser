@@ -299,7 +299,7 @@ def get_convnext_model(input_shape: tuple) -> Sequential:
     print(f_string)
 
     # adding layers to model
-    model.add(base_layers)
+    model.add(base_model)
 
     # mid-dense + dropout layers
     model.add(Dense(units=512,
