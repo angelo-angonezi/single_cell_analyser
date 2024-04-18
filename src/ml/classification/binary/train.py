@@ -186,7 +186,7 @@ def get_vgg_model(input_shape: tuple) -> Sequential:
     # getting base model
     base_model = VGG16(include_top=False,
                        input_shape=input_shape,
-                       pooling='avg',
+                       pooling='max',
                        weights='imagenet')
 
     # getting base layers
