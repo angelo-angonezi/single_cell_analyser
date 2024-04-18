@@ -186,7 +186,7 @@ def get_vgg_model(input_shape: tuple) -> Sequential:
     # getting base model
     base_model = VGG16(include_top=False,
                        input_shape=input_shape,
-                       pooling=None,
+                       pooling='avg',
                        weights='imagenet')
 
     # getting base layers
@@ -302,10 +302,7 @@ def get_convnext_model(input_shape: tuple) -> Sequential:
     model.add(base_model)
 
     # mid-dense + dropout layers
-    model.add(Dense(units=512,
-                    activation='relu'))
-    model.add(Dropout(rate=0.5))
-    model.add(Dense(units=256,
+    model.add(Dense(units=384,
                     activation='relu'))
     model.add(Dropout(rate=0.5))
 

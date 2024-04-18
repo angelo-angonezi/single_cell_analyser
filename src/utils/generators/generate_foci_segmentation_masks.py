@@ -61,7 +61,7 @@ def get_args_dict() -> dict:
     parser.add_argument('-p', '--min-pixel-intensity',
                         dest='min_pixel_intensity',
                         required=True,
-                        help='defines pixel intensity threshold to be used (AS PROPORTION: float 0-1)')
+                        help='defines pixel intensity threshold to be used (int 0-255)')
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -75,7 +75,7 @@ def get_args_dict() -> dict:
 
 def generate_foci_segmentation_mask(input_path: str,
                                     output_path: str,
-                                    min_pixel_intensity: float
+                                    min_pixel_intensity: int
                                     ) -> None:
     """
     Given a path to a fluorescence crop,
@@ -90,40 +90,32 @@ def generate_foci_segmentation_mask(input_path: str,
     from src.utils.aux_funcs import enhance_contrast
 
     # # defining contrast parameters
-    alpha = 0.4  # contrast control
-    beta = 0     # brightness control
+    alpha = 2.2  # contrast control
+    beta = -30     # brightness control
 
     # # changing image contrast
     equalized_image = convertScaleAbs(image,
                                       alpha=alpha,
                                       beta=beta)
     # equalized_image = enhance_contrast(image_matrix=image)
-    save_path = input_path.replace('er2', 'er2_contrast')
+    save_path = input_path.replace('sample', 'sample_enhanced')
     imwrite(save_path,
             image)
     save_path = save_path.replace('.tif', '_enhanced.tif')
     imwrite(save_path,
             equalized_image)
-    return None
-
-    # getting current image min/max
-    img_min = image.min()
-    img_max = image.max()
-
-    # getting current image pixel min threshold
-    min_cell_threshold = 60
-    min_foci_threshold = min_pixel_intensity * img_max
+    # return None
 
     # converting image to binary
-    segmentation_mask = image
-    segmentation_mask[segmentation_mask < min_cell_threshold] = 0
-    segmentation_mask[segmentation_mask < min_foci_threshold] = 0
-    segmentation_mask[segmentation_mask >= min_foci_threshold] = 255
+    segmentation_mask = equalized_image
+    segmentation_mask[segmentation_mask < min_pixel_intensity] = 0
+    segmentation_mask[segmentation_mask >= min_pixel_intensity] = 255
 
     # converting int type
     segmentation_mask = segmentation_mask.astype(np_uint8)
 
     # saving current segmentation mask
+    output_path = save_path.replace('.tif', '_mask.tif')
     imwrite(output_path,
             segmentation_mask)
 
@@ -131,7 +123,7 @@ def generate_foci_segmentation_mask(input_path: str,
 def generate_foci_segmentation_masks(input_folder: str,
                                      images_extension: str,
                                      output_folder: str,
-                                     min_pixel_intensity: float
+                                     min_pixel_intensity: int
                                      ) -> None:
     """
     Given a path to a folder containing
@@ -188,13 +180,13 @@ def main():
     output_folder = args_dict['output_folder']
 
     # getting min pixel intensity
-    min_pixel_intensity = float(args_dict['min_pixel_intensity'])
+    min_pixel_intensity = int(args_dict['min_pixel_intensity'])
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running generate_autophagy_dfs function
     generate_foci_segmentation_masks(input_folder=input_folder,
