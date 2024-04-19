@@ -21,6 +21,7 @@ from matplotlib import pyplot as plt
 from src.utils.aux_funcs import get_analysis_df
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import add_cell_cycle_col
+from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import add_cell_cycle_proportions_col
 print('all required libraries successfully imported.')  # noqa
@@ -214,7 +215,7 @@ def plot_cytometry(df: DataFrame,
                      save_name)
 
     # setting figure size
-    plt.figure(figsize=(14, 8))
+    # plt.figure(figsize=(14, 8))
 
     # plotting figure
     scatterplot(data=df,
@@ -225,7 +226,7 @@ def plot_cytometry(df: DataFrame,
                 palette=colors)
 
     # setting plot title
-    title = f'Fucci "Cytometry" (by mean pixel intensities) '
+    title = f'Fucci "Image-based Cytometry" '
     title += f'| Treatment: {treatment} '
     title += f'| Total cells: {total_cells}'
     plt.title(title)
@@ -355,9 +356,17 @@ def generate_fucci_plots(df: DataFrame,
 
     # grouping df
     df_groups = df.groupby(group_cols)
+    groups_num = len(df_groups)
+    current_group_index = 1
 
     # iterating over df groups
     for df_name, df_group in df_groups:
+
+        # printing progress message
+        base_string = 'creating plot for group #INDEX# of #TOTAL#'
+        print_progress_message(base_string=base_string,
+                               index=current_group_index,
+                               total=groups_num)
 
         # getting current group info
         current_treatment, current_date, current_time = df_name
@@ -372,7 +381,8 @@ def generate_fucci_plots(df: DataFrame,
         sorted_proportions = sorted(current_proportions)
 
         # defining palette based on order [G1, G2, M-eG1, S]
-        colors_list = ['red', 'green', 'magenta', 'yellow']
+        # colors_list = ['red', 'green', 'magenta', 'yellow']
+        colors_list = ['red', 'green']
 
         # plotting cytometry plot
         plot_cytometry(df=df_group,
