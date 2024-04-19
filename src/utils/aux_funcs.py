@@ -2096,12 +2096,14 @@ def add_cell_cycle_col(df: DataFrame,
         green_value = row_data['Mean_green']
 
         # getting current row cell cycle
-        current_cell_cycle = get_cell_cycle(red_value=red_value,
-                                            green_value=green_value,
-                                            min_red_value=min_red_value,
-                                            min_green_value=min_green_value,
-                                            ratio_lower_threshold=ratio_lower_threshold,
-                                            ratio_upper_threshold=ratio_upper_threshold)
+        # current_cell_cycle = get_cell_cycle(red_value=red_value,
+        #                                     green_value=green_value,
+        #                                     min_red_value=min_red_value,
+        #                                     min_green_value=min_green_value,
+        #                                     ratio_lower_threshold=ratio_lower_threshold,
+        #                                     ratio_upper_threshold=ratio_upper_threshold)
+        current_cell_cycle = get_cell_cycle_binary(red_value=red_value,
+                                                   green_value=green_value)
 
         # updating current row col
         df.at[row_index, col_name] = current_cell_cycle
