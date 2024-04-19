@@ -2123,8 +2123,11 @@ def add_cell_cycle_proportions_col(df: DataFrame) -> None:
     # adding placeholder values to col
     df[col_name] = None
 
+    # defining group cols
+    group_cols = ['treatment', 'date', 'time']
+
     # grouping df by treatment
-    treatment_groups = df.groupby('treatment')
+    df_groups = df.groupby(group_cols)
 
     # getting rows num
     rows_num = len(df)
@@ -2132,14 +2135,17 @@ def add_cell_cycle_proportions_col(df: DataFrame) -> None:
     # defining placeholder value for current_row_index
     current_row_index = 1
 
-    # iterating over treatment groups
-    for treatment, treatment_group in treatment_groups:
+    # iterating over df groups
+    for df_name, df_group in df_groups:
+
+        # getting values from df name
+        current_treatment, current_date, current_time = df_name
 
         # getting current treatment total cells count
-        total_cells_count = len(treatment_group)
+        total_cells_count = len(df_group)
 
         # grouping df by cell cycle
-        cell_cycle_groups = treatment_group.groupby('cell_cycle')
+        cell_cycle_groups = df_group.groupby('cell_cycle')
 
         # iterating over cell cycle group
         for cell_cycle, cell_cycle_group in cell_cycle_groups:

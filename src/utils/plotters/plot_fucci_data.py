@@ -214,9 +214,6 @@ def plot_cytometry(df: DataFrame,
     save_path = join(output_folder,
                      save_name)
 
-    # setting figure size
-    # plt.figure(figsize=(14, 8))
-
     # plotting figure
     scatterplot(data=df,
                 x='Mean_red',
@@ -264,9 +261,6 @@ def plot_ratio_log(df: DataFrame,
     save_path = join(output_folder,
                      save_name)
 
-    # setting figure size
-    plt.figure(figsize=(14, 8))
-
     # plotting figure
     scatterplot(data=df,
                 x='red_green_ratio_log2',
@@ -310,9 +304,6 @@ def plot_fucci_nma(df: DataFrame,
     save_name = f'nma_{treatment}_{date}_{time}.png'
     save_path = join(output_folder,
                      save_name)
-
-    # setting figure size
-    plt.figure(figsize=(14, 8))
 
     # plotting figure
     scatterplot(data=df,
@@ -413,6 +404,9 @@ def generate_fucci_plots(df: DataFrame,
                        proportions=sorted_proportions,
                        colors=colors_list,
                        output_folder=output_folder)
+
+        # updating current group index
+        current_group_index += 1
 
 
 def plot_fucci_cytometry(fornma_file_path: str,
