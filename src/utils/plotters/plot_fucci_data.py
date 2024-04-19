@@ -240,6 +240,9 @@ def plot_cytometry(df: DataFrame,
     # saving figure
     plt.savefig(save_path)
 
+    # closing figure
+    plt.close()
+
 
 def plot_ratio_log(df: DataFrame,
                    treatment: str,
@@ -283,6 +286,9 @@ def plot_ratio_log(df: DataFrame,
 
     # saving figure
     plt.savefig(save_path)
+
+    # closing figure
+    plt.close()
 
 
 def plot_fucci_nma(df: DataFrame,
@@ -330,6 +336,9 @@ def plot_fucci_nma(df: DataFrame,
 
     # saving figure
     plt.savefig(save_path)
+
+    # closing figure
+    plt.close()
 
 
 def generate_fucci_plots(df: DataFrame,
