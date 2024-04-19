@@ -1,9 +1,9 @@
-# plot fucci data module
+# plot fucci cytometry module
 
 print('initializing...')  # noqa
 
 # Code destined to plotting red/green intensity
-# cytometry-like plot, based on forNMA output file.
+# cytometry-like plot, based on crops info file.
 
 ######################################################################
 # imports
@@ -25,15 +25,6 @@ from src.utils.aux_funcs import print_execution_parameters
 from src.utils.aux_funcs import add_cell_cycle_proportions_col
 print('all required libraries successfully imported.')  # noqa
 
-######################################################################
-# defining global variables
-
-IMAGE_NAME_COL = 'Image_name_merge'
-MIN_RED_VALUE = 0.15
-MIN_GREEN_VALUE = 0.15
-RATIO_LOWER_THRESHOLD = 0.8
-RATIO_UPPER_THRESHOLD = 1.2
-
 #####################################################################
 # argument parsing related functions
 
@@ -44,25 +35,24 @@ def get_args_dict() -> dict:
     :return: Dictionary. Represents the parsed arguments.
     """
     # defining program description
-    description = "plot fucci data module"
+    description = "plot fucci cytometry module"
 
     # creating a parser instance
     parser = ArgumentParser(description=description)
 
     # adding arguments to parser
 
-    # fornma file param
-    parser.add_argument('-f', '--fornma-file',
-                        dest='fornma_file',
+    # crops file param
+    parser.add_argument('-c', '--crops-file',
+                        dest='crops_file',
                         required=True,
-                        help='defines path to fornma output file (.csv)')
+                        help='defines path to crops file (crops_info.csv file)')
 
     # output folder param
-    output_help = 'defines path to output folder'
     parser.add_argument('-o', '--output-folder',
                         dest='output_folder',
                         required=True,
-                        help=output_help)
+                        help='defines path to output folder')
 
     # treatments file param
     parser.add_argument('-tr', '--treatment-file',
@@ -145,10 +135,6 @@ def create_fucci_df(fornma_file_path: str,
 def get_fucci_df(fornma_file_path: str,
                  image_name_col: str,
                  treatment_file: str,
-                 min_red_value: float,
-                 min_green_value: float,
-                 ratio_lower_threshold: float,
-                 ratio_upper_threshold: float,
                  output_folder: str
                  ) -> DataFrame:
     """
@@ -179,10 +165,6 @@ def get_fucci_df(fornma_file_path: str,
         fucci_df = create_fucci_df(fornma_file_path=fornma_file_path,
                                    image_name_col=image_name_col,
                                    treatment_file=treatment_file,
-                                   min_red_value=min_red_value,
-                                   min_green_value=min_green_value,
-                                   ratio_lower_threshold=ratio_lower_threshold,
-                                   ratio_upper_threshold=ratio_upper_threshold,
                                    output_folder=output_folder)
 
         # saving output csv
@@ -411,10 +393,6 @@ def plot_fucci_cytometry(fornma_file_path: str,
     fucci_df = get_fucci_df(fornma_file_path=fornma_file_path,
                             image_name_col=image_name_col,
                             treatment_file=treatment_file,
-                            min_red_value=MIN_RED_VALUE,
-                            min_green_value=MIN_GREEN_VALUE,
-                            ratio_lower_threshold=RATIO_LOWER_THRESHOLD,
-                            ratio_upper_threshold=RATIO_UPPER_THRESHOLD,
                             output_folder=output_folder)
 
     # generating plots

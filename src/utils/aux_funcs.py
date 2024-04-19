@@ -1145,7 +1145,7 @@ def create_analysis_df(base_df_path: str,
     return analysis_df
 
 
-def get_analysis_df(fornma_file_path: str,
+def get_analysis_df(base_df_path: str,
                     image_name_col: str,
                     output_folder: str,
                     treatment_file: str
@@ -1177,7 +1177,7 @@ def get_analysis_df(fornma_file_path: str,
 
         # creating analysis_df
         print('creating analysis df...')
-        analysis_df = create_analysis_df(base_df_path=fornma_file_path,
+        analysis_df = create_analysis_df(base_df_path=base_df_path,
                                          image_name_col=image_name_col,
                                          treatment_file=treatment_file)
 

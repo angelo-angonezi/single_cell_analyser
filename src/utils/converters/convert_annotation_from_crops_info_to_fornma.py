@@ -19,6 +19,7 @@ from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import get_pixel_intensity
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
+from src.utils.aux_funcs import get_nucleus_pixel_intensity
 print('all required libraries successfully imported.')  # noqa
 
 #####################################################################
@@ -146,10 +147,14 @@ def convert_single_file(input_csv_file_path: str,
 
             # getting current crop mean pixel intensities
             # TODO: check whether to use mean or median here
-            red_mean = get_pixel_intensity(file_path=current_red_path,
-                                           calc='mean')
-            green_mean = get_pixel_intensity(file_path=current_green_path,
-                                             calc='mean')
+            red_mean = get_nucleus_pixel_intensity(crop_path=current_red_path,
+                                                   nucleus_width=current_width,
+                                                   nucleus_height=current_height,
+                                                   calc='mean')
+            green_mean = get_nucleus_pixel_intensity(crop_path=current_green_path,
+                                                     nucleus_width=current_width,
+                                                     nucleus_height=current_height,
+                                                     calc='mean')
 
             # normalizing intensities
             red_mean_normalized = (red_mean - current_img_min) / current_img_max
