@@ -15,6 +15,7 @@ from pandas import DataFrame
 from argparse import ArgumentParser
 from src.utils.aux_funcs import get_cell_cycle
 from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import get_cell_cycle_binary
 from src.utils.aux_funcs import print_progress_message
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
@@ -109,12 +110,14 @@ def get_phenotype(row_data: Series,
         green_value = row_data['Mean_green']
 
         # getting phenotype
-        phenotype_value = get_cell_cycle(red_value=red_value,
-                                         green_value=green_value,
-                                         min_red_value=0.15,
-                                         min_green_value=0.15,
-                                         ratio_lower_threshold=0.8,
-                                         ratio_upper_threshold=1.2)
+        # phenotype_value = get_cell_cycle(red_value=red_value,
+        #                                  green_value=green_value,
+        #                                  min_red_value=0.15,
+        #                                  min_green_value=0.15,
+        #                                  ratio_lower_threshold=0.8,
+        #                                  ratio_upper_threshold=1.2)
+        phenotype_value = get_cell_cycle_binary(red_value=red_value,
+                                                green_value=green_value)
 
     elif phenotype == 'autophagy':
 
