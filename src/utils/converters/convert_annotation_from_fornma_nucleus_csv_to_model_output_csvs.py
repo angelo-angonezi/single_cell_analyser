@@ -201,6 +201,11 @@ def convert_single_file(input_csv_file_path: str,
         angle_in_degs_text = row_data['FitEllipse_angle']
         angle_in_degs_float = float(angle_in_degs_text)
 
+        # TEMPORARY
+        # getting mean red/green values
+        red_value = row_data['Mean_red']
+        green_value = row_data['Mean_green']
+
         # defining current class based on foci count
         current_class = get_phenotype(row_data=row_data,
                                       phenotype=PHENOTYPE)
@@ -213,6 +218,8 @@ def convert_single_file(input_csv_file_path: str,
                             'width': width_float,
                             'height': height_float,
                             'angle': angle_in_degs_float,
+                            'mean_red': red_value,
+                            'mean_green': green_value,
                             'class': current_class}
 
         # creating current obb df
