@@ -97,14 +97,6 @@ def generate_foci_segmentation_mask(input_path: str,
     equalized_image = convertScaleAbs(image,
                                       alpha=alpha,
                                       beta=beta)
-    # equalized_image = enhance_contrast(image_matrix=image)
-    save_path = input_path.replace('sample', 'sample_enhanced')
-    imwrite(save_path,
-            image)
-    save_path = save_path.replace('.tif', '_enhanced.tif')
-    imwrite(save_path,
-            equalized_image)
-    # return None
 
     # converting image to binary
     segmentation_mask = equalized_image
@@ -115,7 +107,6 @@ def generate_foci_segmentation_mask(input_path: str,
     segmentation_mask = segmentation_mask.astype(np_uint8)
 
     # saving current segmentation mask
-    output_path = save_path.replace('.tif', '_mask.tif')
     imwrite(output_path,
             segmentation_mask)
 
