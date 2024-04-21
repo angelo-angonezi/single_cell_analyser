@@ -24,8 +24,8 @@ print('all required libraries successfully imported.')  # noqa
 #####################################################################
 # defining global variables
 
-FOCI_COUNT_THRESHOLD = 5
-FOCI_AREA_MEAN_THRESHOLD = 5.5
+FOCI_COUNT_THRESHOLD = 3
+FOCI_AREA_MEAN_THRESHOLD = 3.2
 
 #####################################################################
 # argument parsing related functions
@@ -88,7 +88,7 @@ def get_args_dict() -> dict:
 def add_dna_damage_col(df: DataFrame,
                        foci_masks_folder: str,
                        images_extension: str,
-                       foci_min_area: str
+                       foci_min_area: int
                        ) -> None:
     """
     Given a crops info df, and paths to
@@ -153,6 +153,7 @@ def add_dna_damage_col(df: DataFrame,
 
         # updating current row index
         current_row_index += 1
+
 
 def generate_dna_damage_annotations(crops_file: str,
                                     foci_masks_folder: str,

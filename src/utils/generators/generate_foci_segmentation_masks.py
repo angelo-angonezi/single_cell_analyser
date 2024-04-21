@@ -177,7 +177,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running generate_autophagy_dfs function
     generate_foci_segmentation_masks(input_folder=input_folder,

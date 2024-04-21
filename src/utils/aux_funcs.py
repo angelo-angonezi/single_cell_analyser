@@ -1789,9 +1789,14 @@ def get_dna_damage_level(foci_count: int,
     dna damage levels, calculates it
     and returns dna damage level string.
     """
-    # TODO: update here!
     # defining placeholder value for dna damage level
     dna_damage_level = 'undefined'
+
+    # getting conditional bools
+    mitosis_incompatible = foci_count >= 3
+
+    # updating dna damage level string
+    dna_damage_level = 'HighDamage' if mitosis_incompatible else 'LowDamage'
 
     # returning dna damage level
     return dna_damage_level
