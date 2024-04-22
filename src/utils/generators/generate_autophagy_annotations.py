@@ -169,13 +169,10 @@ def add_autophagy_col(df: DataFrame,
         foci_area_mean = foci_area_col.mean()
 
         # getting current crop autophagy level
-        # current_class = get_autophagy_level(foci_count=foci_count,
-        #                                     foci_area_mean=foci_area_mean,
-        #                                     foci_count_threshold=FOCI_COUNT_THRESHOLD,
-        #                                     foci_area_mean_threshold=FOCI_AREA_MEAN_THRESHOLD)
-        # TODO: remove once test completed!
-        current_ratio = '>1' if current_ratio >= 1 else '<1'
-        current_class = f'{foci_count}_{current_ratio}'
+        current_class = get_autophagy_level(foci_count=foci_count,
+                                            foci_area_mean=foci_area_mean,
+                                            foci_count_threshold=FOCI_COUNT_THRESHOLD,
+                                            foci_area_mean_threshold=FOCI_AREA_MEAN_THRESHOLD)
 
         # updating current row data
         df.at[row_index, col_name] = current_class
