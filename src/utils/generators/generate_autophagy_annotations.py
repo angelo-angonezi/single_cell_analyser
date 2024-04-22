@@ -150,10 +150,10 @@ def add_autophagy_col(df: DataFrame,
                               crop_name_w_extension)
 
         # getting current crop ratio
-        current_ratio = get_erk_ratio(crop_path=crop_path,
-                                      width=width,
-                                      height=height,
-                                      ring_expansion=ring_expansion)
+        # current_ratio = get_erk_ratio(crop_path=crop_path,
+        #                               width=width,
+        #                               height=height,
+        #                               ring_expansion=ring_expansion)
 
         # getting current crop contours df
         contours_df = get_contours_df(image_name=crop_name,
