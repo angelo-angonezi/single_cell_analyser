@@ -53,6 +53,14 @@ def get_args_dict() -> dict:
                         required=True,
                         help='defines path to prediction df (.csv) file')
 
+    # predictions file param
+    parser.add_argument('-av', '--annotation-validation',
+                        dest='annotation_validation',
+                        action='store_true',
+                        required=False,
+                        default=False,
+                        help='defines whether tests are being applied to validate annotations')
+
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
 
@@ -112,12 +120,10 @@ def get_metrics(test_df: DataFrame,
     merged_df = merge(left=test_df,
                       right=predictions_df,
                       on='crop_name')
+    print(merged_df)
 
     # getting instances count
     df_len = len(merged_df)
-
-    # adding placeholder value for prediction type col (TP, TN, FP, FN)
-    merged_df['prediction_type'] = None
 
     # getting possible classes
     classes_col = merged_df['class']
@@ -215,7 +221,8 @@ def get_metrics(test_df: DataFrame,
 
 
 def binary_classification_test(dataset_file: str,
-                               predictions_file: str
+                               predictions_file: str,
+                               annotation_validation: bool
                                ) -> None:
     """
     Given a path to dataset df, and
@@ -225,7 +232,10 @@ def binary_classification_test(dataset_file: str,
     """
     # getting test df
     print('getting test df...')
-    test_df = get_test_df(dataset_file=dataset_file)
+    if annotation_validation:
+        test_df = get_predictions_df(predictions_file=dataset_file)
+    else:
+        test_df = get_test_df(dataset_file=dataset_file)
 
     # getting images num
     images_num = len(test_df)
@@ -310,6 +320,9 @@ def main():
     # predictions file param
     predictions_file = args_dict['predictions_file']
 
+    # annotation validation param
+    annotation_validation = args_dict['annotation_validation']
+
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
@@ -323,7 +336,8 @@ def main():
 
     # running binary_classification_test function
     binary_classification_test(dataset_file=dataset_file,
-                               predictions_file=predictions_file)
+                               predictions_file=predictions_file,
+                               annotation_validation=annotation_validation)
 
 ######################################################################
 # running main function

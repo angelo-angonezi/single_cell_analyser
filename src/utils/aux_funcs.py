@@ -232,8 +232,7 @@ def get_dirs_in_folder(path_to_folder: str) -> list:
     # getting specific files
     files_in_dir = [file                          # getting file
                     for file                      # iterating over files
-                    in all_files_in_folder        # in input folder
-                    if isdir(file)]               # only if file is dir
+                    in all_files_in_folder]       # in input folder
 
     # sorting list
     files_in_dir = sorted(files_in_dir)

@@ -101,11 +101,14 @@ def generate_manual_annotations(images_folder: str,
         files_in_subfolder = get_specific_files_in_folder(path_to_folder=subfolder_path,
                                                           extension=images_extension)
 
+        # assembling name col based on subfolder name
+        name_col = [f.replace(images_extension, '') for f in files_in_subfolder]
+
         # assembling class col based on subfolder name
         class_col = [subfolder for _ in files_in_subfolder]
 
         # assembling current class dict
-        current_dict = {'crop_name': files_in_subfolder,
+        current_dict = {'crop_name': name_col,
                         'class': class_col}
 
         # assembling current class df
