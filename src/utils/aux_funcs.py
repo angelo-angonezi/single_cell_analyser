@@ -25,6 +25,7 @@ from cv2 import imwrite
 from cv2 import ellipse
 from os.path import join
 from cv2 import cvtColor
+from os.path import isdir
 from numpy import ndarray
 from cv2 import boxPoints
 from pandas import concat
@@ -209,6 +210,30 @@ def get_specific_files_in_folder(path_to_folder: str,
                     for file                      # iterating over files
                     in all_files_in_folder        # in input folder
                     if file.endswith(extension)]  # only if file matches given extension
+
+    # sorting list
+    files_in_dir = sorted(files_in_dir)
+
+    # returning list
+    return files_in_dir
+
+
+def get_dirs_in_folder(path_to_folder: str) -> list:
+    """
+    Given a path to a folder, returns
+    a list containing all subfolders
+    in given folder.
+    :param path_to_folder: String. Represents a path to a folder.
+    :return: List[str]. Represents all subfolders in given folder.
+    """
+    # getting all files in folder
+    all_files_in_folder = listdir(path_to_folder)
+
+    # getting specific files
+    files_in_dir = [file                          # getting file
+                    for file                      # iterating over files
+                    in all_files_in_folder        # in input folder
+                    if isdir(file)]               # only if file is dir
 
     # sorting list
     files_in_dir = sorted(files_in_dir)
