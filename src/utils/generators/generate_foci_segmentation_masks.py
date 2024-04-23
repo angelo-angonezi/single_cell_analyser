@@ -86,9 +86,6 @@ def generate_foci_segmentation_mask(input_path: str,
     # reading image as grayscale
     image = load_grayscale_img(image_path=input_path)
 
-    # equalizing current image contrast
-    from src.utils.aux_funcs import enhance_contrast
-
     # # defining contrast parameters
     alpha = 2.2  # contrast control
     beta = -30     # brightness control
