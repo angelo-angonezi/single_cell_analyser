@@ -86,137 +86,6 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def add_dataset_col(df: DataFrame,
-                    train_size: float,
-                    val_size: float,
-                    test_size: float
-                    ) -> None:
-    """
-    Given an annotations df, groups
-    df by grouper cols, and adds
-    dataset column, balancing train/test
-    according to the df groups.
-    """
-    # defining split col name
-    split_col_name = 'split'
-
-    # adding placeholder "split" col
-    df[split_col_name] = None
-
-    # defining group cols
-    group_cols = ['treatment',
-                  'class_group']
-
-    # grouping df
-    df_groups = df.groupby(group_cols)
-
-    # getting groups/rows num
-    groups_num = len(df_groups)
-    rows_num = len(df)
-
-    # printing execution message
-    f_string = f'{groups_num} groups were found based on: {group_cols}'
-    print(f_string)
-
-    # defining starter for indices
-    current_group_index = 1
-    current_row_index = 1
-
-    # iterating over groups
-    for df_name, df_group in df_groups:
-
-        # defining execution message
-        base_string = f'adding data split col to group '
-        base_string += f'{current_group_index} of {groups_num} '
-        base_string += f'| row: #INDEX# of #TOTAL#'
-
-        # randomly splitting current group rows
-        current_test_split = df_group.sample(frac=test_size,
-                                             random_state=SEED)
-        rest_df = df_group.drop(current_test_split.index)
-        val_frac = val_size / (train_size + val_size)
-        current_val_split = rest_df.sample(frac=val_frac,
-                                           random_state=SEED)
-        current_train_split = rest_df.drop(current_val_split.index)
-
-        # getting train/test indices
-        train_indices = current_train_split.index
-        val_indices = current_val_split.index
-        test_indices = current_test_split.index
-
-        # adding split column based on current samples
-
-        # iterating over train indices
-        for train_index in train_indices:
-
-            # printing execution message
-            print_progress_message(base_string=base_string,
-                                   index=current_row_index,
-                                   total=rows_num)
-
-            # updating current row split col
-            df.at[train_index, split_col_name] = 'train'
-
-            # updating current row index
-            current_row_index += 1
-
-        # iterating over val indices
-        for val_index in val_indices:
-
-            # printing execution message
-            print_progress_message(base_string=base_string,
-                                   index=current_row_index,
-                                   total=rows_num)
-
-            # updating current row split col
-            df.at[val_index, split_col_name] = 'val'
-
-            # updating current row index
-            current_row_index += 1
-
-        # iterating over test indices
-        for test_index in test_indices:
-
-            # printing execution message
-            print_progress_message(base_string=base_string,
-                                   index=current_row_index,
-                                   total=rows_num)
-
-            # updating current row split col
-            df.at[test_index, split_col_name] = 'test'
-
-            # updating current row index
-            current_row_index += 1
-
-        # updating current group index
-        current_group_index += 1
-
-
-def add_class_group_col(df: DataFrame) -> None:
-    """
-    Given an annotated crops info df,
-    adds class group col, adapting it
-    should it be a number.
-    """
-    # getting first element info
-    first_row = df.iloc[0]
-    first_class = first_row['class']
-    first_class_is_num = isinstance(first_class, float)
-
-    # checking whether class is a number
-    if first_class_is_num:
-
-        # adding class group col
-        df['class_group'] = df['class'].round()
-        df['class_group'] = df['class_group'].astype(int)
-        df['class_group'] = df['class_group'].astype(str)
-
-    else:
-
-        # adding class group col
-        df['class_group'] = df['class'].astype(str)
-
-
 def get_sample_df(df: DataFrame,
                   sample_size: int
                   ) -> DataFrame:
@@ -226,7 +95,7 @@ def get_sample_df(df: DataFrame,
     from each class, returning a samples df.
     """
     # defining group col
-    group_col = 'class_group'
+    group_col = 'class'
 
     # checking class group lengths
     df_groups = df.groupby(group_col)
@@ -277,14 +146,8 @@ def create_data_sample(annotations_file: str,
 
     # dropping unrequired columns
     print('dropping unrequired columns...')
-    cols_to_keep = ['crop_name',
-                    'treatment',
-                    'class']
+    cols_to_keep = ['crop_name', 'class']
     crops_df = crops_df[cols_to_keep]
-
-    # adding class_group col
-    print('adding class group col...')
-    add_class_group_col(df=crops_df)
 
     # getting sample df
     print('getting sample df...')

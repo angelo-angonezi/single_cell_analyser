@@ -100,9 +100,9 @@ def add_prediction_col(df: DataFrame,
     model predictions.
     """
     # defining col name
-    col_name = 'prediction'
+    col_name = 'class'
 
-    # defining placeholder value for prediction col
+    # defining placeholder value for predicted class col
     df[col_name] = None
 
     # getting df rows

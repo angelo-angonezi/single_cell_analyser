@@ -41,25 +41,17 @@ def get_args_dict() -> dict:
 
     # adding arguments to parser
 
-    # dataset file param
-    parser.add_argument('-d', '--dataset-file',
-                        dest='dataset_file',
+    # annotations file param
+    parser.add_argument('-a', '--annotations-file',
+                        dest='annotations_file',
                         required=True,
-                        help='defines path to dataset df (.csv) file')
+                        help='defines path to ANNOTATED crops info df (.csv) file')
 
     # predictions file param
     parser.add_argument('-p', '--predictions-file',
                         dest='predictions_file',
                         required=True,
                         help='defines path to prediction df (.csv) file')
-
-    # predictions file param
-    parser.add_argument('-av', '--annotation-validation',
-                        dest='annotation_validation',
-                        action='store_true',
-                        required=False,
-                        default=False,
-                        help='defines whether tests are being applied to validate annotations')
 
     # creating arguments dictionary
     args_dict = vars(parser.parse_args())
@@ -71,41 +63,32 @@ def get_args_dict() -> dict:
 # defining auxiliary functions
 
 
-def get_test_df(dataset_file: str) -> DataFrame:
+def load_df(data_file: str,
+            data_type: str
+            ) -> DataFrame:
     """
-    Given a path to a dataset file,
+    Given a path to a annotations file,
     returns filtered df containing
-    only test data and required cols
-    for analysis.
+    required cols for analysis.
     """
-    # reading dataset df
-    dataset_df = read_csv(dataset_file)
-
-    # filtering df by test data
-    filtered_df = dataset_df[dataset_df['split'] == 'test']
+    # reading df
+    df = read_csv(data_file)
 
     # defining cols to keep
-    cols_to_keep = ['crop_name',
-                    'class']
+    cols_to_keep = ['crop_name', 'class']
 
     # dropping unrequired cols
-    filtered_df = filtered_df[cols_to_keep]
+    df = df[cols_to_keep]
+
+    # checking data type
+    if data_type == 'prediction':
+
+        # renaming cols
+        cols = ['crop_name', 'prediction']
+        df.columns = cols
 
     # returning filtered df
-    return filtered_df
-
-
-def get_predictions_df(predictions_file: str) -> DataFrame:
-    """
-    Given a path to a predictions file,
-    returns loaded df filtered by cols
-    related to test analysis.
-    """
-    # reading predictions df
-    predictions_df = read_csv(predictions_file)
-
-    # returning predictions df
-    return predictions_df
+    return df
 
 
 def get_metrics(test_df: DataFrame,
@@ -220,29 +203,27 @@ def get_metrics(test_df: DataFrame,
     return metrics_tuple
 
 
-def binary_classification_test(dataset_file: str,
-                               predictions_file: str,
-                               annotation_validation: bool
+def binary_classification_test(annotations_file: str,
+                               predictions_file: str
                                ) -> None:
     """
-    Given a path to dataset df, and
-    a path to a file containing test
+    Given a path to an annotated data df,
+    and a path to a file containing test
     data predictions, prints metrics
     on console.
     """
     # getting test df
     print('getting test df...')
-    if annotation_validation:
-        test_df = get_predictions_df(predictions_file=dataset_file)
-    else:
-        test_df = get_test_df(dataset_file=dataset_file)
-
-    # getting images num
-    images_num = len(test_df)
+    test_df = load_df(data_file=annotations_file,
+                      data_type='test')
 
     # getting predictions df
     print('getting predictions df...')
-    predictions_df = get_predictions_df(predictions_file=predictions_file)
+    predictions_df = load_df(data_file=predictions_file,
+                             data_type='prediction')
+
+    # getting images num
+    images_num = len(test_df)
 
     # getting metrics
     print('getting base metrics...')
@@ -314,14 +295,11 @@ def main():
     # getting args dict
     args_dict = get_args_dict()
 
-    # getting dataset file param
-    dataset_file = args_dict['dataset_file']
+    # getting annotations file param
+    annotations_file = args_dict['annotations_file']
 
     # predictions file param
     predictions_file = args_dict['predictions_file']
-
-    # annotation validation param
-    annotation_validation = args_dict['annotation_validation']
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
@@ -335,9 +313,8 @@ def main():
     enter_to_continue()
 
     # running binary_classification_test function
-    binary_classification_test(dataset_file=dataset_file,
-                               predictions_file=predictions_file,
-                               annotation_validation=annotation_validation)
+    binary_classification_test(annotations_file=annotations_file,
+                               predictions_file=predictions_file)
 
 ######################################################################
 # running main function
