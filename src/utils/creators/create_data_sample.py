@@ -335,7 +335,7 @@ def main():
     output_folder = args_dict['output_folder']
 
     # getting sample size param
-    sample_size = args_dict['sample_size']
+    sample_size = int(args_dict['sample_size'])
 
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
