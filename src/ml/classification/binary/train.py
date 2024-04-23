@@ -434,17 +434,17 @@ def binary_classification_train(splits_folder: str,
                                      model_type=model_type)
 
     # defining callback
-    tensorboard_callback = TensorBoard(log_dir=logs_folder)
+    # tensorboard_callback = TensorBoard(log_dir=logs_folder)
     # lr_callback = LearningRateScheduler(scheduler)
-    # early_stopping = EarlyStopping(monitor='val_binary_accuracy',
-    #                                patience=5)
+    early_stopping = EarlyStopping(monitor='val_binary_accuracy',
+                                   patience=5)
 
     # training model (and saving history)
     train_history = train_model(model=model,
                                 train_data=train_data,
                                 val_data=val_data,
                                 epochs=epochs,
-                                callback=tensorboard_callback)
+                                callback=early_stopping)
 
     # saving model
     print('saving model...')
