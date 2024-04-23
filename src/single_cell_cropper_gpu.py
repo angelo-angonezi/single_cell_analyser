@@ -724,7 +724,8 @@ def main():
 
     # printing fixed size resolution
     f_string = f'fixed_size_shape: {IMAGE_SIZE}'
-    print(f_string)
+    if fixed_size_toggle:
+        print(f_string)
 
     # checking gpu usage
     print_gpu_usage()
