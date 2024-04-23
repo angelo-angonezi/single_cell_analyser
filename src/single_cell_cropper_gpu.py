@@ -722,6 +722,10 @@ def main():
     # printing execution parameters
     print_execution_parameters(params_dict=args_dict)
 
+    # printing fixed size resolution
+    f_string = f'fixed_size_shape: {IMAGE_SIZE}'
+    print(f_string)
+
     # checking gpu usage
     print_gpu_usage()
 
