@@ -11,6 +11,7 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 from os import environ
+from os.path import join
 from pandas import read_csv
 from tensorflow import Tensor
 from keras.layers import Dense
@@ -434,17 +435,17 @@ def binary_classification_train(splits_folder: str,
                                      model_type=model_type)
 
     # defining callback
-    # tensorboard_callback = TensorBoard(log_dir=logs_folder)
+    tensorboard_callback = TensorBoard(log_dir=logs_folder)
     # lr_callback = LearningRateScheduler(scheduler)
-    early_stopping = EarlyStopping(monitor='val_binary_accuracy',
-                                   patience=5)
+    # early_stopping = EarlyStopping(monitor='val_binary_accuracy',
+    #                                patience=5)
 
     # training model (and saving history)
     train_history = train_model(model=model,
                                 train_data=train_data,
                                 val_data=val_data,
                                 epochs=epochs,
-                                callback=early_stopping)
+                                callback=tensorboard_callback)
 
     # saving model
     print('saving model...')
@@ -452,6 +453,14 @@ def binary_classification_train(splits_folder: str,
 
     # converting history dict to data frame
     history_df = get_history_df(history_dict=train_history)
+
+    # saving history df
+    print('saving train history df...')
+    save_name = 'train_history.csv'
+    save_path = join(logs_folder,
+                     save_name)
+    history_df.to_csv(save_path,
+                      index=False)
 
     # generating history plot
     generate_history_plot(logs_folder=logs_folder,

@@ -223,7 +223,7 @@ def binary_classification_test(annotations_file: str,
                              data_type='prediction')
 
     # getting images num
-    images_num = len(test_df)
+    images_num = len(predictions_df)
 
     # getting metrics
     print('getting base metrics...')
