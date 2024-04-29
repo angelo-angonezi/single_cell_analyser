@@ -19,8 +19,10 @@ from keras.layers import Conv2D
 from keras.layers import Flatten
 from keras.layers import Dropout
 from keras.optimizers import Adam
+from keras.regularizers import l1
 from keras.regularizers import l2
 from keras.layers import MaxPool2D
+from keras.regularizers import l1_l2
 from argparse import ArgumentParser
 from keras.optimizers import RMSprop
 from keras.applications import VGG16
@@ -210,17 +212,20 @@ def get_vgg_model(input_shape: tuple) -> Sequential:
         # adding layer to model
         model.add(layer)
 
-    # defining regularizer
-    regularizer = l2(0.01)
+    # defining regularizers
+    regularizer_l1 = l1(0.001)
+    regularizer_l2 = l2(0.001)
+    regularizer_l1_l2 = l1_l2(l1=0.01,
+                              l2=0.001)
 
     # mid-dense + dropout layers
     model.add(Dense(units=512,
                     activation='relu',
-                    kernel_regularizer=regularizer))
+                    kernel_regularizer=regularizer_l1_l2))
     model.add(Dropout(rate=0.5))
     model.add(Dense(units=256,
                     activation='relu',
-                    kernel_regularizer=regularizer))
+                    kernel_regularizer=regularizer_l1_l2))
     model.add(Dropout(rate=0.5))
 
     # final dense layer
