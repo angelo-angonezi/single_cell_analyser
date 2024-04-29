@@ -2457,8 +2457,17 @@ def get_history_df(history_dict):
     # creating data frame based on dict
     history_df = DataFrame(history_dict)
 
+    # getting epochs num
+    epochs_num = len(history_df)
+
+    # getting epochs range
+    epochs_range = range(epochs_num)
+
+    # getting epochs column
+    epochs_col = [f + 1 for f in epochs_range]
+
     # adding epoch column
-    history_df['epoch'] = [f for f in range(len(history_df))]
+    history_df['epoch'] = epochs_col
 
     # melting df
     history_df = history_df.melt('epoch')
