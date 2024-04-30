@@ -214,7 +214,7 @@ def get_vgg_model(input_shape: tuple) -> Sequential:
 
     # defining regularizers
     regularizer_l1 = l1(0.001)
-    regularizer_l2 = l2(0.001)
+    regularizer_l2 = l2(0.01)
     regularizer_l1_l2 = l1_l2(l1=0.01,
                               l2=0.001)
 
