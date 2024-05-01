@@ -270,13 +270,8 @@ def get_new_model(input_shape: tuple) -> Sequential:
     model.add(Flatten())
 
     # mid-dense + dropout layers
-    model.add(Dense(units=3200, activation='relu'))
-    model.add(Dropout(rate=0.5))
     model.add(Dense(units=1600, activation='relu'))
     model.add(Dropout(rate=0.5))
-    model.add(Dense(units=800, activation='relu'))
-    model.add(Dropout(rate=0.5))
-    model.add(Dense(units=400, activation='relu'))
 
     # final dense layer
     model.add(Dense(units=1, activation='sigmoid'))
