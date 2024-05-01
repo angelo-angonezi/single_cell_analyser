@@ -357,8 +357,8 @@ def get_classification_model(input_shape: tuple,
         model = get_new_model(input_shape=input_shape)
 
     # defining optimizer
-    # optimizer = Adam(learning_rate=learning_rate)
-    optimizer = SGD(learning_rate=learning_rate)
+    optimizer = Adam(learning_rate=learning_rate)
+    # optimizer = SGD(learning_rate=learning_rate)
 
     # defining loss function
     loss = BinaryCrossentropy()
