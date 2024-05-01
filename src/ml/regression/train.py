@@ -18,6 +18,8 @@ from keras.layers import Conv2D
 from keras.layers import Flatten
 from keras.layers import Dropout
 from keras.optimizers import Adam
+from keras.regularizers import l1
+from keras.regularizers import l2
 from argparse import ArgumentParser
 from keras.applications import VGG16
 from keras.layers import MaxPooling2D
@@ -166,7 +168,7 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
     base_layers_num = len(base_layers)
 
     # printing execution message
-    f_string = f'Num of layers in VGG based architecture: {base_layers_num}'
+    f_string = f'Num of layers in Resnet based architecture: {base_layers_num}'
     print(f_string)
 
     # setting layers as untrainable
@@ -205,28 +207,38 @@ def get_vgg16_model(input_shape: tuple) -> Sequential:
 
     # getting base layers
     base_layers = base_model.layers
+    base_layers_num = len(base_layers)
+
+    # printing execution message
+    f_string = f'Num of layers in VGG based architecture: {base_layers_num}'
+    print(f_string)
 
     # iterating over layers
     for layer_index, layer in enumerate(base_layers):
 
         # checking layer index
-        if layer_index < 20:
-
+        if layer_index < 0:
             # freezing layer
             layer.trainable = False
 
         # adding layer to model
         model.add(layer)
 
+    # defining regularizers
+    kernel_regularizer = l2(0.001)
+
     # mid-dense + dropout layers
-    model.add(Dense(units=512, activation='relu'))
+    model.add(Dense(units=512,
+                    activation='relu',
+                    kernel_regularizer=kernel_regularizer))
     model.add(Dropout(rate=0.5))
-    model.add(Dense(units=256, activation='relu'))
+    model.add(Dense(units=256,
+                    activation='relu',
+                    kernel_regularizer=kernel_regularizer))
     model.add(Dropout(rate=0.5))
 
     # final dense layer
-    # model.add(Dense(units=1, activation='linear'))
-    model.add(Dense(units=1, activation='relu'))
+    model.add(Dense(units=1, activation='linear'))
 
     # returning model
     return model

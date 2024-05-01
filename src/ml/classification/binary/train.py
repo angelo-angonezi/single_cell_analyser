@@ -18,6 +18,7 @@ from keras.layers import Dense
 from keras.layers import Conv2D
 from keras.layers import Flatten
 from keras.layers import Dropout
+from keras.optimizers import SGD
 from keras.optimizers import Adam
 from keras.regularizers import l1
 from keras.regularizers import l2
@@ -204,7 +205,7 @@ def get_vgg_model(input_shape: tuple) -> Sequential:
     for layer_index, layer in enumerate(base_layers):
 
         # checking layer index
-        if layer_index < 10:
+        if layer_index < 0:
 
             # freezing layer
             layer.trainable = False
@@ -213,19 +214,16 @@ def get_vgg_model(input_shape: tuple) -> Sequential:
         model.add(layer)
 
     # defining regularizers
-    regularizer_l1 = l1(0.001)
-    regularizer_l2 = l2(0.001)
-    regularizer_l1_l2 = l1_l2(l1=0.01,
-                              l2=0.001)
+    kernel_regularizer = l2(0.001)
 
     # mid-dense + dropout layers
     model.add(Dense(units=512,
                     activation='relu',
-                    kernel_regularizer=regularizer_l2))
+                    kernel_regularizer=kernel_regularizer))
     model.add(Dropout(rate=0.5))
     model.add(Dense(units=256,
                     activation='relu',
-                    kernel_regularizer=regularizer_l2))
+                    kernel_regularizer=kernel_regularizer))
     model.add(Dropout(rate=0.5))
 
     # final dense layer
@@ -359,7 +357,8 @@ def get_classification_model(input_shape: tuple,
         model = get_new_model(input_shape=input_shape)
 
     # defining optimizer
-    optimizer = Adam(learning_rate=learning_rate)
+    # optimizer = Adam(learning_rate=learning_rate)
+    optimizer = SGD(learning_rate=learning_rate)
 
     # defining loss function
     loss = BinaryCrossentropy()
