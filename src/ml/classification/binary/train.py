@@ -198,13 +198,6 @@ def get_vgg_model(input_shape: tuple) -> Sequential:
     # adding preprocess input layer
     model.add(Lambda(vgg_preprocess_input, input_shape=input_shape))
 
-    # adding data augmentation layers
-    model.add(RandomFlip("horizontal"))
-    model.add(RandomFlip("vertical"))
-    model.add(RandomRotation(0.1))
-    model.add(RandomZoom(0.2))
-    model.add(GaussianNoise(5))
-
     # getting base model
     base_model = VGG16(include_top=False,
                        input_shape=input_shape,
@@ -223,7 +216,7 @@ def get_vgg_model(input_shape: tuple) -> Sequential:
     for layer_index, layer in enumerate(base_layers):
 
         # checking layer index
-        if layer_index < 0:
+        if layer_index < 20:
 
             # freezing layer
             layer.trainable = False
