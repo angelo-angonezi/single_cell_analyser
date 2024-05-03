@@ -1485,11 +1485,8 @@ def get_data_split_from_df(splits_folder: str,
     cols_to_keep = ['crop_path', 'class']
     filtered_df = filtered_df[cols_to_keep]
 
-    # defining rescaler
-    rescaler = 1.0 / 255
-
-    # creating image data generator object (and defining normalization)
-    image_generator = ImageDataGenerator(rescale=rescaler)
+    # creating image data generator object
+    image_generator = ImageDataGenerator()
 
     # loading data
     print(f'loading data from folder "{current_split_folder}"...')
@@ -1501,9 +1498,6 @@ def get_data_split_from_df(splits_folder: str,
                                                      class_mode=class_mode,  # 'raw' for regression, 'binary' for binary classification and 'categorical' for multi-label classification  # noqa
                                                      batch_size=batch_size,
                                                      shuffle=True)
-
-    # normalizing data to 0-1 scale (already performed by image generator)
-    print('normalizing data...')
 
     # returning data
     return split_data

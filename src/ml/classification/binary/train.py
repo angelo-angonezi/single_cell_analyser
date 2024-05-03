@@ -35,6 +35,12 @@ from tensorflow.math import exp as tf_exp
 from keras.applications import ConvNeXtTiny
 from keras.layers import BatchNormalization
 from keras.losses import BinaryCrossentropy
+from keras import Input
+from keras.layers import Dropout
+from keras.layers import RandomFlip
+from keras.layers import RandomRotation
+from keras.layers import RandomZoom
+from keras.layers import GaussianNoise
 from src.utils.aux_funcs import INPUT_SHAPE
 from src.utils.aux_funcs import train_model
 from src.utils.aux_funcs import is_using_gpu
@@ -46,6 +52,7 @@ from keras.callbacks import LearningRateScheduler
 from src.utils.aux_funcs import enter_to_continue
 from tensorflow.keras.callbacks import EarlyStopping
 from src.utils.aux_funcs import generate_history_plot
+from keras.applications.vgg16 import preprocess_input
 from src.utils.aux_funcs import get_data_split_from_df
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
@@ -187,6 +194,9 @@ def get_vgg_model(input_shape: tuple) -> Sequential:
     # defining base model
     model = Sequential()
 
+    # adding preprocess input layer
+    model.add(preprocess_input, input_shape)
+
     # getting base model
     base_model = VGG16(include_top=False,
                        input_shape=input_shape,
@@ -205,8 +215,79 @@ def get_vgg_model(input_shape: tuple) -> Sequential:
     for layer_index, layer in enumerate(base_layers):
 
         # checking layer index
-        if layer_index < 20:
+        if layer_index < 0:
 
+            # freezing layer
+            layer.trainable = False
+
+        # adding layer to model
+        model.add(layer)
+
+    # defining regularizers
+    kernel_regularizer = l2(0.001)
+
+    # mid-dense + dropout layers
+    model.add(Dense(units=512,
+                    activation='relu',
+                    kernel_regularizer=kernel_regularizer))
+    model.add(Dropout(rate=0.5))
+    model.add(Dense(units=256,
+                    activation='relu',
+                    kernel_regularizer=kernel_regularizer))
+    model.add(Dropout(rate=0.5))
+
+    # final dense layer
+    model.add(Dense(units=1, activation='sigmoid'))
+
+    # returning model
+    return model
+
+
+def get_vgg_model_new(input_shape: tuple) -> Sequential:
+    """
+        Given an input shape, returns
+        vgg16-based model.
+        """
+    # defining input
+    inputs = Input(input_shape)
+    x = da_layers(inputs)
+    x = preprocess_input(x)
+    x = base_vgg16(x)
+
+    # defining base model
+    model = Sequential()
+
+    # Creates augmentation "sub-network"
+    da_layers = Sequential(
+        [
+            RandomFlip("horizontal"),
+            RandomRotation(0.1),
+            RandomZoom(0.2),
+            GaussianNoise(5),  # also added Gaussian noise here
+        ]
+    )
+
+    # getting base model
+    base_model = VGG16(include_top=False,
+                       input_shape=input_shape,
+                       pooling='max',
+                       weights='imagenet')
+
+    # getting base layers
+    base_layers = base_model.layers
+    base_layers_num = len(base_layers)
+
+    # printing execution message
+    f_string = f'Num of layers in VGG based architecture: {base_layers_num}'
+    print(f_string)
+
+    # TODO: add random crop / layers do próprio keras
+
+    # iterating over layers
+    for layer_index, layer in enumerate(base_layers):
+
+        # checking layer index
+        if layer_index < 20:
             # freezing layer
             layer.trainable = False
 
