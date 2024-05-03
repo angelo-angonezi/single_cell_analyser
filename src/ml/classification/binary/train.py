@@ -36,6 +36,7 @@ from keras.applications import ConvNeXtTiny
 from keras.layers import BatchNormalization
 from keras.losses import BinaryCrossentropy
 from keras import Input
+from keras.layers import Lambda
 from keras.layers import Dropout
 from keras.layers import RandomFlip
 from keras.layers import RandomRotation
@@ -195,7 +196,7 @@ def get_vgg_model(input_shape: tuple) -> Sequential:
     model = Sequential()
 
     # adding preprocess input layer
-    # model.add(preprocess_input)
+    model.add(Lambda(vgg_preprocess_input, input_shape=input_shape))
 
     # getting base model
     base_model = VGG16(include_top=False,
@@ -399,8 +400,8 @@ def get_classification_model(input_shape: tuple,
     elif model_type == 'vgg':
 
         # getting vgg layers
-        # model = get_vgg_model(input_shape=input_shape)
-        model = get_vgg_model_new(input_shape=input_shape)
+        model = get_vgg_model(input_shape=input_shape)
+        # model = get_vgg_model_new(input_shape=input_shape)
 
     else:
 
