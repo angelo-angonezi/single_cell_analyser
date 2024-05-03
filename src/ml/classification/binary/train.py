@@ -281,7 +281,7 @@ def get_vgg_model_new(input_shape: tuple) -> Sequential:
     # defining input
     inputs = Input(input_shape)
     # x = da_layers(inputs)
-    x = vgg_preprocess_input(x)
+    x = vgg_preprocess_input(inputs)
     x = base_model(x)
     x = cl_layers(x)
 
