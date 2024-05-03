@@ -141,6 +141,7 @@ def add_prediction_col(df: DataFrame,
                                      image_size=IMAGE_SIZE)
 
         # normalizing current image
+        # TODO: change this to preprocess input!!!
         normalized_image = current_image / 255
 
         # expending dims (required to enter Sequential model)

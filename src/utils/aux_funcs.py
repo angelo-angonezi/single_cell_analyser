@@ -1486,7 +1486,8 @@ def get_data_split_from_df(splits_folder: str,
     filtered_df = filtered_df[cols_to_keep]
 
     # creating image data generator object
-    image_generator = ImageDataGenerator()
+    from keras.applications.vgg16 import preprocess_input as vgg_preprocess_input
+    image_generator = ImageDataGenerator(preprocessing_function=vgg_preprocess_input)
 
     # loading data
     print(f'loading data from folder "{current_split_folder}"...')

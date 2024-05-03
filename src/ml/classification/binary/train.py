@@ -197,7 +197,7 @@ def get_vgg_model(input_shape: tuple) -> Sequential:
     model = Sequential()
 
     # adding preprocess input layer
-    model.add(Lambda(vgg_preprocess_input, input_shape=input_shape))
+    # model.add(Lambda(vgg_preprocess_input, input_shape=input_shape))
 
     # getting base model
     base_model = VGG16(include_top=False,
@@ -403,8 +403,8 @@ def get_classification_model(input_shape: tuple,
     elif model_type == 'vgg':
 
         # getting vgg layers
-        # model = get_vgg_model(input_shape=input_shape)
-        model = get_vgg_model_new(input_shape=input_shape)
+        model = get_vgg_model(input_shape=input_shape)
+        # model = get_vgg_model_new(input_shape=input_shape)
 
     else:
 
