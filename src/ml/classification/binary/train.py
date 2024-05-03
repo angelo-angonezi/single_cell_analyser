@@ -280,7 +280,7 @@ def get_vgg_model_new(input_shape: tuple) -> Sequential:
 
     # defining input
     inputs = Input(input_shape)
-    x = da_layers(inputs)
+    # x = da_layers(inputs)
     x = vgg_preprocess_input(x)
     x = base_model(x)
     x = cl_layers(x)
@@ -400,8 +400,8 @@ def get_classification_model(input_shape: tuple,
     elif model_type == 'vgg':
 
         # getting vgg layers
-        model = get_vgg_model(input_shape=input_shape)
-        # model = get_vgg_model_new(input_shape=input_shape)
+        # model = get_vgg_model(input_shape=input_shape)
+        model = get_vgg_model_new(input_shape=input_shape)
 
     else:
 
