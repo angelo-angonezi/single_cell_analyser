@@ -157,25 +157,8 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
                           pooling='max',
                           weights='imagenet')
 
-    # getting base layers
-    base_layers = base_model.layers
-    base_layers_num = len(base_layers)
-
-    # printing execution message
-    f_string = f'Num of layers in ResNet based architecture: {base_layers_num}'
-    print(f_string)
-
-    # iterating over layers
-    for layer_index, layer in enumerate(base_layers):
-
-        # checking layer index
-        if layer_index < 20:
-
-            # freezing layer
-            layer.trainable = False
-
-        # adding layer to model
-        model.add(layer)
+    # adding layer to model
+    model.add(base_model)
 
     # adding dense/dropout layers
     model.add(Dense(units=1024, activation='relu'))
