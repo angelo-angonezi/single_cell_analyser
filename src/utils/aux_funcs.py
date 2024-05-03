@@ -1487,7 +1487,9 @@ def get_data_split_from_df(splits_folder: str,
 
     # creating image data generator object
     from keras.applications.vgg16 import preprocess_input as vgg_preprocess_input
-    image_generator = ImageDataGenerator(preprocessing_function=vgg_preprocess_input)
+    from keras.applications.resnet import preprocess_input as resnet_preprocess_input
+    # image_generator = ImageDataGenerator(preprocessing_function=vgg_preprocess_input)
+    image_generator = ImageDataGenerator(preprocessing_function=resnet_preprocess_input)
 
     # loading data
     print(f'loading data from folder "{current_split_folder}"...')
@@ -1499,6 +1501,8 @@ def get_data_split_from_df(splits_folder: str,
                                                      class_mode=class_mode,  # 'raw' for regression, 'binary' for binary classification and 'categorical' for multi-label classification  # noqa
                                                      batch_size=batch_size,
                                                      shuffle=True)
+
+    print(split_data[0])
 
     # returning data
     return split_data
