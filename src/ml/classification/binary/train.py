@@ -1,4 +1,5 @@
 # binary classification train module
+import keras
 
 print('initializing...')  # noqa
 
@@ -266,9 +267,7 @@ def get_vgg_model_new(input_shape: tuple) -> Sequential:
             Dropout(rate=0.5),
             Dense(units=256,
                   activation='relu'),
-            Dropout(rate=0.5),
-            Dense(units=1,
-                  activation='sigmoid'),
+            Dropout(rate=0.5)
         ]
     )
 
@@ -285,8 +284,12 @@ def get_vgg_model_new(input_shape: tuple) -> Sequential:
     x = base_model(x)
     x = cl_layers(x)
 
+    outputs = Dense(units=1, activation="sigmoid")(x)
+
+    model = keras.Model(inputs, outputs)
+
     # returning model
-    return x
+    return model
 
 
 def get_new_model(input_shape: tuple) -> Sequential:
