@@ -195,7 +195,7 @@ def get_vgg_model(input_shape: tuple) -> Sequential:
     model = Sequential()
 
     # adding preprocess input layer
-    model.add(preprocess_input, input_shape)
+    model.add(preprocess_input)
 
     # getting base model
     base_model = VGG16(include_top=False,
