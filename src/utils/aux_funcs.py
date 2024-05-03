@@ -1499,7 +1499,8 @@ def get_data_split_from_df(splits_folder: str,
                                                      class_mode=class_mode,  # 'raw' for regression, 'binary' for binary classification and 'categorical' for multi-label classification  # noqa
                                                      batch_size=batch_size,
                                                      shuffle=True)
-    print(split_data)
+    print(split_data[0])
+    print(split_data[1])
     exit()
 
     # returning data
