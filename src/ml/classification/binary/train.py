@@ -165,12 +165,13 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
     # adding layer to model
     model.add(base_model)
 
+    # defining regularizers
+    kernel_regularizer = l2(0.001)
+
     # adding dense/dropout layers
-    # model.add(Dense(units=1024, activation='relu'))
-    # model.add(Dropout(rate=0.5))
-    # model.add(Dense(units=512, activation='relu'))
-    # model.add(Dropout(rate=0.5))
-    model.add(Dense(units=256, activation='relu'))
+    model.add(Dense(units=256,
+                    activation='relu',
+                    kernel_regularizer=kernel_regularizer))
     model.add(Dropout(rate=0.5))
 
     # final dense layer
