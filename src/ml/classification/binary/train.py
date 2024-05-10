@@ -486,13 +486,22 @@ def binary_classification_train(splits_folder: str,
     # lr_callback = LearningRateScheduler(scheduler)
     # early_stopping = EarlyStopping(monitor='val_binary_accuracy',
     #                                patience=5)
+    early_stopping_monitor = EarlyStopping(
+        monitor='val_loss',
+        min_delta=0,
+        patience=0,
+        verbose=0,
+        mode='auto',
+        baseline=None,
+        restore_best_weights=True
+    )
 
     # training model (and saving history)
     train_history = train_model(model=model,
                                 train_data=train_data,
                                 val_data=val_data,
                                 epochs=epochs,
-                                callback=tensorboard_callback)
+                                callback=early_stopping_monitor)
 
     # saving model
     print('saving model...')
