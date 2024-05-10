@@ -1489,9 +1489,9 @@ def get_data_split_from_df(splits_folder: str,
 
     # creating image data generator object
     # image_generator = ImageDataGenerator(preprocessing_function=vgg_preprocess_input)
-    # image_generator = ImageDataGenerator(preprocessing_function=resnet_preprocess_input)
-    rescaler = 1 / 255
-    image_generator = ImageDataGenerator(rescale=rescaler)
+    image_generator = ImageDataGenerator(preprocessing_function=resnet_preprocess_input)
+    # rescaler = 1 / 255
+    # image_generator = ImageDataGenerator(rescale=rescaler)
 
     # loading data
     print(f'loading data from folder "{current_split_folder}"...')
