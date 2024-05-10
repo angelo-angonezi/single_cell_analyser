@@ -12,11 +12,14 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 from os import environ
+from keras import Input
 from os.path import join
 from pandas import read_csv
 from tensorflow import Tensor
 from keras.layers import Dense
+from keras.layers import Lambda
 from keras.layers import Conv2D
+from keras.layers import Dropout
 from keras.layers import Flatten
 from keras.layers import Dropout
 from keras.optimizers import SGD
@@ -24,11 +27,15 @@ from keras.optimizers import Adam
 from keras.regularizers import l1
 from keras.regularizers import l2
 from keras.layers import MaxPool2D
-from keras.regularizers import l1_l2
+from keras.layers import RandomFlip
+from keras.layers import RandomZoom
 from argparse import ArgumentParser
 from keras.optimizers import RMSprop
+from keras.regularizers import l1_l2
 from keras.applications import VGG16
 from keras.layers import MaxPooling2D
+from keras.layers import GaussianNoise
+from keras.layers import RandomRotation
 from keras.callbacks import TensorBoard
 from keras.applications import ResNet50
 from keras.metrics import BinaryAccuracy
@@ -36,16 +43,11 @@ from tensorflow.math import exp as tf_exp
 from keras.applications import ConvNeXtTiny
 from keras.layers import BatchNormalization
 from keras.losses import BinaryCrossentropy
-from keras import Input
-from keras.layers import Lambda
-from keras.layers import Dropout
-from keras.layers import RandomFlip
-from keras.layers import RandomRotation
-from keras.layers import RandomZoom
-from keras.layers import GaussianNoise
+from keras.callbacks import ModelCheckpoint
 from src.utils.aux_funcs import INPUT_SHAPE
 from src.utils.aux_funcs import train_model
 from src.utils.aux_funcs import is_using_gpu
+from keras.callbacks import ReduceLROnPlateau
 from keras.engine.sequential import Sequential
 from src.utils.aux_funcs import get_history_df
 from keras.layers import GlobalAveragePooling2D
@@ -481,7 +483,7 @@ def binary_classification_train(splits_folder: str,
                                      learning_rate=learning_rate,
                                      model_type=model_type)
 
-    # defining callback
+    # defining callbacks
     tensorboard_callback = TensorBoard(log_dir=logs_folder)
     # lr_callback = LearningRateScheduler(scheduler)
     # early_stopping = EarlyStopping(monitor='val_binary_accuracy',
@@ -496,12 +498,20 @@ def binary_classification_train(splits_folder: str,
         restore_best_weights=True
     )
 
+    early_stopping = EarlyStopping(monitor='val_loss', patience=10, verbose=0, mode='min')
+    mcp_save = ModelCheckpoint('.mdl_wts.hdf5', save_best_only=True, monitor='val_loss', mode='min')
+    reduce_lr_loss = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=7, verbose=1, epsilon=1e-4, mode='min')
+    callbacks = [tensorboard_callback,
+                 early_stopping,
+                 mcp_save,
+                 reduce_lr_loss]
+
     # training model (and saving history)
     train_history = train_model(model=model,
                                 train_data=train_data,
                                 val_data=val_data,
                                 epochs=epochs,
-                                callback=early_stopping_monitor)
+                                callback=callbacks)
 
     # saving model
     print('saving model...')
