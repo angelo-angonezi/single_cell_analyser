@@ -428,19 +428,6 @@ def get_classification_model(input_shape: tuple,
     return model
 
 
-def scheduler(epoch: int,
-              lr: Tensor
-              ) -> Tensor:
-    """
-    Given an epoch, and a learning
-    rate, returns updated learning rate.
-    """
-    if epoch < 20:
-        return lr
-    else:
-        return lr * tf_exp(-0.1)
-
-
 def binary_classification_train(splits_folder: str,
                                 extension: str,
                                 dataset_file: str,
@@ -485,26 +472,13 @@ def binary_classification_train(splits_folder: str,
 
     # defining callbacks
     tensorboard_callback = TensorBoard(log_dir=logs_folder)
-    # lr_callback = LearningRateScheduler(scheduler)
-    # early_stopping = EarlyStopping(monitor='val_binary_accuracy',
-    #                                patience=5)
-    early_stopping_monitor = EarlyStopping(
-        monitor='val_loss',
-        min_delta=0,
-        patience=0,
-        verbose=0,
-        mode='auto',
-        baseline=None,
-        restore_best_weights=True
-    )
-
-    early_stopping = EarlyStopping(monitor='val_loss', patience=10, verbose=0, mode='min')
-    mcp_save = ModelCheckpoint('.mdl_wts.hdf5', save_best_only=True, monitor='val_loss', mode='min')
-    reduce_lr_loss = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=7, verbose=1, epsilon=1e-4, mode='min')
+    early_stopping = EarlyStopping(monitor='val_binary_accuracy',
+                                   patience=3,
+                                   mode='max',
+                                   verbose=1,
+                                   restore_best_weights=True)
     callbacks = [tensorboard_callback,
-                 early_stopping,
-                 mcp_save,
-                 reduce_lr_loss]
+                 early_stopping]
 
     # training model (and saving history)
     train_history = train_model(model=model,
