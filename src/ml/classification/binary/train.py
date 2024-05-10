@@ -473,7 +473,7 @@ def binary_classification_train(splits_folder: str,
     # defining callbacks
     tensorboard_callback = TensorBoard(log_dir=logs_folder)
     early_stopping = EarlyStopping(monitor='val_binary_accuracy',
-                                   patience=3,
+                                   patience=10,
                                    mode='max',
                                    verbose=1,
                                    restore_best_weights=True)
