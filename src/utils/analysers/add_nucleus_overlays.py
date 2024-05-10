@@ -242,10 +242,15 @@ def add_single_overlay(open_img: ndarray,
         # getting just first two letters of label (better visualization)
         current_label = current_label[0:2]
 
+    # getting label text coords
+    if evaluator == 'model':
+        cx += 20
+    coords = (int(cx), int(cy))
+
     # adding label text
     putText(open_img,
             current_label,
-            (int(cx), int(cy)),
+            coords,
             FONT_HERSHEY_SIMPLEX,
             0.7,
             text_color,
