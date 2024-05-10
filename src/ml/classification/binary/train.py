@@ -164,10 +164,10 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
     model.add(base_model)
 
     # adding dense/dropout layers
-    model.add(Dense(units=1024, activation='relu'))
-    model.add(Dropout(rate=0.5))
-    model.add(Dense(units=512, activation='relu'))
-    model.add(Dropout(rate=0.5))
+    # model.add(Dense(units=1024, activation='relu'))
+    # model.add(Dropout(rate=0.5))
+    # model.add(Dense(units=512, activation='relu'))
+    # model.add(Dropout(rate=0.5))
     model.add(Dense(units=256, activation='relu'))
     model.add(Dropout(rate=0.5))
 
