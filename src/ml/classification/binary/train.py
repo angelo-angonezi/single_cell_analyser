@@ -158,7 +158,7 @@ def get_resnet_model(input_shape: tuple) -> Sequential:
                           weights='imagenet')
 
     # freezing layers
-    base_model.trainable = False
+    base_model.trainable = True
 
     # adding layer to model
     model.add(base_model)
