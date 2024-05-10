@@ -59,6 +59,8 @@ from numpy import reshape as np_reshape
 from scipy.optimize import linear_sum_assignment
 from keras.utils import image_dataset_from_directory
 from keras.preprocessing.image import ImageDataGenerator
+from keras.applications.vgg16 import preprocess_input as vgg_preprocess_input
+from keras.applications.resnet import preprocess_input as resnet_preprocess_input
 
 # preventing "SettingWithoutCopyWarning" messages
 pd.options.mode.chained_assignment = None  # default='warn'
@@ -1486,10 +1488,10 @@ def get_data_split_from_df(splits_folder: str,
     filtered_df = filtered_df[cols_to_keep]
 
     # creating image data generator object
-    from keras.applications.vgg16 import preprocess_input as vgg_preprocess_input
-    from keras.applications.resnet import preprocess_input as resnet_preprocess_input
     # image_generator = ImageDataGenerator(preprocessing_function=vgg_preprocess_input)
-    image_generator = ImageDataGenerator(preprocessing_function=resnet_preprocess_input)
+    # image_generator = ImageDataGenerator(preprocessing_function=resnet_preprocess_input)
+    rescaler = 1 / 255
+    image_generator = ImageDataGenerator(rescale=rescaler)
 
     # loading data
     print(f'loading data from folder "{current_split_folder}"...')
