@@ -126,7 +126,8 @@ def get_mean_metrics(df: DataFrame) -> tuple:
 
 
 def print_metrics(df: DataFrame,
-                  metrics_type: str) -> None:
+                  metrics_type: str
+                  ) -> None:
     """
     Given a metrics data frame and a metric
     type (global/mean), gets respective metrics
@@ -251,12 +252,6 @@ def analyse_metrics(input_path: str,
     metrics_df = metrics_df[metrics_df['iou_threshold'] == IOU_THRESHOLD]
     metrics_df = metrics_df[metrics_df['mask_style'] == MASK_TYPE]
 
-    # removing bad images
-    good_images_path = '/home/angelo/dados/pycharm_projects/single_cell_analyser/data/nucleus_detection/NucleusDetectorV2/metrics/V2/associations_overlays/included'
-    good_images = listdir(good_images_path)
-    good_images = [f.replace('_iou0.3_dt0.5.png', '') for f in good_images]
-    metrics_df = metrics_df[metrics_df['img_name'].isin(good_images)]
-
     # adding confluence column
     add_confluence_group_col(df=metrics_df)
 
@@ -305,7 +300,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running plot_metric function
     analyse_metrics(input_path=input_path,

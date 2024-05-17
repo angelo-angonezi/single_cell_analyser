@@ -240,11 +240,12 @@ def add_single_overlay(open_img: ndarray,
         current_label = det_class
 
         # getting just first two letters of label (better visualization)
-        current_label = current_label[0:2]
+        # current_label = current_label[0:2]
+        current_label = current_label[0:4]
 
     # getting label text coords
     if evaluator == 'model':
-        cx += 20
+        cx += 50
     coords = (int(cx), int(cy))
 
     # adding label text
@@ -253,7 +254,7 @@ def add_single_overlay(open_img: ndarray,
             coords,
             FONT_HERSHEY_SIMPLEX,
             0.7,
-            text_color,
+            overlay_color,  # changed to overlays color to differentiate phenotypes from each evaluator
             text_thickness)
 
 

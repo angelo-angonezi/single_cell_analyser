@@ -13,7 +13,6 @@ from pandas import Series
 from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
-from src.utils.aux_funcs import get_cell_cycle
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import get_cell_cycle_binary
 from src.utils.aux_funcs import print_progress_message
@@ -28,7 +27,8 @@ IMAGE_NAME_COL = 'Image_name_merge'
 
 # phenotype selection
 # PHENOTYPE = 'dna_damage'
-PHENOTYPE = 'cell_cycle'
+# PHENOTYPE = 'cell_cycle'
+PHENOTYPE = 'erk'
 # PHENOTYPE = 'autophagy'
 # PHENOTYPE = 'nii'
 
@@ -135,6 +135,15 @@ def get_phenotype(row_data: Series,
         # getting phenotype
         phenotype_value = row_value
 
+    elif phenotype == 'erk':
+
+        # getting phenotype col value
+        row_value = row_data['Mean_Ring/Nucleus_green']
+        # row_value = row_data['Mean_Ellipse/Nucleus_green']
+
+        # getting phenotype
+        phenotype_value = row_value
+
     else:
 
         # printing error message
@@ -206,8 +215,8 @@ def convert_single_file(input_csv_file_path: str,
 
         # TEMPORARY
         # getting mean red/green values
-        red_value = row_data['Mean_red']
-        green_value = row_data['Mean_green']
+        # red_value = row_data['Mean_red']
+        # green_value = row_data['Mean_green']
 
         # defining current class based on foci count
         current_class = get_phenotype(row_data=row_data,
@@ -221,8 +230,8 @@ def convert_single_file(input_csv_file_path: str,
                             'width': width_float,
                             'height': height_float,
                             'angle': angle_in_degs_float,
-                            'mean_red': red_value,
-                            'mean_green': green_value,
+                            # 'mean_red': red_value,
+                            # 'mean_green': green_value,
                             'class': current_class}
 
         # creating current obb df
