@@ -313,7 +313,8 @@ def get_image_metrics(images_folder: str,
     true_positives = 0
     false_positives = 0
     false_negatives = 0
-    area_errors = []
+    area_pairs = []
+    class_pairs = []
 
     # converting iou threshold to cost threshold (same is done for cost matrix)
     iou_threshold_cost = 1 - iou_threshold
@@ -382,6 +383,7 @@ def get_image_metrics(images_folder: str,
             detection_coords = (detection_cx, detection_cy)
             detection_area = get_mask_area(row_data=detection_row,
                                            style=style)
+            detection_class = detection_row['class']
 
             # retrieving current annotation coords/area
             annotation_row = annotations_df.iloc[annotation_index]
@@ -390,12 +392,19 @@ def get_image_metrics(images_folder: str,
             annotation_coords = (annotation_cx, annotation_cy)
             annotation_area = get_mask_area(row_data=annotation_row,
                                             style=style)
+            annotation_class = annotation_row['class']
 
-            # getting current area error
-            current_area_error = detection_area - annotation_area
+            # getting current area pair
+            current_area_pair = (detection_area, annotation_area)
 
-            # appending current area error to area error list
-            area_errors.append(current_area_error)
+            # getting current class pair
+            current_class_pair = (detection_class, annotation_class)
+
+            # appending current area pair to area pairs list
+            area_pairs.append(current_area_pair)
+
+            # appending current class pair to class pairs list
+            class_pairs.append(current_class_pair)
 
             # drawing line between detection/annotation coords
             line(open_img,
@@ -440,7 +449,8 @@ def get_image_metrics(images_folder: str,
     metrics_tuple = (true_positives,
                      false_positives,
                      false_negatives,
-                     area_errors)
+                     area_pairs,
+                     class_pairs)
 
     # returning final tuple
     return metrics_tuple
@@ -538,14 +548,16 @@ def create_detection_metrics_df(images_folder: str,
                 annotations_num = len(annotations_df)
 
                 # getting current image metrics
-                tp, fp, fn, area_errors = get_image_metrics(images_folder=images_folder,
-                                                            images_extension=images_extension,
-                                                            image_name=image_name,
-                                                            output_folder=output_folder,
-                                                            detections_df=detections_df,
-                                                            annotations_df=annotations_df,
-                                                            iou_threshold=iou,
-                                                            style=style)
+                current_metrics = get_image_metrics(images_folder=images_folder,
+                                                    images_extension=images_extension,
+                                                    image_name=image_name,
+                                                    output_folder=output_folder,
+                                                    detections_df=detections_df,
+                                                    annotations_df=annotations_df,
+                                                    iou_threshold=iou,
+                                                    style=style)
+
+                tp, fp, fn, area_pairs, class_pairs = current_metrics
 
                 # getting current image confluences
                 model_confluence = get_image_confluence(df=detections_df,
@@ -588,7 +600,8 @@ def create_detection_metrics_df(images_folder: str,
                                 'fornma_confluence': fornma_confluence,
                                 'iou_threshold': iou,
                                 'detection_threshold': dt,
-                                'area_errors': [area_errors],
+                                'area_pairs': [area_pairs],
+                                'class_pairs': [class_pairs],
                                 'true_positives': tp,
                                 'false_positives': fp,
                                 'false_negatives': fn,

@@ -17,9 +17,9 @@ from pandas import read_csv
 from pandas import DataFrame
 from seaborn import scatterplot
 from argparse import ArgumentParser
-from sklearn.metrics import r2_score
 from matplotlib import pyplot as plt
 from src.utils.aux_funcs import is_using_gpu
+from src.utils.aux_funcs import get_pearson_correlation
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
@@ -126,23 +126,6 @@ def get_errors_df(test_df: DataFrame,
     return joined_df
 
 
-def get_r_squared(df: DataFrame) -> float:
-    """
-    Given an errors data frame,
-    returns r2 score.
-    """
-    # getting real/prediction cols
-    real_col = df['class']
-    pred_col = df['prediction']
-
-    # calculating r2 score
-    r2_value = r2_score(y_true=real_col,
-                        y_pred=pred_col)
-
-    # returning r2 value
-    return r2_value
-
-
 def get_error_mean(df: DataFrame,
                    error_col: str
                    ) -> float:
@@ -226,7 +209,9 @@ def regression_test(dataset_file: str,
     mse = get_error_mean(df=errors_df,
                          error_col='squared_error')
     rmse = sqrt(mse)
-    r_squared = get_r_squared(df=errors_df)
+    r_squared = get_pearson_correlation(df=errors_df,
+                                        col_real='class',
+                                        col_pred='prediction')
 
     # printing metrics on console
     print('printing metrics...')

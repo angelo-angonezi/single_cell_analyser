@@ -45,6 +45,7 @@ from cv2 import COLOR_GRAY2BGR
 from cv2 import convertScaleAbs
 from numpy import add as np_add
 from numpy import count_nonzero
+from scipy.stats import pearsonr
 from cv2 import IMREAD_GRAYSCALE
 from cv2 import destroyAllWindows
 from cv2 import CHAIN_APPROX_NONE
@@ -2739,6 +2740,31 @@ def get_prediction(prediction: float,
 
     # returning prediction value
     return current_prediction
+
+
+def get_pearson_correlation(df: DataFrame,
+                            col_real: str,
+                            col_pred: str
+                            ) -> float:
+    """
+    Given an errors data frame,
+    returns pearson correlation.
+    """
+    # getting real/prediction cols
+    real_col = df[col_real]
+    pred_col = df[col_pred]
+
+    # calculating pearson correlation
+    print('calculating pearson correlation...')
+    corr_value, p_value = pearsonr(x=real_col,
+                                   y=pred_col)
+
+    # printing execution message
+    f_string = f'p-value: {p_value}'
+    print(f_string)
+
+    # returning correlation value
+    return corr_value
 
 ######################################################################
 # end of current module

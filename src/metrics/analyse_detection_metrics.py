@@ -23,6 +23,7 @@ from seaborn import scatterplot
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 from src.utils.aux_funcs import spacer
+from src.utils.aux_funcs import get_pearson_correlation
 from sklearn.metrics import mean_squared_error
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import print_progress_message
@@ -269,10 +270,58 @@ def analyse_metrics(input_path: str,
     print_metrics_by_group(df=metrics_df)
 
     # plotting F1-Scores line plot
-    plot_f1_scores_lineplot(df=metrics_df)
+    # plot_f1_scores_lineplot(df=metrics_df)
 
     # plotting F1-Scores box plot
-    plot_f1_scores_boxplot(df=metrics_df)
+    # plot_f1_scores_boxplot(df=metrics_df)
+
+    print(metrics_df)
+    print(metrics_df.columns)
+
+    class_pairs_col = metrics_df['class_pairs']
+    class_pairs_list = class_pairs_col.to_list()
+    braind_ratios = []
+    fornma_ratios = []
+    for i in class_pairs_list:
+        for j in i:
+            braind_ratio, fornma_ratio = j
+            braind_ratios.append(braind_ratio)
+            fornma_ratios.append(fornma_ratio)
+
+    ratios_dict = {'braind_ratio': braind_ratios,
+                   'fornma_ratio': fornma_ratios}
+    ratios_df = DataFrame(ratios_dict)
+    print(ratios_df)
+    scatterplot(data=ratios_df,
+                x='fornma_ratio',
+                y='braind_ratio')
+    corr_value = get_pearson_correlation(df=ratios_df,
+                                         col_real='fornma_ratio',
+                                         col_pred='braind_ratio')
+    corr_value = round(corr_value, 3)
+
+    ratios_df = ratios_df.melt()
+    print(ratios_df)
+    from seaborn import histplot
+    histplot(data=ratios_df,
+             x='value',
+             hue='variable')
+    plt.show()
+    title = f'ERK-KTR Histogram Plot'
+    plt.title(title)
+    plt.show()
+    exit()
+
+    title = f'ERK-KTR Correlation Plot | Pearson R: {corr_value}'
+    plt.title(title)
+    # plt.show()
+
+    ratios_df['ratio_error'] = ratios_df['braind_ratio'] - ratios_df['fornma_ratio']
+    ratios_df['ratio_error_abs'] = [abs(v) for v in ratios_df['ratio_error']]
+    print(ratios_df)
+    mae = ratios_df['ratio_error_abs'].mean()
+    print(mae)
+    print(len(ratios_df))
 
     # printing execution message
     print(f'output saved to "{output_folder}".')
@@ -300,7 +349,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    enter_to_continue()
+    # enter_to_continue()
 
     # running plot_metric function
     analyse_metrics(input_path=input_path,
