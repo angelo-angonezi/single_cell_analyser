@@ -12,9 +12,11 @@ print('initializing...')  # noqa
 # importing required libraries
 print('importing required libraries...')  # noqa
 from os import listdir
+from os.path import join
 from numpy import arange
 from pandas import concat
 from seaborn import boxplot
+from seaborn import histplot
 from pandas import DataFrame
 from seaborn import lineplot
 from seaborn import stripplot
@@ -320,7 +322,8 @@ def print_metrics_by_group(df: DataFrame,
 
 def plot_f1_scores_by_col_lineplot(df: DataFrame,
                                    col_name: str,
-                                   axis_name: str
+                                   axis_name: str,
+                                   output_folder: str
                                    ) -> None:
     """
     Given a metrics data frame,
@@ -338,16 +341,20 @@ def plot_f1_scores_by_col_lineplot(df: DataFrame,
     plt.ylabel('F1-Score')
     plt.ylim(0.0, 1.0)
 
-    # adjusting layout
-    plt.tight_layout()
+    # saving plot
+    save_name = f'{col_name}_lineplot.png'
+    save_path = join(output_folder,
+                     save_name)
+    plt.savefig(save_path)
 
-    # showing plot
-    plt.show()
+    # closing plot
+    plt.close()
 
 
 def plot_f1_scores_by_col_boxplot(df: DataFrame,
                                   col_name: str,
-                                  axis_name: str
+                                  axis_name: str,
+                                  output_folder: str
                                   ) -> None:
     """
     Given a metrics data frame,
@@ -363,17 +370,55 @@ def plot_f1_scores_by_col_boxplot(df: DataFrame,
     plt.ylabel('F1-Score')
     plt.ylim(0.0, 1.0)
 
-    # adjusting layout
-    plt.tight_layout()
+    # saving plot
+    save_name = f'{col_name}_boxplot.png'
+    save_path = join(output_folder,
+                     save_name)
+    plt.savefig(save_path)
 
-    # showing plot
-    plt.show()
+    # closing plot
+    plt.close()
 
 
-def run_cell_line_tests(df: DataFrame) -> None:
+def run_confluence_tests(df: DataFrame,
+                         output_folder: str
+                         ) -> None:
     """
     Given a metrics df, runs
-    cell line tests.
+    confluence tests/plots.
+    """
+    # printing metrics by confluence
+    print_metrics_by_group(df=df,
+                           group_col='confluence_group')
+
+    # defining plots axis names
+    confluence_axis_name = 'Confluence (%)'
+
+    # plotting F1-Scores by confluence line plot
+    plot_f1_scores_by_col_lineplot(df=df,
+                                   col_name='confluence_percentage_int',
+                                   axis_name=confluence_axis_name,
+                                   output_folder=output_folder)
+
+    # plotting F1-Scores by confluence percentage box plot
+    plot_f1_scores_by_col_boxplot(df=df,
+                                  col_name='confluence_percentage_int',
+                                  axis_name=confluence_axis_name,
+                                  output_folder=output_folder)
+
+    # plotting F1-Scores by confluence level box plot
+    plot_f1_scores_by_col_boxplot(df=df,
+                                  col_name='confluence_level',
+                                  axis_name=confluence_axis_name,
+                                  output_folder=output_folder)
+
+
+def run_cell_line_tests(df: DataFrame,
+                        output_folder: str
+                        ) -> None:
+    """
+    Given a metrics df, runs
+    cell line tests/plots.
     """
     # filtering df
     cols_to_keep = ['img_name',
@@ -410,6 +455,19 @@ def run_cell_line_tests(df: DataFrame) -> None:
         # appending current sample to samples list
         samples.append(current_sample)
 
+    # printing metrics by cell line
+    print_metrics_by_group(df=df,
+                           group_col='cell_line')
+
+    # defining plots axis names
+    cell_line_axis_name = 'Cell line'
+
+    # plotting F1-Scores by cell line box plot
+    plot_f1_scores_by_col_boxplot(df=filtered_df,
+                                  col_name='cell_line',
+                                  axis_name=cell_line_axis_name,
+                                  output_folder=output_folder)
+
     # running Levene test
     run_levene_test(samples=samples)
 
@@ -434,12 +492,45 @@ def run_cell_line_tests(df: DataFrame) -> None:
                               sample_b=sample_b)
 
 
-def run_count_tests(df: DataFrame) -> None:
+def run_count_tests(df: DataFrame,
+                    output_folder: str
+                    ) -> None:
     """
     Given a metrics df,
     runs nuclei count tests.
     """
-    pass
+    # filtering df for values below 200
+    filtered_df = df[df['fornma_count'] <= 200]
+
+    # getting count values correlation
+    count_correlation = get_pearson_correlation(df=filtered_df,
+                                                col_real='fornma_count',
+                                                col_pred='model_count')
+
+    # rounding value for plot
+    count_correlation_round = round(count_correlation, 2)
+
+    # creating correlation plot
+    scatterplot(data=filtered_df,
+                x='fornma_count',
+                y='model_count')
+
+    # defining title/axis names
+    title = f'Count correlation | Pearson R: {count_correlation_round}'
+    plt.title(title)
+    plt.xlabel('forNMA count')
+    plt.ylabel('Model count')
+
+    # saving plot
+    save_name = 'count_correlation_plot.png'
+    save_path = join(output_folder,
+                     save_name)
+    plt.savefig(save_path)
+
+    # closing plot
+    plt.close()
+
+    # running paired t-test
 
 
 def run_area_tests(df: DataFrame) -> None:
@@ -530,8 +621,6 @@ def analyse_metrics(input_path: str,
 
     # getting area pairs df
     area_pairs_df = get_area_pairs_df(df=metrics_df)
-    print(area_pairs_df)
-    exit()
 
     # getting class pairs df
     class_pairs_df = get_class_pairs_df(df=metrics_df)
@@ -544,43 +633,17 @@ def analyse_metrics(input_path: str,
     print_metrics(df=metrics_df,
                   metrics_type='mean')
 
-    # printing metrics by cell line
-    print_metrics_by_group(df=metrics_df,
-                           group_col='cell_line')
-
-    # printing metrics by confluence
-    print_metrics_by_group(df=metrics_df,
-                           group_col='confluence_group')
-
-    # defining plots axis names
-    confluence_axis_name = 'Confluence (%)'
-    cell_line_axis_name = 'Cell line'
-
-    # plotting F1-Scores by confluence line plot
-    plot_f1_scores_by_col_lineplot(df=metrics_df,
-                                   col_name='confluence_percentage_int',
-                                   axis_name=confluence_axis_name)
-
-    # plotting F1-Scores by confluence percentage box plot
-    plot_f1_scores_by_col_boxplot(df=metrics_df,
-                                  col_name='confluence_percentage_int',
-                                  axis_name=confluence_axis_name)
-
-    # plotting F1-Scores by confluence level box plot
-    plot_f1_scores_by_col_boxplot(df=metrics_df,
-                                  col_name='confluence_level',
-                                  axis_name=confluence_axis_name)
-
-    # plotting F1-Scores by cell line box plot
-    plot_f1_scores_by_col_boxplot(df=metrics_df,
-                                  col_name='cell_line',
-                                  axis_name=cell_line_axis_name)
+    # running confluence tests
+    run_confluence_tests(df=metrics_df,
+                         output_folder=output_folder)
 
     # running cell line tests
-    run_cell_line_tests(df=metrics_df)
+    run_cell_line_tests(df=metrics_df,
+                        output_folder=output_folder)
 
     # running nuclei count tests
-    run_count_tests(df=count_pairs_df)
+    run_count_tests(df=count_pairs_df,
+                    output_folder=output_folder)
 
     # running nuclei area tests
     run_area_tests(df=area_pairs_df)
