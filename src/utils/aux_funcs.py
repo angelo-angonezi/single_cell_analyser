@@ -25,7 +25,6 @@ from cv2 import imwrite
 from cv2 import ellipse
 from os.path import join
 from cv2 import cvtColor
-from os.path import isdir
 from numpy import ndarray
 from cv2 import boxPoints
 from pandas import concat
@@ -42,21 +41,23 @@ from cv2 import boundingRect
 from cv2 import findContours
 from cv2 import RETR_EXTERNAL
 from cv2 import COLOR_GRAY2BGR
+from scipy.stats import levene
 from cv2 import convertScaleAbs
 from numpy import add as np_add
 from numpy import count_nonzero
+from scipy.stats import kruskal
 from scipy.stats import pearsonr
+from scipy.stats import f_oneway
 from cv2 import IMREAD_GRAYSCALE
 from cv2 import destroyAllWindows
 from cv2 import CHAIN_APPROX_NONE
 from shutil import copy as sh_copy
 from numpy import where as np_where
 from cv2 import resize as cv_resize
+from scipy.stats import mannwhitneyu
 from matplotlib import pyplot as plt
 from numpy import zeros as np_zeroes
-from numpy import cumsum as np_cumsum
 from tensorflow import test as tf_test
-from numpy import reshape as np_reshape
 from scipy.optimize import linear_sum_assignment
 from keras.utils import image_dataset_from_directory
 from keras.preprocessing.image import ImageDataGenerator
@@ -1682,6 +1683,41 @@ def add_confluence_group_col(df: DataFrame) -> None:
     df['confluence_group'] = df['confluence_percentage_str'].replace('0', '<1')
 
 
+def add_confluence_level_col(df: DataFrame) -> None:
+    """
+    Docstring.
+    """
+    # getting confluence percentage mean/std
+    conf_mean = df['confluence_percentage'].mean()
+    conf_std = df['confluence_percentage'].std()
+    print(f'conf_mean: {conf_mean}')
+    print(f'conf_std: {conf_std}')
+
+    # calculating confluence threshold
+    multiplier = 0.5
+    confluence_lower_threshold = conf_mean - (multiplier * conf_std)
+    confluence_upper_threshold = conf_mean + (multiplier * conf_std)
+    print(f'confluence_threshold: {confluence_upper_threshold}')
+
+    # getting confluence percentage col
+    confluence_percentage_col = df['confluence_percentage']
+
+    # calculating confluence level for values
+    confluence_levels_col = []
+    for value in confluence_percentage_col:
+        level = None
+        if value < confluence_lower_threshold:
+            level = 'Low'
+        elif value > confluence_upper_threshold:
+            level = 'High'
+        else:
+            level = 'Medium'
+        confluence_levels_col.append(level)
+
+    # adding confluence level col
+    df['confluence_level'] = confluence_levels_col
+
+
 def get_base_df(files: list,
                 col_name: str
                 ) -> DataFrame:
@@ -2759,12 +2795,105 @@ def get_pearson_correlation(df: DataFrame,
     corr_value, p_value = pearsonr(x=real_col,
                                    y=pred_col)
 
-    # printing execution message
-    f_string = f'p-value: {p_value}'
+    # assembling results string
+    f_string = '--Pearson correlation test results--\n'
+    f_string += f'p-value: {p_value}\n'
+    f_string += f's-value: {corr_value}'
+
+    # printing test results
+    spacer()
     print(f_string)
+    spacer()
 
     # returning correlation value
     return corr_value
+
+
+def run_levene_test(samples: list) -> None:
+    """
+    Given a list of samples,
+    runs Levene test.
+    """
+    # calculating Levene statistic
+    print('calculating Levene statistic...')
+    s_value, p_value = levene(*samples)
+
+    # assembling results string
+    f_string = '--Levene test results--\n'
+    f_string += f'p-value: {p_value}\n'
+    f_string += f's-value: {s_value}'
+
+    # printing test results
+    spacer()
+    print(f_string)
+    spacer()
+
+
+def run_anova_test(samples: list) -> None:
+    """
+    Given a list of samples,
+    runs one-way ANOVA test.
+    """
+    # calculating ANOVA statistic
+    print('calculating one-way ANOVA statistic...')
+    s_value, p_value = f_oneway(*samples)
+
+    # assembling results string
+    f_string = '--ANOVA test results--\n'
+    f_string += f'p-value: {p_value}\n'
+    f_string += f's-value: {s_value}'
+
+    # printing test results
+    spacer()
+    print(f_string)
+    spacer()
+
+
+def run_kruskal_test(samples: list) -> None:
+    """
+    Given a list of samples,
+    runs Kruskal test.
+    """
+    # calculating Kruskal statistic
+    print('calculating Kruskal statistic...')
+    s_value, p_value = kruskal(*samples)
+
+    # assembling results string
+    f_string = '--Kruskal test results--\n'
+    f_string += f'p-value: {p_value}\n'
+    f_string += f's-value: {s_value}'
+
+    # printing test results
+    print(f_string)
+    spacer()
+
+
+def run_mannwhitneyu_test(sample_a: list,
+                          sample_b: list
+                          ) -> None:
+    """
+    Given a list of samples,
+    runs mann-whitney-U test.
+    """
+    # getting sample info
+    sample_a_len = len(sample_a)
+    sample_b_len = len(sample_b)
+
+    # calculating Mann-Whitney-U statistic
+    print('calculating Mann-Whitney-U statistic...')
+    s_value, p_value = mannwhitneyu(x=sample_a,
+                                    y=sample_b)
+
+    # assembling results string
+    f_string = '--Mann-Whitney-U test results--\n'
+    f_string += f'sample_a count: {sample_a_len}\n'
+    f_string += f'sample_b count: {sample_b_len}\n'
+    f_string += f'p-value: {p_value}\n'
+    f_string += f's-value: {s_value}'
+
+    # printing test results
+    print(f_string)
+    spacer()
 
 ######################################################################
 # end of current module

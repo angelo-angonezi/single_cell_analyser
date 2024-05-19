@@ -20,14 +20,20 @@ from seaborn import lineplot
 from seaborn import stripplot
 from pandas import read_pickle
 from seaborn import scatterplot
+from itertools import combinations
 from argparse import ArgumentParser
 from matplotlib import pyplot as plt
 from src.utils.aux_funcs import spacer
-from src.utils.aux_funcs import get_pearson_correlation
 from sklearn.metrics import mean_squared_error
+from src.utils.aux_funcs import run_anova_test
+from src.utils.aux_funcs import run_levene_test
+from src.utils.aux_funcs import run_kruskal_test
 from src.utils.aux_funcs import enter_to_continue
+from src.utils.aux_funcs import run_mannwhitneyu_test
 from src.utils.aux_funcs import print_progress_message
+from src.utils.aux_funcs import get_pearson_correlation
 from src.utils.aux_funcs import add_confluence_group_col
+from src.utils.aux_funcs import add_confluence_level_col
 from src.utils.aux_funcs import print_execution_parameters
 print('all required libraries successfully imported.')  # noqa
 
@@ -37,6 +43,9 @@ print('all required libraries successfully imported.')  # noqa
 IOU_THRESHOLD = 0.3
 DETECTION_THRESHOLD = 0.5
 MASK_TYPE = 'ellipse'
+PRINT_METRICS = False
+PLOT_DATA = False
+RUN_TESTS = True
 
 #####################################################################
 # argument parsing related functions
@@ -126,6 +135,30 @@ def get_mean_metrics(df: DataFrame) -> tuple:
     return metrics
 
 
+def get_count_pairs_df(df: DataFrame) -> DataFrame:
+    """
+    Given a metrics df,
+    returns count pairs df.
+    """
+    pass
+
+
+def get_area_pairs_df(df: DataFrame) -> DataFrame:
+    """
+    Given a metrics df,
+    returns area pairs df.
+    """
+    pass
+
+
+def get_class_pairs_df(df: DataFrame) -> DataFrame:
+    """
+    Given a metrics df,
+    returns class pairs df.
+    """
+    pass
+
+
 def print_metrics(df: DataFrame,
                   metrics_type: str
                   ) -> None:
@@ -165,17 +198,19 @@ def print_metrics(df: DataFrame,
     # printing metrics string
     print(metrics_string)
 
+    # printing spacer
+    spacer()
 
-def print_metrics_by_group(df: DataFrame) -> None:
+
+def print_metrics_by_group(df: DataFrame,
+                           group_col: str
+                           ) -> None:
     """
     Given a metrics data frame,
     prints metrics by group.
     """
-    # defining groups
-    groups = 'cell_line'
-
     # grouping df
-    df_groups = df.groupby(groups)
+    df_groups = df.groupby(group_col)
 
     # iterating over groups
     for df_name, df_group in df_groups:
@@ -185,28 +220,34 @@ def print_metrics_by_group(df: DataFrame) -> None:
         print(group_string)
 
         # printing global metrics
-        # print_metrics(df=df_group,
-        #               metrics_type='global')
+        print_metrics(df=df_group,
+                      metrics_type='global')
 
         # printing mean metrics
         print_metrics(df=df_group,
                       metrics_type='mean')
+
+        # printing spacer
         spacer()
 
 
-def plot_f1_scores_lineplot(df: DataFrame) -> None:
+def plot_f1_scores_by_col_lineplot(df: DataFrame,
+                                   col_name: str,
+                                   axis_name: str
+                                   ) -> None:
     """
     Given a metrics data frame,
     plots F1-Score line plot.
     """
     # creating plot
     lineplot(data=df,
-             x='confluence_percentage_int',
+             x=col_name,
              y='f1_score',
              hue='cell_line',
              errorbar=None)
 
     # setting plot axis labels/limits
+    plt.xlabel(axis_name)
     plt.ylabel('F1-Score')
     plt.ylim(0.0, 1.0)
 
@@ -217,20 +258,21 @@ def plot_f1_scores_lineplot(df: DataFrame) -> None:
     plt.show()
 
 
-def plot_f1_scores_boxplot(df: DataFrame) -> None:
+def plot_f1_scores_by_col_boxplot(df: DataFrame,
+                                  col_name: str,
+                                  axis_name: str
+                                  ) -> None:
     """
     Given a metrics data frame,
     plots F1-Score box plot.
     """
     # creating plot
     boxplot(data=df,
-            x='confluence_percentage_int',
+            x=col_name,
             y='f1_score')
-    # stripplot(data=df,
-    #           x='confluence_percentage_int',
-    #           y='f1_score')
 
     # setting plot axis labels/limits
+    plt.xlabel(axis_name)
     plt.ylabel('F1-Score')
     plt.ylim(0.0, 1.0)
 
@@ -241,44 +283,95 @@ def plot_f1_scores_boxplot(df: DataFrame) -> None:
     plt.show()
 
 
-def analyse_metrics(input_path: str,
-                    output_folder: str,
-                    ) -> None:
-    # getting metrics df
-    print('getting metrics df...')
-    metrics_df = read_pickle(input_path)
-
+def run_cell_line_tests(df: DataFrame) -> None:
+    """
+    Given a metrics df, runs
+    cell line tests.
+    """
     # filtering df
-    metrics_df = metrics_df[metrics_df['detection_threshold'] == DETECTION_THRESHOLD]
-    metrics_df = metrics_df[metrics_df['iou_threshold'] == IOU_THRESHOLD]
-    metrics_df = metrics_df[metrics_df['mask_style'] == MASK_TYPE]
+    cols_to_keep = ['img_name',
+                    'cell_line',
+                    'fornma_count',
+                    'f1_score']
+    filtered_df = df[cols_to_keep]
 
-    # adding confluence column
-    add_confluence_group_col(df=metrics_df)
+    # defining group col
+    group_col = 'cell_line'
 
-    # printing global metrics
-    print_metrics(df=metrics_df,
-                  metrics_type='global')
-    spacer()
+    # grouping df by cell line
+    df_groups = filtered_df.groupby(group_col)
 
-    # printing mean metrics
-    print_metrics(df=metrics_df,
-                  metrics_type='mean')
-    spacer()
+    # defining placeholder value for anova samples
+    samples = []
 
-    # printing metrics by groups
-    print_metrics_by_group(df=metrics_df)
+    # iterating over df groups
+    for df_name, df_group in df_groups:
 
-    # plotting F1-Scores line plot
-    # plot_f1_scores_lineplot(df=metrics_df)
+        # getting current sample count
+        sample_count = len(df_group)
 
-    # plotting F1-Scores box plot
-    # plot_f1_scores_boxplot(df=metrics_df)
+        # printing execution message
+        f_string = f'cell line "{df_name}" count: {sample_count}'
+        print(f_string)
 
-    print(metrics_df)
-    print(metrics_df.columns)
+        # getting current cell line f1 scores col
+        current_sample_col = df_group['f1_score']
 
-    class_pairs_col = metrics_df['class_pairs']
+        # converting current sample to list
+        current_sample = current_sample_col.to_list()
+
+        # appending current sample to samples list
+        samples.append(current_sample)
+
+    # running Levene test
+    run_levene_test(samples=samples)
+
+    # running ANOVA test
+    run_anova_test(samples=samples)
+
+    # running Kruskal test
+    run_kruskal_test(samples=samples)
+
+    # getting sample pairs
+    sample_pairs = combinations(iterable=samples,
+                                r=2)
+
+    # iterating over sample pairs
+    for sample_pair in sample_pairs:
+
+        # getting samples from pair
+        sample_a, sample_b = sample_pair
+
+        # running mann-whitney test
+        run_mannwhitneyu_test(sample_a=sample_a,
+                              sample_b=sample_b)
+
+
+def run_count_tests(df: DataFrame) -> None:
+    """
+    Given a metrics df,
+    runs nuclei count tests.
+    """
+    pass
+
+
+def run_area_tests(df: DataFrame) -> None:
+    """
+    Given a metrics df,
+    runs nuclei area tests.
+    """
+    pass
+
+
+def run_erk_tests(df: DataFrame) -> None:
+    """
+    Given a metrics df, runs
+    cit/nuc ratio tests.
+    """
+    print(df)
+    print(df.columns)
+
+    class_pairs_col = df['class_pairs']
     class_pairs_list = class_pairs_col.to_list()
     braind_ratios = []
     fornma_ratios = []
@@ -295,9 +388,9 @@ def analyse_metrics(input_path: str,
     scatterplot(data=ratios_df,
                 x='fornma_ratio',
                 y='braind_ratio')
-    corr_value = get_pearson_correlation(df=ratios_df,
-                                         col_real='fornma_ratio',
-                                         col_pred='braind_ratio')
+    corr_value = run_anova_test(df=ratios_df,
+                                col_real='fornma_ratio',
+                                col_pred='braind_ratio')
     corr_value = round(corr_value, 3)
 
     ratios_df = ratios_df.melt()
@@ -322,6 +415,95 @@ def analyse_metrics(input_path: str,
     mae = ratios_df['ratio_error_abs'].mean()
     print(mae)
     print(len(ratios_df))
+
+
+def analyse_metrics(input_path: str,
+                    output_folder: str,
+                    ) -> None:
+    # getting metrics df
+    print('getting metrics df...')
+    metrics_df = read_pickle(input_path)
+
+    # filtering df
+    metrics_df = metrics_df[metrics_df['detection_threshold'] == DETECTION_THRESHOLD]
+    metrics_df = metrics_df[metrics_df['iou_threshold'] == IOU_THRESHOLD]
+    metrics_df = metrics_df[metrics_df['mask_style'] == MASK_TYPE]
+
+    # adding confluence group column
+    add_confluence_group_col(df=metrics_df)
+
+    # adding confluence level column
+    add_confluence_level_col(df=metrics_df)
+
+    # getting count pairs df
+    count_pairs_df = get_count_pairs_df(df=metrics_df)
+
+    # getting area pairs df
+    area_pairs_df = get_area_pairs_df(df=metrics_df)
+
+    # getting class pairs df
+    class_pairs_df = get_class_pairs_df(df=metrics_df)
+
+    # checking global bool
+    if PRINT_METRICS:
+
+        # printing global metrics
+        print_metrics(df=metrics_df,
+                      metrics_type='global')
+
+        # printing mean metrics
+        print_metrics(df=metrics_df,
+                      metrics_type='mean')
+
+        # printing metrics by cell line
+        print_metrics_by_group(df=metrics_df,
+                               group_col='cell_line')
+
+        # printing metrics by confluence
+        print_metrics_by_group(df=metrics_df,
+                               group_col='confluence_group')
+
+    # checking global bool
+    if PLOT_DATA:
+
+        # defining plots axis names
+        confluence_axis_name = 'Confluence (%)'
+        cell_line_axis_name = 'Cell line'
+
+        # plotting F1-Scores by confluence line plot
+        plot_f1_scores_by_col_lineplot(df=metrics_df,
+                                       col_name='confluence_percentage_int',
+                                       axis_name=confluence_axis_name)
+
+        # plotting F1-Scores by confluence percentage box plot
+        plot_f1_scores_by_col_boxplot(df=metrics_df,
+                                      col_name='confluence_percentage_int',
+                                      axis_name=confluence_axis_name)
+
+        # plotting F1-Scores by confluence level box plot
+        plot_f1_scores_by_col_boxplot(df=metrics_df,
+                                      col_name='confluence_level',
+                                      axis_name=confluence_axis_name)
+
+        # plotting F1-Scores by cell line box plot
+        plot_f1_scores_by_col_boxplot(df=metrics_df,
+                                      col_name='cell_line',
+                                      axis_name=cell_line_axis_name)
+
+    # checking global bool
+    if RUN_TESTS:
+
+        # running cell line tests
+        run_cell_line_tests(df=metrics_df)
+
+        # running nuclei count tests
+        run_count_tests(df=count_pairs_df)
+
+        # running nuclei area tests
+        run_area_tests(df=area_pairs_df)
+
+        # running erk tests
+        # run_erk_tests(df=class_pairs_df)
 
     # printing execution message
     print(f'output saved to "{output_folder}".')
