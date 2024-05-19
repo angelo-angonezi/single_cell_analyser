@@ -387,9 +387,13 @@ def run_confluence_tests(df: DataFrame,
     Given a metrics df, runs
     confluence tests/plots.
     """
-    # printing metrics by confluence
+    # printing metrics by confluence group
     print_metrics_by_group(df=df,
                            group_col='confluence_group')
+
+    # printing metrics by confluence level
+    print_metrics_by_group(df=df,
+                           group_col='confluence_level')
 
     # defining plots axis names
     confluence_axis_name = 'Confluence (%)'
@@ -499,11 +503,8 @@ def run_count_tests(df: DataFrame,
     Given a metrics df,
     runs nuclei count tests.
     """
-    # filtering df for values below 200
-    filtered_df = df[df['fornma_count'] <= 200]
-
     # getting count values correlation
-    count_correlation = get_pearson_correlation(df=filtered_df,
+    count_correlation = get_pearson_correlation(df=df,
                                                 col_real='fornma_count',
                                                 col_pred='model_count')
 
@@ -511,7 +512,7 @@ def run_count_tests(df: DataFrame,
     count_correlation_round = round(count_correlation, 2)
 
     # creating correlation plot
-    scatterplot(data=filtered_df,
+    scatterplot(data=df,
                 x='fornma_count',
                 y='model_count')
 
@@ -602,10 +603,23 @@ def analyse_metrics(input_path: str,
     print('getting metrics df...')
     metrics_df = read_pickle(input_path)
 
-    # filtering df
+    # filtering df for global variables
     metrics_df = metrics_df[metrics_df['detection_threshold'] == DETECTION_THRESHOLD]
     metrics_df = metrics_df[metrics_df['iou_threshold'] == IOU_THRESHOLD]
     metrics_df = metrics_df[metrics_df['mask_style'] == MASK_TYPE]
+
+    # filtering df for values below 200
+    print(len(metrics_df))
+    metrics_df = metrics_df[metrics_df['fornma_count'] <= 200]
+    print(len(metrics_df))
+
+    # TODO: remove once test completed
+    metrics_df = metrics_df[metrics_df['fornma_count'] < 80]
+    metrics_df = metrics_df[metrics_df['fornma_count'] > 70]
+    metrics_df = metrics_df[metrics_df['model_count'] > 170]
+    print(metrics_df.iloc[0])
+    print(len(metrics_df))
+    exit()
 
     # adding confluence group column
     add_confluence_group_col(df=metrics_df)
