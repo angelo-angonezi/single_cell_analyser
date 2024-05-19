@@ -1690,6 +1690,7 @@ def add_confluence_level_col(df: DataFrame) -> None:
     # getting confluence percentage mean/std
     conf_mean = df['confluence_percentage'].mean()
     conf_std = df['confluence_percentage'].std()
+    print('defining  confluence levels thresholds...')
     print(f'conf_mean: {conf_mean}')
     print(f'conf_std: {conf_std}')
 
@@ -1697,7 +1698,8 @@ def add_confluence_level_col(df: DataFrame) -> None:
     multiplier = 0.5
     confluence_lower_threshold = conf_mean - (multiplier * conf_std)
     confluence_upper_threshold = conf_mean + (multiplier * conf_std)
-    print(f'confluence_threshold: {confluence_upper_threshold}')
+    print(f'confluence_lower_threshold: {confluence_lower_threshold}')
+    print(f'confluence_upper_threshold: {confluence_upper_threshold}')
 
     # getting confluence percentage col
     confluence_percentage_col = df['confluence_percentage']

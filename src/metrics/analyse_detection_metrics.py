@@ -43,9 +43,6 @@ print('all required libraries successfully imported.')  # noqa
 IOU_THRESHOLD = 0.3
 DETECTION_THRESHOLD = 0.5
 MASK_TYPE = 'ellipse'
-PRINT_METRICS = True
-PLOT_DATA = True
-RUN_TESTS = True
 
 #####################################################################
 # argument parsing related functions
@@ -135,12 +132,92 @@ def get_mean_metrics(df: DataFrame) -> tuple:
     return metrics
 
 
+def get_col_pairs_df(df: DataFrame,
+                     col_a: str,
+                     col_b: str
+                     ) -> DataFrame:
+    """
+    Given a metrics df and two columns,
+    returns filtered df for only:
+    | img_name | col_a | col_b |
+    """
+    # defining cols to keep
+    cols_to_keep = ['img_name',
+                    col_a,
+                    col_b]
+
+    # filtering df
+    filtered_df = df[cols_to_keep]
+
+    # returning filtered df
+    return filtered_df
+
+
 def get_count_pairs_df(df: DataFrame) -> DataFrame:
     """
     Given a metrics df,
     returns count pairs df.
     """
-    pass
+    # getting count pairs df
+    count_pairs_df = get_col_pairs_df(df=df,
+                                      col_a='model_count',
+                                      col_b='fornma_count')
+
+    # returning count pairs df
+    return count_pairs_df
+
+
+def get_confluence_pairs_df(df: DataFrame) -> DataFrame:
+    """
+    Given a metrics df,
+    returns confluence pairs df.
+    """
+    # getting confluence pairs df
+    confluence_pairs_df = get_col_pairs_df(df=df,
+                                           col_a='model_confluence',
+                                           col_b='fornma_confluence')
+
+    # returning confluence pairs df
+    return confluence_pairs_df
+
+
+def get_tuple_pairs_df(df: DataFrame,
+                       tuple_col: str
+                       ) -> DataFrame:
+    """
+    Given a metrics df and tuple column,
+    returns filtered df for only:
+    | tuple_col_braind | tuple_col_fornma |
+    """
+    # defining placeholder value for model/fornma lists
+    model_list = []
+    fornma_list = []
+
+    # getting tuple col values
+    tuple_col_values = df[tuple_col]
+
+    # iterating over tuple col values
+    for tuple_list in tuple_col_values:
+
+        # iterating over tuples in tuple list
+        for pair in tuple_list:
+
+            # getting model/fornma values
+            model_value, fornma_value = pair
+
+            # appending values to respective lists
+            model_list.append(model_value)
+            fornma_list.append(fornma_value)
+
+    # creating pairs dict
+    pairs_dict = {'model_value': model_list,
+                  'fornma_value': fornma_list}
+
+    # creating pairs df
+    pairs_df = DataFrame(pairs_dict)
+
+    # returning pairs df
+    return pairs_df
 
 
 def get_area_pairs_df(df: DataFrame) -> DataFrame:
@@ -148,7 +225,12 @@ def get_area_pairs_df(df: DataFrame) -> DataFrame:
     Given a metrics df,
     returns area pairs df.
     """
-    pass
+    # getting area pairs df
+    area_pairs_df = get_tuple_pairs_df(df=df,
+                                       tuple_col='area_pairs')
+
+    # returning area pairs df
+    return area_pairs_df
 
 
 def get_class_pairs_df(df: DataFrame) -> DataFrame:
@@ -156,7 +238,12 @@ def get_class_pairs_df(df: DataFrame) -> DataFrame:
     Given a metrics df,
     returns class pairs df.
     """
-    pass
+    # getting class pairs df
+    class_pairs_df = get_tuple_pairs_df(df=df,
+                                        tuple_col='class_pairs')
+
+    # returning class pairs df
+    return class_pairs_df
 
 
 def print_metrics(df: DataFrame,
@@ -429,9 +516,6 @@ def analyse_metrics(input_path: str,
     metrics_df = metrics_df[metrics_df['iou_threshold'] == IOU_THRESHOLD]
     metrics_df = metrics_df[metrics_df['mask_style'] == MASK_TYPE]
 
-    # TODO: remove once test completed
-    metrics_df = metrics_df[metrics_df['fornma_count'] <= 200]
-
     # adding confluence group column
     add_confluence_group_col(df=metrics_df)
 
@@ -441,72 +525,68 @@ def analyse_metrics(input_path: str,
     # getting count pairs df
     count_pairs_df = get_count_pairs_df(df=metrics_df)
 
+    # getting confluence pairs df
+    confluence_pairs_df = get_confluence_pairs_df(df=metrics_df)
+
     # getting area pairs df
     area_pairs_df = get_area_pairs_df(df=metrics_df)
+    print(area_pairs_df)
+    exit()
 
     # getting class pairs df
     class_pairs_df = get_class_pairs_df(df=metrics_df)
 
-    # checking global bool
-    if PRINT_METRICS:
+    # printing global metrics
+    print_metrics(df=metrics_df,
+                  metrics_type='global')
 
-        # printing global metrics
-        print_metrics(df=metrics_df,
-                      metrics_type='global')
+    # printing mean metrics
+    print_metrics(df=metrics_df,
+                  metrics_type='mean')
 
-        # printing mean metrics
-        print_metrics(df=metrics_df,
-                      metrics_type='mean')
+    # printing metrics by cell line
+    print_metrics_by_group(df=metrics_df,
+                           group_col='cell_line')
 
-        # printing metrics by cell line
-        print_metrics_by_group(df=metrics_df,
-                               group_col='cell_line')
+    # printing metrics by confluence
+    print_metrics_by_group(df=metrics_df,
+                           group_col='confluence_group')
 
-        # printing metrics by confluence
-        print_metrics_by_group(df=metrics_df,
-                               group_col='confluence_group')
+    # defining plots axis names
+    confluence_axis_name = 'Confluence (%)'
+    cell_line_axis_name = 'Cell line'
 
-    # checking global bool
-    if PLOT_DATA:
+    # plotting F1-Scores by confluence line plot
+    plot_f1_scores_by_col_lineplot(df=metrics_df,
+                                   col_name='confluence_percentage_int',
+                                   axis_name=confluence_axis_name)
 
-        # defining plots axis names
-        confluence_axis_name = 'Confluence (%)'
-        cell_line_axis_name = 'Cell line'
+    # plotting F1-Scores by confluence percentage box plot
+    plot_f1_scores_by_col_boxplot(df=metrics_df,
+                                  col_name='confluence_percentage_int',
+                                  axis_name=confluence_axis_name)
 
-        # plotting F1-Scores by confluence line plot
-        plot_f1_scores_by_col_lineplot(df=metrics_df,
-                                       col_name='confluence_percentage_int',
-                                       axis_name=confluence_axis_name)
+    # plotting F1-Scores by confluence level box plot
+    plot_f1_scores_by_col_boxplot(df=metrics_df,
+                                  col_name='confluence_level',
+                                  axis_name=confluence_axis_name)
 
-        # plotting F1-Scores by confluence percentage box plot
-        plot_f1_scores_by_col_boxplot(df=metrics_df,
-                                      col_name='confluence_percentage_int',
-                                      axis_name=confluence_axis_name)
+    # plotting F1-Scores by cell line box plot
+    plot_f1_scores_by_col_boxplot(df=metrics_df,
+                                  col_name='cell_line',
+                                  axis_name=cell_line_axis_name)
 
-        # plotting F1-Scores by confluence level box plot
-        plot_f1_scores_by_col_boxplot(df=metrics_df,
-                                      col_name='confluence_level',
-                                      axis_name=confluence_axis_name)
+    # running cell line tests
+    run_cell_line_tests(df=metrics_df)
 
-        # plotting F1-Scores by cell line box plot
-        plot_f1_scores_by_col_boxplot(df=metrics_df,
-                                      col_name='cell_line',
-                                      axis_name=cell_line_axis_name)
+    # running nuclei count tests
+    run_count_tests(df=count_pairs_df)
 
-    # checking global bool
-    if RUN_TESTS:
+    # running nuclei area tests
+    run_area_tests(df=area_pairs_df)
 
-        # running cell line tests
-        run_cell_line_tests(df=metrics_df)
-
-        # running nuclei count tests
-        run_count_tests(df=count_pairs_df)
-
-        # running nuclei area tests
-        run_area_tests(df=area_pairs_df)
-
-        # running erk tests
-        # run_erk_tests(df=class_pairs_df)
+    # running erk tests
+    # run_erk_tests(df=class_pairs_df)
 
     # printing execution message
     print(f'output saved to "{output_folder}".')

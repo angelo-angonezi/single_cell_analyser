@@ -17,6 +17,7 @@ from cv2 import imwrite
 from os.path import join
 from pandas import concat
 from numpy import ndarray
+from os.path import exists
 from pandas import read_csv
 from pandas import DataFrame
 from argparse import ArgumentParser
@@ -503,6 +504,18 @@ def create_detection_metrics_df(images_folder: str,
             # iterating over detection thresholds
             for dt in detection_thresholds:
 
+                # defining save name/path
+                save_name = f'{image_name}_{iou}_{dt}_metrics.pickle'
+                save_path = join(output_folder,
+                                 save_name)
+
+                # checking if current df already exists
+                output_exists = exists(save_path)
+                if output_exists:
+
+                    # skipping to next iteration
+                    continue
+
                 # updating global variables
                 global CURRENT_DT
                 CURRENT_DT = dt
@@ -617,9 +630,6 @@ def create_detection_metrics_df(images_folder: str,
                 dfs_list.append(current_df)
 
                 # saving current df
-                save_name = f'{image_name}_metrics.pickle'
-                save_path = join(output_folder,
-                                 save_name)
                 current_df.to_pickle(save_path)
 
     # concatenating dfs in dfs_list
