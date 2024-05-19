@@ -616,6 +616,12 @@ def create_detection_metrics_df(images_folder: str,
                 # appending current df to dfs_list
                 dfs_list.append(current_df)
 
+                # saving current df
+                save_name = f'{image_name}_metrics.pickle'
+                save_path = join(output_folder,
+                                 save_name)
+                current_df.to_pickle(save_path)
+
     # concatenating dfs in dfs_list
     final_df = concat(dfs_list,
                       ignore_index=True)

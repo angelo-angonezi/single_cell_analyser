@@ -43,8 +43,8 @@ print('all required libraries successfully imported.')  # noqa
 IOU_THRESHOLD = 0.3
 DETECTION_THRESHOLD = 0.5
 MASK_TYPE = 'ellipse'
-PRINT_METRICS = False
-PLOT_DATA = False
+PRINT_METRICS = True
+PLOT_DATA = True
 RUN_TESTS = True
 
 #####################################################################
@@ -428,6 +428,9 @@ def analyse_metrics(input_path: str,
     metrics_df = metrics_df[metrics_df['detection_threshold'] == DETECTION_THRESHOLD]
     metrics_df = metrics_df[metrics_df['iou_threshold'] == IOU_THRESHOLD]
     metrics_df = metrics_df[metrics_df['mask_style'] == MASK_TYPE]
+
+    # TODO: remove once test completed
+    metrics_df = metrics_df[metrics_df['fornma_count'] <= 200]
 
     # adding confluence group column
     add_confluence_group_col(df=metrics_df)
