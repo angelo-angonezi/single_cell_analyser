@@ -574,9 +574,9 @@ def run_erk_tests(df: DataFrame) -> None:
     scatterplot(data=ratios_df,
                 x='fornma_ratio',
                 y='braind_ratio')
-    corr_value = run_anova_test(df=ratios_df,
-                                col_real='fornma_ratio',
-                                col_pred='braind_ratio')
+    corr_value = get_pearson_correlation(df=ratios_df,
+                                         col_real='fornma_ratio',
+                                         col_pred='braind_ratio')
     corr_value = round(corr_value, 3)
 
     ratios_df = ratios_df.melt()
@@ -589,7 +589,6 @@ def run_erk_tests(df: DataFrame) -> None:
     title = f'ERK-KTR Histogram Plot'
     plt.title(title)
     plt.show()
-    exit()
 
     title = f'ERK-KTR Correlation Plot | Pearson R: {corr_value}'
     plt.title(title)
