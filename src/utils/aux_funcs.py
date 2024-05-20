@@ -50,6 +50,7 @@ from scipy.stats import pearsonr
 from scipy.stats import f_oneway
 from cv2 import IMREAD_GRAYSCALE
 from cv2 import destroyAllWindows
+from scipy.stats import ttest_rel
 from cv2 import CHAIN_APPROX_NONE
 from shutil import copy as sh_copy
 from numpy import where as np_where
@@ -2890,6 +2891,28 @@ def run_mannwhitneyu_test(sample_a: list,
     f_string = '--Mann-Whitney-U test results--\n'
     f_string += f'sample_a count: {sample_a_len}\n'
     f_string += f'sample_b count: {sample_b_len}\n'
+    f_string += f'p-value: {p_value}\n'
+    f_string += f's-value: {s_value}'
+
+    # printing test results
+    print(f_string)
+    spacer()
+
+
+def run_paired_test(sample_a: list,
+                    sample_b: list
+                    ) -> None:
+    """
+    Given a list of samples,
+    runs paired t-test.
+    """
+    # calculating paired t-test statistic
+    print('calculating paired t-test statistic...')
+    s_value, p_value = ttest_rel(a=sample_a,
+                                 b=sample_b)
+
+    # assembling results string
+    f_string = '--paired t-test test results--\n'
     f_string += f'p-value: {p_value}\n'
     f_string += f's-value: {s_value}'
 

@@ -29,6 +29,7 @@ from src.utils.aux_funcs import spacer
 from sklearn.metrics import mean_squared_error
 from src.utils.aux_funcs import run_anova_test
 from src.utils.aux_funcs import run_levene_test
+from src.utils.aux_funcs import run_paired_test
 from src.utils.aux_funcs import run_kruskal_test
 from src.utils.aux_funcs import enter_to_continue
 from src.utils.aux_funcs import run_mannwhitneyu_test
@@ -531,7 +532,13 @@ def run_count_tests(df: DataFrame,
     # closing plot
     plt.close()
 
+    # getting sample info
+    fornma_sample = df['fornma_count']
+    model_sample = df['model_count']
+
     # running paired t-test
+    run_paired_test(sample_a=fornma_sample,
+                    sample_b=model_sample)
 
 
 def run_area_tests(df: DataFrame) -> None:
@@ -609,17 +616,7 @@ def analyse_metrics(input_path: str,
     metrics_df = metrics_df[metrics_df['mask_style'] == MASK_TYPE]
 
     # filtering df for values below 200
-    print(len(metrics_df))
     metrics_df = metrics_df[metrics_df['fornma_count'] <= 200]
-    print(len(metrics_df))
-
-    # TODO: remove once test completed
-    metrics_df = metrics_df[metrics_df['fornma_count'] < 80]
-    metrics_df = metrics_df[metrics_df['fornma_count'] > 70]
-    metrics_df = metrics_df[metrics_df['model_count'] > 170]
-    print(metrics_df.iloc[0])
-    print(len(metrics_df))
-    exit()
 
     # adding confluence group column
     add_confluence_group_col(df=metrics_df)

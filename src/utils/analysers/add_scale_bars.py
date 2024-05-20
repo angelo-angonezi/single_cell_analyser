@@ -25,27 +25,19 @@ sleep(0.8)
 # defining global parameters
 
 # defining file/folder paths
-IMAGES_FOLDER_PATH = 'E:\\Angelo\\Desktop\\figs_paper\\add_scale\\input'
-OUTPUT_FOLDER_PATH = 'E:\\Angelo\\Desktop\\figs_paper\\add_scale\\output'
-SCALE_BAR_DICT = {'annotated_cells.jpg': 0.75,
-                  'annotators_overlays.png': 0.75,
-                  'annotators_overlays_pixelated.png': 0.75,
-                  'cell22.jpg': 0.75,
-                  'cells.png': 0.75,
-                  'cells_bb.png': 0.10,
-                  'cells_bb_rotated.png': 0.10,
-                  'detected_cells.jpg': 0.75,
-                  'glioblastoma_1.jpg': 0.40,
-                  'glioblastoma_2.jpg': 0.67,
-                  'glioblastoma_3.jpg': 0.40,
-                  'glioblastoma_4.jpg': 1.00,
-                  'glioblastoma_5.jpg': 0.75,
-                  'glioblastoma_6.jpg': 1.00,
-                  'glioblastoma_cells.jpg': 1.00,
-                  'glioblastoma_normal_mitoses.png': 0.12,
-                  'low_iou_example.png': 0.15,
-                  'matched_annotations.jpg': 0.60,
-                  'polarity_example_img_arrows.png': 0.75}
+IMAGES_FOLDER_PATH = 'E:\\Angelo\\Desktop\\figs_paper_mestrado\\add_scale\\input'
+OUTPUT_FOLDER_PATH = 'E:\\Angelo\\Desktop\\figs_paper_mestrado\\add_scale\\output'
+SCALE_BAR_DICT = {'img_ex_phase.png': 0.98,
+                  'img_ex_red.png': 0.98,
+                  'bad_ex_01.png': 0.62,
+                  'bad_ex_02.png': 0.62,
+                  'confluence_11_example.png': 0.62,
+                  'confluence_12_example.png': 0.62,
+                  'A172_example.jpg': 0.62,
+                  'MRC5_example.jpg': 0.62,
+                  'U87_example.jpg': 0.62,
+                  'U251_example.jpg': 0.62,
+                  }
 
 ######################################################################
 # defining auxiliary functions
