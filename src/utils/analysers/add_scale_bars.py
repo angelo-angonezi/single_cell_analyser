@@ -27,16 +27,30 @@ sleep(0.8)
 # defining file/folder paths
 IMAGES_FOLDER_PATH = 'E:\\Angelo\\Desktop\\figs_paper_mestrado\\add_scale\\input'
 OUTPUT_FOLDER_PATH = 'E:\\Angelo\\Desktop\\figs_paper_mestrado\\add_scale\\output'
-SCALE_BAR_DICT = {'img_ex_phase.png': 0.98,
-                  'img_ex_red.png': 0.98,
+SCALE_BAR_DICT = {'cell_count_outlier_img_ex_phase.png': 0.98,
+                  'cell_count_outlier_img_ex_red.png': 0.98,
                   'bad_ex_01.png': 0.62,
                   'bad_ex_02.png': 0.62,
+                  'good_ex_red.jpg': 0.62,
+                  'good_ex_original.jpg': 0.62,
+                  'good_ex_overlays.png': 0.62,
                   'confluence_11_example.png': 0.62,
                   'confluence_12_example.png': 0.62,
-                  'A172_example.jpg': 0.62,
-                  'MRC5_example.jpg': 0.62,
-                  'U87_example.jpg': 0.62,
-                  'U251_example.jpg': 0.62,
+                  'A172_example_full.jpg': 0.62,
+                  'A172_example.png': 0.62,
+                  'MRC5_example_full.jpg': 0.62,
+                  'MRC5_example.png': 0.62,
+                  'U87_example_full.jpg': 0.62,
+                  'U87_example.png': 0.62,
+                  'U251_example_full.jpg': 0.62,
+                  'U251_example.png': 0.62,
+                  'outlier_01_full.png': 0.62,
+                  'outlier_01.png': 0.62,
+                  'outlier_02_full.png': 0.62,
+                  'outlier_02.png': 0.62,
+                  'outlier_03_full.png': 0.62,
+                  'outlier_03.png': 0.62,
+                  'contrast_challenge.png': 0.62,
                   }
 
 ######################################################################

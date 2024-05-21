@@ -11,6 +11,7 @@ print('initializing...')  # noqa
 
 # importing required libraries
 print('importing required libraries...')  # noqa
+from math import sqrt
 from os import listdir
 from os.path import join
 from numpy import arange
@@ -232,6 +233,11 @@ def get_area_pairs_df(df: DataFrame) -> DataFrame:
     area_pairs_df = get_tuple_pairs_df(df=df,
                                        tuple_col='area_pairs')
 
+    # renaming cols
+    cols = ['model_area',
+            'fornma_area']
+    area_pairs_df.columns = cols
+
     # returning area pairs df
     return area_pairs_df
 
@@ -244,6 +250,11 @@ def get_class_pairs_df(df: DataFrame) -> DataFrame:
     # getting class pairs df
     class_pairs_df = get_tuple_pairs_df(df=df,
                                         tuple_col='class_pairs')
+
+    # renaming cols
+    cols = ['model_class',
+            'fornma_class']
+    class_pairs_df.columns = cols
 
     # returning class pairs df
     return class_pairs_df
@@ -540,13 +551,91 @@ def run_count_tests(df: DataFrame,
     run_paired_test(sample_a=fornma_sample,
                     sample_b=model_sample)
 
+    # adding metrics related cols
+    df['count_error'] = df['model_count'] - df['fornma_count']
+    df['count_error_sqr'] = [v ** 2 for v in df['count_error']]
+    df['count_error_abs'] = [abs(v) for v in df['count_error']]
+    df['count_error_rel'] = df['count_error_abs'] / df['fornma_count']
 
-def run_area_tests(df: DataFrame) -> None:
+    # getting mean metrics
+    mae = df['count_error_abs'].mean()
+    mre = df['count_error_rel'].mean()
+    mse = df['count_error_sqr'].mean()
+    rmse = sqrt(mse)
+
+    # printing metrics
+    f_string = '--Count metrics--\n'
+    f_string += f'MAE: {mae}\n'
+    f_string += f'MRE: {mre}\n'
+    f_string += f'MSE: {mse}\n'
+    f_string += f'RMSE: {rmse}'
+    print(f_string)
+    spacer()
+
+
+def run_area_tests(df: DataFrame,
+                   output_folder: str
+                   ) -> None:
     """
     Given a metrics df,
     runs nuclei area tests.
     """
-    pass
+    # getting area values correlation
+    area_correlation = get_pearson_correlation(df=df,
+                                               col_real='fornma_area',
+                                               col_pred='model_area')
+
+    # rounding value for plot
+    area_correlation_round = round(area_correlation, 2)
+
+    # creating correlation plot
+    scatterplot(data=df,
+                x='fornma_area',
+                y='model_area')
+
+    # defining title/axis names
+    title = f'Area correlation | Pearson R: {area_correlation_round}'
+    plt.title(title)
+    plt.xlabel('forNMA area')
+    plt.ylabel('Model area')
+
+    # saving plot
+    save_name = 'area_correlation_plot.png'
+    save_path = join(output_folder,
+                     save_name)
+    plt.savefig(save_path)
+
+    # closing plot
+    plt.close()
+
+    # getting sample info
+    fornma_sample = df['fornma_area']
+    model_sample = df['model_area']
+
+    # running paired t-test
+    run_paired_test(sample_a=fornma_sample,
+                    sample_b=model_sample)
+
+    # adding metrics related cols
+    df['area_error'] = df['model_area'] - df['fornma_area']
+    df['area_error_sqr'] = [v ** 2 for v in df['area_error']]
+    df['area_error_abs'] = [abs(v) for v in df['area_error']]
+    df['area_error_rel'] = df['area_error_abs'] / df['fornma_area']
+
+    # getting mean metrics
+    mae = df['area_error_abs'].mean()
+    mre = df['area_error_rel'].mean()
+    mse = df['area_error_sqr'].mean()
+    rmse = sqrt(mse)
+
+    # printing metrics
+    f_string = '--area metrics--\n'
+    f_string += f'MAE: {mae}\n'
+    f_string += f'MRE: {mre}\n'
+    f_string += f'MSE: {mse}\n'
+    f_string += f'RMSE: {rmse}'
+    print(f_string)
+    spacer()
 
 
 def run_erk_tests(df: DataFrame) -> None:
@@ -656,7 +745,8 @@ def analyse_metrics(input_path: str,
                     output_folder=output_folder)
 
     # running nuclei area tests
-    run_area_tests(df=area_pairs_df)
+    run_area_tests(df=area_pairs_df,
+                   output_folder=output_folder)
 
     # running erk tests
     # run_erk_tests(df=class_pairs_df)
