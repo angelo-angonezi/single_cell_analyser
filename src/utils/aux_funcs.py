@@ -2782,16 +2782,16 @@ def get_prediction(prediction: float,
 
 
 def get_pearson_correlation(df: DataFrame,
-                            col_real: str,
-                            col_pred: str
+                            real_col: str,
+                            pred_col: str
                             ) -> float:
     """
     Given an errors data frame,
     returns pearson correlation.
     """
     # getting real/prediction cols
-    real_col = df[col_real]
-    pred_col = df[col_pred]
+    real_col = df[real_col]
+    pred_col = df[pred_col]
 
     # calculating pearson correlation
     print('calculating pearson correlation...')

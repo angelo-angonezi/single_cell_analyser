@@ -392,6 +392,137 @@ def plot_f1_scores_by_col_boxplot(df: DataFrame,
     plt.close()
 
 
+def plot_histogram(df: DataFrame,
+                   x_col: str,
+                   variable: str,
+                   output_folder: str
+                   ) -> None:
+    """
+    Given a correlations df, plots
+    histogram, saving plot in given
+    output folder.
+    """
+    # creating histogram plot
+    histplot(data=df,
+             x=x_col)
+
+    # defining title/axis names
+    title = f'{variable} ground-truth histogram'
+    x_name = f'forNMA {variable}'
+    y_name = 'Count'
+    plt.title(title)
+    plt.xlabel(x_name)
+    plt.ylabel(y_name)
+
+    # saving plot
+    save_name = f'{x_col}_histogram.png'
+    save_path = join(output_folder,
+                     save_name)
+    plt.savefig(save_path)
+
+    # closing plot
+    plt.close()
+
+
+def plot_correlations(df: DataFrame,
+                      real_col: str,
+                      pred_col: str,
+                      variable: str,
+                      output_folder: str
+                      ) -> None:
+    """
+    Given a df and plot parameters,
+    creates correlation plot, and
+    saves it to given output folder.
+    """
+    # getting area values correlation
+    correlation_value = get_pearson_correlation(df=df,
+                                                real_col=real_col,
+                                                pred_col=pred_col)
+
+    # rounding value for plot
+    correlation_round = round(correlation_value, 2)
+
+    # defining plot parameters
+    capitalized_variable = variable.capitalize()
+    title = f'{capitalized_variable} correlation | Pearson R: {correlation_round}'
+    x_name = f'forNMA {capitalized_variable}'
+    y_name = f'Model {capitalized_variable}'
+    save_name = f'{variable}_correlation_plot.png'
+    save_path = join(output_folder,
+                     save_name)
+
+    # creating correlation plot
+    scatterplot(data=df,
+                x=real_col,
+                y=pred_col)
+
+    # defining title/axis names
+    plt.title(title)
+    plt.xlabel(x_name)
+    plt.ylabel(y_name)
+
+    # saving plot
+    plt.savefig(save_path)
+
+    # closing plot
+    plt.close()
+
+
+def run_correlation_tests(df: DataFrame,
+                          real_col: str,
+                          pred_col: str,
+                          variable: str,
+                          output_folder: str
+                          ) -> None:
+    """
+    Given a correlations df, and parameters
+    for correlation calculation, runs tests,
+    and saves plots in given output folder.
+    """
+    # plotting histogram plot
+    plot_histogram(df=df,
+                   x_col=real_col,
+                   variable=variable,
+                   output_folder=output_folder)
+
+    # plotting correlation plot
+    plot_correlations(df=df,
+                      real_col=real_col,
+                      pred_col=pred_col,
+                      variable=variable,
+                      output_folder=output_folder)
+
+    # getting sample info
+    fornma_sample = df[real_col]
+    model_sample = df[pred_col]
+
+    # running paired t-test
+    run_paired_test(sample_a=fornma_sample,
+                    sample_b=model_sample)
+
+    # adding metrics related cols
+    df['error'] = df[pred_col] - df[real_col]
+    df['error_sqr'] = [v ** 2 for v in df['error']]
+    df['error_abs'] = [abs(v) for v in df['error']]
+    df['error_rel'] = df['error_abs'] / df[real_col]
+
+    # getting mean metrics
+    mae = df['error_abs'].mean()
+    mre = df['error_rel'].mean()
+    mse = df['error_sqr'].mean()
+    rmse = sqrt(mse)
+
+    # printing metrics
+    f_string = '--Metrics--\n'
+    f_string += f'MAE: {mae}\n'
+    f_string += f'MRE: {mre}\n'
+    f_string += f'MSE: {mse}\n'
+    f_string += f'RMSE: {rmse}'
+    print(f_string)
+    spacer()
+
+
 def run_confluence_tests(df: DataFrame,
                          output_folder: str
                          ) -> None:
@@ -508,144 +639,13 @@ def run_cell_line_tests(df: DataFrame,
                               sample_b=sample_b)
 
 
-def run_count_tests(df: DataFrame,
-                    output_folder: str
-                    ) -> None:
-    """
-    Given a metrics df,
-    runs nuclei count tests.
-    """
-    # getting count values correlation
-    count_correlation = get_pearson_correlation(df=df,
-                                                col_real='fornma_count',
-                                                col_pred='model_count')
-
-    # rounding value for plot
-    count_correlation_round = round(count_correlation, 2)
-
-    # creating correlation plot
-    scatterplot(data=df,
-                x='fornma_count',
-                y='model_count')
-
-    # defining title/axis names
-    title = f'Count correlation | Pearson R: {count_correlation_round}'
-    plt.title(title)
-    plt.xlabel('forNMA count')
-    plt.ylabel('Model count')
-
-    # saving plot
-    save_name = 'count_correlation_plot.png'
-    save_path = join(output_folder,
-                     save_name)
-    plt.savefig(save_path)
-
-    # closing plot
-    plt.close()
-
-    # getting sample info
-    fornma_sample = df['fornma_count']
-    model_sample = df['model_count']
-
-    # running paired t-test
-    run_paired_test(sample_a=fornma_sample,
-                    sample_b=model_sample)
-
-    # adding metrics related cols
-    df['count_error'] = df['model_count'] - df['fornma_count']
-    df['count_error_sqr'] = [v ** 2 for v in df['count_error']]
-    df['count_error_abs'] = [abs(v) for v in df['count_error']]
-    df['count_error_rel'] = df['count_error_abs'] / df['fornma_count']
-
-    # getting mean metrics
-    mae = df['count_error_abs'].mean()
-    mre = df['count_error_rel'].mean()
-    mse = df['count_error_sqr'].mean()
-    rmse = sqrt(mse)
-
-    # printing metrics
-    f_string = '--Count metrics--\n'
-    f_string += f'MAE: {mae}\n'
-    f_string += f'MRE: {mre}\n'
-    f_string += f'MSE: {mse}\n'
-    f_string += f'RMSE: {rmse}'
-    print(f_string)
-    spacer()
-
-
-def run_area_tests(df: DataFrame,
-                   output_folder: str
-                   ) -> None:
-    """
-    Given a metrics df,
-    runs nuclei area tests.
-    """
-    # getting area values correlation
-    area_correlation = get_pearson_correlation(df=df,
-                                               col_real='fornma_area',
-                                               col_pred='model_area')
-
-    # rounding value for plot
-    area_correlation_round = round(area_correlation, 2)
-
-    # creating correlation plot
-    scatterplot(data=df,
-                x='fornma_area',
-                y='model_area')
-
-    # defining title/axis names
-    title = f'Area correlation | Pearson R: {area_correlation_round}'
-    plt.title(title)
-    plt.xlabel('forNMA area')
-    plt.ylabel('Model area')
-
-    # saving plot
-    save_name = 'area_correlation_plot.png'
-    save_path = join(output_folder,
-                     save_name)
-    plt.savefig(save_path)
-
-    # closing plot
-    plt.close()
-
-    # getting sample info
-    fornma_sample = df['fornma_area']
-    model_sample = df['model_area']
-
-    # running paired t-test
-    run_paired_test(sample_a=fornma_sample,
-                    sample_b=model_sample)
-
-    # adding metrics related cols
-    df['area_error'] = df['model_area'] - df['fornma_area']
-    df['area_error_sqr'] = [v ** 2 for v in df['area_error']]
-    df['area_error_abs'] = [abs(v) for v in df['area_error']]
-    df['area_error_rel'] = df['area_error_abs'] / df['fornma_area']
-
-    # getting mean metrics
-    mae = df['area_error_abs'].mean()
-    mre = df['area_error_rel'].mean()
-    mse = df['area_error_sqr'].mean()
-    rmse = sqrt(mse)
-
-    # printing metrics
-    f_string = '--area metrics--\n'
-    f_string += f'MAE: {mae}\n'
-    f_string += f'MRE: {mre}\n'
-    f_string += f'MSE: {mse}\n'
-    f_string += f'RMSE: {rmse}'
-    print(f_string)
-    spacer()
-
-
 def run_erk_tests(df: DataFrame) -> None:
     """
     Given a metrics df, runs
     cit/nuc ratio tests.
     """
-    print(df)
-    print(df.columns)
-
+    # TODO: create correlation plot of area_errorVSratio_errors
+    # TODO: create barplots of proportions of Active/Inactive cells
     class_pairs_col = df['class_pairs']
     class_pairs_list = class_pairs_col.to_list()
     braind_ratios = []
@@ -664,8 +664,8 @@ def run_erk_tests(df: DataFrame) -> None:
                 x='fornma_ratio',
                 y='braind_ratio')
     corr_value = get_pearson_correlation(df=ratios_df,
-                                         col_real='fornma_ratio',
-                                         col_pred='braind_ratio')
+                                         real_col='fornma_ratio',
+                                         pred_col='braind_ratio')
     corr_value = round(corr_value, 3)
 
     ratios_df = ratios_df.melt()
@@ -740,13 +740,26 @@ def analyse_metrics(input_path: str,
     run_cell_line_tests(df=metrics_df,
                         output_folder=output_folder)
 
-    # running nuclei count tests
-    run_count_tests(df=count_pairs_df,
-                    output_folder=output_folder)
+    # running image confluence correlation tests
+    run_correlation_tests(df=confluence_pairs_df,
+                          real_col='fornma_confluence',
+                          pred_col='model_confluence',
+                          variable='confluence',
+                          output_folder=output_folder)
 
-    # running nuclei area tests
-    run_area_tests(df=area_pairs_df,
-                   output_folder=output_folder)
+    # running nuclei count correlation tests
+    run_correlation_tests(df=count_pairs_df,
+                          real_col='fornma_count',
+                          pred_col='model_count',
+                          variable='count',
+                          output_folder=output_folder)
+
+    # running nuclei area correlation tests
+    run_correlation_tests(df=area_pairs_df,
+                          real_col='fornma_area',
+                          pred_col='model_area',
+                          variable='area',
+                          output_folder=output_folder)
 
     # running erk tests
     # run_erk_tests(df=class_pairs_df)
