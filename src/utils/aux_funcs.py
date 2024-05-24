@@ -1697,7 +1697,7 @@ def add_confluence_level_col(df: DataFrame) -> None:
 
     # calculating confluence threshold
     multiplier = 0.5
-    confluence_lower_threshold = conf_mean - (multiplier * conf_std)
+    confluence_lower_threshold = conf_mean + (multiplier * conf_std)
     confluence_upper_threshold = conf_mean + (multiplier * conf_std)
     print(f'confluence_lower_threshold: {confluence_lower_threshold}')
     print(f'confluence_upper_threshold: {confluence_upper_threshold}')

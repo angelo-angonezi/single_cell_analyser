@@ -407,12 +407,19 @@ def plot_histogram(df: DataFrame,
              x=x_col)
 
     # defining title/axis names
-    title = f'{variable} ground-truth histogram'
+    capitalized_variable = variable.capitalize()
+    title = f'{capitalized_variable} ground-truth histogram'
     x_name = f'forNMA {variable}'
     y_name = 'Count'
     plt.title(title)
     plt.xlabel(x_name)
     plt.ylabel(y_name)
+
+    # printing col description
+    col_description = df[x_col].describe()
+    f_string = f'--{x_col} column description--'
+    print(f_string)
+    print(col_description)
 
     # saving plot
     save_name = f'{x_col}_histogram.png'
@@ -446,8 +453,8 @@ def plot_correlations(df: DataFrame,
     # defining plot parameters
     capitalized_variable = variable.capitalize()
     title = f'{capitalized_variable} correlation | Pearson R: {correlation_round}'
-    x_name = f'forNMA {capitalized_variable}'
-    y_name = f'Model {capitalized_variable}'
+    x_name = f'forNMA {variable}'
+    y_name = f'Model {variable}'
     save_name = f'{variable}_correlation_plot.png'
     save_path = join(output_folder,
                      save_name)
@@ -712,6 +719,10 @@ def analyse_metrics(input_path: str,
     # adding confluence level column
     add_confluence_level_col(df=metrics_df)
 
+    # converting columns scale
+    metrics_df['fornma_confluence'] *= 100
+    metrics_df['model_confluence'] *= 100
+
     # getting count pairs df
     count_pairs_df = get_count_pairs_df(df=metrics_df)
 
@@ -733,14 +744,17 @@ def analyse_metrics(input_path: str,
                   metrics_type='mean')
 
     # running confluence tests
+    print('running confluence tests...')
     run_confluence_tests(df=metrics_df,
                          output_folder=output_folder)
 
     # running cell line tests
+    print('running cell line tests...')
     run_cell_line_tests(df=metrics_df,
                         output_folder=output_folder)
 
     # running image confluence correlation tests
+    print('running image confluence correlation tests...')
     run_correlation_tests(df=confluence_pairs_df,
                           real_col='fornma_confluence',
                           pred_col='model_confluence',
@@ -748,6 +762,7 @@ def analyse_metrics(input_path: str,
                           output_folder=output_folder)
 
     # running nuclei count correlation tests
+    print('running nuclei count correlation tests...')
     run_correlation_tests(df=count_pairs_df,
                           real_col='fornma_count',
                           pred_col='model_count',
@@ -755,6 +770,7 @@ def analyse_metrics(input_path: str,
                           output_folder=output_folder)
 
     # running nuclei area correlation tests
+    print('running nuclei area correlation tests...')
     run_correlation_tests(df=area_pairs_df,
                           real_col='fornma_area',
                           pred_col='model_area',
