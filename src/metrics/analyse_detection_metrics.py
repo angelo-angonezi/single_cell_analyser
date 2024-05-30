@@ -713,6 +713,8 @@ def analyse_metrics(input_path: str,
     # filtering df for values below 200
     metrics_df = metrics_df[metrics_df['fornma_count'] <= 200]
 
+    # TODO: add confluence conversion here!
+
     # adding confluence group column
     add_confluence_group_col(df=metrics_df)
 
