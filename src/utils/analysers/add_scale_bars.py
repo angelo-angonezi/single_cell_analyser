@@ -13,13 +13,11 @@ print('importing required libraries...')  # noqa
 import cv2
 import numpy as np
 from os import listdir
-from time import sleep
 from cv2 import imread
 from cv2 import imwrite
 from os.path import join
 from src.utils.aux_funcs import print_progress_message
 print('all required libraries successfully imported.')  # noqa
-sleep(0.8)
 
 #####################################################################
 # defining global parameters
@@ -51,6 +49,12 @@ SCALE_BAR_DICT = {'cell_count_outlier_img_ex_phase.png': 0.98,
                   'outlier_03_full.png': 0.62,
                   'outlier_03.png': 0.62,
                   'contrast_challenge.png': 0.62,
+                  'single_nuclei_01_phase.png': 0.62,
+                  'single_nuclei_02_phase.png': 0.62,
+                  'single_nuclei_03_phase.png': 0.62,
+                  'single_nuclei_01_red.png': 0.62,
+                  'single_nuclei_02_red.png': 0.62,
+                  'single_nuclei_03_red.png': 0.62,
                   }
 
 ######################################################################
