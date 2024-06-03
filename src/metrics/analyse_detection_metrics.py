@@ -422,7 +422,7 @@ def plot_histogram(df: DataFrame,
     print(col_description)
 
     # saving plot
-    save_name = f'{x_col}_histogram.png'
+    save_name = f'{variable}_histogram.png'
     save_path = join(output_folder,
                      save_name)
     plt.savefig(save_path)
@@ -519,6 +519,17 @@ def run_correlation_tests(df: DataFrame,
     mre = df['error_rel'].mean()
     mse = df['error_sqr'].mean()
     rmse = sqrt(mse)
+
+    # plotting error histogram plots
+    plot_histogram(df=df,
+                   x_col='error',
+                   variable=f'{variable}_error',
+                   output_folder=output_folder)
+
+    plot_histogram(df=df,
+                   x_col='error_rel',
+                   variable=f'{variable}_error_rel',
+                   output_folder=output_folder)
 
     # printing metrics
     f_string = '--Metrics--\n'
@@ -757,11 +768,11 @@ def analyse_metrics(input_path: str,
 
     # running image confluence correlation tests
     print('running image confluence correlation tests...')
-    run_correlation_tests(df=confluence_pairs_df,
-                          real_col='fornma_confluence',
-                          pred_col='model_confluence',
-                          variable='confluence',
-                          output_folder=output_folder)
+    # run_correlation_tests(df=confluence_pairs_df,
+    #                       real_col='fornma_confluence',
+    #                       pred_col='model_confluence',
+    #                       variable='confluence',
+    #                       output_folder=output_folder)
 
     # running nuclei count correlation tests
     print('running nuclei count correlation tests...')
