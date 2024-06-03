@@ -431,6 +431,53 @@ def plot_histogram(df: DataFrame,
     plt.close()
 
 
+def plot_boxplot(df: DataFrame,
+                 y_col: str,
+                 variable: str,
+                 output_folder: str
+                 ) -> None:
+    """
+    Given a correlations df, plots
+    boxplot, saving plot in given
+    output folder.
+    """
+    # creating histogram plot
+    boxplot(data=df,
+            y=y_col)
+
+    # defining title/axis names
+    capitalized_variable = variable.capitalize()
+    title = f'{capitalized_variable} boxplot'
+    y_name = f'{variable}'
+    plt.title(title)
+    plt.ylabel(y_name)
+
+    # getting mean/std values
+    error_mean = df[y_col].mean()
+    error_std = df[y_col].std()
+    upper_threshold = error_mean + 1 * error_std
+    lower_threshold = error_mean - 1 * error_std
+
+    # setting y lims
+    plt.ylim(lower_threshold,
+             upper_threshold)
+
+    # printing col description
+    col_description = df[y_col].describe()
+    f_string = f'--{y_col} column description--'
+    print(f_string)
+    print(col_description)
+
+    # saving plot
+    save_name = f'{variable}_boxplot.png'
+    save_path = join(output_folder,
+                     save_name)
+    plt.savefig(save_path)
+
+    # closing plot
+    plt.close()
+
+
 def plot_correlations(df: DataFrame,
                       real_col: str,
                       pred_col: str,
@@ -516,25 +563,29 @@ def run_correlation_tests(df: DataFrame,
 
     # getting mean metrics
     mae = df['error_abs'].mean()
+    medae = df['error_abs'].median()
     mre = df['error_rel'].mean()
+    medre = df['error_rel'].median()
     mse = df['error_sqr'].mean()
     rmse = sqrt(mse)
 
     # plotting error histogram plots
-    plot_histogram(df=df,
-                   x_col='error',
-                   variable=f'{variable}_error',
-                   output_folder=output_folder)
+    plot_boxplot(df=df,
+                 y_col='error',
+                 variable=f'{variable}_error',
+                 output_folder=output_folder)
 
-    plot_histogram(df=df,
-                   x_col='error_rel',
-                   variable=f'{variable}_error_rel',
-                   output_folder=output_folder)
+    plot_boxplot(df=df,
+                 y_col='error_rel',
+                 variable=f'{variable}_error_rel',
+                 output_folder=output_folder)
 
     # printing metrics
     f_string = '--Metrics--\n'
     f_string += f'MAE: {mae}\n'
+    f_string += f'MedAE: {medae}\n'
     f_string += f'MRE: {mre}\n'
+    f_string += f'MedRE: {medre}\n'
     f_string += f'MSE: {mse}\n'
     f_string += f'RMSE: {rmse}'
     print(f_string)
@@ -768,11 +819,11 @@ def analyse_metrics(input_path: str,
 
     # running image confluence correlation tests
     print('running image confluence correlation tests...')
-    # run_correlation_tests(df=confluence_pairs_df,
-    #                       real_col='fornma_confluence',
-    #                       pred_col='model_confluence',
-    #                       variable='confluence',
-    #                       output_folder=output_folder)
+    run_correlation_tests(df=confluence_pairs_df,
+                          real_col='fornma_confluence',
+                          pred_col='model_confluence',
+                          variable='confluence',
+                          output_folder=output_folder)
 
     # running nuclei count correlation tests
     print('running nuclei count correlation tests...')
