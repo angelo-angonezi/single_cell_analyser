@@ -1667,9 +1667,9 @@ def add_confluence_group_col(df: DataFrame) -> None:
     """
     # adding confluence percentage col
     try:
-        df['confluence_percentage'] = df['confluence'] * 100
+        df['confluence_percentage'] = df['confluence']
     except KeyError:
-        df['confluence_percentage'] = df['fornma_confluence'] * 100
+        df['confluence_percentage'] = df['fornma_confluence']
 
     # getting confluence percentage round values
     df['confluence_percentage_round'] = df['confluence_percentage'].round()

@@ -167,6 +167,9 @@ def get_count_pairs_df(df: DataFrame) -> DataFrame:
                                       col_a='model_count',
                                       col_b='fornma_count')
 
+    # cleaning data (removing debris/outliers)
+    count_pairs_df = count_pairs_df[count_pairs_df['fornma_count'] < 200]
+
     # returning count pairs df
     return count_pairs_df
 
@@ -180,6 +183,9 @@ def get_confluence_pairs_df(df: DataFrame) -> DataFrame:
     confluence_pairs_df = get_col_pairs_df(df=df,
                                            col_a='model_confluence',
                                            col_b='fornma_confluence')
+
+    # cleaning data (removing debris/outliers)
+    confluence_pairs_df = confluence_pairs_df[confluence_pairs_df['fornma_confluence'] < 30]
 
     # returning confluence pairs df
     return confluence_pairs_df
@@ -200,6 +206,8 @@ def get_tuple_pairs_df(df: DataFrame,
     # getting tuple col values
     tuple_col_values = df[tuple_col]
 
+    current_id = 0
+
     # iterating over tuple col values
     for tuple_list in tuple_col_values:
 
@@ -209,9 +217,16 @@ def get_tuple_pairs_df(df: DataFrame,
             # getting model/fornma values
             model_value, fornma_value = pair
 
+            if fornma_value > 8000:
+
+                print(df.iloc[current_id])
+                exit()
+
             # appending values to respective lists
             model_list.append(model_value)
             fornma_list.append(fornma_value)
+
+        current_id += 1
 
     # creating pairs dict
     pairs_dict = {'model_value': model_list,
@@ -237,6 +252,9 @@ def get_area_pairs_df(df: DataFrame) -> DataFrame:
     cols = ['model_area',
             'fornma_area']
     area_pairs_df.columns = cols
+
+    # cleaning data (removing debris/outliers)
+    area_pairs_df = area_pairs_df[area_pairs_df['fornma_area'] < 10000]
 
     # returning area pairs df
     return area_pairs_df
@@ -406,9 +424,17 @@ def plot_histogram(df: DataFrame,
     histplot(data=df,
              x=x_col)
 
+    # adding line in median
+    data_col = df[x_col]
+    data_median = data_col.median()
+    median_round = round(data_median)
+    plt.axvline(x=data_median,
+                c='black',
+                ls='--')
+
     # defining title/axis names
     capitalized_variable = variable.capitalize()
-    title = f'{capitalized_variable} ground-truth histogram'
+    title = f'{capitalized_variable} ground-truth histogram | Median: {median_round}'
     x_name = f'forNMA {variable}'
     y_name = 'Count'
     plt.title(title)
@@ -511,10 +537,22 @@ def plot_correlations(df: DataFrame,
                 x=real_col,
                 y=pred_col)
 
-    # defining title/axis names
+    # adding line plot data
+    lineplot_min = 0
+    lineplot_max = int(df[real_col].max() * 1.05)  # adding margin
+    lineplot_range = range(lineplot_max)
+    lineplot_x = [f for f in lineplot_range]
+    plt.plot(lineplot_x,
+             lineplot_x,
+             c='r',
+             ls='--')
+
+    # defining title/axis names/lims
     plt.title(title)
     plt.xlabel(x_name)
     plt.ylabel(y_name)
+    plt.xlim(lineplot_min, lineplot_max)
+    plt.ylim(lineplot_min, lineplot_max)
 
     # saving plot
     plt.savefig(save_path)
@@ -775,10 +813,15 @@ def analyse_metrics(input_path: str,
     # filtering df for values below 200
     metrics_df = metrics_df[metrics_df['fornma_count'] <= 200]
 
-    # converting confluence values
+    # converting confluence scale to "cell confluence"
     confluence_conversion_factor = 1 / 0.36
     metrics_df['fornma_confluence'] *= confluence_conversion_factor
     metrics_df['model_confluence'] *= confluence_conversion_factor
+
+    # converting confluence scale to percentage
+    percentage_conversion_factor = 100
+    metrics_df['fornma_confluence'] *= percentage_conversion_factor
+    metrics_df['model_confluence'] *= percentage_conversion_factor
 
     # adding confluence group column
     add_confluence_group_col(df=metrics_df)
