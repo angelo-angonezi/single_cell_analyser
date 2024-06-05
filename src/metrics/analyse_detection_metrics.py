@@ -612,7 +612,7 @@ def run_confluence_tests(df: DataFrame,
 
     # plotting F1-Scores by confluence line plot
     plot_f1_scores_by_col_lineplot(df=df,
-                                   col_name='confluence_percentage_int',
+                                   col_name='confluence_percentage',
                                    axis_name=confluence_axis_name,
                                    output_folder=output_folder)
 
@@ -775,17 +775,16 @@ def analyse_metrics(input_path: str,
     # filtering df for values below 200
     metrics_df = metrics_df[metrics_df['fornma_count'] <= 200]
 
-    # TODO: add confluence conversion here!
+    # converting confluence values
+    confluence_conversion_factor = 1 / 0.36
+    metrics_df['fornma_confluence'] *= confluence_conversion_factor
+    metrics_df['model_confluence'] *= confluence_conversion_factor
 
     # adding confluence group column
     add_confluence_group_col(df=metrics_df)
 
     # adding confluence level column
     add_confluence_level_col(df=metrics_df)
-
-    # converting columns scale
-    metrics_df['fornma_confluence'] *= 100
-    metrics_df['model_confluence'] *= 100
 
     # getting count pairs df
     count_pairs_df = get_count_pairs_df(df=metrics_df)
