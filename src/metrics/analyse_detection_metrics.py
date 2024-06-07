@@ -136,6 +136,28 @@ def get_mean_metrics(df: DataFrame) -> tuple:
     return metrics
 
 
+def get_median_metrics(df: DataFrame) -> tuple:
+    """
+    Given a metrics data frame,
+    returns median metrics.
+    """
+    # getting metrics columns
+    precision_col = df['precision']
+    recall_col = df['recall']
+    f1_score_col = df['f1_score']
+
+    # getting metric means
+    precision = precision_col.median()
+    recall = recall_col.median()
+    f1_score = f1_score_col.median()
+
+    # assembling metrics tuple
+    metrics = (precision, recall, f1_score)
+
+    # returning metrics
+    return metrics
+
+
 def get_col_pairs_df(df: DataFrame,
                      col_a: str,
                      col_b: str
@@ -217,10 +239,11 @@ def get_tuple_pairs_df(df: DataFrame,
             # getting model/fornma values
             model_value, fornma_value = pair
 
-            if fornma_value > 8000:
-
-                print(df.iloc[current_id])
-                exit()
+            # TODO: remove once test completed
+            # if fornma_value > 8000:
+            #
+            #     print(df.iloc[current_id])
+            #     exit()
 
             # appending values to respective lists
             model_list.append(model_value)
@@ -297,11 +320,25 @@ def print_metrics(df: DataFrame,
         # getting global metrics
         precision, recall, f1_score = get_global_metrics(df=df)
 
-    # checking metrics type
-    else:
+    elif metrics_type == 'mean':
 
         # getting mean metrics
         precision, recall, f1_score = get_mean_metrics(df=df)
+
+    elif metrics_type == 'median':
+
+        # getting median metrics
+        precision, recall, f1_score = get_median_metrics(df=df)
+
+    else:
+
+        # printing error message
+        f_string = f'metric type "{metrics_type}" undefined.\n'
+        f_string += 'Please, check and try again.'
+        print(f_string)
+
+        # quitting
+        exit()
 
     # rounding values before printing
     precision = round(precision, 2)
@@ -345,6 +382,10 @@ def print_metrics_by_group(df: DataFrame,
         # printing mean metrics
         print_metrics(df=df_group,
                       metrics_type='mean')
+
+        # printing median metrics
+        print_metrics(df=df_group,
+                      metrics_type='median')
 
         # printing spacer
         spacer()
@@ -849,6 +890,10 @@ def analyse_metrics(input_path: str,
     print_metrics(df=metrics_df,
                   metrics_type='mean')
 
+    # printing median metrics
+    print_metrics(df=metrics_df,
+                  metrics_type='median')
+
     # running confluence tests
     print('running confluence tests...')
     run_confluence_tests(df=metrics_df,
@@ -914,7 +959,7 @@ def main():
     # waiting for user input
     # enter_to_continue()
 
-    # running plot_metric function
+    # running analyse_metrics function
     analyse_metrics(input_path=input_path,
                     output_folder=output_folder)
 
