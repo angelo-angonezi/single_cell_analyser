@@ -239,12 +239,6 @@ def get_tuple_pairs_df(df: DataFrame,
             # getting model/fornma values
             model_value, fornma_value = pair
 
-            # TODO: remove once test completed
-            # if fornma_value > 8000:
-            #
-            #     print(df.iloc[current_id])
-            #     exit()
-
             # appending values to respective lists
             model_list.append(model_value)
             fornma_list.append(fornma_value)
