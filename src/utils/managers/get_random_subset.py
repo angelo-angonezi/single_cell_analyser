@@ -73,7 +73,7 @@ for df_name, df_group in df_groups:
     # getting file dst paths
     red_path_dst = join(red_folder_dst, tif_name)
     phase_path_dst = join(phase_folder_dst, jpg_name)
-    annotation_path_dst = join(annotation_folder_dst, jpg_name)
+    annotation_path_dst = join(annotation_folder_dst, xml_name)
 
     # copying files
     sh_cp(src=red_path_src,
