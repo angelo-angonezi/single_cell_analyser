@@ -1,10 +1,13 @@
 # imports
+print('importing required libraries...')  # noqa
 from os import listdir
 from os.path import join
 from os.path import exists
 from pandas import read_csv
 from shutil import copy as sh_cp
 from src.utils.aux_funcs import print_progress_message
+print('all required libraries successfully imported.')  # noqa
+sleep(0.8)
 
 # defining global variables
 seed = 53
@@ -68,7 +71,7 @@ for df_name, df_group in df_groups:
     # getting file src paths
     red_path_src = join(red_folder_src, tif_name)
     phase_path_src = join(phase_folder_src, jpg_name)
-    annotation_path_src = join(annotation_folder_src, jpg_name)
+    annotation_path_src = join(annotation_folder_src, xml_name)
 
     # getting file dst paths
     red_path_dst = join(red_folder_dst, tif_name)
