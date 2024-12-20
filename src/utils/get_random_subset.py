@@ -1,13 +1,10 @@
 # imports
 print('importing required libraries...')  # noqa
-from os import listdir
 from os.path import join
-from os.path import exists
 from pandas import read_csv
 from shutil import copy as sh_cp
 from src.utils.aux_funcs import print_progress_message
 print('all required libraries successfully imported.')  # noqa
-sleep(0.8)
 
 # defining global variables
 seed = 53
