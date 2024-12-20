@@ -4,14 +4,18 @@ from os.path import join
 from os.path import exists
 from pandas import read_csv
 from shutil import copy as sh_cp
+from src.utils.aux_funcs import print_progress_message
 
 # defining global variables
 seed = 53
 base_folder = 'C:\\data_tmp\\angelo\\test'
 df_path = join(base_folder, 'info_files', 'dataset_splits.csv')
-red_folder = join(base_folder, 'imgs', 'red')
-phase_folder = join(base_folder, 'imgs', 'phase')
-annotation_folder = join(base_folder, 'annotations', 'rolabelimg_format', 'fornma')
+red_folder_src = join(base_folder, 'imgs', 'red')
+phase_folder_src = join(base_folder, 'imgs', 'phase')
+annotation_folder_src = join(base_folder, 'annotations', 'rolabelimg_format', 'fornma')
+red_folder_dst = join(base_folder, 'sample', 'imgs', 'red')
+phase_folder_dst = join(base_folder, 'sample', 'imgs', 'phase')
+annotation_folder_dst = join(base_folder, 'sample', 'annotations')
 
 # reading df
 df = read_csv(df_path)
@@ -34,8 +38,20 @@ groups_num = len(df_groups)
 f_string = f'{groups_num} groups were found based on: {groups_list}'
 print(f_string)
 
+# defining placeholder for current index
+current_index = 0
+
 # iterating over groups
 for df_name, df_group in df_groups:
+
+    # updating current index
+    current_index += 1
+
+    # printing progress message
+    base_string = 'copying file #INDEX# of #TOTAL#'
+    print_progress_message(base_string=base_string,
+                           index=current_index,
+                           total=groups_num)
 
     # getting current group random image
     random_sample = df_group.sample(n=1,
@@ -49,40 +65,22 @@ for df_name, df_group in df_groups:
     jpg_name = f'{random_image}.jpg'
     xml_name = f'{random_image}.xml'
 
-    # getting file paths
-    red_path = join(red_folder, tif_name)
-    phase_path = join(phase_folder, jpg_name)
-    annotation_path = join(annotation_folder, jpg_name)
+    # getting file src paths
+    red_path_src = join(red_folder_src, tif_name)
+    phase_path_src = join(phase_folder_src, jpg_name)
+    annotation_path_src = join(annotation_folder_src, jpg_name)
 
-    # checking wheteher files exists
-    if exists(red_path):
-        random_red.append(red_path)
-    else:
-        print('Red file does not exist!')
-        continue
-    if exists(phase_path):
-        random_phase.append(phase_path)
-    else:
-        print('Phase file does not exist!')
+    # getting file dst paths
+    red_path_dst = join(red_folder_dst, tif_name)
+    phase_path_dst = join(phase_folder_dst, jpg_name)
+    annotation_path_dst = join(annotation_folder_dst, jpg_name)
 
-print('seed: ', seed)
-print(len(random_red))
-print(len(random_phase))
+    # copying files
+    sh_cp(src=red_path_src,
+          dst=red_path_dst)
+    sh_cp(src=phase_path_src,
+          dst=phase_path_dst)
+    sh_cp(src=annotation_path_src,
+          dst=annotation_path_dst)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# end of current module
