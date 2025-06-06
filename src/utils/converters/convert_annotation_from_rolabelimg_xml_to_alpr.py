@@ -116,7 +116,6 @@ def convert_single_file(input_xml_file_path: str,
 
     # opening output file
     with open(output_txt_file_path, 'w') as open_output_file:
-        # TODO: create a copy of this file to write rolabelimg -> model output format converter
 
         # iterating over bounding boxes (to get coords) and objects (to get classes)
         for box_index, (box, obj) in enumerate(box_obj_zip, 1):

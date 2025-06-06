@@ -888,6 +888,8 @@ def analyse_metrics(input_path: str,
     print_metrics(df=metrics_df,
                   metrics_type='median')
 
+    exit()
+
     # running confluence tests
     print('running confluence tests...')
     run_confluence_tests(df=metrics_df,
@@ -951,7 +953,7 @@ def main():
     print_execution_parameters(params_dict=args_dict)
 
     # waiting for user input
-    # enter_to_continue()
+    enter_to_continue()
 
     # running analyse_metrics function
     analyse_metrics(input_path=input_path,

@@ -217,8 +217,8 @@ def print_global_progress():
 
     # defining progress string
     progress_string = f'analysing image {CURRENT_IMAGE}/{IMAGES_TOTAL}... '
-    progress_string += f'| IoU: {CURRENT_IOU:02.1f} '
-    progress_string += f'| DT: {CURRENT_DT:02.1f} '
+    # progress_string += f'| IoU: {CURRENT_IOU:02.1f} '
+    # progress_string += f'| DT: {CURRENT_DT:02.1f} '
     progress_string += f'| iteration: {CURRENT_ITERATION} '
     progress_string += f'| progress: {progress_percentage:02.2f}% '
     progress_string += f'| time elapsed: {time_elapsed_str} '
